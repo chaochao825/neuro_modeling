@@ -1,0 +1,8 @@
+{
+  "seed": 7,
+  "quick": true,
+  "n_units": 48,
+  "t_steps": 1200,
+  "notes": "Self-contained defaults for smoke validation. Increase n_units and t_steps for publication-scale sweeps."
+}
+

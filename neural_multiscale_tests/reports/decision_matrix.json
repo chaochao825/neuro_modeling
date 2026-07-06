@@ -1,0 +1,204 @@
+{
+  "H1_history_local_coupling": {
+    "evidence": {
+      "history_delta_bits": 0.002087945686624916,
+      "local_delta_bits": 0.00767846510014831
+    },
+    "interpretation": "Nested GLM gains test whether history and local coupling add predictive information.",
+    "level": "strong",
+    "score": 1.0
+  },
+  "H2_nearcritical_powerlaw_spectrum": {
+    "evidence": {
+      "alpha": 0.9136396773774018,
+      "lyapunov_log_eig_corr": 0.9892938512757817
+    },
+    "interpretation": "Power-law-like eigenspectrum is counted only with Lyapunov covariance agreement.",
+    "level": "strong",
+    "score": 1.0
+  },
+  "H3_oscillatory_synchrony": {
+    "evidence": {
+      "dmd": {
+        "complex_fraction": 0.6,
+        "eigenvalues": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.29306007731510597,
+            0.0
+          ],
+          [
+            -0.21622794796606337,
+            0.0
+          ],
+          [
+            -0.03099288858837945,
+            0.17070246356432392
+          ],
+          [
+            -0.03099288858837945,
+            -0.17070246356432392
+          ],
+          [
+            -0.11329483069446869,
+            0.12639613672890426
+          ],
+          [
+            -0.11329483069446869,
+            -0.12639613672890426
+          ],
+          [
+            0.1447105475730745,
+            0.0
+          ],
+          [
+            0.06473346076884506,
+            0.12747045674687124
+          ],
+          [
+            0.06473346076884506,
+            -0.12747045674687124
+          ],
+          [
+            0.1099560306958319,
+            0.05727670277384384
+          ],
+          [
+            0.1099560306958319,
+            -0.05727670277384384
+          ],
+          [
+            0.05789252225121574,
+            0.052578640193312425
+          ],
+          [
+            0.05789252225121574,
+            -0.052578640193312425
+          ],
+          [
+            -0.0024920777603546166,
+            0.09871165032209754
+          ],
+          [
+            -0.0024920777603546166,
+            -0.09871165032209754
+          ]
+        ],
+        "near_unit_complex": 0,
+        "spectral_radius": 0.29306007731510597
+      },
+      "mean_rate_per_bin": 0.009008928571428572,
+      "phase_locking": {
+        "mean_plv": 0.722362138171982,
+        "unit_count": 59
+      },
+      "phase_reset_proxy": -0.012094787831003317,
+      "psd": {
+        "peak_freq": 162.5,
+        "peak_ratio": 13.174994187426822,
+        "spectral_slope": -0.11586232013741858
+      },
+      "required_criteria": {
+        "narrowband_psd": true,
+        "near_unit_complex_dmd": false,
+        "phase_locking": true,
+        "positive_phase_reset": false
+      }
+    },
+    "interpretation": "Narrowband power and PLV alone are not sufficient for a synchrony-code claim; near-unit complex DMD and positive phase reset are required for strong support.",
+    "level": "weak",
+    "score": 0.25
+  },
+  "H4_avalanche_criticality": {
+    "evidence": {
+      "dynamic_range_best_m": 1.0,
+      "near_m_case": {
+        "duration_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 222.22406942257427,
+              "lambda": 0.2611111111110429,
+              "loglik": -110.11203471128714
+            },
+            "lognormal": {
+              "aic": 212.0136374128304,
+              "loglik": -104.0068187064152,
+              "mu": 0.8151537755150683,
+              "sigma": 0.9790414752733057
+            },
+            "power_law": {
+              "aic": 153.41287571738835,
+              "alpha": 2.226762397521325,
+              "loglik": -75.70643785869417
+            },
+            "stretched_exponential": {
+              "aic": 237.78114478986143,
+              "beta": 0.791304347826087,
+              "loglik": -116.89057239493071,
+              "scale": 3.9291630194129494
+            }
+          },
+          "n": 47
+        },
+        "dynamic_range": {
+          "dynamic_range_db": 17.16511787350672,
+          "mean_response": 3.4244375
+        },
+        "estimated_branching_ratio": 0.9760692464358448,
+        "m": 1.0,
+        "n_avalanches": 47,
+        "size_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 444.58669928171105,
+              "lambda": 0.02451747522169997,
+              "loglik": -221.29334964085552
+            },
+            "lognormal": {
+              "aic": 277.81122815966773,
+              "loglik": -136.90561407983387,
+              "mu": 1.0924462733673728,
+              "sigma": 1.4940650093461896
+            },
+            "power_law": {
+              "aic": 207.00137979029532,
+              "alpha": 1.9153768239028874,
+              "loglik": -102.50068989514766
+            },
+            "stretched_exponential": {
+              "aic": 311.75477559183867,
+              "beta": 0.47608695652173916,
+              "loglik": -153.87738779591933,
+              "scale": 7.503408493070048
+            }
+          },
+          "n": 47
+        }
+      }
+    },
+    "interpretation": "A log-log-looking tail alone is not counted as criticality.",
+    "level": "strong",
+    "score": 1.0
+  },
+  "H5_energy_constraint": {
+    "evidence": {
+      "decoding_accuracy": 1.0,
+      "energy_cost": 0.4803368225108225,
+      "information_bits": 1.0,
+      "information_per_cost": 2.081872455192562,
+      "long_range_fraction": 0.035,
+      "mean_activity": 0.20086309523809523,
+      "rho": 0.9,
+      "target_sparsity": 0.09,
+      "wiring_cost": 0.29000000000000004
+    },
+    "interpretation": "Energy support is based on information per activity and wiring cost proxy.",
+    "level": "strong",
+    "score": 1.0
+  }
+}

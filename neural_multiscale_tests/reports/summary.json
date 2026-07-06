@@ -1,0 +1,1727 @@
+{
+  "baseline": {
+    "metrics": {
+      "autocorrelation": {
+        "lag_values": [
+          0.00023929526982992768,
+          0.00016906283581586865,
+          -0.001452395408521223,
+          -0.013633860498832322,
+          0.004894157088076372,
+          0.007729028690904246,
+          0.006509115217230584,
+          -0.0038124197389381564,
+          0.005418294161087734,
+          0.0032703199663017867,
+          -0.00829998897200297,
+          -0.0024110366873642394,
+          -0.00485966155885608,
+          0.010558962146067438,
+          -0.003746192185103192,
+          -0.0033197077151178866,
+          -0.004827819459494738,
+          0.005604990145215757,
+          0.001998546861114856,
+          0.003921922561004269,
+          0.0009396026318071197,
+          -0.001875122216878459,
+          -0.008355350806451231,
+          -0.0007670154605769834,
+          -0.005254925487445095,
+          -0.004015411464359846,
+          -0.011654345902617429,
+          -0.004007988027454061,
+          -0.0024545014745497155,
+          0.005778820763606808,
+          -0.0038616310543609245,
+          -0.004276652863449967,
+          0.005914531661758479,
+          -0.005935166242239437,
+          -0.0027715824818492236,
+          0.009614797522982452,
+          -0.006047478712649448,
+          0.005044872766337277,
+          -0.0035146117011643895,
+          -0.008221797466032911
+        ],
+        "max_lag": 40,
+        "mean_abs": 0.004924574596886272
+      },
+      "avalanche": {
+        "branching_ratio": 0.5750636132315514,
+        "duration_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 590.7161900028572,
+              "lambda": 0.7175324675319527,
+              "loglik": -294.3580950014286
+            },
+            "lognormal": {
+              "aic": 721.1187362396016,
+              "loglik": -358.5593681198008,
+              "mu": 0.65616815718426,
+              "sigma": 0.6359304285741705
+            },
+            "power_law": {
+              "aic": 547.7948473891128,
+              "alpha": 2.5239995861587765,
+              "loglik": -272.8974236945564
+            },
+            "stretched_exponential": {
+              "aic": 773.516881680129,
+              "beta": 1.5478260869565221,
+              "loglik": -384.7584408400645,
+              "scale": 2.6998689491107153
+            }
+          },
+          "n": 221
+        },
+        "n": 221,
+        "size_tail": {
+          "best_model": "exponential",
+          "models": {
+            "exponential": {
+              "aic": 860.4508981756858,
+              "lambda": 0.3897707231039045,
+              "loglik": -429.2254490878429
+            },
+            "lognormal": {
+              "aic": 933.5025385496062,
+              "loglik": -464.7512692748031,
+              "mu": 1.0080703074207704,
+              "sigma": 0.7232054595120804
+            },
+            "power_law": {
+              "aic": 893.119835035818,
+              "alpha": 1.9919943010307959,
+              "loglik": -445.559917517909
+            },
+            "stretched_exponential": {
+              "aic": 968.4443848642998,
+              "beta": 1.4217391304347826,
+              "loglik": -482.2221924321499,
+              "scale": 3.9665912145759123
+            }
+          },
+          "n": 221
+        }
+      },
+      "cross_correlation": {
+        "max_abs_offdiag": 0.1401431245634319,
+        "mean_abs_offdiag": 0.028963642627369474
+      },
+      "dmd": {
+        "complex_fraction": 0.8333333333333334,
+        "eigenvalues": [
+          [
+            0.46109182415632033,
+            0.0
+          ],
+          [
+            0.14170585291867302,
+            0.12062740729878911
+          ],
+          [
+            0.14170585291867302,
+            -0.12062740729878911
+          ],
+          [
+            0.16870945387827263,
+            0.02375351960436745
+          ],
+          [
+            0.16870945387827263,
+            -0.02375351960436745
+          ],
+          [
+            -0.17808255643577323,
+            0.02057780741059323
+          ],
+          [
+            -0.17808255643577323,
+            -0.02057780741059323
+          ],
+          [
+            -0.05424471351295882,
+            0.16872090057309114
+          ],
+          [
+            -0.05424471351295882,
+            -0.16872090057309114
+          ],
+          [
+            -0.08723588040790409,
+            0.14447358194011445
+          ],
+          [
+            -0.08723588040790409,
+            -0.14447358194011445
+          ],
+          [
+            0.021547119887911883,
+            0.16027093927987662
+          ],
+          [
+            0.021547119887911883,
+            -0.16027093927987662
+          ],
+          [
+            0.1304362871149869,
+            0.06057035223017621
+          ],
+          [
+            0.1304362871149869,
+            -0.06057035223017621
+          ],
+          [
+            0.09555832575623524,
+            0.10405774871364643
+          ]
+        ],
+        "near_unit_complex": 0,
+        "spectral_radius": 0.46109182415632033
+      },
+      "eigenspectrum": {
+        "power_law": {
+          "alpha": 0.3378153045717866,
+          "n": 36,
+          "r2": 0.7121195355463318
+        },
+        "top5": [
+          0.037818775843732236,
+          0.03633641404816103,
+          0.036026001711134154,
+          0.03331077979691788,
+          0.032813518326551154
+        ]
+      },
+      "mean_rate": 0.02432098765432099,
+      "psd": {
+        "peak_freq": 0.39111111111111113,
+        "peak_ratio": 7.940056542778986,
+        "spectral_slope": 0.018927448009900795
+      },
+      "shape": [
+        900,
+        36
+      ]
+    },
+    "name": "baseline_independent_bernoulli",
+    "parameters": {
+      "n_units": 36,
+      "rate": 0.025,
+      "t_steps": 900
+    }
+  },
+  "branching": {
+    "cases": [
+      {
+        "duration_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 198.13025086863357,
+              "lambda": 0.5446428571425604,
+              "loglik": -98.06512543431678
+            },
+            "lognormal": {
+              "aic": 226.82215080723807,
+              "loglik": -111.41107540361904,
+              "mu": 0.6509416672094337,
+              "sigma": 0.7839036761587065
+            },
+            "power_law": {
+              "aic": 151.03598342545018,
+              "alpha": 2.536235964562251,
+              "loglik": -74.51799171272509
+            },
+            "stretched_exponential": {
+              "aic": 252.49566626724868,
+              "beta": 1.106521739130435,
+              "loglik": -124.24783313362434,
+              "scale": 2.9777758242242474
+            }
+          },
+          "n": 61
+        },
+        "dynamic_range": {
+          "dynamic_range_db": 9.979198672577525,
+          "mean_response": 0.14768750000000003
+        },
+        "estimated_branching_ratio": 0.7980132450331099,
+        "m": 0.75,
+        "n_avalanches": 61,
+        "size_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 291.61861445623396,
+              "lambda": 0.2531120331949567,
+              "loglik": -144.80930722811698
+            },
+            "lognormal": {
+              "aic": 274.6395403712715,
+              "loglik": -135.31977018563575,
+              "mu": 0.7857249799736359,
+              "sigma": 1.0137875587791851
+            },
+            "power_law": {
+              "aic": 190.43833714063817,
+              "alpha": 2.272709950029752,
+              "loglik": -94.21916857031908
+            },
+            "stretched_exponential": {
+              "aic": 307.98219230295797,
+              "beta": 0.791304347826087,
+              "loglik": -151.99109615147898,
+              "scale": 3.9829836912421084
+            }
+          },
+          "n": 61
+        }
+      },
+      {
+        "duration_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 116.09659771183648,
+              "lambda": 0.45714285714264813,
+              "loglik": -57.04829885591824
+            },
+            "lognormal": {
+              "aic": 132.2727452446263,
+              "loglik": -64.13637262231315,
+              "mu": 0.7994698647800064,
+              "sigma": 0.8072299124856153
+            },
+            "power_law": {
+              "aic": 102.84245918583287,
+              "alpha": 2.25082888555734,
+              "loglik": -50.42122959291643
+            },
+            "stretched_exponential": {
+              "aic": 140.72877724791113,
+              "beta": 1.1695652173913045,
+              "loglik": -68.36438862395556,
+              "scale": 3.3921493029121494
+            }
+          },
+          "n": 32
+        },
+        "dynamic_range": {
+          "dynamic_range_db": 10.05411278080521,
+          "mean_response": 0.28737500000000005
+        },
+        "estimated_branching_ratio": 0.8128654970760186,
+        "m": 0.9,
+        "n_avalanches": 32,
+        "size_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 159.99923394090376,
+              "lambda": 0.2302158273380765,
+              "loglik": -78.99961697045188
+            },
+            "lognormal": {
+              "aic": 162.8869150802867,
+              "loglik": -79.44345754014336,
+              "mu": 1.0063240862476595,
+              "sigma": 1.0590215636398324
+            },
+            "power_law": {
+              "aic": 130.8082085998502,
+              "alpha": 1.9937156564823213,
+              "loglik": -64.4041042999251
+            },
+            "stretched_exponential": {
+              "aic": 173.41667398345407,
+              "beta": 0.8543478260869566,
+              "loglik": -84.70833699172704,
+              "scale": 4.816894529807804
+            }
+          },
+          "n": 32
+        }
+      },
+      {
+        "duration_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 222.22406942257427,
+              "lambda": 0.2611111111110429,
+              "loglik": -110.11203471128714
+            },
+            "lognormal": {
+              "aic": 212.0136374128304,
+              "loglik": -104.0068187064152,
+              "mu": 0.8151537755150683,
+              "sigma": 0.9790414752733057
+            },
+            "power_law": {
+              "aic": 153.41287571738835,
+              "alpha": 2.226762397521325,
+              "loglik": -75.70643785869417
+            },
+            "stretched_exponential": {
+              "aic": 237.78114478986143,
+              "beta": 0.791304347826087,
+              "loglik": -116.89057239493071,
+              "scale": 3.9291630194129494
+            }
+          },
+          "n": 47
+        },
+        "dynamic_range": {
+          "dynamic_range_db": 17.16511787350672,
+          "mean_response": 3.4244375
+        },
+        "estimated_branching_ratio": 0.9760692464358448,
+        "m": 1.0,
+        "n_avalanches": 47,
+        "size_tail": {
+          "best_model": "power_law",
+          "models": {
+            "exponential": {
+              "aic": 444.58669928171105,
+              "lambda": 0.02451747522169997,
+              "loglik": -221.29334964085552
+            },
+            "lognormal": {
+              "aic": 277.81122815966773,
+              "loglik": -136.90561407983387,
+              "mu": 1.0924462733673728,
+              "sigma": 1.4940650093461896
+            },
+            "power_law": {
+              "aic": 207.00137979029532,
+              "alpha": 1.9153768239028874,
+              "loglik": -102.50068989514766
+            },
+            "stretched_exponential": {
+              "aic": 311.75477559183867,
+              "beta": 0.47608695652173916,
+              "loglik": -153.87738779591933,
+              "scale": 7.503408493070048
+            }
+          },
+          "n": 47
+        }
+      },
+      {
+        "duration_tail": {
+          "best_model": "insufficient",
+          "models": {},
+          "n": 1
+        },
+        "dynamic_range": {
+          "dynamic_range_db": 9.860551906499737,
+          "mean_response": 237.06300000000002
+        },
+        "estimated_branching_ratio": 1.000331018813229,
+        "m": 1.08,
+        "n_avalanches": 1,
+        "size_tail": {
+          "best_model": "insufficient",
+          "models": {},
+          "n": 1
+        }
+      }
+    ],
+    "name": "branching_avalanche"
+  },
+  "ei": {
+    "cases": [
+      {
+        "metrics": {
+          "dmd": {
+            "complex_fraction": 0.65,
+            "eigenvalues": [
+              [
+                0.26970138421910933,
+                0.0
+              ],
+              [
+                -0.1870041115865712,
+                0.0
+              ],
+              [
+                0.004630901565090294,
+                0.19748229436451376
+              ],
+              [
+                0.004630901565090294,
+                -0.19748229436451376
+              ],
+              [
+                -0.1256613116659902,
+                0.11237948969328165
+              ],
+              [
+                -0.1256613116659902,
+                -0.11237948969328165
+              ],
+              [
+                -0.07593070594670354,
+                0.1411727354592527
+              ],
+              [
+                -0.07593070594670354,
+                -0.1411727354592527
+              ],
+              [
+                0.14423129666895362,
+                0.02112643352925142
+              ],
+              [
+                0.14423129666895362,
+                -0.02112643352925142
+              ],
+              [
+                -0.046508428084770514,
+                0.1241412302425396
+              ],
+              [
+                -0.046508428084770514,
+                -0.1241412302425396
+              ],
+              [
+                -0.020008794660281586,
+                0.13053180116704888
+              ],
+              [
+                -0.020008794660281586,
+                -0.13053180116704888
+              ],
+              [
+                0.03042925796911797,
+                0.1229782330476857
+              ],
+              [
+                0.03042925796911797,
+                -0.1229782330476857
+              ]
+            ],
+            "near_unit_complex": 0,
+            "spectral_radius": 0.26970138421910933
+          },
+          "mean_rate_per_bin": 0.00817857142857143,
+          "phase_locking": {
+            "mean_plv": 0.7165697771569671,
+            "unit_count": 63
+          },
+          "phase_reset_proxy": 0.09264692719705386,
+          "psd": {
+            "peak_freq": 16.25,
+            "peak_ratio": 15.609852804693746,
+            "spectral_slope": -0.25089224309801317
+          }
+        },
+        "mode": "balanced_async"
+      },
+      {
+        "metrics": {
+          "dmd": {
+            "complex_fraction": 0.6,
+            "eigenvalues": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.29306007731510597,
+                0.0
+              ],
+              [
+                -0.21622794796606337,
+                0.0
+              ],
+              [
+                -0.03099288858837945,
+                0.17070246356432392
+              ],
+              [
+                -0.03099288858837945,
+                -0.17070246356432392
+              ],
+              [
+                -0.11329483069446869,
+                0.12639613672890426
+              ],
+              [
+                -0.11329483069446869,
+                -0.12639613672890426
+              ],
+              [
+                0.1447105475730745,
+                0.0
+              ],
+              [
+                0.06473346076884506,
+                0.12747045674687124
+              ],
+              [
+                0.06473346076884506,
+                -0.12747045674687124
+              ],
+              [
+                0.1099560306958319,
+                0.05727670277384384
+              ],
+              [
+                0.1099560306958319,
+                -0.05727670277384384
+              ],
+              [
+                0.05789252225121574,
+                0.052578640193312425
+              ],
+              [
+                0.05789252225121574,
+                -0.052578640193312425
+              ],
+              [
+                -0.0024920777603546166,
+                0.09871165032209754
+              ],
+              [
+                -0.0024920777603546166,
+                -0.09871165032209754
+              ]
+            ],
+            "near_unit_complex": 0,
+            "spectral_radius": 0.29306007731510597
+          },
+          "mean_rate_per_bin": 0.009008928571428572,
+          "phase_locking": {
+            "mean_plv": 0.722362138171982,
+            "unit_count": 59
+          },
+          "phase_reset_proxy": -0.012094787831003317,
+          "psd": {
+            "peak_freq": 162.5,
+            "peak_ratio": 13.174994187426822,
+            "spectral_slope": -0.11586232013741858
+          }
+        },
+        "mode": "gamma_sync"
+      }
+    ],
+    "name": "ei_lif_oscillation"
+  },
+  "energy": {
+    "best": {
+      "decoding_accuracy": 1.0,
+      "energy_cost": 0.4803368225108225,
+      "information_bits": 1.0,
+      "information_per_cost": 2.081872455192562,
+      "long_range_fraction": 0.035,
+      "mean_activity": 0.20086309523809523,
+      "rho": 0.9,
+      "target_sparsity": 0.09,
+      "wiring_cost": 0.29000000000000004
+    },
+    "grid": [
+      {
+        "decoding_accuracy": 0.9959183673469387,
+        "energy_cost": 0.5681795714285715,
+        "information_bits": 0.8270869761892015,
+        "information_per_cost": 1.4556788342630134,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.10851190476190477,
+        "rho": 0.65,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 0.9918367346938776,
+        "energy_cost": 0.5583998095238095,
+        "information_bits": 0.8012151153293653,
+        "information_per_cost": 1.4348413120209031,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.11473214285714285,
+        "rho": 0.9,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5625664761904762,
+        "information_bits": 0.86,
+        "information_per_cost": 1.5287082263124714,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.11889880952380952,
+        "rho": 0.985,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 0.9959183673469387,
+        "energy_cost": 0.596355761904762,
+        "information_bits": 0.9617290420804668,
+        "information_per_cost": 1.6126766999092983,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.11148809523809523,
+        "rho": 0.65,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 0.9959183673469387,
+        "energy_cost": 0.5843140952380953,
+        "information_bits": 0.9617290420804668,
+        "information_per_cost": 1.6459110774806538,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.11544642857142857,
+        "rho": 0.9,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5883319523809524,
+        "information_bits": 1.0,
+        "information_per_cost": 1.6997207035127804,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.11946428571428572,
+        "rho": 0.985,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.658776,
+        "information_bits": 1.0,
+        "information_per_cost": 1.51796665330856,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.11270833333333333,
+        "rho": 0.65,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6462879047619048,
+        "information_bits": 1.0,
+        "information_per_cost": 1.5472980271360706,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.1162202380952381,
+        "rho": 0.9,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6477164761904762,
+        "information_bits": 1.0,
+        "information_per_cost": 1.5438853831254502,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.11764880952380953,
+        "rho": 0.985,
+        "target_sparsity": 0.04,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4572082510822511,
+        "information_bits": 0.86,
+        "information_per_cost": 1.8809809271033633,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.1869345238095238,
+        "rho": 0.65,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4531725367965368,
+        "information_bits": 0.86,
+        "information_per_cost": 1.8977319457161161,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.19889880952380953,
+        "rho": 0.9,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4574582510822511,
+        "information_bits": 0.86,
+        "information_per_cost": 1.879952974868021,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.20318452380952381,
+        "rho": 0.985,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.48044396536796535,
+        "information_bits": 1.0,
+        "information_per_cost": 2.0814081809397145,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.1849702380952381,
+        "rho": 0.65,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4803368225108225,
+        "information_bits": 1.0,
+        "information_per_cost": 2.081872455192562,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.20086309523809523,
+        "rho": 0.9,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4835808701298701,
+        "information_bits": 1.0,
+        "information_per_cost": 2.067906449093904,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.20410714285714285,
+        "rho": 0.985,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5448582510822512,
+        "information_bits": 1.0,
+        "information_per_cost": 1.83533973838829,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.1881845238095238,
+        "rho": 0.65,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5435011082251083,
+        "information_bits": 1.0,
+        "information_per_cost": 1.839922651244748,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.20282738095238095,
+        "rho": 0.9,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5429951558441559,
+        "information_bits": 1.0,
+        "information_per_cost": 1.8416370555744115,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.20232142857142857,
+        "rho": 0.985,
+        "target_sparsity": 0.09,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.45879465079365084,
+        "information_bits": 0.86,
+        "information_per_cost": 1.8744769550218596,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.27690476190476193,
+        "rho": 0.65,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4666636984126984,
+        "information_bits": 0.86,
+        "information_per_cost": 1.842868864506043,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.3007738095238095,
+        "rho": 0.9,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.4746696507936508,
+        "information_bits": 0.86,
+        "information_per_cost": 1.811786362498791,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.3087797619047619,
+        "rho": 0.985,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.48089941269841274,
+        "information_bits": 1.0,
+        "information_per_cost": 2.079436933367876,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.27380952380952384,
+        "rho": 0.65,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.49382798412698414,
+        "information_bits": 1.0,
+        "information_per_cost": 2.0249966225949185,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.30273809523809525,
+        "rho": 0.9,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5001672698412699,
+        "information_bits": 1.0,
+        "information_per_cost": 1.9993311443936626,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.30907738095238096,
+        "rho": 0.985,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5509684603174604,
+        "information_bits": 1.0,
+        "information_per_cost": 1.8149859239198807,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.28267857142857145,
+        "rho": 0.65,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5442541746031747,
+        "information_bits": 1.0,
+        "information_per_cost": 1.8373768115405225,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.29196428571428573,
+        "rho": 0.9,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5633315555555556,
+        "information_bits": 1.0,
+        "information_per_cost": 1.775153531056508,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.31104166666666666,
+        "rho": 0.985,
+        "target_sparsity": 0.16,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5282390952380953,
+        "information_bits": 0.86,
+        "information_per_cost": 1.6280506455365042,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.40190476190476193,
+        "rho": 0.65,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5403938571428573,
+        "information_bits": 0.86,
+        "information_per_cost": 1.5914318577693463,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.43005952380952384,
+        "rho": 0.9,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5675069523809524,
+        "information_bits": 0.86,
+        "information_per_cost": 1.5153999372023637,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.457172619047619,
+        "rho": 0.985,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5480224285714287,
+        "information_bits": 1.0,
+        "information_per_cost": 1.8247428350820882,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.39648809523809525,
+        "rho": 0.65,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5748200476190477,
+        "information_bits": 1.0,
+        "information_per_cost": 1.7396748845870684,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.4392857142857143,
+        "rho": 0.9,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.5870521904761905,
+        "information_bits": 1.0,
+        "information_per_cost": 1.7034260602772722,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.45151785714285714,
+        "rho": 0.985,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6136271904761905,
+        "information_bits": 1.0,
+        "information_per_cost": 1.6296539910885863,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.40089285714285716,
+        "rho": 0.65,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6344129047619048,
+        "information_bits": 1.0,
+        "information_per_cost": 1.5762604961122284,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.4376785714285714,
+        "rho": 0.9,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6536986190476191,
+        "information_bits": 1.0,
+        "information_per_cost": 1.5297569412903325,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.4569642857142857,
+        "rho": 0.985,
+        "target_sparsity": 0.28,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6630079655521784,
+        "information_bits": 0.86,
+        "information_per_cost": 1.29711865419861,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.5668154761904762,
+        "rho": 0.65,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.7013829655521784,
+        "information_bits": 0.86,
+        "information_per_cost": 1.2261489688774334,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.6211904761904762,
+        "rho": 0.9,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.718079394123607,
+        "information_bits": 0.86,
+        "information_per_cost": 1.1976391566695805,
+        "long_range_fraction": 0.0,
+        "mean_activity": 0.6378869047619048,
+        "rho": 0.985,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.15
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.6843091560283688,
+        "information_bits": 1.0,
+        "information_per_cost": 1.4613278095003945,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.5629166666666666,
+        "rho": 0.65,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.7318210607902736,
+        "information_bits": 1.0,
+        "information_per_cost": 1.366454251699353,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.6264285714285714,
+        "rho": 0.9,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.7429520131712261,
+        "information_bits": 1.0,
+        "information_per_cost": 1.3459819507475146,
+        "long_range_fraction": 0.035,
+        "mean_activity": 0.6375595238095239,
+        "rho": 0.985,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.29000000000000004
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.7502115369807498,
+        "information_bits": 1.0,
+        "information_per_cost": 1.3329573736289524,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.5676190476190476,
+        "rho": 0.65,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.7898365369807498,
+        "information_bits": 1.0,
+        "information_per_cost": 1.26608475700887,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.6232440476190476,
+        "rho": 0.9,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.63
+      },
+      {
+        "decoding_accuracy": 1.0,
+        "energy_cost": 0.8132591560283688,
+        "information_bits": 1.0,
+        "information_per_cost": 1.229620340069208,
+        "long_range_fraction": 0.12,
+        "mean_activity": 0.6466666666666666,
+        "rho": 0.985,
+        "target_sparsity": 0.45,
+        "wiring_cost": 0.63
+      }
+    ],
+    "name": "energy_efficiency_sweep"
+  },
+  "hawkes": {
+    "glm_comparison": {
+      "bits_per_bin_gain_vs_bias": {
+        "bias": 0.0,
+        "full": 0.009049645762961404,
+        "history": 0.002087945686624916,
+        "history_global": 0.003916514874973763,
+        "history_local": 0.009766410786773226
+      },
+      "full_delta_bits": -0.0007167650238118217,
+      "global_delta_bits": 0.0018285691883488469,
+      "history_delta_bits": 0.002087945686624916,
+      "local_delta_bits": 0.00767846510014831,
+      "mean_train_aic": {
+        "bias": 286.8614295002151,
+        "full": 278.46488355370155,
+        "history": 285.3826270911565,
+        "history_global": 285.68585060318264,
+        "history_local": 276.08039774149324
+      },
+      "test_loglik_per_bin": {
+        "bias": -0.21529537929392228,
+        "full": -0.20902264284825933,
+        "history": -0.21384812562807592,
+        "history_global": -0.21258065805071313,
+        "history_local": -0.20852581919288019
+      },
+      "units_fit": 16
+    },
+    "metrics": {
+      "autocorrelation": {
+        "lag_values": [
+          0.10108005705720197,
+          0.06650490707527348,
+          0.026524783707404756,
+          0.004978238408563318,
+          0.012921997243736764,
+          0.003212868609157019,
+          0.004697604688533958,
+          -0.004964429157017503,
+          0.004755766370212764,
+          -0.004350878654411685,
+          0.006760535159733724,
+          0.0020947608095139283,
+          -0.004056143357349024,
+          0.002314076991780506,
+          0.009842885869674942,
+          0.0024925383868511963,
+          0.0041725526494783,
+          0.005127138572018655,
+          0.002703200216263234,
+          0.0030242588699481133,
+          0.017759736214381542,
+          0.01053651309694445,
+          0.010794190334651751,
+          -0.0014002759910385345,
+          0.015430337132529873,
+          0.004630980856955549,
+          0.004782873655283168,
+          0.00712390609819737,
+          -0.0006606728609639653,
+          -0.0021236271999092882,
+          0.0027465182147552105,
+          -0.00680617942618251,
+          0.006110358629795343,
+          0.011203422007533954,
+          0.01200297475563146,
+          -0.010331695140497869,
+          -0.005303472601402251,
+          -0.00590136813382379,
+          -0.005117833449234257,
+          -0.004555514074012676
+        ],
+        "max_lag": 40,
+        "mean_abs": 0.010547551793196242
+      },
+      "avalanche": {
+        "branching_ratio": 0.8873493975903609,
+        "duration_tail": {
+          "best_model": "exponential",
+          "models": {
+            "exponential": {
+              "aic": 595.622768251727,
+              "lambda": 0.18749999999996486,
+              "loglik": -296.8113841258635
+            },
+            "lognormal": {
+              "aic": 631.0986857458004,
+              "loglik": -313.5493428729002,
+              "mu": 1.4425820969478114,
+              "sigma": 0.9639153731242397
+            },
+            "power_law": {
+              "aic": 625.6017135472989,
+              "alpha": 1.6932014490652736,
+              "loglik": -311.80085677364946
+            },
+            "stretched_exponential": {
+              "aic": 630.0287659270227,
+              "beta": 1.232608695652174,
+              "loglik": -313.01438296351137,
+              "scale": 6.810069289227433
+            }
+          },
+          "n": 111
+        },
+        "n": 111,
+        "size_tail": {
+          "best_model": "exponential",
+          "models": {
+            "exponential": {
+              "aic": 809.1552898781086,
+              "lambda": 0.07165913492575342,
+              "loglik": -403.5776449390543
+            },
+            "lognormal": {
+              "aic": 828.3241969506373,
+              "loglik": -412.16209847531866,
+              "mu": 2.0483312803216616,
+              "sigma": 1.2787745605822018
+            },
+            "power_law": {
+              "aic": 837.9091945899306,
+              "alpha": 1.4882022793905119,
+              "loglik": -417.9545972949653
+            },
+            "stretched_exponential": {
+              "aic": 825.3744762531711,
+              "beta": 0.9173913043478261,
+              "loglik": -410.68723812658556,
+              "scale": 14.361780946142215
+            }
+          },
+          "n": 111
+        }
+      },
+      "cross_correlation": {
+        "max_abs_offdiag": 0.17603686973398408,
+        "mean_abs_offdiag": 0.03281901614803228
+      },
+      "dmd": {
+        "complex_fraction": 0.7777777777777778,
+        "eigenvalues": [
+          [
+            0.7971566600163877,
+            0.0
+          ],
+          [
+            0.5471579513700171,
+            0.0
+          ],
+          [
+            0.4754416342024085,
+            0.04195678712205466
+          ],
+          [
+            0.4754416342024085,
+            -0.04195678712205466
+          ],
+          [
+            0.42576996995711053,
+            0.049721219256927345
+          ],
+          [
+            0.42576996995711053,
+            -0.049721219256927345
+          ],
+          [
+            0.2807591433908134,
+            0.026443332056931782
+          ],
+          [
+            0.2807591433908134,
+            -0.026443332056931782
+          ],
+          [
+            0.2605822204065623,
+            0.06737358799980807
+          ],
+          [
+            0.2605822204065623,
+            -0.06737358799980807
+          ],
+          [
+            0.18361529132288762,
+            0.0508493571570245
+          ],
+          [
+            0.18361529132288762,
+            -0.0508493571570245
+          ],
+          [
+            -0.25380931456872347,
+            0.0
+          ],
+          [
+            -0.24410467888744644,
+            0.0
+          ],
+          [
+            -0.1863393835781394,
+            0.10476381382413424
+          ],
+          [
+            -0.1863393835781394,
+            -0.10476381382413424
+          ]
+        ],
+        "near_unit_complex": 0,
+        "spectral_radius": 0.7971566600163877
+      },
+      "eigenspectrum": {
+        "power_law": {
+          "alpha": 0.3245393890714607,
+          "n": 36,
+          "r2": 0.8588097029026761
+        },
+        "top5": [
+          0.08945877955313801,
+          0.0793186429311652,
+          0.06941704443410043,
+          0.06706521638733456,
+          0.06660847140119762
+        ]
+      },
+      "mean_rate": 0.05123456790123457,
+      "psd": {
+        "peak_freq": 0.052222222222222225,
+        "peak_ratio": 32.073348968381545,
+        "spectral_slope": -0.7035196066958391
+      },
+      "shape": [
+        900,
+        36
+      ]
+    },
+    "name": "glm_hawkes_history_local",
+    "parameters": {
+      "common_strength": 0.08,
+      "history_strength": 1.0,
+      "local_strength": 6.0,
+      "n_units": 36,
+      "stimulus_strength": 0.35,
+      "t_steps": 900
+    }
+  },
+  "linear": {
+    "cases": [
+      {
+        "dmd": {
+          "complex_fraction": 0.7777777777777778,
+          "eigenvalues": [
+            [
+              0.7453470659223291,
+              0.0752946592447632
+            ],
+            [
+              0.7453470659223291,
+              -0.0752946592447632
+            ],
+            [
+              0.7577093813406084,
+              0.008385306149492002
+            ],
+            [
+              0.7577093813406084,
+              -0.008385306149492002
+            ],
+            [
+              0.7929429576935325,
+              0.05115864014577382
+            ],
+            [
+              0.7929429576935325,
+              -0.05115864014577382
+            ],
+            [
+              0.7842283759162214,
+              0.01838527487817061
+            ],
+            [
+              0.7842283759162214,
+              -0.01838527487817061
+            ],
+            [
+              0.9887122409573393,
+              0.0
+            ],
+            [
+              0.8078988076354557,
+              0.005671895625486954
+            ],
+            [
+              0.8078988076354557,
+              -0.005671895625486954
+            ],
+            [
+              0.8514383723730263,
+              0.0602162942858473
+            ],
+            [
+              0.8514383723730263,
+              -0.0602162942858473
+            ],
+            [
+              0.8484104150267597,
+              0.05538147331836697
+            ],
+            [
+              0.8484104150267597,
+              -0.05538147331836697
+            ],
+            [
+              0.8318051101456877,
+              0.012062774160517244
+            ]
+          ],
+          "near_unit_complex": 20,
+          "spectral_radius": 0.9887122409573393
+        },
+        "eigenspectrum_power_law": {
+          "alpha": 0.9136396773774018,
+          "n": 36,
+          "r2": 0.9787023241720701
+        },
+        "empirical_spectral_radius": 0.9850000000000041,
+        "lyapunov_agreement": {
+          "log_eigenspectrum_corr": 0.9892938512757817,
+          "relative_fro_error": 0.4457745096267986
+        },
+        "name": "critical_symmetric_powerlaw",
+        "symmetry": 1.0,
+        "target_rho": 0.985
+      },
+      {
+        "dmd": {
+          "complex_fraction": 0.6666666666666666,
+          "eigenvalues": [
+            [
+              -0.6339458358174469,
+              0.0
+            ],
+            [
+              -0.5371396325809732,
+              0.023629390062039395
+            ],
+            [
+              -0.5371396325809732,
+              -0.023629390062039395
+            ],
+            [
+              -0.5009705485577349,
+              0.0
+            ],
+            [
+              0.6156412969160263,
+              0.0
+            ],
+            [
+              -0.41753057769780355,
+              0.014713619442508815
+            ],
+            [
+              -0.41753057769780355,
+              -0.014713619442508815
+            ],
+            [
+              0.5353705150484493,
+              0.0
+            ],
+            [
+              -0.34042195860529445,
+              0.04474535048841101
+            ],
+            [
+              -0.34042195860529445,
+              -0.04474535048841101
+            ],
+            [
+              0.47047121970733896,
+              0.0055468332034406855
+            ],
+            [
+              0.47047121970733896,
+              -0.0055468332034406855
+            ],
+            [
+              -0.28651026540150404,
+              0.0
+            ],
+            [
+              -0.20364580991805445,
+              0.06972443973680191
+            ],
+            [
+              -0.20364580991805445,
+              -0.06972443973680191
+            ],
+            [
+              -0.23854238208691017,
+              0.0
+            ]
+          ],
+          "near_unit_complex": 0,
+          "spectral_radius": 0.6339458358174469
+        },
+        "eigenspectrum_power_law": {
+          "alpha": 0.25577516791883487,
+          "n": 36,
+          "r2": 0.9211246971850173
+        },
+        "empirical_spectral_radius": 0.6500000000000014,
+        "lyapunov_agreement": {
+          "log_eigenspectrum_corr": 0.9421870215973025,
+          "relative_fro_error": 0.1705375865601526
+        },
+        "name": "subcritical_symmetric",
+        "symmetry": 1.0,
+        "target_rho": 0.65
+      },
+      {
+        "dmd": {
+          "complex_fraction": 0.7222222222222222,
+          "eigenvalues": [
+            [
+              -0.946456815178246,
+              0.0
+            ],
+            [
+              0.8876578709877236,
+              0.0
+            ],
+            [
+              -0.8372717264474527,
+              0.0
+            ],
+            [
+              0.8077989147757851,
+              0.022284642730223857
+            ],
+            [
+              0.8077989147757851,
+              -0.022284642730223857
+            ],
+            [
+              -0.7229225023665792,
+              0.1388870925087406
+            ],
+            [
+              -0.7229225023665792,
+              -0.1388870925087406
+            ],
+            [
+              0.6756924229445043,
+              0.0
+            ],
+            [
+              0.6379505131909071,
+              0.13863658354703184
+            ],
+            [
+              0.6379505131909071,
+              -0.13863658354703184
+            ],
+            [
+              -0.6317079206337448,
+              0.06306768439709307
+            ],
+            [
+              -0.6317079206337448,
+              -0.06306768439709307
+            ],
+            [
+              0.4982088697554367,
+              0.13914556968707503
+            ],
+            [
+              0.4982088697554367,
+              -0.13914556968707503
+            ],
+            [
+              0.48928956529069767,
+              0.0
+            ],
+            [
+              0.2812906260066147,
+              0.2269293716904318
+            ]
+          ],
+          "near_unit_complex": 2,
+          "spectral_radius": 0.946456815178246
+        },
+        "eigenspectrum_power_law": {
+          "alpha": 0.8264033054221186,
+          "n": 36,
+          "r2": 0.9828700978494627
+        },
+        "empirical_spectral_radius": 0.9599999999999991,
+        "lyapunov_agreement": {
+          "log_eigenspectrum_corr": 0.9971396673510298,
+          "relative_fro_error": 0.2107317894503706
+        },
+        "name": "nearcritical_mixed",
+        "symmetry": 0.45,
+        "target_rho": 0.96
+      },
+      {
+        "dmd": {
+          "complex_fraction": 0.9444444444444444,
+          "eigenvalues": [
+            [
+              -0.4086219480324106,
+              0.8501407236158176
+            ],
+            [
+              -0.4086219480324106,
+              -0.8501407236158176
+            ],
+            [
+              -0.16346459221182727,
+              0.9261780304718743
+            ],
+            [
+              -0.16346459221182727,
+              -0.9261780304718743
+            ],
+            [
+              -0.7454170690936472,
+              0.4497604035768786
+            ],
+            [
+              -0.7454170690936472,
+              -0.4497604035768786
+            ],
+            [
+              -0.6359187276970599,
+              0.47084568533943355
+            ],
+            [
+              -0.6359187276970599,
+              -0.47084568533943355
+            ],
+            [
+              0.07327066062426227,
+              0.8489723606569326
+            ],
+            [
+              0.07327066062426227,
+              -0.8489723606569326
+            ],
+            [
+              0.3089534231936595,
+              0.7286269460778936
+            ],
+            [
+              0.3089534231936595,
+              -0.7286269460778936
+            ],
+            [
+              0.8082147661830399,
+              0.5123800374650797
+            ],
+            [
+              0.8082147661830399,
+              -0.5123800374650797
+            ],
+            [
+              0.7640896813360505,
+              0.4290111437145821
+            ],
+            [
+              0.7640896813360505,
+              -0.4290111437145821
+            ]
+          ],
+          "near_unit_complex": 14,
+          "spectral_radius": 0.95694535427527
+        },
+        "eigenspectrum_power_law": {
+          "alpha": 1.5590365429022177,
+          "n": 36,
+          "r2": 0.9548565527027196
+        },
+        "empirical_spectral_radius": 0.9599999999999999,
+        "lyapunov_agreement": {
+          "log_eigenspectrum_corr": 0.9993675915230045,
+          "relative_fro_error": 0.07767129644963662
+        },
+        "name": "nearcritical_asymmetric",
+        "symmetry": 0.0,
+        "target_rho": 0.96
+      }
+    ],
+    "name": "linear_stochastic_dynamics"
+  },
+  "metadata": {
+    "n_units": 36,
+    "quick": true,
+    "seed": 7,
+    "t_steps": 900
+  }
+}
