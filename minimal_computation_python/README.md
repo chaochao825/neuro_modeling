@@ -26,6 +26,7 @@ git clone https://github.com/ChrisWLynn/Minimal_computation minimal_computation_
 ## Run
 
 ```powershell
+cd /path/to/neuro_modeling/minimal_computation_python
 python -B run_reproduction.py --dataset hippocampus --neuron 13 --max-inputs 30 --sweep 1,2,3,5,8,13,21,30
 ```
 

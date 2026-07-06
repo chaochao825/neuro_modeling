@@ -146,7 +146,7 @@ def main() -> None:
     result = greedy_minimax_entropy(activity, args.neuron, sweep, threshold=args.threshold)
     result_dict = asdict(result)
     result_dict["dataset"] = args.dataset
-    result_dict["source_mat"] = str(DATASETS[args.dataset])
+    result_dict["source_mat"] = (Path("..") / "minimal_computation_original" / DATASETS[args.dataset].name).as_posix()
     result_dict["run_config"] = {
         "dataset": args.dataset,
         "neuron": args.neuron,

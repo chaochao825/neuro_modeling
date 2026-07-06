@@ -108,5 +108,5 @@
     "threshold": 1e-06
   },
   "selected_inputs_complete": [],
-  "source_mat": "E:\\Codex_work\\ssh_experiment\\minimal_computation_original\\data_mouse_visual_responding.mat"
+  "source_mat": "../minimal_computation_original/data_mouse_visual_responding.mat"
 }

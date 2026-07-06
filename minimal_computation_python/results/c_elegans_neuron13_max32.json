@@ -132,5 +132,5 @@
     23,
     19
   ],
-  "source_mat": "E:\\Codex_work\\ssh_experiment\\minimal_computation_original\\data_C_elegans.mat"
+  "source_mat": "../minimal_computation_original/data_C_elegans.mat"
 }
