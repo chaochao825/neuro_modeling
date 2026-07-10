@@ -1,0 +1,18 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "conditions": ["in_phase", "anti_phase", "random_phase", "no_oscillation"],
+  "simulation": {
+    "n_trials": 40,
+    "n_steps": 30,
+    "dt_s": 0.01,
+    "frequency_hz": 8.0,
+    "gamma": 0.6,
+    "delay_steps": 2,
+    "coupling": 0.35,
+    "target_rate_hz": 10.0,
+    "spikes_per_trial": 30,
+    "block_size": 5,
+    "noise_std": 0.1
+  }
+}

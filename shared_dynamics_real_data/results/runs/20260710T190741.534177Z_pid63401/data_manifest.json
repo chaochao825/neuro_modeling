@@ -1,0 +1,40 @@
+{
+  "aligned_unit_count": 11445,
+  "data_fingerprint": "86cdca0dfb8317686a405ef5dfe5eb2f459b448d83c0b8de0f76f04d1240fbe4",
+  "dataset_pair": "visual_responding__visual_spontaneous",
+  "metadata_available": [
+    "binary_activity",
+    "context_recording_label"
+  ],
+  "metadata_missing": [
+    "trial",
+    "stimulus_identity",
+    "behavior",
+    "animal_id",
+    "ei_identity",
+    "natural_switch_time"
+  ],
+  "recordings": {
+    "visual_responding": {
+      "dtype": "float32",
+      "mean_activity": 0.037601690739393234,
+      "path": "${REPO_ROOT}/minimal_computation_original/data_mouse_visual_responding.mat",
+      "sha256": "734604460f0e861dcdc206e5b7a9317093b41cf7f2d51a79e0a4dc863ca6e690",
+      "shape_time_units": [
+        5166,
+        11445
+      ]
+    },
+    "visual_spontaneous": {
+      "dtype": "float32",
+      "mean_activity": 0.03959991782903671,
+      "path": "${REPO_ROOT}/minimal_computation_original/data_mouse_visual_spontaneous.mat",
+      "sha256": "07e9c531f9db3146ab72f772b3fef5b3a9a2ae030aecb14e42ffa69ee8202035",
+      "shape_time_units": [
+        4696,
+        11445
+      ]
+    }
+  },
+  "unit_alignment_assumption": "responding/spontaneous row order is aligned as documented upstream; the MAT files contain no independent unit identifiers"
+}

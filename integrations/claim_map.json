@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "rules": {
+    "allowed_stats_units": ["seed", "recording", "recording_pair", "session", "animal"],
+    "forbidden_stats_units": ["neuron", "timepoint", "fold"],
+    "evidence_scopes": [
+      "analytic",
+      "synthetic_calibration",
+      "synthetic_heldout",
+      "real_heldout"
+    ],
+    "matrix_scopes": [
+      "raw_update",
+      "derivative_modulated",
+      "masked",
+      "dale_projected",
+      "normalized",
+      "jacobian",
+      "activity"
+    ]
+  },
+  "legacy": {
+    "H1_history_local_coupling": {
+      "new_role": "auxiliary_predictive_coupling",
+      "scope": "synthetic_calibration",
+      "cannot_support": ["A1", "B2"]
+    },
+    "H2_nearcritical_powerlaw_spectrum": {
+      "new_role": "stable_bulk_diagnostic",
+      "scope": "synthetic_calibration",
+      "cannot_support": ["A1"]
+    },
+    "H3_oscillatory_synchrony": {
+      "new_role": "phase_control_diagnostic",
+      "scope": "synthetic_calibration",
+      "related_core_claim": "C1"
+    },
+    "H4_avalanche_criticality": {
+      "new_role": "competing_mechanism_check",
+      "scope": "synthetic_calibration",
+      "related_core_claim": null
+    },
+    "H5_energy_constraint": {
+      "new_role": "performance_energy_pareto_diagnostic",
+      "scope": "synthetic_calibration",
+      "cannot_support": ["A1", "B1"]
+    }
+  },
+  "core_snapshot": {
+    "A1": "support",
+    "A2": "support",
+    "A3": "support",
+    "B1": "support_relative_branch_only",
+    "B2": "inconclusive",
+    "B3": "oppose",
+    "B4": "inconclusive",
+    "C1": "oppose",
+    "D1": "inconclusive",
+    "D2": "inconclusive",
+    "E1": "inconclusive",
+    "E2": "inconclusive"
+  },
+  "real_data_snapshot": {
+    "evidence_unit": "recording_pair",
+    "inferential_stats_unit": null,
+    "n_biological_units": 1,
+    "formal_conclusion": "inconclusive",
+    "within_recording_directions": {
+      "R0_switching_improves_common": "oppose",
+      "R1_shared_retains_separate_gain": "unavailable",
+      "R2_aligned_beats_basis_controls": "support",
+      "R3_d4_nll_vs_highest_tested_dimension": "support_not_intrinsic_rank",
+      "R4_shared_has_absolute_predictive_signal": "oppose"
+    },
+    "note": "Computational seeds and folds are robustness checks, not biological replicates."
+  }
+}

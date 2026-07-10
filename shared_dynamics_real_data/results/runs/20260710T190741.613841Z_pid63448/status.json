@@ -1,0 +1,13 @@
+{
+  "complete_cells": 108,
+  "elapsed_seconds": 95.06038006104063,
+  "experiment": "visual_context_shared_lds",
+  "failed_cells": 0,
+  "planned_cells": 108,
+  "profile": "formal",
+  "recorded_cells": 108,
+  "started_utc": "20260710T190741.613841Z",
+  "status": "complete",
+  "top_level_error_message": "",
+  "top_level_error_type": ""
+}

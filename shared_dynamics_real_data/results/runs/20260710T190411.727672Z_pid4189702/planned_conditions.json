@@ -1,0 +1,194 @@
+[
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "common",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "common"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "shared"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "separate",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "separate"
+  },
+  {
+    "basis_control": "random",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "random"
+  },
+  {
+    "basis_control": "orthogonal",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "orthogonal"
+  },
+  {
+    "basis_control": "shuffled",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 2,
+    "model": "shuffled"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "common",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "common"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "shared"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "separate",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "separate"
+  },
+  {
+    "basis_control": "random",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "random"
+  },
+  {
+    "basis_control": "orthogonal",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "orthogonal"
+  },
+  {
+    "basis_control": "shuffled",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 0,
+    "latent_dim": 4,
+    "model": "shuffled"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "common",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "common"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "shared"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "separate",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "separate"
+  },
+  {
+    "basis_control": "random",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "random"
+  },
+  {
+    "basis_control": "orthogonal",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "orthogonal"
+  },
+  {
+    "basis_control": "shuffled",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 2,
+    "model": "shuffled"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "common",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "common"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "shared"
+  },
+  {
+    "basis_control": "aligned",
+    "computational_seed": 0,
+    "family": "separate",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "separate"
+  },
+  {
+    "basis_control": "random",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "random"
+  },
+  {
+    "basis_control": "orthogonal",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "orthogonal"
+  },
+  {
+    "basis_control": "shuffled",
+    "computational_seed": 0,
+    "family": "shared",
+    "fold": 1,
+    "latent_dim": 4,
+    "model": "shuffled"
+  }
+]

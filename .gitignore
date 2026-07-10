@@ -3,8 +3,19 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.venv/
+.venv-neuro/
+.coverage
 .DS_Store
 trash/
 *.tmp
 *.log
 minimal_computation_original/
+minimal_computation_python/results/runs/
+
+# Public source data are not redistributed. The committed real-data run
+# snapshot is path-sanitized so the aggregate report can be rebuilt.
+shared_dynamics_real_data/data/
+shared_dynamics_real_data/results/runs/
+!shared_dynamics_real_data/results/runs/
+!shared_dynamics_real_data/results/runs/**

@@ -1,0 +1,20 @@
+# New integrated projects and evidence snapshots use stable LF text.
+local_plasticity_gated_dynamics/** text eol=lf
+shared_dynamics_real_data/** text eol=lf
+docs/** text eol=lf
+integrations/** text eol=lf
+
+# Root release metadata.
+.gitignore text eol=lf
+.gitattributes text eol=lf
+README.md text eol=lf
+REPRODUCE.md text eol=lf
+METHODS_AND_RESULTS_ZH.md text eol=lf
+NOTICE.md text eol=lf
+pytest.ini text eol=lf
+
+# Binary scientific figures are never text-normalized.
+*.png binary
+*.pdf binary
+*.mat binary
+*.npy binary

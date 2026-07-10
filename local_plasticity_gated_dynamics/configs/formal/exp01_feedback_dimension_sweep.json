@@ -1,0 +1,36 @@
+{
+  "profile": "formal",
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  "feedback_dims": [1, 2, 4, 8, 16, 32, 128],
+  "feedback_modes": ["aligned", "random", "orthogonal", "shuffled"],
+  "core_activity_noise_std": 0.02,
+  "core_weight_decay": 0.0001,
+  "include_ablations": true,
+  "ablation_dims": [4, 128],
+  "ablation_modes": ["aligned", "random"],
+  "activity_noise_sweep": [0.01, 0.02, 0.05],
+  "weight_decay_sweep": [0.0, 0.0001],
+  "rollout_horizon": 100,
+  "decoder_ridge": 0.000001,
+  "task": {
+    "n_neurons": 128,
+    "latent_dim": 4,
+    "n_contexts": 2,
+    "train_steps_per_context": 10000,
+    "test_steps_per_context": 2000,
+    "n_train_blocks_per_context": 5,
+    "n_test_blocks_per_context": 1,
+    "dynamics_decay": 0.985,
+    "context_angles": [0.12, -0.09],
+    "process_noise_std": 0.04,
+    "initial_state_std": 0.75,
+    "embedding_gain": 2.0
+  },
+  "model": {
+    "learning_rate": 1.0,
+    "batch_size": null,
+    "max_epochs": 600,
+    "tolerance": 0.0002,
+    "shuffle_batches": false
+  }
+}

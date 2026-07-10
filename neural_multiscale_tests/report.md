@@ -1,12 +1,14 @@
 # Neural Multiscale Validation Report
 
+> Scope: `synthetic_calibration / single_seed`. Levels test whether the pipeline recovers configured synthetic mechanisms; they are not biological inference.
+
 This report separates mechanistic evidence instead of claiming a unified theory is proven.
 
 ## Decision Matrix
 
 | Hypothesis | Level | Key evidence |
 |---|---:|---|
-| H1_history_local_coupling | strong | history delta=0.0021 bits/bin, local delta=0.0077 |
+| H1_history_local_coupling | strong | history delta=0.0022 bits/bin, local delta=0.0081 |
 | H2_nearcritical_powerlaw_spectrum | strong | alpha=0.914, Lyapunov log-eig corr=0.989 |
 | H3_oscillatory_synchrony | weak | PSD peak ratio=13.17, PLV=0.722, complex modes=0, reset=-0.012 |
 | H4_avalanche_criticality | strong | near m branching=0.976, best dynamic-range m=1.0 |

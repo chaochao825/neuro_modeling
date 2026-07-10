@@ -1,5 +1,7 @@
 # 神经群体动力学框架完成情况对比汇总与分析
 
+> `synthetic_calibration / single_seed` 辅助报告；不是生物统计推断。H1 数值已按训练前缀 scaler 的当前代码重新生成。
+
 本报告对照用户粘贴文本中的目标，核对当前 `neural_multiscale_tests` 仓库的实际交付物、模拟结果、证据等级和仍未覆盖的范围。结论只基于当前工作树中的文件与生成结果，不把模拟验证外推为真实脑数据结论。
 
 ## 1. 总体完成度
@@ -18,7 +20,7 @@
 
 | 假设 | 目标判据 | 当前结果 | 证据等级 | 分析 |
 |---|---|---:|---|---|
-| H1 历史相关 + 局部耦合 | history-only 提升 test likelihood；local-coupled 继续提升；global/latent 可用于检验共同状态混淆 | history delta = 0.0021 bits/bin；local delta = 0.0077 bits/bin；Hawkes 平均互相关 0.0328，高于 baseline 0.0290 | strong | 合成 GLM/Hawkes 数据中，自历史项和局部耦合均提供增量预测信息。该结论只证明 pipeline 能检出这类机制，不等价于真实皮层数据中一定存在同等强度局部耦合。 |
+| H1 历史相关 + 局部耦合 | history-only 提升 test likelihood；local-coupled 继续提升；global/latent 可用于检验共同状态混淆 | history delta = 0.0022 bits/bin；local delta = 0.0081 bits/bin；Hawkes 平均互相关 0.0328，高于 baseline 0.0290 | strong | 合成 GLM/Hawkes 数据中，自历史项和局部耦合均提供增量预测信息。该结论只证明 pipeline 能检出这类机制，不等价于真实皮层数据中一定存在同等强度局部耦合。 |
 | H2 近临界/幂律谱 | 近对称、近临界线性动力学产生幂律协方差谱；Lyapunov 方程可预测经验协方差 | critical symmetric case 的谱指数 alpha = 0.9136；Lyapunov log-eigenspectrum corr = 0.9893 | strong | 当前合成设置能复现“近临界归一化 + 近对称动力学 -> 长尾协方差谱”的核心现象，并且不是只看相关性，而是加入了 Lyapunov 预测一致性。 |
 | H3 振荡同步码 | 需同时出现窄带峰、phase locking、接近单位圆复 DMD 模态、phase reset | PSD peak ratio = 13.17；PLV = 0.722；near-unit complex DMD = 0；phase reset proxy = -0.012 | weak | 虽有窄带功率峰和相位锁定，但缺少接近单位圆的复模态和正向 phase reset。因此只能说出现部分振荡/相位统计特征，不能支持“振荡同步码”。 |
 | H4 近临界/雪崩 | m≈1、幂律优于替代分布、finite-size scaling / dynamic range 峰值等共同支持，不能只靠 log-log | m=1 case 的 estimated branching ratio = 0.9761；dynamic range 最优 m = 1.0；size/duration tail 当前最佳为 power-law | strong | 在合成分支过程里，临界点附近的 branching ratio 和 dynamic range 判据同时成立。当前 finite-size scaling 仍是简化 proxy，真实数据上必须继续做 subsampling、bin-size sweep 和状态控制。 |

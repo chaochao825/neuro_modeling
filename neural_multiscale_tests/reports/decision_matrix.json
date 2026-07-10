@@ -1,8 +1,8 @@
 {
   "H1_history_local_coupling": {
     "evidence": {
-      "history_delta_bits": 0.002087945686624916,
-      "local_delta_bits": 0.00767846510014831
+      "history_delta_bits": 0.0021770416403506256,
+      "local_delta_bits": 0.0081017962064487
     },
     "interpretation": "Nested GLM gains test whether history and local coupling add predictive information.",
     "level": "strong",
@@ -11,7 +11,7 @@
   "H2_nearcritical_powerlaw_spectrum": {
     "evidence": {
       "alpha": 0.9136396773774018,
-      "lyapunov_log_eig_corr": 0.9892938512757817
+      "lyapunov_log_eig_corr": 0.9892938512757818
     },
     "interpretation": "Power-law-like eigenspectrum is counted only with Lyapunov covariance agreement.",
     "level": "strong",

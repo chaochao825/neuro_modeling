@@ -164,6 +164,14 @@ def main() -> None:
     panel_h3(axes[1, 0], matrix)
     panel_h4(axes[1, 1], summary)
     panel_h5(axes[1, 2], summary)
+    fig.text(
+        0.5,
+        -0.01,
+        "Synthetic calibration, seed 7; evidence levels are not biological inference.",
+        ha="center",
+        fontsize=8,
+        color="#555555",
+    )
     for ext in ("png", "pdf"):
         fig.savefig(OUT_BASE.with_suffix(f".{ext}"), bbox_inches="tight")
     plt.close(fig)

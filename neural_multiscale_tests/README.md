@@ -1,5 +1,10 @@
 # Neural Multiscale Tests
 
+> Scope: `synthetic_calibration / single_seed`. The committed H1--H5 labels
+> and figures are pipeline-calibration artifacts, not inferential evidence.
+> Equal-time Minimal-computation results are methodologically separate and do
+> not establish temporal history dependence or anatomical locality.
+
 Reproducible simulation and analysis pipeline for separating five competing
 mechanistic claims in neural population dynamics:
 

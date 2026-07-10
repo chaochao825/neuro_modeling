@@ -1,5 +1,7 @@
 # 深入审计：当前模拟是否完全实现，以及局部规则如何通向整体现象
 
+> `synthetic_calibration / single_seed` 辅助报告；不是生物统计推断。H1 数值已按训练前缀 scaler 的当前代码重新生成。
+
 本报告在原始 goal 的基础上，结合当前仓库结果和相关工作，对 `neural_multiscale_tests` 的完成程度做更严格的审计。结论先行：当前项目已经实现了“可复现合成模拟框架”和主要判据矩阵，但还没有完全实现原始 goal 中的公开数据拟合、真实实验设计、完整行为状态控制、严格 finite-size scaling、严格同步码因果验证。当前最有价值的部分，是它已经能把若干局部规则映射到可观测的整体统计，并能避免把所有现象混成一个统一理论。
 
 ## 1. 参考工作的机制启发
@@ -32,8 +34,8 @@
 
 | 局部规则 | 当前实现 | 中间可观测量 | 整体现象 | 当前证据 |
 |---|---|---|---|---|
-| 自历史项 | Hawkes 中 `history_strength=1.0` | GLM history delta = 0.0021 bits/bin；自相关提高 | 单神经元历史依赖 | H1 strong 的一部分 |
-| 局部耦合 | Hawkes 中 `local_strength=6.0` 和邻域 kernel | local delta = 0.0077 bits/bin；Hawkes mean xcorr = 0.0328 > baseline 0.0290 | 局部网络相关和 population structure | H1 strong 的主要来源 |
+| 自历史项 | Hawkes 中 `history_strength=1.0` | GLM history delta = 0.0022 bits/bin；自相关提高 | 单神经元历史依赖 | H1 strong 的一部分 |
+| 局部耦合 | Hawkes 中 `local_strength=6.0` 和邻域 kernel | local delta = 0.0081 bits/bin；Hawkes mean xcorr = 0.0328 > baseline 0.0290 | 局部网络相关和 population structure | H1 strong 的主要来源 |
 | 共同状态 | Hawkes 中 common latent/stimulus；GLM 有 global/full 比较 | global delta = 0.0018 bits/bin；full delta 不一定继续提升 | 区分局部耦合和共同状态混淆 | 机制存在，但真实行为控制未完成 |
 | 近临界谱半径 | Linear A 的 target rho 接近 1 | critical symmetric alpha=0.9136；Lyapunov corr=0.9893 | 长尾协方差谱、多尺度模态 | H2 strong，但指数偏高 |
 | 对称/非对称结构 | symmetric/mixed/asymmetric A | mixed alpha=0.8264；asymmetric complex fraction=0.9444、alpha=1.5590 | 对称性影响谱形与旋转模态 | 支持“动力学结构塑造整体谱” |

@@ -1,0 +1,84 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "test_fraction": 0.25,
+  "task": {
+    "n_trials": 16,
+    "dt_ms": 100,
+    "cue_ms": 200,
+    "sensory_ms": 400,
+    "delay_ms": 200,
+    "response_ms": 200,
+    "context_block_trials": 4,
+    "coherence_values": [-0.5, 0.5],
+    "sensory_noise_std": 0.25,
+    "input_scale": 1.0
+  },
+  "architectures": [
+    {
+      "name": "non_dale_n12",
+      "kind": "non_dale",
+      "n_units": 12,
+      "connection_probability": 0.7,
+      "tau": 5.0,
+      "dt": 1.0,
+      "bulk_gain": 0.4,
+      "input_scale": 1.0,
+      "conditions": [
+        "local",
+        "bptt",
+        "readout-only",
+        "no-gate",
+        "full-feedback",
+        "shuffled-feedback",
+        "separate-network"
+      ]
+    },
+    {
+      "name": "ei_n16_fi25",
+      "kind": "ei",
+      "n_units": 16,
+      "excitatory_fraction": 0.75,
+      "connection_probability": 0.5,
+      "tau_e": 5.0,
+      "tau_i": 3.0,
+      "dt": 1.0,
+      "bulk_gain": 0.4,
+      "inhibitory_gain": 1.5,
+      "input_scale": 1.0,
+      "activation": "rectified_tanh",
+      "normalize_fan_in_after_update": true
+    }
+  ],
+  "training": {
+    "train_epochs": 1,
+    "oracle_pretrain_epochs": 1,
+    "learned_epochs": 1,
+    "recurrent_learning_rate": 0.002,
+    "readout_learning_rate": 0.08,
+    "tau_eligibility": 3.0,
+    "weight_decay": 0.0001,
+    "feedback_dim": 4,
+    "feedback_scale": 0.02,
+    "update_interval": 2,
+    "homeostasis_learning_rate": 0.0005,
+    "homeostasis_interval": 2,
+    "homeostasis_max_abs_update": 0.0005,
+    "target_rate": 0.1,
+    "gate_strength": 0.25,
+    "n_md": 4,
+    "md_learning_rate": 0.1,
+    "md_tau_trace": 2.0,
+    "md_fit_passes": 2,
+    "md_bias_strength": 8.0,
+    "reduced_dim": 2,
+    "reduced_ridge": 0.001,
+    "switch_window": 1,
+    "bptt": {
+      "learning_rate": 0.005,
+      "epochs": 2,
+      "batch_size": 8,
+      "grad_clip": 1.0
+    }
+  }
+}

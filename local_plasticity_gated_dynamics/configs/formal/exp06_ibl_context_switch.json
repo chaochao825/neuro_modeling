@@ -1,0 +1,18 @@
+{
+  "profile": "formal",
+  "seeds": [0],
+  "cache_dir": "data/ibl_cache",
+  "n_sessions": 1,
+  "eids": ["ebce500b-c530-47de-8cb1-963c552703ea"],
+  "cached_session_paths": {
+    "ebce500b-c530-47de-8cb1-963c552703ea": "churchlandlab_ucla/Subjects/MFD_09/2023-10-19/001"
+  },
+  "bin_size_ms": 20,
+  "pre_window_s": [-0.5, 0.0],
+  "minimum_trials": 80,
+  "n_splits": 5,
+  "pca_dim": 12,
+  "shared_dim": 4,
+  "context_stay_probability": 0.95,
+  "ridge": 0.01
+}

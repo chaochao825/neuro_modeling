@@ -1,0 +1,13 @@
+{
+  "config_fingerprint": "f6cfd38f5b4089cdb3883a075bbb8f3aa624b498651b0adeda5f54550bf34502",
+  "config_fingerprint_scope": "original_unsanitized_run_config",
+  "elapsed_seconds": 3.7219714269740507,
+  "error_message": "",
+  "error_type": "",
+  "original_config_fingerprint": "f6cfd38f5b4089cdb3883a075bbb8f3aa624b498651b0adeda5f54550bf34502",
+  "published_config_fingerprint": "67fc65705ccf56bf79b0c65514e1be4576d5dd19e6157dd1cebc6e9e6e4ac36d",
+  "published_config_fingerprint_scope": "sanitized_run_config_without_provenance_fields",
+  "run_id": "20260710T190518.093195Z_f6cfd38f5b40",
+  "snapshot_sanitized": true,
+  "status": "complete"
+}

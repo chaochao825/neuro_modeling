@@ -1,0 +1,84 @@
+{
+  "algorithm_version": "shared-basis-woodbury-v1",
+  "analysis_fingerprint": "a22062f9bfdb67fa59b7fa12cd9765583b5d11b073a1abdd6b722b38b6032a35",
+  "biological_inference_allowed": false,
+  "configured_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "data_root": "${REPO_ROOT}/minimal_computation_original",
+  "experiment": "visual_context_shared_lds",
+  "latent_dims": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "model_specs": [
+    {
+      "basis_control": "aligned",
+      "family": "common",
+      "model": "common"
+    },
+    {
+      "basis_control": "aligned",
+      "family": "shared",
+      "model": "shared"
+    },
+    {
+      "basis_control": "aligned",
+      "family": "separate",
+      "model": "separate"
+    },
+    {
+      "basis_control": "random",
+      "family": "shared",
+      "model": "random"
+    },
+    {
+      "basis_control": "orthogonal",
+      "family": "shared",
+      "model": "orthogonal"
+    },
+    {
+      "basis_control": "shuffled",
+      "family": "shared",
+      "model": "shuffled"
+    }
+  ],
+  "n_splits": 3,
+  "n_units": 128,
+  "preprocessing_fit_scope": "train_only",
+  "profile": "formal",
+  "purge": 2,
+  "results_root": "${REPO_ROOT}/shared_dynamics_real_data/results",
+  "ridge": 0.001,
+  "seeds": [
+    16
+  ],
+  "source_fingerprint": "841c93f9441d3ab07176672c42495a1cd3512dabf2927f8c3d4e8700deae7dbd",
+  "stats_unit": "recording_pair",
+  "time_split": "purged_contiguous_block",
+  "top_k": 4,
+  "variance_floor": 0.0001
+}

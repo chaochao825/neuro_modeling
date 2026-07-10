@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shared-dynamics-real-data"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "numpy",
+  "scipy",
+  "scikit-learn",
+  "pandas",
+  "matplotlib",
+]
+
+[tool.setuptools]
+packages = ["shared_dynamics_real_data", "shared_dynamics_real_data.figures"]
+package-dir = {shared_dynamics_real_data = "."}
+
+[tool.setuptools.package-data]
+shared_dynamics_real_data = ["configs/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+pythonpath = [".."]

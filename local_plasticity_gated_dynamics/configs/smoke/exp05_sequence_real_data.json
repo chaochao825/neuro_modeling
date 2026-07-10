@@ -1,0 +1,18 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "data_root": "data/raw/sequence_memory",
+  "window_s": [0.0, 0.2],
+  "bin_size_ms": 20,
+  "smoothing_ms": 40,
+  "fallback_block_size": 4,
+  "n_splits": 2,
+  "pca_dim": 4,
+  "shared_dim": 2,
+  "subspace_dim": 1,
+  "required_subspaces": ["rank", "rule", "operation"],
+  "ridge": 0.01,
+  "columns": {"block": "block", "rule": "rule", "rank": "rank", "operation": "operation", "item": "item", "behavior": "choice"},
+  "combination_factors": ["item", "rule"],
+  "combination_holdout_fraction": 0.25
+}

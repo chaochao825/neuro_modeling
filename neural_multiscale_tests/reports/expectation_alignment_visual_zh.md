@@ -1,5 +1,7 @@
 # 原始 Goal 预期一致性检查与结果可视化
 
+> `synthetic_calibration / single_seed` 辅助报告；不是生物统计推断。H1 数值已按训练前缀 scaler 的当前代码重新生成。
+
 本报告参考原始粘贴文本中的目标，检查当前 `neural_multiscale_tests` 完成情况与预期是否一致，并给出必要结果可视化。当前结论基于 `reports/summary.json` 与 `reports/decision_matrix.json`，不把合成模拟结果外推为真实脑数据事实。
 
 ## 可视化总览
@@ -17,7 +19,7 @@
 | 模块 | 原始预期 | 当前结果 | 一致性判断 |
 |---|---|---|---|
 | Baseline 独立 Bernoulli | 无历史/无耦合时不应自动产生强机制证据 | baseline 平均互相关为 0.0290，作为 negative control 使用 | 一致 |
-| H1 历史相关 + 局部耦合 | history-only 与 local-coupled 应带来预测增益 | history delta = 0.0021 bits/bin；local delta = 0.0077 bits/bin | 一致 |
+| H1 历史相关 + 局部耦合 | history-only 与 local-coupled 应带来预测增益 | history delta = 0.0022 bits/bin；local delta = 0.0081 bits/bin | 一致 |
 | H2 近临界/幂律谱 | 近对称、近临界线性系统应产生长尾谱，且 Lyapunov 方程能预测协方差 | alpha = 0.9136；Lyapunov log-eig corr = 0.9893 | 基本一致，但 alpha 高于目标文本中约 0.7-0.85 的经验范围 |
 | H3 振荡同步码 | 只有 PSD/PLV 不够，需 complex DMD 与 phase reset | PSD peak ratio = 13.17、PLV = 0.722，但 near-unit complex DMD = 0、phase reset = -0.012 | 与“不能过度声称同步码”的预期一致；与“强同步码证据”不一致 |
 | H4 雪崩/临界传播 | m≈1、branching ratio 接近 1、dynamic range 峰值接近临界 | m=1 case branching ratio = 0.9761；dynamic range 最优 m = 1.0 | 一致 |

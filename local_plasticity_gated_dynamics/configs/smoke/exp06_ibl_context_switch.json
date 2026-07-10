@@ -1,0 +1,15 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "cache_dir": "data/ibl_cache",
+  "n_sessions": 1,
+  "eids": ["fake-eid"],
+  "bin_size_ms": 20,
+  "pre_window_s": [-0.2, 0.0],
+  "minimum_trials": 12,
+  "n_splits": 3,
+  "pca_dim": 4,
+  "shared_dim": 2,
+  "context_stay_probability": 0.9,
+  "ridge": 0.01
+}

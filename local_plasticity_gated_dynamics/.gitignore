@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+.python311/
+downloads/
+build/
+dist/
+*.egg-info/
+
+# Raw public data and generated runs are local artifacts.
+data/raw/
+data/ibl_cache/
+results/runs/
+results/*.png
+results/*.pdf
+!results/core_results.png
+!results/core_results.pdf
+!results/phase_models.png
+!results/phase_models.pdf
+
+# Deletions are staged here per workspace safety policy.
+trash/

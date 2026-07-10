@@ -85,11 +85,11 @@ def main() -> None:
         "energy": (0.50, 0.08, "Information / activity /\nwiring-cost proxy"),
     }
     global_nodes = {
-        "h1": (0.84, 0.80, "H1 supported:\nhistory + local coupling"),
-        "h2": (0.84, 0.62, "H2 supported:\nlong-tail eigenspectrum"),
+        "h1": (0.84, 0.80, "H1 detected (synthetic):\nhistory + local coupling"),
+        "h2": (0.84, 0.62, "H2 detected (synthetic):\nlong-tail eigenspectrum"),
         "h3": (0.84, 0.44, "H3 weak:\nPSD/PLV without\ncomplex/reset evidence"),
-        "h4": (0.84, 0.26, "H4 supported:\ncritical branching proxy"),
-        "h5": (0.84, 0.08, "H5 supported:\nsparse + few long-range\nnear-stable optimum"),
+        "h4": (0.84, 0.26, "H4 detected (synthetic):\ncritical branching proxy"),
+        "h5": (0.84, 0.08, "H5 detected (synthetic):\nsparse + few long-range\nnear-stable optimum"),
     }
 
     for x, y, text in local.values():
@@ -125,7 +125,7 @@ def main() -> None:
     ax.text(
         0.50,
         0.015,
-        "Solid blue: implemented evidence path. Orange: partial/weak path. Dashed: control or insufficiency warning.",
+        "Seed-7 synthetic calibration. Solid blue: implemented path; orange: partial/weak; dashed: control/insufficiency.",
         ha="center",
         va="center",
         fontsize=9,

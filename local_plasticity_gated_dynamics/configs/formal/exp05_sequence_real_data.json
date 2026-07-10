@@ -1,0 +1,18 @@
+{
+  "profile": "formal",
+  "seeds": [0],
+  "data_root": "data/raw/sequence_memory",
+  "window_s": [0.0, 2.0],
+  "bin_size_ms": 20,
+  "smoothing_ms": 50,
+  "fallback_block_size": 20,
+  "n_splits": 5,
+  "pca_dim": 20,
+  "shared_dim": 8,
+  "subspace_dim": 3,
+  "required_subspaces": ["rank", "rule", "operation"],
+  "ridge": 0.01,
+  "columns": {},
+  "combination_factors": ["item", "rule"],
+  "combination_holdout_fraction": 0.2
+}

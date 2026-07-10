@@ -1,5 +1,7 @@
 # Minimal_computation Python 复现结果
 
+> 历史 `residual_approximation` baseline；不是 block-Schur/MATLAB-parity 结果。
+
 - 数据集: `visual_spontaneous`
 - 输出神经元: MATLAB index `13`
 - 数据形状: 11445 neurons x 4696 time bins

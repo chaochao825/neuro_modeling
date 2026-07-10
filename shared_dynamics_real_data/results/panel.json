@@ -1,0 +1,10 @@
+{
+  "profile":"formal",
+  "analysis_fingerprint":"a22062f9bfdb67fa59b7fa12cd9765583b5d11b073a1abdd6b722b38b6032a35",
+  "data_fingerprint":"86cdca0dfb8317686a405ef5dfe5eb2f459b448d83c0b8de0f76f04d1240fbe4",
+  "run_source_fingerprints":[
+    "841c93f9441d3ab07176672c42495a1cd3512dabf2927f8c3d4e8700deae7dbd"
+  ],
+  "report_source_fingerprint":"a452b0777516590a4dc9a00166a3a52c7946bd47feaff4ee99be4e27dbbeaaf8",
+  "latest_cells":2160
+}

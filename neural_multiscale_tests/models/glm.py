@@ -36,7 +36,6 @@ def log_likelihood(x: np.ndarray, y: np.ndarray, w: np.ndarray) -> float:
 
 
 def _ring_local_sum(prev: np.ndarray, radius: int = 3) -> np.ndarray:
-    n = prev.shape[1]
     out = np.zeros_like(prev, dtype=float)
     for shift in range(1, radius + 1):
         out += np.roll(prev, shift, axis=1) + np.roll(prev, -shift, axis=1)
@@ -49,13 +48,15 @@ def _features_for_unit(
     stimulus: np.ndarray | None,
     model: str,
     local_radius: int,
+    *,
+    include_index_local: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     prev = spikes[:-1]
     y = spikes[1:, unit]
     cols: List[np.ndarray] = [np.ones(prev.shape[0])]
     if model in {"history", "history_local", "history_global", "full"}:
         cols.append(prev[:, unit])
-    if model in {"history_local", "full"}:
+    if include_index_local and model in {"history_local", "full"}:
         cols.append(_ring_local_sum(prev, radius=local_radius)[:, unit])
     if model in {"history_global", "full"}:
         global_prev = (prev.sum(axis=1) - prev[:, unit]) / max(1, prev.shape[1] - 1)
@@ -63,10 +64,24 @@ def _features_for_unit(
     if stimulus is not None and model == "full":
         cols.append(np.asarray(stimulus[:-1], dtype=float).ravel())
     x = np.column_stack(cols)
-    if x.shape[1] > 1:
-        xs, _, _ = _standardize_features(x[:, 1:])
-        x = np.column_stack([np.ones(x.shape[0]), xs])
     return x, y
+
+
+def _split_standardize_features(
+    x: np.ndarray, split: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Fit feature scaling on the training prefix and apply it to both splits."""
+
+    if not 0 < split < x.shape[0]:
+        raise ValueError("split must leave non-empty train and test prefixes")
+    train = np.asarray(x[:split], dtype=float).copy()
+    test = np.asarray(x[split:], dtype=float).copy()
+    if x.shape[1] > 1:
+        train_scaled, mu, sig = _standardize_features(train[:, 1:])
+        test_scaled = (test[:, 1:] - mu) / sig
+        train = np.column_stack([np.ones(train.shape[0]), train_scaled])
+        test = np.column_stack([np.ones(test.shape[0]), test_scaled])
+    return train, test
 
 
 def compare_nested_glms(
@@ -76,6 +91,7 @@ def compare_nested_glms(
     max_units: int = 16,
     local_radius: int = 3,
     seed: int = 0,
+    use_index_ring: bool = True,
 ) -> Dict[str, object]:
     arr = np.asarray(spikes, dtype=float)
     if arr.ndim != 2 or arr.shape[0] < 20:
@@ -84,15 +100,24 @@ def compare_nested_glms(
     units = np.arange(arr.shape[1])
     if units.size > max_units:
         units = np.sort(gen.choice(units, size=max_units, replace=False))
-    models = ["bias", "history", "history_local", "history_global", "full"]
+    models = ["bias", "history", "history_global", "full"]
+    if use_index_ring:
+        models.insert(2, "history_local")
     per_model: Dict[str, List[float]] = {m: [] for m in models}
     per_model_aic: Dict[str, List[float]] = {m: [] for m in models}
     split = int((arr.shape[0] - 1) * train_frac)
     for unit in units:
         for name in models:
-            x, y = _features_for_unit(arr, int(unit), stimulus, name, local_radius)
-            x_train, y_train = x[:split], y[:split]
-            x_test, y_test = x[split:], y[split:]
+            x, y = _features_for_unit(
+                arr,
+                int(unit),
+                stimulus,
+                name,
+                local_radius,
+                include_index_local=use_index_ring,
+            )
+            x_train, x_test = _split_standardize_features(x, split)
+            y_train, y_test = y[:split], y[split:]
             w = fit_logistic_ridge(x_train, y_train)
             ll = log_likelihood(x_test, y_test, w)
             per_model[name].append(ll / max(1, y_test.size))
@@ -107,8 +132,22 @@ def compare_nested_glms(
         "bits_per_bin_gain_vs_bias": bits_gain,
         "mean_train_aic": mean_aic,
         "history_delta_bits": float(bits_gain["history"] - bits_gain["bias"]),
-        "local_delta_bits": float(bits_gain["history_local"] - bits_gain["history"]),
+        "local_delta_bits": (
+            float(bits_gain["history_local"] - bits_gain["history"])
+            if use_index_ring
+            else None
+        ),
         "global_delta_bits": float(bits_gain["history_global"] - bits_gain["history"]),
-        "full_delta_bits": float(bits_gain["full"] - max(bits_gain["history_local"], bits_gain["history_global"])),
+        "full_delta_bits": float(
+            bits_gain["full"]
+            - (
+                max(bits_gain["history_local"], bits_gain["history_global"])
+                if use_index_ring
+                else bits_gain["history_global"]
+            )
+        ),
+        "local_structure": (
+            "index_ring" if use_index_ring else "not_evaluated_missing_coordinates"
+        ),
     }
 

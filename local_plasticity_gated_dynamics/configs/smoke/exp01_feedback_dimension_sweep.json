@@ -1,0 +1,32 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "feedback_dims": [2, 4, 16],
+  "feedback_modes": ["aligned", "random", "orthogonal", "shuffled"],
+  "core_activity_noise_std": 0.02,
+  "core_weight_decay": 0.0001,
+  "include_ablations": false,
+  "rollout_horizon": 20,
+  "decoder_ridge": 0.000001,
+  "task": {
+    "n_neurons": 24,
+    "latent_dim": 4,
+    "n_contexts": 2,
+    "train_steps_per_context": 120,
+    "test_steps_per_context": 40,
+    "n_train_blocks_per_context": 3,
+    "n_test_blocks_per_context": 1,
+    "dynamics_decay": 0.985,
+    "context_angles": [0.12, -0.09],
+    "process_noise_std": 0.04,
+    "initial_state_std": 0.75,
+    "embedding_gain": 2.0
+  },
+  "model": {
+    "learning_rate": 1.0,
+    "batch_size": null,
+    "max_epochs": 50,
+    "tolerance": 0.01,
+    "shuffle_batches": false
+  }
+}

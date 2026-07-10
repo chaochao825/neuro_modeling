@@ -140,6 +140,12 @@ def render_markdown(summary: Dict[str, object], matrix: Dict[str, object]) -> st
     lines: List[str] = []
     lines.append("# Neural Multiscale Validation Report")
     lines.append("")
+    lines.append(
+        "> Scope: `synthetic_calibration / single_seed`. Levels test whether "
+        "the pipeline recovers configured synthetic mechanisms; they are not "
+        "biological inference."
+    )
+    lines.append("")
     lines.append("This report separates mechanistic evidence instead of claiming a unified theory is proven.")
     lines.append("")
     lines.append("## Decision Matrix")

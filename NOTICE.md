@@ -5,7 +5,7 @@ This repository does not redistribute the public `Minimal_computation` MATLAB fi
 Original project:
 
 - Repository: `ChrisWLynn/Minimal_computation`
-- Paper context: "Direct dependencies between neurons explain activity"
+- Paper context: "Simple input-output dependencies explain neuronal activity" (Nature Physics, 2026)
 
 The Python reproduction and neural multiscale simulation framework in this repository were created as separate working artifacts for mechanism testing and result summarization.
 

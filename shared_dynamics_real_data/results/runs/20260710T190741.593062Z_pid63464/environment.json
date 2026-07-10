@@ -1,0 +1,15 @@
+{
+  "executable": "${PYTHON_3_11}",
+  "packages": {
+    "matplotlib": "3.10.8",
+    "numpy": "2.3.5",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "sklearn": "1.8.0",
+    "statsmodels": "0.14.6",
+    "torch": "2.7.0+cu126"
+  },
+  "pid": 63464,
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]"
+}

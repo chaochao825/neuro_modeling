@@ -123,6 +123,15 @@ def main() -> None:
         ax_ratio.text(i, value * 1.12, text, ha="center", va="bottom", fontsize=8)
     ax_ratio.text(0.01, 0.98, "D", transform=ax_ratio.transAxes, fontweight="bold", va="top")
 
+    fig.text(
+        0.5,
+        -0.01,
+        "Historical residual-approximation baselines; not block-Schur/MATLAB-parity results.",
+        ha="center",
+        fontsize=8,
+        color="#555555",
+    )
+
     for ext in ("png", "pdf"):
         fig.savefig(OUT_BASE.with_suffix(f".{ext}"), bbox_inches="tight")
     plt.close(fig)

@@ -1,4 +1,4 @@
-"""Plot integrated status for the original H1-H5 goal and Minimal_computation reproduction."""
+"""Plot historical synthetic calibration beside mixed-selector dependency fits."""
 
 from __future__ import annotations
 
@@ -19,7 +19,11 @@ MINIMAL_ROOT = ROOT.parent / "minimal_computation_python"
 OUT_BASE = Path(__file__).with_name("integrated_goal_status")
 
 MINIMAL_RUNS = [
-    ("C. elegans", MINIMAL_ROOT / "results" / "c_elegans_neuron13_max32.json", "#4c78a8"),
+    (
+        "C. elegans",
+        MINIMAL_ROOT / "results" / "c_elegans_matlab_schur_neuron13_max32.json",
+        "#4c78a8",
+    ),
     ("Hippocampus", MINIMAL_ROOT / "results" / "hippocampus_neuron13_max30.json", "#f58518"),
     ("Visual spontaneous", MINIMAL_ROOT / "results" / "visual_spontaneous_neuron13_max30.json", "#54a24b"),
     ("Visual responding", MINIMAL_ROOT / "results" / "visual_responding_neuron13_max30.json", "#b279a2"),
@@ -52,7 +56,7 @@ def panel_framework_scores(ax, matrix: dict) -> None:
     for i, key in enumerate(keys):
         ax.text(i, scores[i] + 0.035, matrix[key]["level"], ha="center", va="bottom", fontsize=8)
     ax.text(0.01, 0.98, "A", transform=ax.transAxes, fontweight="bold", va="top")
-    ax.set_title("H1-H5 synthetic evidence", loc="left", fontweight="bold")
+    ax.set_title("H1-H5 synthetic calibration (seed 7)", loc="left", fontweight="bold")
 
 
 def panel_minimal_entropy(ax, minimal: list[dict]) -> None:
@@ -72,7 +76,7 @@ def panel_minimal_entropy(ax, minimal: list[dict]) -> None:
     for i, val in enumerate(reductions):
         ax.text(i, val + 1.5, f"{val:.1f}%", ha="center", va="bottom", fontsize=8)
     ax.text(0.01, 0.98, "B", transform=ax.transAxes, fontweight="bold", va="top")
-    ax.set_title("Minimal_computation entropy drop", loc="left", fontweight="bold")
+    ax.set_title("Equal-time dependency fits (mixed selectors)", loc="left", fontweight="bold")
 
 
 def panel_minimal_complete(ax, minimal: list[dict]) -> None:
@@ -94,11 +98,16 @@ def panel_minimal_complete(ax, minimal: list[dict]) -> None:
         label = "not complete" if row["complete_num_inputs"] is None else f"{row['complete_num_inputs']} inputs"
         ax.text(i, ratios[i] * 1.12, label, ha="center", va="bottom", fontsize=8)
     ax.text(0.01, 0.98, "C", transform=ax.transAxes, fontweight="bold", va="top")
-    ax.set_title("Minimal_computation complete criterion", loc="left", fontweight="bold")
+    ax.set_title("Dependency-fit criterion (mixed selectors)", loc="left", fontweight="bold")
 
 
 def panel_goal_coverage(ax) -> None:
-    rows = ["Synthetic\nsimulations", "Public-data\ninterface", "Minimal\nreproduction", "Causal / real\nexperiments"]
+    rows = [
+        "Synthetic\nsimulations",
+        "Public-data\ninterface",
+        "Equal-time\ndependency fit",
+        "Causal / real\nexperiments",
+    ]
     cols = ["H1", "H2", "H3", "H4", "H5"]
     # Coverage is a status audit, not an evidence score:
     # 1.0 implemented and run; 0.5 partial interface or submodule; 0.2 design-only; 0.0 absent.
@@ -106,7 +115,7 @@ def panel_goal_coverage(ax) -> None:
         [
             [1.0, 1.0, 1.0, 1.0, 1.0],
             [0.5, 0.5, 0.5, 0.5, 0.5],
-            [0.5, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
             [0.2, 0.2, 0.2, 0.2, 0.2],
         ]
     )
@@ -160,6 +169,15 @@ def main() -> None:
     panel_minimal_entropy(axes[0, 1], minimal)
     panel_minimal_complete(axes[1, 0], minimal)
     panel_goal_coverage(axes[1, 1])
+    fig.text(
+        0.5,
+        -0.01,
+        "C. elegans: block-Schur; mouse panels: historical residual approximation. "
+        "Equal-time fits do not test H1-H5.",
+        ha="center",
+        fontsize=8,
+        color="#555555",
+    )
     for ext in ("png", "pdf"):
         fig.savefig(OUT_BASE.with_suffix(f".{ext}"), bbox_inches="tight")
     plt.close(fig)

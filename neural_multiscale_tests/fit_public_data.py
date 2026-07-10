@@ -30,7 +30,12 @@ def analyze_public_matrix(spikes: np.ndarray, dataset: str, bin_ms: float, seed:
         "dataset": dataset,
         "bin_ms": bin_ms,
         "activity": summarize_activity(spikes),
-        "glm_hawkes": compare_nested_glms(spikes, seed=seed),
+        # Public matrix exports do not include anatomical coordinates.  Treating
+        # adjacent column indices as spatially local would invent structure, so
+        # the ring-local term is disabled until explicit coordinates are given.
+        "glm_hawkes": compare_nested_glms(
+            spikes, seed=seed, use_index_ring=False
+        ),
         "eigenspectrum_controls": analyze_eigenspectrum(spikes, seed=seed),
         "state_controls_required": [
             "running",

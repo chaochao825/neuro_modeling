@@ -1127,28 +1127,29 @@
     "glm_comparison": {
       "bits_per_bin_gain_vs_bias": {
         "bias": 0.0,
-        "full": 0.009049645762961404,
-        "history": 0.002087945686624916,
-        "history_global": 0.003916514874973763,
-        "history_local": 0.009766410786773226
+        "full": 0.011132396110100893,
+        "history": 0.0021770416403506256,
+        "history_global": 0.005032289057578214,
+        "history_local": 0.010278837846799326
       },
-      "full_delta_bits": -0.0007167650238118217,
-      "global_delta_bits": 0.0018285691883488469,
-      "history_delta_bits": 0.002087945686624916,
-      "local_delta_bits": 0.00767846510014831,
+      "full_delta_bits": 0.0008535582633015671,
+      "global_delta_bits": 0.002855247417227588,
+      "history_delta_bits": 0.0021770416403506256,
+      "local_delta_bits": 0.0081017962064487,
+      "local_structure": "index_ring",
       "mean_train_aic": {
         "bias": 286.8614295002151,
-        "full": 278.46488355370155,
-        "history": 285.3826270911565,
-        "history_global": 285.68585060318264,
-        "history_local": 276.08039774149324
+        "full": 278.24776502175513,
+        "history": 285.27550954392177,
+        "history_global": 285.08366389821333,
+        "history_local": 275.7590345517877
       },
       "test_loglik_per_bin": {
         "bias": -0.21529537929392228,
-        "full": -0.20902264284825933,
-        "history": -0.21384812562807592,
-        "history_global": -0.21258065805071313,
-        "history_local": -0.20852581919288019
+        "full": -0.20757899031732935,
+        "history": -0.21378636901895165,
+        "history_global": -0.21180726232189928,
+        "history_local": -0.20817063182098047
       },
       "units_fit": 16
     },
@@ -1450,7 +1451,7 @@
         },
         "empirical_spectral_radius": 0.9850000000000041,
         "lyapunov_agreement": {
-          "log_eigenspectrum_corr": 0.9892938512757817,
+          "log_eigenspectrum_corr": 0.9892938512757818,
           "relative_fro_error": 0.4457745096267986
         },
         "name": "critical_symmetric_powerlaw",
@@ -1536,7 +1537,7 @@
         },
         "empirical_spectral_radius": 0.6500000000000014,
         "lyapunov_agreement": {
-          "log_eigenspectrum_corr": 0.9421870215973025,
+          "log_eigenspectrum_corr": 0.9421870215973027,
           "relative_fro_error": 0.1705375865601526
         },
         "name": "subcritical_symmetric",
@@ -1623,7 +1624,7 @@
         "empirical_spectral_radius": 0.9599999999999991,
         "lyapunov_agreement": {
           "log_eigenspectrum_corr": 0.9971396673510298,
-          "relative_fro_error": 0.2107317894503706
+          "relative_fro_error": 0.21073178945037083
         },
         "name": "nearcritical_mixed",
         "symmetry": 0.45,
@@ -1708,8 +1709,8 @@
         },
         "empirical_spectral_radius": 0.9599999999999999,
         "lyapunov_agreement": {
-          "log_eigenspectrum_corr": 0.9993675915230045,
-          "relative_fro_error": 0.07767129644963662
+          "log_eigenspectrum_corr": 0.9993675915230048,
+          "relative_fro_error": 0.077671296449637
         },
         "name": "nearcritical_asymmetric",
         "symmetry": 0.0,

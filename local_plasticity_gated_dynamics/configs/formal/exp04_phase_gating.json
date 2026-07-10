@@ -1,0 +1,18 @@
+{
+  "profile": "formal",
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  "conditions": ["in_phase", "anti_phase", "random_phase", "no_oscillation"],
+  "simulation": {
+    "n_trials": 200,
+    "n_steps": 150,
+    "dt_s": 0.01,
+    "frequency_hz": 8.0,
+    "gamma": 0.6,
+    "delay_steps": 2,
+    "coupling": 0.35,
+    "target_rate_hz": 10.0,
+    "spikes_per_trial": 150,
+    "block_size": 10,
+    "noise_std": 0.1
+  }
+}
