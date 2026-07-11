@@ -131,10 +131,7 @@ def test_trusted_projected_update_matches_validated_public_path() -> None:
     np.testing.assert_allclose(trusted.recurrent_weights, public.recurrent_weights)
     np.testing.assert_allclose(
         trusted.recurrent_weights,
-        trusted.W_bulk
-        + trusted.W_task
-        + trusted.W_homeo
-        + trusted.W_normalization,
+        trusted.W_bulk + trusted.W_task + trusted.W_homeo + trusted.W_normalization,
     )
 
 
@@ -153,11 +150,9 @@ def test_failed_normalization_is_atomic_across_components_and_cache() -> None:
     np.testing.assert_array_equal(network.W_normalization, before_normalization)
     np.testing.assert_array_equal(
         network.recurrent_weights,
-        network.W_bulk
-        + network.W_task
-        + network.W_homeo
-        + network.W_normalization,
+        network.W_bulk + network.W_task + network.W_homeo + network.W_normalization,
     )
+
 
 def test_normalization_correction_does_not_pollute_local_components() -> None:
     network = EIRateNetwork(
@@ -183,7 +178,9 @@ def test_normalization_correction_does_not_pollute_local_components() -> None:
     local_delta = network.W_homeo - before_homeostatic_component
     np.testing.assert_allclose(local_delta, homeostatic.local_update)
     assert np.all(local_delta[:, network.excitatory_mask] == 0.0)
-    assert np.any(homeostatic.normalization_correction[:, network.excitatory_mask] != 0.0)
+    assert np.any(
+        homeostatic.normalization_correction[:, network.excitatory_mask] != 0.0
+    )
 
 
 def test_zero_bulk_reference_does_not_erase_task_learning() -> None:
@@ -237,6 +234,49 @@ def test_step_accepts_md_gain_and_run_is_time_major() -> None:
     trajectory = network.run(np.zeros((4, 2)), gains=np.ones((4, 8)))
     assert trajectory.x.shape == (5, 8)
     assert trajectory.rates.shape == (5, 8)
+
+
+def test_trial_batch_matches_independent_fine_step_runs() -> None:
+    network = EIRateNetwork(
+        8,
+        n_inputs=2,
+        connection_probability=0.25,
+        tau_e=20.0,
+        tau_i=10.0,
+        dt=5.0,
+        seed=31,
+    )
+    inputs = np.array(
+        [
+            [[1.0, -0.5], [0.0, 0.25]],
+            [[-0.25, 0.75], [0.5, 0.0]],
+        ]
+    )
+    gains = np.ones((2, 2, 8))
+    gains[0, 1] = np.linspace(0.8, 1.2, 8)
+    batched = network.run_trial_batch(inputs, gains=gains, substeps=2)
+
+    assert batched.x.shape == (2, 3, 8)
+    assert batched.rates.shape == (2, 3, 8)
+    assert batched.integration_substeps == 2
+    assert batched.substep_firing_sum > 0.0
+    assert batched.substep_input_event_sum > 0.0
+    assert batched.substep_recurrent_event_sum >= 0.0
+    for trial in range(2):
+        fine_inputs = np.repeat(inputs[trial], 2, axis=0)
+        fine_gains = np.repeat(gains[trial], 2, axis=0)
+        independent = network.run(fine_inputs, gains=fine_gains)
+        np.testing.assert_allclose(batched.x[trial, 1:], independent.x[[2, 4]])
+        np.testing.assert_allclose(batched.rates[trial, 1:], independent.rates[[2, 4]])
+
+
+def test_trial_batch_rejects_misaligned_gains_and_invalid_substeps() -> None:
+    network = EIRateNetwork(8, n_inputs=2, seed=5)
+    inputs = np.zeros((3, 4, 2))
+    with pytest.raises(ValueError, match="gains"):
+        network.run_trial_batch(inputs, gains=np.ones((3, 4, 7)))
+    with pytest.raises(ValueError, match="substeps"):
+        network.run_trial_batch(inputs, substeps=0)
 
 
 @pytest.mark.parametrize(

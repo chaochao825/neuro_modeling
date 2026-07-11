@@ -1,0 +1,15 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "router_dim": 2,
+  "regularization_c": 1.0,
+  "n_bootstrap": 200,
+  "synthetic_fixture": {
+    "n_train_tasks": 8,
+    "n_test_tasks": 6,
+    "n_candidates": 4,
+    "feature_dim": 4,
+    "missing_test_tasks": 1,
+    "seed": 314159
+  }
+}

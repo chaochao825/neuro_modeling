@@ -12,6 +12,8 @@ dist/
 # Raw public data and generated runs are local artifacts.
 data/raw/
 data/ibl_cache/
+data/ibl_behavior/
+data/arc/
 results/runs/
 results/*.png
 results/*.pdf
@@ -21,6 +23,10 @@ results/*.pdf
 !results/phase_models.pdf
 !results/hidden_context.png
 !results/hidden_context.pdf
+!results/exp10_bridge_pilot.png
+!results/exp10_bridge_pilot.pdf
+!results/exp11_ibl_behavior_real.png
+!results/exp11_ibl_behavior_real.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

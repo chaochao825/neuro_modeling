@@ -825,6 +825,63 @@ def write_report(
         note = str(row.get("note") or "—").replace("\n", " ")
         lines.append(f"- `{row['claim_id']}` (failed={row['n_failed']}): {note}")
     lines += _p2_formal_diagnostics(raw, summary)
+    bridge_path = results_root / "exp10_bridge_pilot_summary.csv"
+    if bridge_path.is_file():
+        bridge = pd.read_csv(bridge_path)
+        lines += [
+            "",
+            "## Incremental exp10 bridge pilot (not formal)",
+            "",
+            "This N=32 pilot uses 30 independent seeds and is reported separately from the registered N=256 formal grid. Base gates use separately fitted readouts, so their differences concern whole functional pipelines, not a fixed-readout gate effect. They are ineligible for biological-mechanism, recurrent-plasticity, or efficiency claims. Clamp/delay/shuffle are fixed-checkpoint within-model counterfactuals; all three are inconclusive.",
+            "",
+            "| Comparison | Scope | Paired balanced-accuracy difference [95% seed-bootstrap CI] | Holm p | Conclusion |",
+            "|---|---|---:|---:|---|",
+        ]
+        for row in bridge.to_dict("records"):
+            interval = (
+                f"{float(row['mean_balanced_accuracy_difference']):.4f} "
+                f"[{float(row['bootstrap_ci_low']):.4f}, "
+                f"{float(row['bootstrap_ci_high']):.4f}]"
+            )
+            lines.append(
+                f"| {row['comparison']} | {row.get('comparison_scope', 'scope unavailable')} | {interval} | "
+                f"{float(row['holm_p']):.4g} | **{row['conclusion']}** |"
+            )
+    exp11_path = results_root / "exp11_ibl_behavior_real_summary.csv"
+    if exp11_path.is_file():
+        exp11 = pd.read_csv(exp11_path)
+        cohort_hashes = exp11["cohort_manifest_sha256"].dropna().astype(str).unique()
+        cohort_hash = cohort_hashes[0] if len(cohort_hashes) == 1 else "unavailable"
+        lines += [
+            "",
+            "## exp11 IBL hidden-block benchmark (behavior only)",
+            "",
+            "This section analyzes trial-table behavior only: no spikes, neural activity, or shared neural dynamics are fit. Conclusions use animal-primary inference with sessions nested within animal, preserve failed/missing conditions, and are bound to cohort manifest `"
+            + str(cohort_hash)
+            + "`.",
+            "",
+            "| Claim | planned / paired sessions | animals | animal-mean difference [hierarchical 95% CI] | Holm p | Conclusion |",
+            "|---|---:|---:|---:|---:|---|",
+        ]
+        for row in exp11.to_dict("records"):
+            interval = (
+                f"{_format_number(row['animal_mean_difference'])} "
+                f"[{_format_number(row['hierarchical_bootstrap_ci_low'])}, "
+                f"{_format_number(row['hierarchical_bootstrap_ci_high'])}]"
+            )
+            lines.append(
+                f"| {row['claim']} | {int(row['n_planned_sessions'])} / "
+                f"{int(row['n_paired_complete_sessions'])} | {int(row['n_animals'])} | "
+                f"{interval} | {_format_number(row['holm_p'])} | "
+                f"**{row['conclusion']}** |"
+            )
+    else:
+        lines += [
+            "",
+            "## exp11 IBL hidden-block benchmark (behavior only)",
+            "",
+            "No animal-primary formal exp11 summary is available. The behavior-only real-data conclusion is pending/inconclusive; this absence is not neural evidence.",
+        ]
     lines += [
         "",
         "## Interpretation safeguards",
@@ -838,17 +895,17 @@ def write_report(
         "- P0 task+homeostasis has one matched task component plus one matched homeostasis component, so its total component budget is twice homeostasis-only; normalization corrections are reported outside those selected component budgets.",
         "- The P0 homeostasis control is yoked inhibitory strengthening, not closed-loop E/I stability evidence; formal normal-perturbation decay, Lyapunov, and closure-error gates remain pending P4.",
         "- P1 cross-parameterization budgets are descriptive and unmatched; physical-rank versus credit-tangent results cannot rank parameterizations by task performance.",
-        "- P2 learned-HMM and MD-like gates receive cue observations rather than realized context. Learned-HMM fitting uses legal train-episode batch smoothing, while every held-out belief trajectory is causal and frozen before truth scoring.",
+        "- P2 learned-HMM and MD-like gates receive cue observations rather than realized context. Learned-HMM fitting uses legal train-episode batch smoothing, while every held-out belief trajectory is past-only and frozen before truth scoring.",
         "- P2 supervised context inference is an explicitly ineligible upper bound. The oracle filter knows q/h but never receives realized state or switch boundaries.",
-        "- P2 q/h cells are paired within seed and then equally averaged; post-fit clamp, delay, and shuffle interventions reuse the intact MD checkpoint and readout.",
-        "- The P2 MD candidate is specifically causal two-slice local soft counts with Hebbian lag-1--5 moment shrinkage; it is not evidence for a pure soft-count learner.",
+        "- P2 q/h cells are paired within seed and then equally averaged; post-fit clamp, delay, and shuffle within-model counterfactuals reuse the intact MD checkpoint and readout. They are not biological causal evidence.",
+        "- The P2 MD candidate is specifically past-only two-slice local soft counts with Hebbian lag-1--5 moment shrinkage; it is not evidence for a pure soft-count learner.",
         "- P2_overall is a gate-only belief/effective-control stage gate. It cannot support coupled N=256/N=512 PFC/E/I dynamics, recurrent three-factor credit assignment, or homeostasis.",
         "- P2 energy_proxy_per_trial measures belief confidence and trajectory change, not physical energy consumption; P2i is diagnostic and excluded from P2_overall.",
         "- Nominal feedback dimension is an upper bound on the empirical projected signal span; it is not reported as an automatically realized exact rank.",
         "- PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.",
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
-        "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as causal gating.",
+        "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.",
         "- IBL support requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
         "",
         "## External-data status",
@@ -860,7 +917,7 @@ def write_report(
         "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
         "- `results/summary.csv`: one row per pre-registered core claim.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, and `results/hidden_context.pdf`: script-generated data figures when applicable.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -881,13 +938,19 @@ def main() -> None:
     write_compact_runs(results_root, runs)
     summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
-    write_report(results_root, raw, runs, summary)
     if args.plots:
-        for script in (
+        scripts = [
             "core_results_plot.py",
             "phase_models_plot.py",
             "hidden_context_plot.py",
-        ):
+            "exp10_bridge_pilot_plot.py",
+        ]
+        exp11_source_available = (
+            results_root / "exp11_ibl_behavior_real_raw.csv.gz"
+        ).is_file() or (results_root / "runs" / "exp11_ibl_behavior_belief").is_dir()
+        if exp11_source_available:
+            scripts.append("exp11_ibl_behavior_plot.py")
+        for script in scripts:
             subprocess.run(
                 [
                     sys.executable,
@@ -898,6 +961,9 @@ def main() -> None:
                 check=True,
                 cwd=PROJECT_ROOT,
             )
+    # Plot scripts bind their own scoped summaries; write the report afterward
+    # so a single --plots invocation includes newly generated exp10/exp11 rows.
+    write_report(results_root, raw, runs, summary)
 
 
 if __name__ == "__main__":

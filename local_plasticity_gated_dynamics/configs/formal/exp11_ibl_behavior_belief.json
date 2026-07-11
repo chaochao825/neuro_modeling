@@ -1,0 +1,31 @@
+{
+  "profile": "formal",
+  "seeds": [0],
+  "cohort_manifest": "data/ibl_behavior/bwm_behavior_v1/cohort_manifest.csv",
+  "sessions": [],
+  "cohort_requirements": {
+    "minimum_sessions": 20,
+    "minimum_animals": 5
+  },
+  "split": {
+    "test_fraction": 0.2,
+    "validation_fraction": 0.2,
+    "min_blocks": 5
+  },
+  "exponential_history": {
+    "decays": [0.5, 0.8, 0.9, 0.95, 0.98],
+    "belief_width": 0.12
+  },
+  "learned_hmm": {
+    "max_iter": 100,
+    "tolerance": 1e-7,
+    "pseudocount": 0.1,
+    "n_restarts": 5
+  },
+  "behavior_model": {
+    "C": 1.0,
+    "max_iter": 1000
+  },
+  "context_epsilon": 1e-9,
+  "calibration_bins": 10
+}

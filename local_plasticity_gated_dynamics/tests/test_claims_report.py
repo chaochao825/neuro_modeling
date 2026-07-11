@@ -328,6 +328,63 @@ def test_report_exposes_attempt_categories_and_claim_evidence_notes(
     assert "## P2 formal diagnostics" not in report
 
 
+def test_report_keeps_exp10_and_exp11_evidence_scopes_self_contained(
+    tmp_path: Path,
+) -> None:
+    pd.DataFrame(
+        [
+            {
+                "comparison": "hmm_vs_no_gate",
+                "comparison_scope": "separately_refit_readout_functional_pipeline",
+                "mean_balanced_accuracy_difference": 0.02,
+                "bootstrap_ci_low": 0.01,
+                "bootstrap_ci_high": 0.03,
+                "holm_p": 0.04,
+                "conclusion": "functional_pipeline_support_pilot",
+            }
+        ]
+    ).to_csv(tmp_path / "exp10_bridge_pilot_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "claim": "hmm_context_nll_gain",
+                "cohort_manifest_sha256": "d" * 64,
+                "n_planned_sessions": 30,
+                "n_paired_complete_sessions": 30,
+                "n_animals": 10,
+                "animal_mean_difference": 0.1,
+                "hierarchical_bootstrap_ci_low": 0.05,
+                "hierarchical_bootstrap_ci_high": 0.15,
+                "holm_p": 0.01,
+                "conclusion": "support",
+            }
+        ]
+    ).to_csv(tmp_path / "exp11_ibl_behavior_real_summary.csv", index=False)
+    core = pd.DataFrame(
+        [
+            {
+                "claim_id": "core",
+                "criterion": "registered",
+                "n_complete": 1,
+                "n_planned": 1,
+                "n_failed": 0,
+                "estimate": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.0,
+                "conclusion": "inconclusive",
+                "note": "scope test",
+            }
+        ]
+    )
+    write_report(tmp_path, pd.DataFrame(), pd.DataFrame(), core)
+    report = (tmp_path / "report.md").read_text(encoding="utf-8")
+    assert "whole functional pipelines, not a fixed-readout gate effect" in report
+    assert "separately_refit_readout_functional_pipeline" in report
+    assert "exp11 IBL hidden-block benchmark (behavior only)" in report
+    assert "no spikes, neural activity, or shared neural dynamics" in report
+    assert "`" + "d" * 64 + "`" in report
+
+
 def test_report_adds_formal_p2_macro_and_fit_diagnostics(tmp_path: Path) -> None:
     rows: list[dict[str, object]] = []
     gates = (

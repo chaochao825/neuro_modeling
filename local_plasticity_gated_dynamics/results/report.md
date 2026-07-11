@@ -22,6 +22,7 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | exp07_mechanism_identifiability | formal | 30 | 30 | 0 | 0 | 1020 |
 | exp08_rank_stage_validation | formal | 30 | 30 | 0 | 0 | 4410 |
 | exp09_hidden_context_gate | formal | 30 | 30 | 0 | 0 | 3840 |
+| exp10_hidden_context_ei_bridge | smoke | 60 | 60 | 0 | 0 | 420 |
 
 ## Core proposition audit
 
@@ -96,7 +97,7 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 - `P0c_aligned_adds_value_over_matched_homeostasis` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.0024354150219953246, CI=[0.001248913662966034, 0.004012353270735189], raw_p=3.997236490249634e-06; l2: conclusion=support, n=30, estimate=0.004104866967973079, CI=[0.002230666236489589, 0.0065737887957078266], raw_p=2.9867514967918396e-06; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=3.99723649025e-06); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P0d_local_absolute_accuracy` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.056666666666666685, CI=[0.02997916666666677, 0.08166666666666669], raw_p=0.00028261244544550504; l2: conclusion=support, n=30, estimate=0.05666666666666667, CI=[0.02916666666666669, 0.08166666666666669], raw_p=0.000305714097041996; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.000305714097042); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P0e_local_noninferior_tuned_bptt` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.07491666666666666, CI=[0.034581249999999994, 0.11733958333333325], raw_p=0.00047877202703846004; l2: conclusion=support, n=30, estimate=0.07491666666666666, CI=[0.03491250000000002, 0.11742291666666656], raw_p=0.00047895487883489285; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.000478954878835); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
-- `P0f_local_noninferior_tuned_gru` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.021916666666666685, 0.09916874999999999], raw_p=0.003719669399051919; l2: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.022831250000000032, 0.09733541666666666], raw_p=0.003244611805976201; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.00371966939905); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
+- `P0f_local_noninferior_tuned_gru` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.021916666666666685, 0.09916874999999999], raw_p=0.003719669399051919; l2: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.022831250000000032, 0.09733541666666666], raw_p=0.0032446118059762; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.00371966939905); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1a_masked_outer_product_identity` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1b_credit_tangent_respects_feedback_bound` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1c_highrank_physical_update_coexists_with_lowdim_credit` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
@@ -149,6 +150,23 @@ Each endpoint below is first averaged across seeds within a q/h cell. The extrem
 P2i is registered on the log(MD/no-gate energy) scale. Exponentiating the summary estimate and CI gives an energy ratio of 1.954 [1.946, 1.964].
 
 
+## Incremental exp10 bridge pilot (not formal)
+
+This N=32 pilot uses 30 independent seeds and is reported separately from the registered N=256 formal grid. Base gates use separately fitted readouts, so their differences concern whole functional pipelines, not a fixed-readout gate effect. They are ineligible for biological-mechanism, recurrent-plasticity, or efficiency claims. Clamp/delay/shuffle are fixed-checkpoint within-model counterfactuals; all three are inconclusive.
+
+| Comparison | Scope | Paired balanced-accuracy difference [95% seed-bootstrap CI] | Holm p | Conclusion |
+|---|---|---:|---:|---|
+| oracle_vs_no_gate | separately_refit_readout_functional_pipeline | 0.0358 [0.0183, 0.0532] | 0.001917 | **descriptive_ceiling_support** |
+| hmm_vs_no_gate | separately_refit_readout_functional_pipeline | 0.0252 [0.0075, 0.0438] | 0.03203 | **functional_pipeline_support_pilot** |
+| md_vs_no_gate | separately_refit_readout_functional_pipeline | 0.0033 [0.0000, 0.0093] | 0.3147 | **inconclusive_functional_pipeline_pilot** |
+| md_vs_clamp | fixed_receiver_readout_within_model_counterfactual | 0.0031 [0.0000, 0.0089] | 0.3147 | **inconclusive_within_model_counterfactual** |
+| md_vs_delay | fixed_receiver_readout_within_model_counterfactual | 0.0015 [-0.0021, 0.0066] | 0.9809 | **inconclusive_within_model_counterfactual** |
+| md_vs_shuffle | fixed_receiver_readout_within_model_counterfactual | 0.0018 [-0.0003, 0.0058] | 0.9809 | **inconclusive_within_model_counterfactual** |
+
+## exp11 IBL hidden-block benchmark (behavior only)
+
+No animal-primary formal exp11 summary is available. The behavior-only real-data conclusion is pending/inconclusive; this absence is not neural evidence.
+
 ## Interpretation safeguards
 
 - Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.
@@ -160,17 +178,17 @@ P2i is registered on the log(MD/no-gate energy) scale. Exponentiating the summar
 - P0 task+homeostasis has one matched task component plus one matched homeostasis component, so its total component budget is twice homeostasis-only; normalization corrections are reported outside those selected component budgets.
 - The P0 homeostasis control is yoked inhibitory strengthening, not closed-loop E/I stability evidence; formal normal-perturbation decay, Lyapunov, and closure-error gates remain pending P4.
 - P1 cross-parameterization budgets are descriptive and unmatched; physical-rank versus credit-tangent results cannot rank parameterizations by task performance.
-- P2 learned-HMM and MD-like gates receive cue observations rather than realized context. Learned-HMM fitting uses legal train-episode batch smoothing, while every held-out belief trajectory is causal and frozen before truth scoring.
+- P2 learned-HMM and MD-like gates receive cue observations rather than realized context. Learned-HMM fitting uses legal train-episode batch smoothing, while every held-out belief trajectory is past-only and frozen before truth scoring.
 - P2 supervised context inference is an explicitly ineligible upper bound. The oracle filter knows q/h but never receives realized state or switch boundaries.
-- P2 q/h cells are paired within seed and then equally averaged; post-fit clamp, delay, and shuffle interventions reuse the intact MD checkpoint and readout.
-- The P2 MD candidate is specifically causal two-slice local soft counts with Hebbian lag-1--5 moment shrinkage; it is not evidence for a pure soft-count learner.
+- P2 q/h cells are paired within seed and then equally averaged; post-fit clamp, delay, and shuffle within-model counterfactuals reuse the intact MD checkpoint and readout. They are not biological causal evidence.
+- The P2 MD candidate is specifically past-only two-slice local soft counts with Hebbian lag-1--5 moment shrinkage; it is not evidence for a pure soft-count learner.
 - P2_overall is a gate-only belief/effective-control stage gate. It cannot support coupled N=256/N=512 PFC/E/I dynamics, recurrent three-factor credit assignment, or homeostasis.
 - P2 energy_proxy_per_trial measures belief confidence and trajectory change, not physical energy consumption; P2i is diagnostic and excluded from P2_overall.
 - Nominal feedback dimension is an upper bound on the empirical projected signal span; it is not reported as an automatically realized exact rank.
 - PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.
 - Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.
 - Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.
-- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as causal gating.
+- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.
 - IBL support requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.
 
 ## External-data status
@@ -182,4 +200,4 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.
 - `results/runs.csv`: run status and planned-cell coverage.
 - `results/summary.csv`: one row per pre-registered core claim.
-- `results/core_results.pdf`, `results/phase_models.pdf`, and `results/hidden_context.pdf`: script-generated data figures when applicable.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.

@@ -43,11 +43,36 @@ committed configs and scripts regenerate that layout.
   hidden-context panel.
 - `exp09` repairs the hidden-context leakage at the gate-only level and adds
   cue-only HMM/MD inference plus frozen post-fit interventions. The MD
-  candidate combines causal two-slice soft counts with 80% Hebbian multi-lag
+  candidate combines past-only two-slice soft counts with 80% Hebbian multi-lag
   moment shrinkage when the cue process is identifiable; it is not a pure
   recurrent soft-count mechanism. It does not yet
   couple that belief gate to the local-plasticity N=256/N=512 recurrent PFC/E/I
   models, so even positive P2 gate results cannot by themselves establish the
   complete credit-assignment-to-recurrent-dynamics mechanism.
+- `exp10` is the repository's first belief-to-Dale-E/I bridge, but recurrent weights remain
+  frozen and the control axis is rank one by construction. Its N=32 pilot
+  shows a small learned-HMM *pipeline* gain over a separately refit no-gate
+  readout; it does not support the current fixed-readout MD-like intervention
+  panel, and it cannot establish three-factor recurrent learning. The
+  registered N=256/30-seed run remains outstanding.
+- `exp11` now implements a leakage-safe trials-only IBL benchmark plus a cohort
+  freezer and immutable-manifest contract; no formal multi-animal artifact is
+  yet committed. A one-session developmental check was descriptively worse on
+  held-out choice log loss than the strong history readout, but the inferential
+  conclusion is `inconclusive_insufficient_cohort`, not `oppose`.
+  Multi-session/animal inference must be completed before either a support or
+  oppose conclusion. The distinct MFD_09 `exp06` neural pilot is not exp11
+  behavior evidence.
+- `exp12` validates only the task-safe candidate-routing interface on a
+  synthetic smoke tape. No public ARC candidate tape has yet passed the frozen
+  coverage contract, and the external feature/candidate extractor is not yet
+  independently reproducible. Hash-shaped provenance fields are therefore
+  treated only as schema attestations and cannot make a formal tape eligible
+  for scientific claims. Maze, Sudoku, and ARC remain secondary functional
+  tests and are not evidence for a biological mechanism.
+- The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
+  Shared dynamics retains only about 25--29% of the full-model likelihood gain,
+  far below the 90% criterion; pre-stim future-covariate and true-boundary-reset
+  issues must be removed before it can be joined to the exp11 belief trajectory.
 
 See `../docs/integrated_method_audit_zh.md` for the cross-workstream audit and the next falsification tests.

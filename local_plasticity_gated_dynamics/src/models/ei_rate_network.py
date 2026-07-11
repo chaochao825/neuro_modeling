@@ -31,7 +31,9 @@ def _finite_vector(value: Array, *, name: str, length: int) -> Array:
     return array
 
 
-def dale_project(weights: Array, connectivity_mask: Array, presynaptic_signs: Array) -> Array:
+def dale_project(
+    weights: Array, connectivity_mask: Array, presynaptic_signs: Array
+) -> Array:
     """Project a recurrent matrix onto its sparse Dale-constrained set."""
 
     matrix = np.asarray(weights, dtype=float)
@@ -83,6 +85,25 @@ class EIRateTrajectory:
 
 
 @dataclass(frozen=True)
+class EIRateBatchTrajectory:
+    """Trial-major trajectories and exact substep event aggregates.
+
+    The state histories are sampled after every coarse task step.  Energy
+    aggregates, in contrast, are accumulated at every Euler substep so a
+    caller cannot make a condition appear cheaper merely by requesting fewer
+    saved samples.  They are transparent unitless compute proxies, not ATP
+    estimates.
+    """
+
+    x: Array
+    rates: Array
+    substep_firing_sum: float
+    substep_recurrent_event_sum: float
+    substep_input_event_sum: float
+    integration_substeps: int
+
+
+@dataclass(frozen=True)
 class AppliedWeightUpdate:
     """Auditable local change, fan-in correction, and their total effect."""
 
@@ -121,9 +142,17 @@ class EIRateNetwork:
         normalize_fan_in_after_update: bool = True,
         seed: int = 0,
     ) -> None:
-        if not isinstance(n_units, (int, np.integer)) or isinstance(n_units, bool) or n_units < 2:
+        if (
+            not isinstance(n_units, (int, np.integer))
+            or isinstance(n_units, bool)
+            or n_units < 2
+        ):
             raise ValueError("n_units must be an integer >= 2")
-        if not isinstance(n_inputs, (int, np.integer)) or isinstance(n_inputs, bool) or n_inputs < 0:
+        if (
+            not isinstance(n_inputs, (int, np.integer))
+            or isinstance(n_inputs, bool)
+            or n_inputs < 0
+        ):
             raise ValueError("n_inputs must be a non-negative integer")
         if not 0.0 < excitatory_fraction < 1.0:
             raise ValueError("excitatory_fraction must be in (0, 1)")
@@ -134,7 +163,9 @@ class EIRateNetwork:
         if not np.isfinite(tau_i) or tau_i <= 0.0:
             raise ValueError("tau_i must be positive and finite")
         if not np.isfinite(dt) or dt <= 0.0 or dt > min(tau_e, tau_i):
-            raise ValueError("dt must be positive and no larger than either time constant")
+            raise ValueError(
+                "dt must be positive and no larger than either time constant"
+            )
         if not np.isfinite(bulk_gain) or bulk_gain < 0.0:
             raise ValueError("bulk_gain must be non-negative and finite")
         if not np.isfinite(inhibitory_gain) or inhibitory_gain <= 0.0:
@@ -147,7 +178,11 @@ class EIRateNetwork:
             raise TypeError("allow_self_connections must be boolean")
         if not isinstance(normalize_fan_in_after_update, (bool, np.bool_)):
             raise TypeError("normalize_fan_in_after_update must be boolean")
-        if not isinstance(seed, (int, np.integer)) or isinstance(seed, bool) or seed < 0:
+        if (
+            not isinstance(seed, (int, np.integer))
+            or isinstance(seed, bool)
+            or seed < 0
+        ):
             raise ValueError("seed must be a non-negative integer")
 
         self.n_units = int(n_units)
@@ -164,7 +199,9 @@ class EIRateNetwork:
 
         # Rounding gives the nearest realizable fraction while guaranteeing at
         # least one unit of each type for every valid population size.
-        self.n_excitatory = int(np.clip(round(self.n_units * excitatory_fraction), 1, self.n_units - 1))
+        self.n_excitatory = int(
+            np.clip(round(self.n_units * excitatory_fraction), 1, self.n_units - 1)
+        )
         self.n_inhibitory = self.n_units - self.n_excitatory
         self.excitatory_mask = np.arange(self.n_units) < self.n_excitatory
         self.inhibitory_mask = ~self.excitatory_mask
@@ -172,7 +209,9 @@ class EIRateNetwork:
         self.time_constants = np.where(self.excitatory_mask, self.tau_e, self.tau_i)
 
         rng = np.random.default_rng(self.seed)
-        self.connectivity_mask = rng.random((self.n_units, self.n_units)) < connection_probability
+        self.connectivity_mask = (
+            rng.random((self.n_units, self.n_units)) < connection_probability
+        )
         if not allow_self_connections:
             np.fill_diagonal(self.connectivity_mask, False)
 
@@ -182,8 +221,14 @@ class EIRateNetwork:
             size=(self.n_units, self.n_units),
         )
         column_gain = np.where(self.excitatory_mask, 1.0, self.inhibitory_gain)
-        signed = magnitudes * column_gain[np.newaxis, :] * self.presynaptic_signs[np.newaxis, :]
-        self._W_bulk = dale_project(signed, self.connectivity_mask, self.presynaptic_signs)
+        signed = (
+            magnitudes
+            * column_gain[np.newaxis, :]
+            * self.presynaptic_signs[np.newaxis, :]
+        )
+        self._W_bulk = dale_project(
+            signed, self.connectivity_mask, self.presynaptic_signs
+        )
         self._W_task = np.zeros_like(self._W_bulk)
         self._W_homeo = np.zeros_like(self._W_bulk)
         # Fan-in normalization is a distinct homeostatic operation.  Keeping
@@ -278,12 +323,16 @@ class EIRateNetwork:
             activated = np.maximum(activated, 0.0)
         return activated
 
-    def initial_state(self, x: Array | None = None, *, gain: Array | float = 1.0) -> EIRateState:
+    def initial_state(
+        self, x: Array | None = None, *, gain: Array | float = 1.0
+    ) -> EIRateState:
         """Create a validated initial state without hidden random sampling."""
 
-        state_x = np.zeros(self.n_units, dtype=float) if x is None else _finite_vector(
-            x, name="x", length=self.n_units
-        ).copy()
+        state_x = (
+            np.zeros(self.n_units, dtype=float)
+            if x is None
+            else _finite_vector(x, name="x", length=self.n_units).copy()
+        )
         gain_vector = self._gain_vector(gain)
         return EIRateState(x=state_x, rates=self._activate(state_x, gain_vector))
 
@@ -365,11 +414,17 @@ class EIRateNetwork:
         if not np.all(np.isfinite(gain_array)) or np.any(gain_array <= 0.0):
             raise ValueError("all gains must be positive and finite")
 
-        state = self.initial_state() if initial_state is None else EIRateState(
-            x=_finite_vector(initial_state.x, name="initial_state.x", length=self.n_units).copy(),
-            rates=_finite_vector(
-                initial_state.rates, name="initial_state.rates", length=self.n_units
-            ).copy(),
+        state = (
+            self.initial_state()
+            if initial_state is None
+            else EIRateState(
+                x=_finite_vector(
+                    initial_state.x, name="initial_state.x", length=self.n_units
+                ).copy(),
+                rates=_finite_vector(
+                    initial_state.rates, name="initial_state.rates", length=self.n_units
+                ).copy(),
+            )
         )
         x_history = np.empty((n_steps + 1, self.n_units), dtype=float)
         rate_history = np.empty_like(x_history)
@@ -380,6 +435,107 @@ class EIRateNetwork:
             x_history[t + 1] = state.x
             rate_history[t + 1] = state.rates
         return EIRateTrajectory(x=x_history, rates=rate_history)
+
+    def run_trial_batch(
+        self,
+        inputs: Array,
+        *,
+        gains: Array | float = 1.0,
+        substeps: int = 1,
+    ) -> EIRateBatchTrajectory:
+        """Run independent trials with a shared deterministic checkpoint.
+
+        ``inputs`` has shape ``(trial, time, n_inputs)`` and every trial starts
+        from the same zero state.  ``gains`` may be scalar, one population
+        vector, or a full ``(trial, time, n_units)`` tensor.  Coarse inputs and
+        gains are held fixed across ``substeps`` Euler updates.  This method is
+        deliberately stateless: it neither samples noise nor carries receiver
+        state between trials.
+        """
+
+        input_array = np.asarray(inputs, dtype=float)
+        if (
+            input_array.ndim != 3
+            or input_array.shape[2] != self.n_inputs
+            or 0 in input_array.shape[:2]
+        ):
+            raise ValueError(
+                f"inputs must have non-empty shape (trial, time, {self.n_inputs})"
+            )
+        if not np.all(np.isfinite(input_array)):
+            raise ValueError("inputs must contain only finite values")
+        if (
+            isinstance(substeps, (bool, np.bool_))
+            or not isinstance(substeps, (int, np.integer))
+            or int(substeps) < 1
+        ):
+            raise ValueError("substeps must be a positive integer")
+        integration_substeps = int(substeps)
+        n_trials, n_steps, _ = input_array.shape
+
+        if np.isscalar(gains):
+            gain_array = np.full(
+                (n_trials, n_steps, self.n_units), float(gains), dtype=float
+            )
+        else:
+            raw_gains = np.asarray(gains, dtype=float)
+            if raw_gains.shape == (self.n_units,):
+                gain_array = np.broadcast_to(
+                    raw_gains, (n_trials, n_steps, self.n_units)
+                )
+            elif raw_gains.shape == (n_trials, n_steps, self.n_units):
+                gain_array = raw_gains
+            else:
+                raise ValueError(
+                    "gains must be scalar, (n_units,), or (trial, time, n_units)"
+                )
+        if not np.all(np.isfinite(gain_array)) or np.any(gain_array <= 0.0):
+            raise ValueError("all gains must be positive and finite")
+
+        x = np.zeros((n_trials, self.n_units), dtype=float)
+        rates = np.zeros_like(x)
+        x_history = np.empty((n_trials, n_steps + 1, self.n_units), dtype=float)
+        rate_history = np.empty_like(x_history)
+        x_history[:, 0] = x
+        rate_history[:, 0] = rates
+        recurrent_cost_by_pre = np.sum(np.abs(self._effective_recurrent), axis=0)
+        input_cost_by_channel = np.sum(np.abs(self.input_weights), axis=0)
+        firing_sum = 0.0
+        recurrent_event_sum = 0.0
+        input_event_sum = 0.0
+
+        for t in range(n_steps):
+            input_t = input_array[:, t]
+            gain_t = gain_array[:, t]
+            # Input transmission occurs once per Euler update under the stated
+            # zero-order-hold convention, even when the input itself is zero.
+            per_substep_input_events = float(
+                np.sum(np.abs(input_t) * input_cost_by_channel[np.newaxis, :])
+            )
+            for _ in range(integration_substeps):
+                recurrent_event_sum += float(
+                    np.sum(np.abs(rates) * recurrent_cost_by_pre[np.newaxis, :])
+                )
+                input_event_sum += per_substep_input_events
+                recurrent_drive = rates @ self._effective_recurrent.T
+                input_drive = input_t @ self.input_weights.T
+                dx = (-x + recurrent_drive + input_drive) / self.time_constants[
+                    np.newaxis, :
+                ]
+                x = x + self.dt * dx
+                rates = self._activate(x, gain_t)
+                firing_sum += float(np.sum(np.abs(rates)))
+            x_history[:, t + 1] = x
+            rate_history[:, t + 1] = rates
+
+        return EIRateBatchTrajectory(
+            x=x_history,
+            rates=rate_history,
+            substep_firing_sum=firing_sum,
+            substep_recurrent_event_sum=recurrent_event_sum,
+            substep_input_event_sum=input_event_sum,
+            integration_substeps=integration_substeps,
+        )
 
     def _apply_component_update(
         self, component: Array, update: Array, *, name: str
@@ -476,9 +632,7 @@ class EIRateNetwork:
         self.last_homeostatic_application = result
         return result
 
-    def _apply_projected_homeostatic_update(
-        self, update: Array
-    ) -> AppliedWeightUpdate:
+    def _apply_projected_homeostatic_update(self, update: Array) -> AppliedWeightUpdate:
         """Trusted local-training path for a preprojected homeostatic update."""
 
         result = self._apply_projected_component_update(self._W_homeo, update)
