@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from scripts.build_report import collect_runs, write_report
 from src.analysis.claims import evaluate_core_claims
@@ -24,12 +25,27 @@ def _phase1_formal(n_seeds: int = 20) -> pd.DataFrame:
         }
         rows.extend(
             [
-                {**common, "feedback_mode": "aligned", "feedback_dim": 4,
-                 "effective_rank": 4.0 + jitter, "latent_r2": 0.91 + jitter / 10},
-                {**common, "feedback_mode": "aligned", "feedback_dim": 128,
-                 "effective_rank": 14.0, "latent_r2": 0.915 + jitter / 10},
-                {**common, "feedback_mode": "orthogonal", "feedback_dim": 4,
-                 "effective_rank": 4.0, "latent_r2": 0.65 + jitter / 10},
+                {
+                    **common,
+                    "feedback_mode": "aligned",
+                    "feedback_dim": 4,
+                    "effective_rank": 4.0 + jitter,
+                    "latent_r2": 0.91 + jitter / 10,
+                },
+                {
+                    **common,
+                    "feedback_mode": "aligned",
+                    "feedback_dim": 128,
+                    "effective_rank": 14.0,
+                    "latent_r2": 0.915 + jitter / 10,
+                },
+                {
+                    **common,
+                    "feedback_mode": "orthogonal",
+                    "feedback_dim": 4,
+                    "effective_rank": 4.0,
+                    "latent_r2": 0.65 + jitter / 10,
+                },
             ]
         )
     return pd.DataFrame(rows)
@@ -56,7 +72,9 @@ def _phase4_formal(n_seeds: int = 20) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _phase2_formal(n_seeds: int = 20, architecture: str = "ei_n512_fi20_gain1") -> pd.DataFrame:
+def _phase2_formal(
+    n_seeds: int = 20, architecture: str = "ei_n512_fi20_gain1"
+) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for seed in range(n_seeds):
         for experiment in (
@@ -109,19 +127,156 @@ def _phase2_formal(n_seeds: int = 20, architecture: str = "ei_n512_fi20_gain1") 
     return pd.DataFrame(rows)
 
 
+def _p0_formal(n_seeds: int = 30) -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    for seed in range(n_seeds):
+        common = {
+            "profile": "formal",
+            "experiment": "exp07_mechanism_identifiability",
+            "status": "complete",
+            "seed": seed,
+            "architecture": "ei_n128_fi20_p0",
+            "model_kind": "ei",
+        }
+        for norm in ("l1", "l2"):
+            rows.extend(
+                [
+                    {
+                        **common,
+                        "condition": f"task-only__aligned__{norm}",
+                        "mechanism": "task-only",
+                        "feedback_mode": "aligned",
+                        "task_plasticity_enabled": True,
+                        "homeostasis_enabled": False,
+                        "normalization_enabled": False,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 0.80,
+                        "accuracy": 0.90,
+                    },
+                    {
+                        **common,
+                        "condition": f"task-only__shuffled__{norm}",
+                        "mechanism": "task-only",
+                        "feedback_mode": "shuffled",
+                        "task_plasticity_enabled": True,
+                        "homeostasis_enabled": False,
+                        "normalization_enabled": False,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 0.95,
+                        "accuracy": 0.85,
+                    },
+                    {
+                        **common,
+                        "condition": f"frozen-recurrent__aligned__{norm}",
+                        "mechanism": "frozen-recurrent",
+                        "feedback_mode": "aligned",
+                        "task_plasticity_enabled": False,
+                        "homeostasis_enabled": False,
+                        "normalization_enabled": False,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 1.00,
+                        "accuracy": 0.80,
+                    },
+                    {
+                        **common,
+                        "condition": f"homeostasis-only__aligned__{norm}",
+                        "mechanism": "homeostasis-only",
+                        "feedback_mode": "aligned",
+                        "task_plasticity_enabled": False,
+                        "homeostasis_enabled": True,
+                        "normalization_enabled": False,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 1.10,
+                        "accuracy": 0.80,
+                    },
+                    {
+                        **common,
+                        "condition": f"task-homeostasis__aligned__{norm}",
+                        "mechanism": "task+homeostasis",
+                        "feedback_mode": "aligned",
+                        "task_plasticity_enabled": True,
+                        "homeostasis_enabled": True,
+                        "normalization_enabled": False,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 0.85,
+                        "accuracy": 0.90,
+                    },
+                    {
+                        **common,
+                        "condition": (
+                            f"task-homeostasis-normalization__aligned__{norm}"
+                        ),
+                        "mechanism": "task+homeostasis+normalization",
+                        "feedback_mode": "aligned",
+                        "task_plasticity_enabled": True,
+                        "homeostasis_enabled": True,
+                        "normalization_enabled": True,
+                        "budget_norm": norm,
+                        "budget_match_valid": True,
+                        "heldout_masked_mse": 0.85,
+                        "accuracy": 0.90,
+                    },
+                ]
+            )
+        rows.extend(
+            [
+                {**common, "condition": "tuned-bptt", "accuracy": 0.95},
+                {**common, "condition": "tuned-gru", "accuracy": 0.93},
+            ]
+        )
+    return pd.DataFrame(rows)
+
+
+def _p1_formal(n_seeds: int = 30) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "profile": "formal",
+                "experiment": "exp08_rank_stage_validation",
+                "status": "complete",
+                "seed": seed,
+                "condition": "direct__feedback-4__angle-0",
+                "parameterization": "direct",
+                "requested_feedback_dim": 4,
+                "feedback_angle_degrees": 0.0,
+                "geometry_valid": True,
+                "masked_identity_max_abs_residual": 0.0,
+                "lowdim_credit_tangent_dimension": 4,
+                "masked_numerical_rank": 100,
+            }
+            for seed in range(n_seeds)
+        ]
+    )
+
+
 def test_missing_formal_evidence_is_explicitly_inconclusive() -> None:
     raw = pd.DataFrame(
-        [{"profile": "smoke", "experiment": "exp01_feedback_dimension_sweep", "status": "complete"}]
+        [
+            {
+                "profile": "smoke",
+                "experiment": "exp01_feedback_dimension_sweep",
+                "status": "complete",
+            }
+        ]
     )
     claims = evaluate_core_claims(raw)
-    assert len(claims) == 12
+    assert len(claims) == 23
     assert {claim.conclusion for claim in claims} == {"inconclusive"}
-    assert {"A1_rank_matches_feedback", "E2_latent_precedes_behavior_bias"} <= {
-        claim.claim_id for claim in claims
-    }
+    assert {
+        "A1_rank_matches_feedback",
+        "E2_latent_precedes_behavior_bias",
+        "P0_overall",
+    } <= {claim.claim_id for claim in claims}
 
 
-def test_report_exposes_attempt_categories_and_claim_evidence_notes(tmp_path: Path) -> None:
+def test_report_exposes_attempt_categories_and_claim_evidence_notes(
+    tmp_path: Path,
+) -> None:
     runs = pd.DataFrame(
         [
             {"experiment": "exp", "profile": "formal", "status": status, "n_planned": 1}
@@ -132,7 +287,7 @@ def test_report_exposes_attempt_categories_and_claim_evidence_notes(tmp_path: Pa
         [
             {
                 "claim_id": "B1",
-                "criterion": "relative OR absolute threshold",
+                "criterion": "absolute threshold reported separately",
                 "n_complete": 19,
                 "n_planned": 20,
                 "n_failed": 1,
@@ -168,9 +323,8 @@ def test_twenty_seed_phase1_support_and_missing_seed_is_inconclusive() -> None:
     assert "19/20" in incomplete["A1_rank_matches_feedback"].note
 
     missing_full = _phase1_formal().loc[
-        lambda frame: ~(
-            frame["feedback_mode"].eq("aligned")
-            & frame["feedback_dim"].eq(128)
+        lambda frame: (
+            ~(frame["feedback_mode"].eq("aligned") & frame["feedback_dim"].eq(128))
         )
     ]
     missing_claims = {
@@ -206,21 +360,27 @@ def test_unrelated_phase1_failures_do_not_contaminate_required_panels() -> None:
     assert claims["A1_rank_matches_feedback"].n_failed == 0
 
     required_failure = raw.loc[
-        ~((raw["seed"] == 0) & (raw["feedback_mode"] == "aligned") & (raw["feedback_dim"] == 4))
+        ~(
+            (raw["seed"] == 0)
+            & (raw["feedback_mode"] == "aligned")
+            & (raw["feedback_dim"] == 4)
+        )
     ].copy()
     required_failure = pd.concat(
         [
             required_failure,
             pd.DataFrame(
-                [{
-                    "profile": "formal",
-                    "experiment": "exp01_feedback_dimension_sweep",
-                    "status": "failed",
-                    "grid": "core",
-                    "seed": 0,
-                    "feedback_mode": "aligned",
-                    "feedback_dim": 4,
-                }]
+                [
+                    {
+                        "profile": "formal",
+                        "experiment": "exp01_feedback_dimension_sweep",
+                        "status": "failed",
+                        "grid": "core",
+                        "seed": 0,
+                        "feedback_mode": "aligned",
+                        "feedback_dim": 4,
+                    }
+                ]
             ),
         ],
         ignore_index=True,
@@ -232,32 +392,306 @@ def test_unrelated_phase1_failures_do_not_contaminate_required_panels() -> None:
 
 def test_holm_is_applied_across_full_registered_family() -> None:
     claims = evaluate_core_claims(_phase1_formal())
+    statistical_claims = [item for item in claims if item.claim_id != "P0_overall"]
     adjusted_pairs = []
-    for claim in claims:
+    for claim in statistical_claims:
         if claim.p_value is None:
             continue
         match = re.search(r"raw Wilcoxon p=([0-9.eE+-]+)", claim.note)
         assert match is not None
         raw = float(match.group(1))
         assert claim.p_value >= raw - 1e-15
-        assert "all 12 registered claims" in claim.note
+        assert f"all {len(statistical_claims)} registered claims" in claim.note
         adjusted_pairs.append((raw, claim.p_value))
     assert adjusted_pairs
     assert any(adjusted > raw for raw, adjusted in adjusted_pairs if raw > 0)
+    overall = next(item for item in claims if item.claim_id == "P0_overall")
+    assert overall.p_value is None
+    assert overall.multiplicity_method == "derived_after_holm(no_additional_test)"
 
 
 def test_twenty_seed_primary_ei_phase2_claims_are_evaluated() -> None:
-    claims = {
-        claim.claim_id: claim for claim in evaluate_core_claims(_phase2_formal())
-    }
+    claims = {claim.claim_id: claim for claim in evaluate_core_claims(_phase2_formal())}
     for claim_id in (
-        "B1_local_reaches_task_threshold",
+        "B1a_local_absolute_accuracy",
+        "B1b_local_relative_noninferiority",
         "B2_gate_reduces_switch_cost",
         "B3_homeostasis_stabilizes",
         "B4_local_rank_below_full_feedback",
     ):
         assert claims[claim_id].conclusion == "support"
         assert claims[claim_id].n_complete == 20
+
+
+def test_thirty_seed_p0_claims_require_both_budget_panels() -> None:
+    claims = {item.claim_id: item for item in evaluate_core_claims(_p0_formal())}
+    assert not any(claim_id.endswith("_panel") for claim_id in claims)
+    p0_ids = {
+        "P0a_aligned_task_improves_prediction_vs_frozen",
+        "P0b_aligned_task_beats_shuffled",
+        "P0c_aligned_adds_value_over_matched_homeostasis",
+        "P0d_local_absolute_accuracy",
+        "P0e_local_noninferior_tuned_bptt",
+        "P0f_local_noninferior_tuned_gru",
+    }
+    assert all(claims[item].conclusion == "support" for item in p0_ids)
+    assert all(claims[item].n_complete == 30 for item in p0_ids)
+    joint = claims["P0b_aligned_task_beats_shuffled"]
+    panel_p = [float(value) for value in re.findall(r"raw_p=([0-9.eE+-]+)", joint.note)]
+    registered = re.search(r"raw Wilcoxon p=([0-9.eE+-]+)", joint.note)
+    assert len(panel_p) == 2 and registered is not None
+    assert float(registered.group(1)) == pytest.approx(max(panel_p))
+    assert claims["P0_overall"].conclusion == "support"
+    assert (
+        "P0a_aligned_task_improves_prediction_vs_frozen=support"
+        in claims["P0_overall"].note
+    )
+
+    incomplete = _p0_formal()
+    incomplete.loc[
+        (incomplete["seed"] == 29)
+        & incomplete["condition"].isin(
+            [
+                "task-homeostasis__aligned__l2",
+                "task-homeostasis-normalization__aligned__l2",
+            ]
+        ),
+        "budget_match_valid",
+    ] = False
+    claims = {item.claim_id: item for item in evaluate_core_claims(incomplete)}
+    for claim_id in (
+        "P0c_aligned_adds_value_over_matched_homeostasis",
+        "P0d_local_absolute_accuracy",
+        "P0e_local_noninferior_tuned_bptt",
+        "P0f_local_noninferior_tuned_gru",
+    ):
+        assert claims[claim_id].conclusion == "inconclusive"
+        assert claims[claim_id].n_complete == 29
+        assert claims[claim_id].n_failed == 1
+    assert claims["P0_overall"].conclusion == "inconclusive"
+
+
+def test_p0_opposite_l1_l2_directions_cannot_average_to_support() -> None:
+    opposed = _p0_formal()
+    opposed.loc[
+        opposed["condition"].eq("task-only__aligned__l1"),
+        "heldout_masked_mse",
+    ] = 0.0
+    opposed.loc[
+        opposed["condition"].eq("task-only__aligned__l2"),
+        "heldout_masked_mse",
+    ] = 1.6
+
+    claims = {item.claim_id: item for item in evaluate_core_claims(opposed)}
+    for claim_id in (
+        "P0a_aligned_task_improves_prediction_vs_frozen",
+        "P0b_aligned_task_beats_shuffled",
+    ):
+        assert claims[claim_id].conclusion == "inconclusive"
+        assert claims[claim_id].p_value is None
+        assert "panel conclusions are not unanimous" in claims[claim_id].note
+        assert "l1: conclusion=support" in claims[claim_id].note
+        assert "l2: conclusion=oppose" in claims[claim_id].note
+    assert claims["P0_overall"].conclusion == "inconclusive"
+
+
+def test_p0_extra_seed_cannot_replace_a_missing_preregistered_seed() -> None:
+    raw = _p0_formal()
+    missing = raw["seed"].eq(29) & raw["condition"].eq("task-only__aligned__l2")
+    raw = raw.loc[~missing].copy()
+    extra = _p0_formal(1).copy()
+    extra["seed"] = 30
+    claims = {
+        item.claim_id: item
+        for item in evaluate_core_claims(pd.concat([raw, extra], ignore_index=True))
+    }
+
+    claim = claims["P0b_aligned_task_beats_shuffled"]
+    assert claim.conclusion == "inconclusive"
+    assert claim.n_complete == 29
+    assert claim.n_failed == 0
+    assert "29/30 planned seeds" in claim.note
+    assert claims["P0_overall"].conclusion == "inconclusive"
+
+
+def test_p0_joint_complete_count_uses_seed_intersection_across_panels() -> None:
+    raw = _p0_formal()
+    missing = (raw["seed"].eq(28) & raw["condition"].eq("task-only__aligned__l1")) | (
+        raw["seed"].eq(29) & raw["condition"].eq("task-only__aligned__l2")
+    )
+    claims = {
+        item.claim_id: item for item in evaluate_core_claims(raw.loc[~missing].copy())
+    }
+
+    claim = claims["P0b_aligned_task_beats_shuffled"]
+    assert claim.conclusion == "inconclusive"
+    assert claim.n_complete == 28
+    assert claim.n_failed == 0
+    assert "28/30 planned seeds" in claim.note
+
+
+def test_p0_setup_failure_is_counted_as_seed_wide() -> None:
+    raw = _p0_formal()
+    raw = raw.loc[~raw["seed"].eq(29)].copy()
+    setup_failure = pd.DataFrame(
+        [
+            {
+                "profile": "formal",
+                "experiment": "exp07_mechanism_identifiability",
+                "status": "failed",
+                "seed": 29,
+                "condition": "setup",
+                "error": "failed before the scientific grid was materialized",
+            }
+        ]
+    )
+    claims = {
+        item.claim_id: item
+        for item in evaluate_core_claims(
+            pd.concat([raw, setup_failure], ignore_index=True)
+        )
+    }
+
+    for claim_id in (
+        "P0a_aligned_task_improves_prediction_vs_frozen",
+        "P0b_aligned_task_beats_shuffled",
+        "P0c_aligned_adds_value_over_matched_homeostasis",
+        "P0d_local_absolute_accuracy",
+        "P0e_local_noninferior_tuned_bptt",
+        "P0f_local_noninferior_tuned_gru",
+    ):
+        assert claims[claim_id].conclusion == "inconclusive"
+        assert claims[claim_id].n_complete == 29
+        assert claims[claim_id].n_failed == 1
+    assert claims["P0_overall"].n_complete == 29
+    assert claims["P0_overall"].n_failed == 1
+
+
+def test_p0_overall_counts_joint_seed_coverage_across_constituents() -> None:
+    raw = _p0_formal()
+    missing = (
+        raw["seed"].eq(28)
+        & raw["condition"].isin(["task-only__aligned__l1", "task-only__aligned__l2"])
+    ) | (
+        raw["seed"].eq(29)
+        & raw["condition"].isin(
+            [
+                "task-homeostasis-normalization__aligned__l1",
+                "task-homeostasis-normalization__aligned__l2",
+            ]
+        )
+    )
+    claims = {
+        item.claim_id: item for item in evaluate_core_claims(raw.loc[~missing].copy())
+    }
+
+    assert claims["P0a_aligned_task_improves_prediction_vs_frozen"].n_complete == 29
+    assert claims["P0d_local_absolute_accuracy"].n_complete == 29
+    assert claims["P0_overall"].n_complete == 28
+    assert claims["P0_overall"].n_failed == 0
+
+
+@pytest.mark.parametrize(
+    ("condition", "claim_id"),
+    [
+        ("task-only__aligned__l2", "P0b_aligned_task_beats_shuffled"),
+        (
+            "homeostasis-only__aligned__l2",
+            "P0c_aligned_adds_value_over_matched_homeostasis",
+        ),
+        (
+            "task-homeostasis__aligned__l2",
+            "P0c_aligned_adds_value_over_matched_homeostasis",
+        ),
+        (
+            "task-homeostasis-normalization__aligned__l2",
+            "P0d_local_absolute_accuracy",
+        ),
+    ],
+)
+def test_p0_sparse_failure_dimensions_are_recovered_from_condition_name(
+    condition: str,
+    claim_id: str,
+) -> None:
+    raw = _p0_formal()
+    missing = raw["seed"].eq(29) & raw["condition"].eq(condition)
+    raw = raw.loc[~missing].copy()
+    sparse_failure = pd.DataFrame(
+        [
+            {
+                "profile": "formal",
+                "experiment": "exp07_mechanism_identifiability",
+                "status": "failed",
+                "seed": 29,
+                "condition": condition,
+                "error": "condition failed before metrics existed",
+            }
+        ]
+    )
+    claims = {
+        item.claim_id: item
+        for item in evaluate_core_claims(
+            pd.concat([raw, sparse_failure], ignore_index=True)
+        )
+    }
+
+    claim = claims[claim_id]
+    assert claim.conclusion == "inconclusive"
+    assert claim.n_complete == 29
+    assert claim.n_failed == 1
+    assert "failed/invalid planned seeds=29" in claim.note
+
+
+def test_p0_overall_opposes_when_a_holm_adjusted_constituent_opposes() -> None:
+    opposed = _p0_formal()
+    opposed.loc[
+        opposed["condition"].isin(["task-only__aligned__l1", "task-only__aligned__l2"]),
+        "heldout_masked_mse",
+    ] = 1.3
+    claims = {item.claim_id: item for item in evaluate_core_claims(opposed)}
+
+    assert (
+        claims["P0a_aligned_task_improves_prediction_vs_frozen"].conclusion == "oppose"
+    )
+    assert claims["P0b_aligned_task_beats_shuffled"].conclusion == "oppose"
+    assert claims["P0_overall"].conclusion == "oppose"
+    assert claims["P0_overall"].p_value is None
+
+
+def test_p0_overall_propagates_holm_downgrade_of_raw_support() -> None:
+    weak = _p0_formal()
+    shuffled = weak["condition"].isin(
+        ["task-only__shuffled__l1", "task-only__shuffled__l2"]
+    )
+    weak.loc[shuffled, "heldout_masked_mse"] = 0.80
+    weak.loc[shuffled & weak["seed"].lt(7), "heldout_masked_mse"] = 0.95
+
+    claims = {item.claim_id: item for item in evaluate_core_claims(weak)}
+    constituent = claims["P0b_aligned_task_beats_shuffled"]
+    raw = re.search(r"raw Wilcoxon p=([0-9.eE+-]+)", constituent.note)
+
+    assert raw is not None and float(raw.group(1)) <= 0.05
+    assert constituent.p_value is not None and constituent.p_value > 0.05
+    assert constituent.conclusion == "inconclusive"
+    assert claims["P0_overall"].conclusion == "inconclusive"
+
+
+def test_thirty_seed_p1_theorem_claims_are_separate_from_behavior() -> None:
+    claims = {item.claim_id: item for item in evaluate_core_claims(_p1_formal())}
+    p1_ids = {
+        "P1a_masked_outer_product_identity",
+        "P1b_credit_tangent_respects_feedback_bound",
+        "P1c_highrank_physical_update_coexists_with_lowdim_credit",
+    }
+    assert all(claims[item].conclusion == "support" for item in p1_ids)
+    assert all(claims[item].n_complete == 30 for item in p1_ids)
+    assert (
+        "does not imply held-out task support"
+        in claims["P1c_highrank_physical_update_coexists_with_lowdim_credit"].criterion
+    )
+
+    incomplete = {item.claim_id: item for item in evaluate_core_claims(_p1_formal(29))}
+    assert all(incomplete[item].conclusion == "inconclusive" for item in p1_ids)
 
 
 def test_phase2_claims_do_not_fallback_to_nonprimary_architecture() -> None:
@@ -268,7 +702,8 @@ def test_phase2_claims_do_not_fallback_to_nonprimary_architecture() -> None:
     assert all(
         claims[claim_id].conclusion == "inconclusive"
         for claim_id in (
-            "B1_local_reaches_task_threshold",
+            "B1a_local_absolute_accuracy",
+            "B1b_local_relative_noninferiority",
             "B2_gate_reduces_switch_cost",
             "B3_homeostasis_stabilizes",
             "B4_local_rank_below_full_feedback",
@@ -293,19 +728,22 @@ def test_only_failed_required_phase_cells_prevent_support() -> None:
         [
             raw,
             pd.DataFrame(
-                [{
-                    "profile": "formal",
-                    "experiment": "exp04_phase_gating",
-                    "status": "failed",
-                    "seed": 99,
-                    "phase_condition": "anti_phase",
-                }]
+                [
+                    {
+                        "profile": "formal",
+                        "experiment": "exp04_phase_gating",
+                        "status": "failed",
+                        "seed": 99,
+                        "phase_condition": "anti_phase",
+                    }
+                ]
             ),
         ],
         ignore_index=True,
     )
     claim = next(
-        item for item in evaluate_core_claims(unrelated)
+        item
+        for item in evaluate_core_claims(unrelated)
         if item.claim_id == "C1_phase_effect_survives_rate_match"
     )
     assert claim.conclusion == "support"
@@ -318,19 +756,22 @@ def test_only_failed_required_phase_cells_prevent_support() -> None:
         [
             relevant,
             pd.DataFrame(
-                [{
-                    "profile": "formal",
-                    "experiment": "exp04_phase_gating",
-                    "status": "failed",
-                    "seed": 0,
-                    "phase_condition": "no_oscillation",
-                }]
+                [
+                    {
+                        "profile": "formal",
+                        "experiment": "exp04_phase_gating",
+                        "status": "failed",
+                        "seed": 0,
+                        "phase_condition": "no_oscillation",
+                    }
+                ]
             ),
         ],
         ignore_index=True,
     )
     claim = next(
-        item for item in evaluate_core_claims(relevant)
+        item
+        for item in evaluate_core_claims(relevant)
         if item.claim_id == "C1_phase_effect_survives_rate_match"
     )
     assert claim.conclusion == "inconclusive"
@@ -342,15 +783,17 @@ def test_latest_immutable_run_attempt_supersedes_old_failure() -> None:
     current["run_id"] = current["seed"].map(lambda seed: f"new-{seed}")
     current["recorded_at"] = "2026-07-10T12:00:00Z"
     old = pd.DataFrame(
-        [{
-            "profile": "formal",
-            "experiment": "exp04_phase_gating",
-            "status": "failed",
-            "seed": 0,
-            "phase_condition": "in_phase",
-            "run_id": "old-0",
-            "recorded_at": "2026-07-10T11:00:00Z",
-        }]
+        [
+            {
+                "profile": "formal",
+                "experiment": "exp04_phase_gating",
+                "status": "failed",
+                "seed": 0,
+                "phase_condition": "in_phase",
+                "run_id": "old-0",
+                "recorded_at": "2026-07-10T11:00:00Z",
+            }
+        ]
     )
     claim = next(
         item
@@ -470,7 +913,8 @@ def test_empty_phase2_run_failure_is_counted_for_primary_claims() -> None:
         )
     }
     for claim_id in (
-        "B1_local_reaches_task_threshold",
+        "B1a_local_absolute_accuracy",
+        "B1b_local_relative_noninferiority",
         "B2_gate_reduces_switch_cost",
         "B3_homeostasis_stabilizes",
         "B4_local_rank_below_full_feedback",
@@ -507,7 +951,8 @@ def test_explicit_non_primary_phase2_failure_does_not_contaminate_claims() -> No
         )
     }
     for claim_id in (
-        "B1_local_reaches_task_threshold",
+        "B1a_local_absolute_accuracy",
+        "B1b_local_relative_noninferiority",
         "B2_gate_reduces_switch_cost",
         "B3_homeostasis_stabilizes",
         "B4_local_rank_below_full_feedback",
@@ -517,7 +962,7 @@ def test_explicit_non_primary_phase2_failure_does_not_contaminate_claims() -> No
         assert claims[claim_id].n_failed == 0
 
 
-def test_real_data_folds_aggregate_to_animal_before_inference() -> None:
+def test_real_data_folds_aggregate_to_animal_and_do_not_promote_two_animals() -> None:
     rows: list[dict[str, object]] = []
     for animal in ("a0", "a1"):
         for session_index in (0, 1):
@@ -537,8 +982,12 @@ def test_real_data_folds_aggregate_to_animal_before_inference() -> None:
                     ("full", 1.0, 50),
                 ):
                     rows.append(
-                        {**base, "model_family": model,
-                         "heldout_nll_per_scalar": nll, "parameter_count": parameters}
+                        {
+                            **base,
+                            "model_family": model,
+                            "heldout_nll_per_scalar": nll,
+                            "parameter_count": parameters,
+                        }
                     )
             for model, nll, parameters in (
                 ("common", 2.0, 10),
@@ -558,9 +1007,11 @@ def test_real_data_folds_aggregate_to_animal_before_inference() -> None:
                         "parameter_count": parameters,
                     }
                 )
-    claims = {claim.claim_id: claim for claim in evaluate_core_claims(pd.DataFrame(rows))}
-    assert claims["D1_shared_basis_near_full"].conclusion == "support"
-    assert claims["D2_unseen_sequence_generalization"].conclusion == "support"
+    claims = {
+        claim.claim_id: claim for claim in evaluate_core_claims(pd.DataFrame(rows))
+    }
+    assert claims["D1_shared_basis_near_full"].conclusion == "inconclusive"
+    assert claims["D2_unseen_sequence_generalization"].conclusion == "inconclusive"
     assert claims["D1_shared_basis_near_full"].stats_unit == "animal"
     assert claims["D1_shared_basis_near_full"].n_complete == 2
 
@@ -595,7 +1046,8 @@ def test_streamed_sequence_session_failure_invalidates_earlier_complete_folds() 
         }
     )
     claim = next(
-        item for item in evaluate_core_claims(pd.DataFrame(rows))
+        item
+        for item in evaluate_core_claims(pd.DataFrame(rows))
         if item.claim_id == "D1_shared_basis_near_full"
     )
     assert claim.conclusion == "inconclusive"
@@ -631,7 +1083,8 @@ def test_ibl_lead_requires_both_views_and_never_cancels_a_failed_view() -> None:
         }
     )
     claim = next(
-        item for item in evaluate_core_claims(pd.DataFrame(rows))
+        item
+        for item in evaluate_core_claims(pd.DataFrame(rows))
         if item.claim_id == "E2_latent_precedes_behavior_bias"
     )
     assert claim.conclusion == "inconclusive"
@@ -693,7 +1146,9 @@ def test_collect_runs_invalidates_partial_metrics_after_top_level_failure(
     remaining = _phase4_formal().loc[lambda frame: frame["seed"].ne(0)]
     claim = next(
         item
-        for item in evaluate_core_claims(pd.concat([remaining, partial], ignore_index=True))
+        for item in evaluate_core_claims(
+            pd.concat([remaining, partial], ignore_index=True)
+        )
         if item.claim_id == "C1_phase_effect_survives_rate_match"
     )
     assert claim.conclusion == "inconclusive"

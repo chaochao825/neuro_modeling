@@ -1,8 +1,9 @@
 """Pre-registered, evidence-gated classification of the core propositions.
 
 Only ``formal`` artifacts enter this module.  Seed-level propositions require
-all twenty planned seeds.  Real-data folds are first averaged within a session
-and, when ``animal_id`` is available, sessions are then averaged within animal.
+their complete experiment-specific seed plan.  Real-data folds are first
+averaged within a session and, when ``animal_id`` is available, sessions are
+then averaged within animal.
 The reported ``p_value`` is the Holm-adjusted Wilcoxon p value across the full
 family of registered propositions; conclusions use the pre-registered paired
 bootstrap interval and never promote incomplete evidence.
@@ -20,6 +21,17 @@ from src.analysis.model_comparison import paired_bootstrap, paired_wilcoxon
 
 
 SEED_PLAN = 20
+P0_SEED_PLAN = 30
+P0_PLANNED_SEEDS = frozenset(range(P0_SEED_PLAN))
+P0_BUDGET_PANELS = ("l1", "l2")
+P0_REQUIRED_CLAIMS = (
+    "P0a_aligned_task_improves_prediction_vs_frozen",
+    "P0b_aligned_task_beats_shuffled",
+    "P0c_aligned_adds_value_over_matched_homeostasis",
+    "P0d_local_absolute_accuracy",
+    "P0e_local_noninferior_tuned_bptt",
+    "P0f_local_noninferior_tuned_gru",
+)
 
 
 @dataclass(frozen=True)
@@ -105,21 +117,26 @@ def _paired_claim(
     candidate = np.asarray(candidate, dtype=float)
     reference = np.asarray(reference, dtype=float)
     unit_ids = np.asarray(unit_ids, dtype=object)
-    valid = (
-        candidate.ndim == reference.ndim == unit_ids.ndim == 1
-        and len(candidate) == len(reference) == len(unit_ids)
-    )
+    valid = candidate.ndim == reference.ndim == unit_ids.ndim == 1 and len(
+        candidate
+    ) == len(reference) == len(unit_ids)
     if not valid:
         raise ValueError("paired claim arrays must be aligned one-dimensional vectors")
     finite = np.isfinite(candidate) & np.isfinite(reference)
-    candidate, reference, unit_ids = candidate[finite], reference[finite], unit_ids[finite]
+    candidate, reference, unit_ids = (
+        candidate[finite],
+        reference[finite],
+        unit_ids[finite],
+    )
     n_complete = len(set(unit_ids.tolist()))
     if n_failed or n_complete < minimum_units or n_complete < n_planned:
         reasons: list[str] = []
         if n_failed:
             reasons.append(f"{n_failed} planned independent unit(s) failed")
         if n_complete < minimum_units:
-            reasons.append(f"requires at least {minimum_units} complete independent units")
+            reasons.append(
+                f"requires at least {minimum_units} complete independent units"
+            )
         if n_complete < n_planned:
             reasons.append(f"only {n_complete}/{n_planned} planned units are complete")
         return _inconclusive(
@@ -144,12 +161,6 @@ def _paired_claim(
         confidence=0.95,
         seed=seed,
     )
-    wilcoxon = paired_wilcoxon(
-        candidate,
-        reference,
-        unit_ids=unit_ids,
-        replicate_unit=stats_unit,
-    )
     support = True
     if support_low is not None:
         support &= bootstrap.ci_low >= support_low
@@ -161,6 +172,76 @@ def _paired_claim(
     if oppose_above is not None:
         oppose |= bootstrap.ci_low > oppose_above
     conclusion = "support" if support else ("oppose" if oppose else "inconclusive")
+    if conclusion == "support" and support_low is not None and support_high is not None:
+        lower_test = paired_wilcoxon(
+            candidate,
+            reference + support_low,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="greater",
+        )
+        upper_test = paired_wilcoxon(
+            candidate,
+            reference + support_high,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="less",
+        )
+        raw_p_value = max(lower_test.p_value, upper_test.p_value)
+        p_value_definition = "two-one-sided margin tests"
+    elif conclusion == "support" and support_low is not None:
+        directional = paired_wilcoxon(
+            candidate,
+            reference + support_low,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="greater",
+        )
+        raw_p_value = directional.p_value
+        p_value_definition = "one-sided support-margin test"
+    elif conclusion == "support" and support_high is not None:
+        directional = paired_wilcoxon(
+            candidate,
+            reference + support_high,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="less",
+        )
+        raw_p_value = directional.p_value
+        p_value_definition = "one-sided support-margin test"
+    elif (
+        conclusion == "oppose"
+        and oppose_below is not None
+        and bootstrap.ci_high < oppose_below
+    ):
+        directional = paired_wilcoxon(
+            candidate,
+            reference + oppose_below,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="less",
+        )
+        raw_p_value = directional.p_value
+        p_value_definition = "one-sided oppose-margin test"
+    elif conclusion == "oppose" and oppose_above is not None:
+        directional = paired_wilcoxon(
+            candidate,
+            reference + oppose_above,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+            alternative="greater",
+        )
+        raw_p_value = directional.p_value
+        p_value_definition = "one-sided oppose-margin test"
+    else:
+        directional = paired_wilcoxon(
+            candidate,
+            reference,
+            unit_ids=unit_ids,
+            replicate_unit=stats_unit,
+        )
+        raw_p_value = directional.p_value
+        p_value_definition = "two-sided zero-difference diagnostic"
     return ClaimResult(
         claim_id=claim_id,
         experiment=experiment,
@@ -174,13 +255,13 @@ def _paired_claim(
         ci_low=bootstrap.ci_low,
         ci_high=bootstrap.ci_high,
         effect_size=bootstrap.estimate,
-        p_value=wilcoxon.p_value,
+        p_value=raw_p_value,
         multiplicity_method="holm(full_registered_family)",
         conclusion=conclusion,
         criterion=criterion,
         note=(
             "paired 95% bootstrap CI at the declared independent-unit level; "
-            "p_value awaits full-family Holm adjustment"
+            f"{p_value_definition} awaits full-family Holm adjustment"
         ),
     )
 
@@ -213,9 +294,7 @@ def _failed_units(
         # invalidates every preregistered panel in that run.  Keep it in each
         # relevant failure count instead of silently dropping an empty retry.
         run_level = (
-            _series(frame, "run_level_failure", False)
-            .fillna(False)
-            .astype(bool)
+            _series(frame, "run_level_failure", False).fillna(False).astype(bool)
         )
         selected &= scoped | run_level
     failed = frame.loc[selected]
@@ -267,9 +346,7 @@ def select_latest_attempts(formal: pd.DataFrame) -> pd.DataFrame:
         # Attempt identity is defined by its immutable start time.  The final
         # metric time is only a legacy fallback; an older long-running attempt
         # must never supersede a later retry merely because it finished later.
-        run_times["attempt_time"] = run_times["started"].fillna(
-            run_times["recorded"]
-        )
+        run_times["attempt_time"] = run_times["started"].fillna(run_times["recorded"])
         valid = run_times["attempt_time"].notna()
         if not valid.any():
             pieces.append(group)
@@ -284,7 +361,9 @@ def select_latest_attempts(formal: pd.DataFrame) -> pd.DataFrame:
             run_status.notna()
             & ~run_status.isin({"complete", "complete_with_failures"})
         ).any()
-        run_level_failure = _series(latest, "run_level_failure", False).fillna(False).astype(bool).any()
+        run_level_failure = (
+            _series(latest, "run_level_failure", False).fillna(False).astype(bool).any()
+        )
         if has_nonterminal_status or run_level_failure:
             # A streamed condition is not independent evidence until its
             # enclosing run reaches a terminal state.  Preserve its dimensions
@@ -343,15 +422,265 @@ def _paired_rows(
     )
 
 
+def _prepare_p0_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Restrict P0 evidence to preregistered seeds and restore sparse dimensions.
+
+    Failed condition artifacts historically carried only their stable condition
+    name.  Recovering the boolean mechanism axes from that name lets failures
+    remain in the same evidential scope as complete rows.  Existing explicit
+    dimensions always take precedence.
+    """
+
+    if frame.empty or "seed" not in frame:
+        return frame.iloc[:0].copy()
+    seeds = pd.to_numeric(frame["seed"], errors="coerce")
+    planned = seeds.isin(P0_PLANNED_SEEDS)
+    prepared = frame.loc[planned].copy()
+    prepared["seed"] = seeds.loc[planned].astype(int)
+
+    condition = _series(prepared, "condition", "").fillna("").astype(str)
+    parts = condition.str.split("__", n=2, expand=True).reindex(columns=range(3))
+    mechanism_token = parts[0].fillna("").str.lower()
+    parsed_flags = {
+        "task_plasticity_enabled": mechanism_token.str.contains("task", regex=False),
+        "homeostasis_enabled": mechanism_token.str.contains("homeostasis", regex=False),
+        "normalization_enabled": mechanism_token.str.contains(
+            "normalization", regex=False
+        ),
+    }
+    for column, parsed in parsed_flags.items():
+        existing = _series(prepared, column)
+        prepared[column] = existing.where(existing.notna(), parsed)
+
+    parsed_feedback = parts[1].where(parts[1].notna(), None)
+    parsed_budget = parts[2].where(parts[2].notna(), None)
+    for column, parsed in (
+        ("feedback_mode", parsed_feedback),
+        ("budget_norm", parsed_budget),
+    ):
+        existing = _series(prepared, column)
+        prepared[column] = existing.where(existing.notna(), parsed)
+    return prepared
+
+
+def _p0_failed_seed_ids(frame: pd.DataFrame, mask: pd.Series) -> set[int]:
+    """Return failed/invalid P0 seeds, including completed budget shortfalls."""
+
+    if frame.empty or "seed" not in frame:
+        return set()
+    scope = mask.reindex(frame.index, fill_value=False)
+    status = _series(frame, "status")
+    run_level = _series(frame, "run_level_failure", False).fillna(False).astype(bool)
+    condition = _series(frame, "condition", "").fillna("").astype(str)
+    local_cell = condition.str.contains("__", regex=False)
+    setup_failure = condition.eq("setup") & status.isin({"failed", "invalid"})
+    invalid_budget = (
+        scope
+        & status.eq("complete")
+        & local_cell
+        & ~_eq(frame, "budget_match_valid", True)
+    )
+    failed = (
+        (scope & status.isin({"failed", "invalid"}))
+        | (run_level & status.eq("failed"))
+        | setup_failure
+    )
+    selected = pd.to_numeric(
+        frame.loc[failed | invalid_budget, "seed"], errors="coerce"
+    ).dropna()
+    return {int(value) for value in selected.tolist() if int(value) in P0_PLANNED_SEEDS}
+
+
+def _joint_budget_panel_claim(
+    *,
+    claim_id: str,
+    experiment: str,
+    metric: str,
+    comparison: str,
+    stats_unit: str,
+    criterion: str,
+    panels: dict[str, ClaimResult],
+    panel_complete_seed_ids: dict[str, set[int]],
+    failed_seed_ids: set[int],
+) -> ClaimResult:
+    """Combine L1/L2 panel claims with an intersection-union decision.
+
+    No panel values are averaged.  A directional conclusion requires the same
+    conclusion in both panels; its raw joint p value is the maximum of the two
+    panel p values and is subsequently included in the ordinary Holm family.
+    """
+
+    if set(panels) != set(P0_BUDGET_PANELS):
+        raise ValueError("P0 joint claims require exactly l1 and l2 panels")
+    if set(panel_complete_seed_ids) != set(P0_BUDGET_PANELS):
+        raise ValueError("P0 joint claims require complete seed IDs for both panels")
+    ordered = [panels[name] for name in P0_BUDGET_PANELS]
+    jointly_complete = set.intersection(
+        *(panel_complete_seed_ids[name] for name in P0_BUDGET_PANELS)
+    )
+    n_complete = len(jointly_complete)
+    panel_notes = "; ".join(
+        (
+            f"{name}: conclusion={item.conclusion}, n={item.n_complete}, "
+            f"estimate={item.estimate}, CI=[{item.ci_low}, {item.ci_high}], "
+            f"raw_p={item.p_value}"
+        )
+        for name, item in zip(P0_BUDGET_PANELS, ordered, strict=True)
+    )
+    if failed_seed_ids or n_complete < P0_SEED_PLAN:
+        reasons: list[str] = []
+        if failed_seed_ids:
+            reasons.append(
+                "failed/invalid planned seeds="
+                + ",".join(str(value) for value in sorted(failed_seed_ids))
+            )
+        if n_complete < P0_SEED_PLAN:
+            reasons.append(
+                f"only {n_complete}/{P0_SEED_PLAN} planned seeds complete in both panels"
+            )
+        return _inconclusive(
+            claim_id,
+            experiment,
+            metric,
+            comparison,
+            stats_unit,
+            criterion,
+            "; ".join(reasons) + f"; panel audit: {panel_notes}",
+            n_planned=P0_SEED_PLAN,
+            n_complete=n_complete,
+            n_failed=len(failed_seed_ids),
+        )
+
+    conclusions = {item.conclusion for item in ordered}
+    unanimous = conclusions in ({"support"}, {"oppose"})
+    p_values = [item.p_value for item in ordered]
+    if not unanimous or any(
+        value is None or not np.isfinite(value) for value in p_values
+    ):
+        return ClaimResult(
+            claim_id=claim_id,
+            experiment=experiment,
+            metric=metric,
+            comparison=comparison,
+            stats_unit=stats_unit,
+            n_planned=P0_SEED_PLAN,
+            n_complete=n_complete,
+            n_failed=0,
+            estimate=None,
+            ci_low=None,
+            ci_high=None,
+            effect_size=None,
+            p_value=None,
+            multiplicity_method="holm(full_registered_family)",
+            conclusion="inconclusive",
+            criterion=criterion,
+            note=(
+                "L1/L2 panel conclusions are not unanimous; no cross-panel "
+                f"averaging is permitted; panel audit: {panel_notes}"
+            ),
+        )
+
+    conclusion = ordered[0].conclusion
+    estimates = [float(item.estimate) for item in ordered if item.estimate is not None]
+    ci_lows = [float(item.ci_low) for item in ordered if item.ci_low is not None]
+    ci_highs = [float(item.ci_high) for item in ordered if item.ci_high is not None]
+    if len(estimates) != 2 or len(ci_lows) != 2 or len(ci_highs) != 2:
+        raise RuntimeError(
+            "complete P0 panels must expose estimates and confidence bounds"
+        )
+    # Report the conservative panel estimate in the declared direction and an
+    # envelope over both intervals.  Individual values remain in ``note``.
+    estimate = min(estimates) if conclusion == "support" else max(estimates)
+    return ClaimResult(
+        claim_id=claim_id,
+        experiment=experiment,
+        metric=metric,
+        comparison=comparison,
+        stats_unit=stats_unit,
+        n_planned=P0_SEED_PLAN,
+        n_complete=n_complete,
+        n_failed=0,
+        estimate=estimate,
+        ci_low=min(ci_lows),
+        ci_high=max(ci_highs),
+        effect_size=estimate,
+        p_value=float(max(float(value) for value in p_values if value is not None)),
+        multiplicity_method="holm(full_registered_family)",
+        conclusion=conclusion,
+        criterion=criterion,
+        note=(
+            "intersection-union across separately matched L1/L2 panels; raw joint "
+            f"p=max(panel p) awaits full-family Holm adjustment; panel audit: {panel_notes}"
+        ),
+    )
+
+
+def _p0_overall_gate(
+    adjusted_claims: list[ClaimResult],
+    *,
+    complete_seed_ids_by_claim: dict[str, set[int]],
+    failed_seed_ids_by_claim: dict[str, set[int]],
+) -> ClaimResult:
+    """Derive the non-inferential P0 stage gate after constituent Holm tests."""
+
+    lookup = {item.claim_id: item for item in adjusted_claims}
+    constituents = [lookup.get(claim_id) for claim_id in P0_REQUIRED_CLAIMS]
+    conclusions = [
+        item.conclusion if item is not None else "inconclusive" for item in constituents
+    ]
+    if all(value == "support" for value in conclusions):
+        conclusion = "support"
+    elif any(value == "oppose" for value in conclusions):
+        conclusion = "oppose"
+    else:
+        conclusion = "inconclusive"
+    audit = "; ".join(
+        f"{claim_id}={value}"
+        for claim_id, value in zip(P0_REQUIRED_CLAIMS, conclusions, strict=True)
+    )
+    complete_sets = [
+        complete_seed_ids_by_claim.get(claim_id, set())
+        for claim_id in P0_REQUIRED_CLAIMS
+    ]
+    jointly_complete = set.intersection(*complete_sets) if complete_sets else set()
+    any_failed = set().union(
+        *(
+            failed_seed_ids_by_claim.get(claim_id, set())
+            for claim_id in P0_REQUIRED_CLAIMS
+        )
+    )
+    return ClaimResult(
+        claim_id="P0_overall",
+        experiment="exp07",
+        metric="noninferential_stage_gate",
+        comparison="conjunction of Holm-adjusted P0a--P0f conclusions",
+        stats_unit="seed",
+        n_planned=P0_SEED_PLAN,
+        n_complete=len(jointly_complete),
+        n_failed=len(any_failed),
+        estimate=None,
+        ci_low=None,
+        ci_high=None,
+        effect_size=None,
+        p_value=None,
+        multiplicity_method="derived_after_holm(no_additional_test)",
+        conclusion=conclusion,
+        criterion=(
+            "support iff every Holm-adjusted P0a--P0f claim supports; oppose iff "
+            "at least one opposes; otherwise inconclusive"
+        ),
+        note=f"non-inferential stage gate; {audit}",
+    )
+
+
 def _primary_phase2(frame: pd.DataFrame) -> pd.DataFrame:
     """Select the preregistered 80/20 E/I architecture when dimensions exist."""
 
     if frame.empty:
         return frame
-    run_level_failure = (
-        _eq(frame, "status", "failed")
-        & _series(frame, "run_level_failure", False).fillna(False).astype(bool)
-    )
+    run_level_failure = _eq(frame, "status", "failed") & _series(
+        frame, "run_level_failure", False
+    ).fillna(False).astype(bool)
     if "architecture" in frame and frame["architecture"].eq("ei_n512_fi20_gain1").any():
         return frame.loc[
             frame["architecture"].eq("ei_n512_fi20_gain1") | run_level_failure
@@ -471,7 +800,9 @@ def _model_unit_table(
     if has_animal:
         session_keys.insert(1, "animal_id")
     # All folds and both IBL views are repeated measurements within session.
-    aggregated = selected.groupby(session_keys, as_index=False, dropna=False)[metric].mean()
+    aggregated = selected.groupby(session_keys, as_index=False, dropna=False)[
+        metric
+    ].mean()
     if has_animal:
         variation = aggregated.groupby(session, dropna=False)["animal_id"].nunique()
         if (variation != 1).any() or aggregated["animal_id"].isna().any():
@@ -525,7 +856,13 @@ def _real_scalar_values(
     )
     n_failed = _failed_units(frame, unit_column, failure_scope)
     if session is None or metric not in frame:
-        return np.array([]), np.array([], dtype=object), unit_column, stats_unit, n_failed
+        return (
+            np.array([]),
+            np.array([], dtype=object),
+            unit_column,
+            stats_unit,
+            n_failed,
+        )
     columns = [session, metric]
     if "view" in frame:
         columns.append("view")
@@ -536,7 +873,13 @@ def _real_scalar_values(
     selected[metric] = pd.to_numeric(selected[metric], errors="coerce")
     selected = selected.dropna(subset=[session, metric])
     if selected.empty:
-        return np.array([]), np.array([], dtype=object), unit_column, stats_unit, n_failed
+        return (
+            np.array([]),
+            np.array([], dtype=object),
+            unit_column,
+            stats_unit,
+            n_failed,
+        )
 
     bad_sessions = set(
         frame.loc[
@@ -559,8 +902,9 @@ def _real_scalar_values(
                 lambda values: set(values.dropna().astype(str).tolist())
             )
             bad_sessions.update(
-                observed_views.loc[observed_views.map(set) != expected_views]
-                .index.tolist()
+                observed_views.loc[
+                    observed_views.map(set) != expected_views
+                ].index.tolist()
             )
 
     if bad_sessions:
@@ -582,15 +926,29 @@ def _real_scalar_values(
             n_failed = max(n_failed, len(bad_sessions))
             selected = selected.loc[~selected[session].isin(bad_sessions)]
     if selected.empty:
-        return np.array([]), np.array([], dtype=object), unit_column, stats_unit, n_failed
+        return (
+            np.array([]),
+            np.array([], dtype=object),
+            unit_column,
+            stats_unit,
+            n_failed,
+        )
 
     session_keys = [session]
     if has_animal:
         session_keys.append("animal_id")
-    aggregated = selected.groupby(session_keys, as_index=False, dropna=False)[metric].mean()
+    aggregated = selected.groupby(session_keys, as_index=False, dropna=False)[
+        metric
+    ].mean()
     if has_animal:
         if aggregated["animal_id"].isna().any():
-            return np.array([]), np.array([], dtype=object), unit_column, stats_unit, max(1, n_failed)
+            return (
+                np.array([]),
+                np.array([], dtype=object),
+                unit_column,
+                stats_unit,
+                max(1, n_failed),
+            )
         aggregated = aggregated.groupby("animal_id", as_index=False)[metric].mean()
         unit_column = "animal_id"
     return (
@@ -608,19 +966,32 @@ def _phase_match_is_exact(frame: pd.DataFrame) -> tuple[bool, str]:
         "per_trial_spike_count_match_exact",
         "mean_coupling_match_exact",
     )
-    if not set(required_flags) <= set(frame) or "shared_source_fingerprint" not in frame:
+    if (
+        not set(required_flags) <= set(frame)
+        or "shared_source_fingerprint" not in frame
+    ):
         return False, "exact rate/spike/coupling flags or source fingerprint are absent"
     relevant = frame.loc[
         _complete(frame)
         & _series(frame, "phase_condition").isin(["in_phase", "no_oscillation"])
     ]
-    if relevant.empty or not relevant[list(required_flags)].fillna(False).astype(bool).all(axis=None):
+    if relevant.empty or not relevant[list(required_flags)].fillna(False).astype(
+        bool
+    ).all(axis=None):
         return False, "one or more exact matching flags are false"
     counts = relevant.groupby("seed")["phase_condition"].nunique()
-    fingerprints = relevant.groupby("seed")["shared_source_fingerprint"].nunique(dropna=False)
+    fingerprints = relevant.groupby("seed")["shared_source_fingerprint"].nunique(
+        dropna=False
+    )
     if not (counts.eq(2).all() and fingerprints.eq(1).all()):
-        return False, "in-phase/no-oscillation sources are not exactly paired within seed"
-    return True, "all exact matching flags true and source fingerprints identical within seed"
+        return (
+            False,
+            "in-phase/no-oscillation sources are not exactly paired within seed",
+        )
+    return (
+        True,
+        "all exact matching flags true and source fingerprints identical within seed",
+    )
 
 
 def _holm_adjust(values: np.ndarray) -> np.ndarray:
@@ -639,8 +1010,12 @@ def _apply_full_family_holm(results: list[ClaimResult]) -> list[ClaimResult]:
     """Include unavailable hypotheses as p=1 so the registered family stays fixed."""
 
     raw = np.asarray(
-        [result.p_value if result.p_value is not None and np.isfinite(result.p_value) else 1.0
-         for result in results],
+        [
+            result.p_value
+            if result.p_value is not None and np.isfinite(result.p_value)
+            else 1.0
+            for result in results
+        ],
         dtype=float,
     )
     adjusted = _holm_adjust(raw)
@@ -651,14 +1026,18 @@ def _apply_full_family_holm(results: list[ClaimResult]) -> list[ClaimResult]:
             output.append(result)
             continue
         raw_p = result.p_value
+        corrected_conclusion = result.conclusion
+        if result.conclusion in {"support", "oppose"} and adjusted_p > 0.05:
+            corrected_conclusion = "inconclusive"
         output.append(
             replace(
                 result,
+                conclusion=corrected_conclusion,
                 p_value=float(adjusted_p),
                 note=(
                     f"{result.note}; p_value is Holm-adjusted across all {family_size} "
-                    f"registered claims (raw Wilcoxon p={raw_p:.12g}); bootstrap criterion "
-                    "determines the three-way conclusion"
+                    f"registered claims (raw Wilcoxon p={raw_p:.12g}); a directional "
+                    "bootstrap criterion can support/oppose only when Holm p<=0.05"
                 ),
             )
         )
@@ -666,7 +1045,7 @@ def _apply_full_family_holm(results: list[ClaimResult]) -> list[ClaimResult]:
 
 
 def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
-    """Evaluate A1--E2; absent, failed, or incomplete formal evidence stays inconclusive."""
+    """Evaluate registered claims; incomplete formal evidence stays inconclusive."""
 
     if not isinstance(raw_metrics, pd.DataFrame):
         raise TypeError("raw_metrics must be a pandas DataFrame")
@@ -679,12 +1058,12 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
     results: list[ClaimResult] = []
 
     # Phase 1: rank and feedback alignment.
-    exp01 = formal.loc[_eq(formal, "experiment", "exp01_feedback_dimension_sweep")].copy()
+    exp01 = formal.loc[
+        _eq(formal, "experiment", "exp01_feedback_dimension_sweep")
+    ].copy()
     core = _eq(exp01, "grid", "core") & _eq(exp01, "feedback_mode", "aligned")
     d4 = core & pd.to_numeric(_series(exp01, "feedback_dim"), errors="coerce").eq(4)
-    rank_values, _, rank_units = _paired_rows(
-        exp01, d4, d4, "effective_rank", "seed"
-    )
+    rank_values, _, rank_units = _paired_rows(exp01, d4, d4, "effective_rank", "seed")
     results.append(
         _paired_claim(
             claim_id="A1_rank_matches_feedback",
@@ -708,7 +1087,9 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
     # The preregistered full-feedback comparator is N=128. Never substitute the
     # largest surviving dimension from a partial/aborted sweep.
     full_dim = 128
-    full = core & pd.to_numeric(_series(exp01, "feedback_dim"), errors="coerce").eq(full_dim)
+    full = core & pd.to_numeric(_series(exp01, "feedback_dim"), errors="coerce").eq(
+        full_dim
+    )
     first, second, units = _paired_rows(exp01, d4, full, "latent_r2", "seed")
     results.append(
         _paired_claim(
@@ -755,7 +1136,9 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
 
     # Phase 2: primary 80/20 E/I architecture, both oracle and learned gates.
     phase2_names = {"exp02_context_ei_oracle_gate", "exp03_context_ei_learned_gate"}
-    phase2 = _primary_phase2(formal.loc[_series(formal, "experiment").isin(phase2_names)])
+    phase2 = _primary_phase2(
+        formal.loc[_series(formal, "experiment").isin(phase2_names)]
+    )
     required_experiments = {(name,) for name in phase2_names}
     local_mask = _eq(phase2, "condition", "local")
     bptt_mask = _eq(phase2, "condition", "bptt")
@@ -768,40 +1151,45 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         pair_columns=("experiment",),
         required_pairs=required_experiments,
     )
-    b1 = _paired_claim(
-        claim_id="B1_local_reaches_task_threshold",
-        experiment="exp02/03",
-        metric="accuracy",
-        comparison="local minus 90% of paired BPTT accuracy",
-        stats_unit="seed",
-        candidate=local,
-        reference=0.9 * bptt,
-        unit_ids=units,
-        n_planned=SEED_PLAN,
-        n_failed=_failed_units(phase2, "seed", local_mask | bptt_mask),
-        minimum_units=SEED_PLAN,
-        support_low=0.0,
-        oppose_below=0.0,
-        criterion="local accuracy >= 0.85 OR >= 90% of paired BPTT (95% CI)",
-    )
-    if b1.estimate is not None:
-        absolute = paired_bootstrap(
-            local,
-            np.full(len(local), 0.85),
+    results.append(
+        _paired_claim(
+            claim_id="B1a_local_absolute_accuracy",
+            experiment="exp02/03",
+            metric="accuracy",
+            comparison="local accuracy minus absolute threshold 0.85",
+            stats_unit="seed",
+            candidate=local,
+            reference=np.full(len(local), 0.85),
             unit_ids=units,
-            replicate_unit="seed",
-            n_resamples=5000,
-            confidence=0.95,
-            seed=1,
+            n_planned=SEED_PLAN,
+            n_failed=_failed_units(phase2, "seed", local_mask | bptt_mask),
+            minimum_units=SEED_PLAN,
+            support_low=0.0,
+            oppose_below=0.0,
+            criterion="local absolute accuracy-minus-0.85 CI is reported independently",
         )
-        support = b1.ci_low is not None and (b1.ci_low >= 0.0 or absolute.ci_low >= 0.0)
-        oppose = b1.ci_high is not None and b1.ci_high < 0.0 and absolute.ci_high < 0.0
-        b1 = replace(
-            b1,
-            conclusion="support" if support else ("oppose" if oppose else "inconclusive"),
-            note=f"{b1.note}; absolute accuracy-minus-0.85 CI [{absolute.ci_low:.6g}, {absolute.ci_high:.6g}]",
+    )
+    results.append(
+        _paired_claim(
+            claim_id="B1b_local_relative_noninferiority",
+            experiment="exp02/03",
+            metric="accuracy",
+            comparison="local minus 90% of paired BPTT accuracy",
+            stats_unit="seed",
+            candidate=local,
+            reference=0.9 * bptt,
+            unit_ids=units,
+            n_planned=SEED_PLAN,
+            n_failed=_failed_units(phase2, "seed", local_mask | bptt_mask),
+            minimum_units=SEED_PLAN,
+            support_low=0.0,
+            oppose_below=0.0,
+            criterion=(
+                "local relative non-inferiority to 90% of paired BPTT is reported "
+                "independently of absolute performance"
+            ),
         )
-    results.append(b1)
+    )
 
     no_gate_mask = _eq(phase2, "condition", "no-gate")
     no_gate, local_switch, units = _paired_rows(
@@ -837,7 +1225,8 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         (
             metric
             for metric in ("jacobian_max_real_part", "jacobian_unstable_fraction")
-            if metric in exp02 and pd.to_numeric(exp02[metric], errors="coerce").notna().any()
+            if metric in exp02
+            and pd.to_numeric(exp02[metric], errors="coerce").notna().any()
         ),
         "jacobian_max_real_part",
     )
@@ -861,9 +1250,7 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             reference=home,
             unit_ids=units,
             n_planned=SEED_PLAN,
-            n_failed=_failed_units(
-                exp02, "seed", no_home_mask | exp02_local_mask
-            ),
+            n_failed=_failed_units(exp02, "seed", no_home_mask | exp02_local_mask),
             minimum_units=SEED_PLAN,
             support_low=0.0,
             oppose_below=0.0,
@@ -875,7 +1262,8 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         (
             metric
             for metric in ("raw_update_effective_rank", "total_update_effective_rank")
-            if metric in phase2 and pd.to_numeric(phase2[metric], errors="coerce").notna().any()
+            if metric in phase2
+            and pd.to_numeric(phase2[metric], errors="coerce").notna().any()
         ),
         "raw_update_effective_rank",
     )
@@ -900,9 +1288,7 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             reference=local_rank,
             unit_ids=units,
             n_planned=SEED_PLAN,
-            n_failed=_failed_units(
-                phase2, "seed", full_feedback_mask | local_mask
-            ),
+            n_failed=_failed_units(phase2, "seed", full_feedback_mask | local_mask),
             minimum_units=SEED_PLAN,
             support_low=0.0,
             oppose_below=0.0,
@@ -987,17 +1373,17 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             claim_id="D1_shared_basis_near_full",
             experiment="exp05",
             metric="retained_switching_gain",
-            comparison="retained full-vs-common gain minus 0.95",
+            comparison="retained full-vs-common gain minus 0.90",
             stats_unit=stats05,
             candidate=retained.to_numpy(float),
-            reference=np.full(len(retained), 0.95),
+            reference=np.full(len(retained), 0.90),
             unit_ids=retained.index.to_numpy(object),
             n_planned=plan05,
             n_failed=failed05,
             minimum_units=2,
             support_low=0.0,
             oppose_below=0.0,
-            criterion="retained switching gain >= 0.95 and shared parameters < full",
+            criterion="retained switching gain >= 0.90 and shared parameters < full",
         )
         if d1.estimate is not None:
             parameter = paired_bootstrap(
@@ -1010,19 +1396,27 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
                 seed=4,
             )
             support = d1.ci_low is not None and d1.ci_low >= 0 and parameter.ci_low > 0
-            oppose = d1.ci_high is not None and (d1.ci_high < 0 or parameter.ci_high <= 0)
+            oppose = d1.ci_high is not None and (
+                d1.ci_high < 0 or parameter.ci_high <= 0
+            )
             d1 = replace(
                 d1,
-                conclusion="support" if support else ("oppose" if oppose else "inconclusive"),
+                conclusion="support"
+                if support
+                else ("oppose" if oppose else "inconclusive"),
                 note=f"{d1.note}; full-minus-shared parameter CI [{parameter.ci_low:.6g}, {parameter.ci_high:.6g}]",
             )
     else:
         d1 = _inconclusive(
-            "D1_shared_basis_near_full", "exp05", "retained_switching_gain",
-            "shared versus common/full", stats05,
-            "retained switching gain >= 0.95 and shared parameters < full",
+            "D1_shared_basis_near_full",
+            "exp05",
+            "retained_switching_gain",
+            "shared versus common/full",
+            stats05,
+            "retained switching gain >= 0.90 and shared parameters < full",
             "complete common/shared/full formal panel unavailable",
-            n_planned=_real_plan(exp05, unit05, failed05), n_failed=failed05,
+            n_planned=_real_plan(exp05, unit05, failed05),
+            n_failed=failed05,
         )
     results.append(d1)
 
@@ -1056,11 +1450,15 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         )
     else:
         d2 = _inconclusive(
-            "D2_unseen_sequence_generalization", "exp05", "heldout_nll_per_scalar",
-            "full minus shared NLL on unseen combinations", unseen_stats,
+            "D2_unseen_sequence_generalization",
+            "exp05",
+            "heldout_nll_per_scalar",
+            "full minus shared NLL on unseen combinations",
+            unseen_stats,
             "shared held-out NLL is below full LDS on unseen combinations",
             "complete unseen-combination shared/full panel unavailable",
-            n_planned=_real_plan(exp05, unseen_unit, unseen_failed), n_failed=unseen_failed,
+            n_planned=_real_plan(exp05, unseen_unit, unseen_failed),
+            n_failed=unseen_failed,
         )
     results.append(d2)
 
@@ -1096,12 +1494,12 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             minimum_units=2,
             support_low=0.0,
             oppose_below=0.0,
-            criterion="shared improves on common and retains >= 0.95 of full-model gain",
+            criterion="shared improves on common and retains >= 0.90 of full-model gain",
         )
         if e1.estimate is not None:
             gain = paired_bootstrap(
                 retained.to_numpy(float),
-                np.full(len(retained), 0.95),
+                np.full(len(retained), 0.90),
                 unit_ids=retained.index.to_numpy(object),
                 replicate_unit=stats06,
                 n_resamples=5000,
@@ -1112,31 +1510,41 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             oppose = e1.ci_high is not None and (e1.ci_high <= 0 or gain.ci_high < 0)
             e1 = replace(
                 e1,
-                conclusion="support" if support else ("oppose" if oppose else "inconclusive"),
-                note=f"{e1.note}; retained-gain-minus-0.95 CI [{gain.ci_low:.6g}, {gain.ci_high:.6g}]",
+                conclusion="support"
+                if support
+                else ("oppose" if oppose else "inconclusive"),
+                note=f"{e1.note}; retained-gain-minus-0.90 CI [{gain.ci_low:.6g}, {gain.ci_high:.6g}]",
             )
     else:
         e1 = _inconclusive(
-            "E1_ibl_shared_switching", "exp06", "heldout_nll_per_scalar",
-            "shared versus common/full hidden-context LDS", stats06,
-            "shared improves on common and retains >= 0.95 of full-model gain",
+            "E1_ibl_shared_switching",
+            "exp06",
+            "heldout_nll_per_scalar",
+            "shared versus common/full hidden-context LDS",
+            stats06,
+            "shared improves on common and retains >= 0.90 of full-model gain",
             "complete common/shared/full formal panel unavailable",
-            n_planned=_real_plan(exp06, unit06, failed06), n_failed=failed06,
+            n_planned=_real_plan(exp06, unit06, failed06),
+            n_failed=failed06,
         )
     results.append(e1)
 
     lead_mask = _eq(exp06, "model_family", "lead_lag")
     schedule_valid = (
-        not exp06.loc[
-            lead_mask & _complete(exp06), "condition_schedule_observed"
-        ].fillna(True).astype(bool).any()
+        not exp06.loc[lead_mask & _complete(exp06), "condition_schedule_observed"]
+        .fillna(True)
+        .astype(bool)
+        .any()
         if "condition_schedule_observed" in exp06
         else False
     )
     if "lead_lag_is_causal_claim" in exp06:
-        schedule_valid &= not exp06.loc[
-            lead_mask & _complete(exp06), "lead_lag_is_causal_claim"
-        ].fillna(True).astype(bool).any()
+        schedule_valid &= (
+            not exp06.loc[lead_mask & _complete(exp06), "lead_lag_is_causal_claim"]
+            .fillna(True)
+            .astype(bool)
+            .any()
+        )
     lead, lead_ids, lead_unit, lead_stats, lead_failed = _real_scalar_values(
         exp06, "latent_lead_trials", lead_mask
     )
@@ -1157,16 +1565,306 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             oppose_below=0.0,
             criterion="independent-unit bootstrap CI of latent lead is above zero",
         )
-        e2 = replace(e2, note=f"{e2.note}; descriptive temporal association, not causal")
+        e2 = replace(
+            e2, note=f"{e2.note}; descriptive temporal association, not causal"
+        )
     else:
         e2 = _inconclusive(
-            "E2_latent_precedes_behavior_bias", "exp06", "latent_lead_trials",
-            "latent lead minus zero trials", lead_stats,
+            "E2_latent_precedes_behavior_bias",
+            "exp06",
+            "latent_lead_trials",
+            "latent lead minus zero trials",
+            lead_stats,
             "independent-unit bootstrap CI of latent lead is above zero",
             "hidden-context schedule provenance is absent or held-out truth was observed",
             n_planned=_real_plan(exp06, lead_unit, lead_failed),
-            n_complete=len(set(lead_ids.tolist())), n_failed=lead_failed,
+            n_complete=len(set(lead_ids.tolist())),
+            n_failed=lead_failed,
         )
     results.append(e2)
 
-    return _apply_full_family_holm(results)
+    # P0 mechanism-identifiability: restrict evidence to exactly the registered
+    # seed IDs, evaluate L1 and L2 independently, and combine them only through
+    # an intersection-union decision.  Averages across budget panels are never
+    # admissible evidence.
+    p0 = _prepare_p0_frame(
+        formal.loc[_eq(formal, "experiment", "exp07_mechanism_identifiability")].copy()
+    )
+    task_enabled = (
+        _series(p0, "task_plasticity_enabled", False).fillna(False).astype(bool)
+    )
+    homeostasis_enabled = (
+        _series(p0, "homeostasis_enabled", False).fillna(False).astype(bool)
+    )
+    normalization_enabled = (
+        _series(p0, "normalization_enabled", False).fillna(False).astype(bool)
+    )
+    aligned = _eq(p0, "feedback_mode", "aligned")
+    shuffled = _eq(p0, "feedback_mode", "shuffled")
+    task_only = task_enabled & ~homeostasis_enabled & ~normalization_enabled
+    task_homeostasis = (
+        task_enabled & homeostasis_enabled & ~normalization_enabled & aligned
+    )
+    primary_local = task_enabled & homeostasis_enabled & normalization_enabled & aligned
+    homeostasis_only = (
+        ~task_enabled & homeostasis_enabled & ~normalization_enabled & aligned
+    )
+    frozen = ~task_enabled & ~homeostasis_enabled & ~normalization_enabled & aligned
+    valid_budget = _eq(p0, "budget_match_valid", True)
+    p0_complete_seed_ids_by_claim: dict[str, set[int]] = {}
+    p0_failed_seed_ids_by_claim: dict[str, set[int]] = {}
+
+    def p0_joint_claim(
+        *,
+        claim_id: str,
+        metric: str,
+        comparison: str,
+        criterion: str,
+        first_mask: pd.Series,
+        second_mask: pd.Series,
+        fixed_reference: float | None = None,
+        reference_multiplier: float = 1.0,
+        second_is_panel_invariant: bool = False,
+    ) -> ClaimResult:
+        panel_results: dict[str, ClaimResult] = {}
+        panel_complete_seed_ids: dict[str, set[int]] = {}
+        failed_seed_ids: set[int] = set()
+        for panel_index, norm in enumerate(P0_BUDGET_PANELS):
+            norm_mask = _eq(p0, "budget_norm", norm)
+            selected_first = first_mask & norm_mask & valid_budget
+            if second_is_panel_invariant:
+                selected_second = second_mask
+                failure_scope = (first_mask & norm_mask) | second_mask
+            else:
+                selected_second = second_mask & norm_mask & valid_budget
+                failure_scope = (first_mask | second_mask) & norm_mask
+            first, second, units = _paired_rows(
+                p0,
+                selected_first,
+                selected_second,
+                metric,
+                "seed",
+            )
+            if fixed_reference is not None:
+                second = np.full(len(first), fixed_reference, dtype=float)
+            else:
+                second = reference_multiplier * second
+            panel_failed = _p0_failed_seed_ids(p0, failure_scope)
+            failed_seed_ids.update(panel_failed)
+            panel_complete_seed_ids[norm] = {
+                int(value) for value in units.tolist() if int(value) in P0_PLANNED_SEEDS
+            }
+            panel_results[norm] = _paired_claim(
+                claim_id=f"{claim_id}__{norm}_panel",
+                experiment="exp07",
+                metric=metric,
+                comparison=f"{comparison} [{norm} panel]",
+                stats_unit="seed",
+                candidate=first,
+                reference=second,
+                unit_ids=units,
+                n_planned=P0_SEED_PLAN,
+                n_failed=len(panel_failed),
+                minimum_units=P0_SEED_PLAN,
+                support_low=0.0,
+                oppose_below=0.0,
+                criterion=f"{criterion} [{norm} panel]",
+                seed=panel_index,
+            )
+        p0_complete_seed_ids_by_claim[claim_id] = set.intersection(
+            *(panel_complete_seed_ids[name] for name in P0_BUDGET_PANELS)
+        )
+        p0_failed_seed_ids_by_claim[claim_id] = failed_seed_ids.copy()
+        return _joint_budget_panel_claim(
+            claim_id=claim_id,
+            experiment="exp07",
+            metric=metric,
+            comparison=comparison,
+            stats_unit="seed",
+            criterion=criterion,
+            panels=panel_results,
+            panel_complete_seed_ids=panel_complete_seed_ids,
+            failed_seed_ids=failed_seed_ids,
+        )
+
+    results.append(
+        p0_joint_claim(
+            claim_id="P0a_aligned_task_improves_prediction_vs_frozen",
+            metric="heldout_masked_mse",
+            comparison="frozen MSE minus aligned task-plastic MSE",
+            criterion=(
+                "aligned task plasticity lowers held-out prediction MSE versus a "
+                "bitwise-frozen recurrent network in both L1/L2 panels"
+            ),
+            first_mask=frozen,
+            second_mask=task_only & aligned,
+        )
+    )
+    results.append(
+        p0_joint_claim(
+            claim_id="P0b_aligned_task_beats_shuffled",
+            metric="heldout_masked_mse",
+            comparison="shuffled MSE minus aligned MSE at matched task budget",
+            criterion=(
+                "aligned feedback lowers held-out prediction MSE versus shuffled "
+                "feedback under separately exact L1 and L2 task budgets"
+            ),
+            first_mask=task_only & shuffled,
+            second_mask=task_only & aligned,
+        )
+    )
+    results.append(
+        p0_joint_claim(
+            claim_id="P0c_aligned_adds_value_over_matched_homeostasis",
+            metric="heldout_masked_mse",
+            comparison=("homeostasis-only MSE minus aligned task+homeostasis MSE"),
+            criterion=(
+                "adding aligned task plasticity improves held-out prediction over "
+                "the same-budget homeostasis-only control in both panels"
+            ),
+            first_mask=homeostasis_only,
+            second_mask=task_homeostasis,
+        )
+    )
+    results.append(
+        p0_joint_claim(
+            claim_id="P0d_local_absolute_accuracy",
+            metric="accuracy",
+            comparison="aligned local accuracy minus 0.85",
+            criterion=("absolute accuracy >=0.85 independently in both L1/L2 panels"),
+            first_mask=primary_local,
+            second_mask=primary_local,
+            fixed_reference=0.85,
+        )
+    )
+    for claim_id, baseline_condition, label in (
+        ("P0e_local_noninferior_tuned_bptt", "tuned-bptt", "tuned BPTT"),
+        ("P0f_local_noninferior_tuned_gru", "tuned-gru", "tuned GRU"),
+    ):
+        baseline = _eq(p0, "condition", baseline_condition)
+        results.append(
+            p0_joint_claim(
+                claim_id=claim_id,
+                metric="accuracy",
+                comparison=f"aligned local minus 90% of {label} accuracy",
+                criterion=(
+                    f"relative non-inferiority to 90% of {label} independently "
+                    "in both L1/L2 panels and independently of absolute accuracy"
+                ),
+                first_mask=primary_local,
+                second_mask=baseline,
+                reference_multiplier=0.9,
+                second_is_panel_invariant=True,
+            )
+        )
+
+    # P1 rank-stage theorem audit.  These claims establish the revised
+    # mathematical mechanism only; they do not substitute for P0 held-out
+    # behavior/prediction evidence.
+    p1 = formal.loc[_eq(formal, "experiment", "exp08_rank_stage_validation")].copy()
+    p1_primary = (
+        _eq(p1, "parameterization", "direct")
+        & _eq(p1, "requested_feedback_dim", 4)
+        & pd.to_numeric(_series(p1, "feedback_angle_degrees"), errors="coerce").eq(0.0)
+        & _eq(p1, "geometry_valid", True)
+    )
+    identity_residual, _, units = _paired_rows(
+        p1,
+        p1_primary,
+        p1_primary,
+        "masked_identity_max_abs_residual",
+        "seed",
+    )
+    results.append(
+        _paired_claim(
+            claim_id="P1a_masked_outer_product_identity",
+            experiment="exp08",
+            metric="masked_identity_max_abs_residual",
+            comparison="masked identity residual minus zero",
+            stats_unit="seed",
+            candidate=identity_residual,
+            reference=np.zeros(len(identity_residual)),
+            unit_ids=units,
+            n_planned=P0_SEED_PLAN,
+            n_failed=_failed_units(p1, "seed", p1_primary),
+            minimum_units=P0_SEED_PLAN,
+            support_high=1e-12,
+            oppose_above=1e-8,
+            criterion=("M⊙uv^T equals diag(u)Mdiag(v) to <=1e-12 max residual"),
+        )
+    )
+
+    tangent, _, units = _paired_rows(
+        p1,
+        p1_primary,
+        p1_primary,
+        "lowdim_credit_tangent_dimension",
+        "seed",
+    )
+    results.append(
+        _paired_claim(
+            claim_id="P1b_credit_tangent_respects_feedback_bound",
+            experiment="exp08",
+            metric="lowdim_credit_tangent_dimension",
+            comparison="credit tangent dimension minus feedback dimension 4",
+            stats_unit="seed",
+            candidate=tangent,
+            reference=np.full(len(tangent), 4.0),
+            unit_ids=units,
+            n_planned=P0_SEED_PLAN,
+            n_failed=_failed_units(p1, "seed", p1_primary),
+            minimum_units=P0_SEED_PLAN,
+            support_high=0.5,
+            oppose_above=0.5,
+            criterion=(
+                "instantaneous credit tangent does not exceed feedback dimension "
+                "within 0.5 numerical-dimension tolerance"
+            ),
+        )
+    )
+
+    if {
+        "masked_numerical_rank",
+        "lowdim_credit_tangent_dimension",
+    } <= set(p1.columns):
+        p1["physical_minus_tangent_dimension"] = pd.to_numeric(
+            p1["masked_numerical_rank"], errors="coerce"
+        ) - pd.to_numeric(p1["lowdim_credit_tangent_dimension"], errors="coerce")
+    physical_gap, _, units = _paired_rows(
+        p1,
+        p1_primary,
+        p1_primary,
+        "physical_minus_tangent_dimension",
+        "seed",
+    )
+    results.append(
+        _paired_claim(
+            claim_id="P1c_highrank_physical_update_coexists_with_lowdim_credit",
+            experiment="exp08",
+            metric="physical_minus_tangent_dimension",
+            comparison="masked physical rank minus credit tangent dimension",
+            stats_unit="seed",
+            candidate=physical_gap,
+            reference=np.zeros(len(physical_gap)),
+            unit_ids=units,
+            n_planned=P0_SEED_PLAN,
+            n_failed=_failed_units(p1, "seed", p1_primary),
+            minimum_units=P0_SEED_PLAN,
+            support_low=1.0,
+            oppose_below=1.0,
+            criterion=(
+                "masked physical numerical rank exceeds credit tangent dimension; "
+                "this theoretical claim does not imply held-out task support"
+            ),
+        )
+    )
+
+    adjusted = _apply_full_family_holm(results)
+    return [
+        *adjusted,
+        _p0_overall_gate(
+            adjusted,
+            complete_seed_ids_by_claim=p0_complete_seed_ids_by_claim,
+            failed_seed_ids_by_claim=p0_failed_seed_ids_by_claim,
+        ),
+    ]

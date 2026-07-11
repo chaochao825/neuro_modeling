@@ -6,13 +6,19 @@ import pytest
 
 from src.utils.artifacts import ExperimentRun
 from src.utils.reproducibility import derive_seed, make_rng
-from src.utils.splits import TrainOnlyTransformer, grouped_kfold, grouped_train_test_split
+from src.utils.splits import (
+    TrainOnlyTransformer,
+    grouped_kfold,
+    grouped_train_test_split,
+)
 
 
 def test_label_derived_random_streams_are_stable_and_independent() -> None:
     assert derive_seed(1, "data") == derive_seed(1, "data")
     assert derive_seed(1, "data") != derive_seed(1, "feedback")
-    assert np.array_equal(make_rng(3, "x").normal(size=5), make_rng(3, "x").normal(size=5))
+    assert np.array_equal(
+        make_rng(3, "x").normal(size=5), make_rng(3, "x").normal(size=5)
+    )
     assert derive_seed(1, "a::b") != derive_seed(1, "a", "b")
     assert derive_seed(1, 1) != derive_seed(1, "1")
     with pytest.raises(TypeError, match="integer"):
@@ -54,7 +60,9 @@ def test_train_only_transformer_records_fit_provenance() -> None:
         TrainOnlyTransformer().fit(x, sample_ids=[1])
 
 
-def test_artifacts_register_plan_and_retain_failed_and_invalid_conditions(tmp_path: Path) -> None:
+def test_artifacts_register_plan_and_retain_failed_and_invalid_conditions(
+    tmp_path: Path,
+) -> None:
     with ExperimentRun("exp", 2, {"profile": "smoke"}, results_root=tmp_path) as run:
         run.register_conditions([{"condition": "ok"}, {"condition": "bad"}])
         run.record({"status": "complete", "score": 1.0}, condition="ok")
@@ -62,13 +70,25 @@ def test_artifacts_register_plan_and_retain_failed_and_invalid_conditions(tmp_pa
         run.mark_condition_invalid("not mathematically defined", condition="impossible")
         path = run.path
     status = json.loads((path / "status.json").read_text(encoding="utf-8"))
-    records = [json.loads(line) for line in (path / "metrics.jsonl").read_text(encoding="utf-8").splitlines()]
+    records = [
+        json.loads(line)
+        for line in (path / "metrics.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
     assert status["status"] == "complete_with_failures"
     assert {record["status"] for record in records} == {"complete", "failed", "invalid"}
     assert (path / "config.json").is_file()
     assert (path / "run.log").is_file()
+    environment = json.loads((path / "environment.json").read_text(encoding="utf-8"))
+    assert {"python", "platform", "executable", "packages", "git"} <= environment.keys()
+    assert {"numpy", "scipy", "pandas", "scikit-learn", "torch"} <= environment[
+        "packages"
+    ].keys()
+    assert {"commit", "dirty"} == environment["git"].keys()
     assert "RuntimeError: boom" in (path / "run.log").read_text(encoding="utf-8")
-    assert len(json.loads((path / "planned_conditions.json").read_text(encoding="utf-8"))) == 2
+    assert (
+        len(json.loads((path / "planned_conditions.json").read_text(encoding="utf-8")))
+        == 2
+    )
     with pytest.raises(RuntimeError, match="immutable"):
         run.record({"late": 1.0})
     with pytest.raises(RuntimeError, match="immutable"):
@@ -107,7 +127,9 @@ def test_artifacts_reject_provenance_overrides_and_path_escape(tmp_path: Path) -
         with pytest.raises(ValueError, match="reserved"):
             run.record({"seed": 99})
         run.record({"vector": np.array([1.0, np.nan])})
-        encoded = json.loads(run.metrics_path.read_text(encoding="utf-8").splitlines()[0])
+        encoded = json.loads(
+            run.metrics_path.read_text(encoding="utf-8").splitlines()[0]
+        )
         assert encoded["vector"] == [1.0, "nan"]
         run.register_conditions([{"condition": "a"}])
         with pytest.raises(RuntimeError, match="already"):

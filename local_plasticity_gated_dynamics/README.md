@@ -1,9 +1,12 @@
 # Local Plasticity to Gated Low-Dimensional Dynamics
 
-This repository tests whether local three-factor plasticity constrained by
-low-dimensional feedback and E/I homeostasis produces reusable, rapidly
-switchable low-rank recurrent dynamics. It also provides leakage-safe shared
-subspace models for public sequence-memory and IBL data.
+This repository tests a revised, more precise hypothesis: local eligibility
+traces combined with a low-dimensional credit signal can shape a small number
+of controllable/observable modes on top of a high-rank sparse E/I substrate.
+Low-dimensional gates may then modify effective dynamics without requiring the
+physical recurrent matrix or its masked update to be low rank. The repository
+also provides leakage-safe shared-subspace models for public sequence-memory
+and IBL data.
 
 The scientific protocol is intentionally falsifiable. Every core claim is
 classified as `support`, `oppose`, or `inconclusive`; failed seeds and missing
@@ -19,7 +22,9 @@ preserve the raw low-rank update bound.
 - Python 3.11 only.
 - All stochastic entry points receive and record an explicit seed.
 - The local-learning models use NumPy local updates and never autograd or BPTT.
-- BPTT exists only in an isolated baseline module/experiment path.
+- Tuned BPTT rate-RNN and GRU models exist only in isolated baseline paths;
+  candidate selection uses validation blocks and the outer test set is never
+  accepted by the tuning/refit API.
 - Trials or blocks, never individual time points, are split across folds.
 - Scaling, PCA, subspaces, and nuisance regressions are fit on training data.
 - Inference treats seed, session, or animal as the replicate unit.
@@ -27,7 +32,9 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp06_*.py` are executable entry points. Formal runs write immutable run
+`exp08_*.py` are executable entry points as implementation advances. `exp07`
+is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
+effective dimensions. Formal runs write immutable run
 folders under `results/runs/`. `scripts/build_report.py` aggregates all statuses
 (including failures) into `results/summary.csv` and `results/report.md`.
 
@@ -51,8 +58,25 @@ override, and a results root. For example:
   --config configs\formal\exp04_phase_gating.json --results-root results
 .\.venv\Scripts\python.exe experiments\exp06_ibl_context_switch.py `
   --config configs\formal\exp06_ibl_context_switch.json --results-root results
+.\.venv\Scripts\python.exe experiments\exp07_mechanism_identifiability.py `
+  --config configs\formal\exp07_mechanism_identifiability.json --results-root results
+.\.venv\Scripts\python.exe experiments\exp08_rank_stage_validation.py `
+  --config configs\formal\exp08_rank_stage_validation.json --results-root results
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
+
+For `exp07`, normalization is an explicit causal axis rather than a hidden
+side effect. Each L1/L2 panel contains task-only feedback geometries plus
+task/homeostasis/normalization combinations, including matched cells with and
+without normalization. The so-called homeostasis tape in P0 is transparently
+recorded as a *yoked inhibitory-strengthening control*; it is not evidence for
+closed-loop E/I stability, which remains a P4 question. Frozen-reference rates
+and unprojected feedback signals are materialized once, made read-only, and
+content-fingerprinted before any branch runs. Identity feedback reports both
+its projector rank and the empirical span of the signal it actually receives.
+The shuffled control applies an exact within-block/context permutation to the
+complete precomputed third-factor vector, preserving its empirical marginal
+while breaking trial correspondence.
 
 The sequence-memory loader expects one directory per session beneath
 `data/raw/sequence_memory/`, each containing `trials.csv`, `units.csv`, and

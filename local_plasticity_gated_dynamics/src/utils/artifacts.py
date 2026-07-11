@@ -5,12 +5,14 @@ from __future__ import annotations
 import json
 import logging
 import platform
+import subprocess
 import sys
 import traceback
 import uuid
 from contextlib import AbstractContextManager
 from dataclasses import asdict, is_dataclass
 from datetime import datetime, timezone
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -38,10 +40,51 @@ def _jsonable(value: Any) -> Any:
 def _write_json(path: Path, payload: Any) -> None:
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(
-        json.dumps(_jsonable(payload), indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        json.dumps(_jsonable(payload), indent=2, sort_keys=True, ensure_ascii=False)
+        + "\n",
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def _software_provenance() -> dict[str, Any]:
+    packages: dict[str, str | None] = {}
+    for distribution in (
+        "numpy",
+        "scipy",
+        "pandas",
+        "scikit-learn",
+        "torch",
+        "matplotlib",
+        "statsmodels",
+    ):
+        try:
+            packages[distribution] = version(distribution)
+        except PackageNotFoundError:
+            packages[distribution] = None
+    repository = Path(__file__).resolve().parents[3]
+    git: dict[str, Any] = {"commit": None, "dirty": None}
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout
+        git = {"commit": commit or None, "dirty": bool(status.strip())}
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return {"packages": packages, "git": git}
 
 
 def _safe_path_component(name: str, value: object, *, optional: bool = False) -> str:
@@ -67,7 +110,9 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         run_label: str | None = None,
     ) -> None:
         experiment = _safe_path_component("experiment", experiment)
-        if isinstance(seed, (bool, np.bool_)) or not isinstance(seed, (int, np.integer)):
+        if isinstance(seed, (bool, np.bool_)) or not isinstance(
+            seed, (int, np.integer)
+        ):
             raise TypeError("seed must be an integer")
         seed = int(seed)
         if seed < 0:
@@ -82,7 +127,13 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         json.dumps(config_payload, sort_keys=True, ensure_ascii=False)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
         label = f"_{run_label}" if run_label else ""
-        self.path = Path(results_root) / "runs" / experiment / f"seed_{seed:04d}" / f"{stamp}{label}"
+        self.path = (
+            Path(results_root)
+            / "runs"
+            / experiment
+            / f"seed_{seed:04d}"
+            / f"{stamp}{label}"
+        )
         self.path.mkdir(parents=True, exist_ok=False)
         self.run_id = str(uuid.uuid4())
         self.experiment = experiment
@@ -103,13 +154,17 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         self._entered = False
         self._closed = False
 
-        _write_json(self.path / "config.json", {"experiment": experiment, "seed": seed, **self.config})
+        _write_json(
+            self.path / "config.json",
+            {"experiment": experiment, "seed": seed, **self.config},
+        )
         _write_json(
             self.path / "environment.json",
             {
                 "python": sys.version,
                 "platform": platform.platform(),
                 "executable": sys.executable,
+                **_software_provenance(),
             },
         )
         _write_json(
@@ -158,7 +213,9 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         reserved = {"run_id", "experiment", "seed", "recorded_at"}
         conflicts = reserved & (set(metrics) | set(dimensions))
         if conflicts:
-            raise ValueError(f"records cannot override reserved fields: {sorted(conflicts)}")
+            raise ValueError(
+                f"records cannot override reserved fields: {sorted(conflicts)}"
+            )
         overlap = set(metrics) & set(dimensions)
         if overlap:
             raise ValueError(f"metric and dimension keys overlap: {sorted(overlap)}")
@@ -171,7 +228,10 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
             **metrics,
         }
         with self.metrics_path.open("a", encoding="utf-8") as stream:
-            stream.write(json.dumps(_jsonable(payload), sort_keys=True, ensure_ascii=False) + "\n")
+            stream.write(
+                json.dumps(_jsonable(payload), sort_keys=True, ensure_ascii=False)
+                + "\n"
+            )
 
     def register_conditions(self, conditions: list[Mapping[str, Any]]) -> None:
         """Persist the complete planned grid before any condition is run."""
@@ -241,8 +301,10 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
 
     def __exit__(self, exc_type: Any, exc: BaseException | None, tb: Any) -> bool:
         ended_at = datetime.now(timezone.utc)
-        final_status = "failed" if exc is not None else (
-            "complete_with_failures" if self._condition_failures else "complete"
+        final_status = (
+            "failed"
+            if exc is not None
+            else ("complete_with_failures" if self._condition_failures else "complete")
         )
         status: dict[str, Any] = {
             "status": final_status,

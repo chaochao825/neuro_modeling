@@ -13,7 +13,25 @@ committed configs and scripts regenerate that layout.
 - Local, full-feedback, and shuffled-feedback task accuracies are indistinguishable in the completed conditions. These runs do not identify feedback alignment as the cause of behavior.
 - Homeostatic updates dominate task-plastic updates in cumulative L1 budget. The existing homeostasis ablation is not budget matched and its stability result opposes the preregistered direction.
 - The learned MD gate is a supervised Hebbian context classifier because its fit and modulatory features use true context information.
-- B1 passes only the relative `>=90% BPTT` branch; it fails the absolute accuracy threshold. BPTT has not yet been tuned as a strong upper-bound baseline.
+- The historical B1 snapshot passed only a relative branch against an untuned
+  BPTT model and failed the absolute threshold. The current evaluator reports
+  absolute performance, BPTT non-inferiority, and GRU non-inferiority as three
+  separate claims.
+- `exp07` repairs the design, but a smoke/calibration run is not confirmatory
+  evidence. P0 remains `inconclusive` until all 30 formal seeds complete with
+  exact selected-norm budget attainment. If aligned feedback does not improve
+  held-out behavior or prediction over frozen and shuffled controls, the local
+  mechanism claim must be classified as `oppose` or `inconclusive` even when a
+  matrix or tangent rank is low.
+- P0's matched homeostatic component is a yoked, one-sided inhibitory-
+  strengthening nuisance control. It guarantees exact replay across feedback
+  branches but does not establish firing-rate homeostasis, E/I balance, or
+  closed-loop stability; those require the bidirectional P4 experiments.
+- `exp08` distinguishes control-coordinate, physical-weight, mask, Dale, and
+  normalization ranks. Its full-per-synapse parameterization currently samples
+  a low-dimensional auxiliary slice, and cross-parameterization update budgets
+  are not matched; Jacobian/PR/Hankel differences across those
+  parameterizations are therefore descriptive rather than causal evidence.
 - The sequence-memory dataset was unavailable. The IBL result contains one session/animal and is descriptive only.
 
 See `../docs/integrated_method_audit_zh.md` for the cross-workstream audit and the next falsification tests.

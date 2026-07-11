@@ -65,6 +65,9 @@ def set_global_seed(seed: int, *, deterministic_torch: bool = True) -> SeedState
     if not isinstance(deterministic_torch, (bool, np.bool_)):
         raise TypeError("deterministic_torch must be boolean")
     os.environ["PYTHONHASHSEED"] = str(seed)
+    # Must be present before the first CUDA context is initialized for
+    # deterministic cuBLAS execution in BPTT/GRU baseline processes.
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
     random.seed(seed)
     np.random.seed(seed)
 

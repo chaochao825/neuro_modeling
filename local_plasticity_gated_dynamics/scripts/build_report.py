@@ -31,9 +31,17 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
         run_dir = status_path.parent
         status = json.loads(status_path.read_text(encoding="utf-8"))
         config_path = run_dir / "config.json"
-        config = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
+        config = (
+            json.loads(config_path.read_text(encoding="utf-8"))
+            if config_path.exists()
+            else {}
+        )
         manifest_path = run_dir / "manifest.json"
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+        manifest = (
+            json.loads(manifest_path.read_text(encoding="utf-8"))
+            if manifest_path.exists()
+            else {}
+        )
         run_status = status.get("status", manifest.get("status", "unknown"))
         # Older interrupted artifacts predate persisted start timestamps.  The
         # immutable run directory begins with the same UTC timestamp, so it is
@@ -44,7 +52,11 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
             or run_dir.name.split("_", maxsplit=1)[0]
         )
         planned_path = run_dir / "planned_conditions.json"
-        n_planned = len(json.loads(planned_path.read_text(encoding="utf-8"))) if planned_path.exists() else 0
+        n_planned = (
+            len(json.loads(planned_path.read_text(encoding="utf-8")))
+            if planned_path.exists()
+            else 0
+        )
         runs.append(
             {
                 "run_id": manifest.get("run_id"),
@@ -70,7 +82,9 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
                 record.setdefault("run_path", str(run_dir.resolve()))
                 record.setdefault("run_status", run_status)
                 record.setdefault("run_started_at", run_started_at)
-                records.append({key: _csv_value(value) for key, value in record.items()})
+                records.append(
+                    {key: _csv_value(value) for key, value in record.items()}
+                )
         # A top-level failure or an interrupted nonterminal run may occur after
         # some conditions were streamed.  Materialize the run state so an
         # empty latest attempt cannot silently fall back to an older success;
@@ -92,7 +106,9 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
                 ),
                 "error": status.get(
                     "error",
-                    "nonterminal run artifact" if run_status == "running" else "top-level run failure",
+                    "nonterminal run artifact"
+                    if run_status == "running"
+                    else "top-level run failure",
                 ),
                 "run_level_failure": True,
             }
@@ -108,7 +124,9 @@ def _format_number(value) -> str:
     return f"{value:.4g}" if isinstance(value, (float, np.floating)) else str(value)
 
 
-def write_report(results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summary: pd.DataFrame) -> None:
+def write_report(
+    results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summary: pd.DataFrame
+) -> None:
     lines = [
         "# Local Plasticity to Gated Low-Dimensional Dynamics",
         "",
@@ -124,7 +142,9 @@ def write_report(results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summ
     if runs.empty:
         lines.append("| none | — | 0 | 0 | 0 | 0 | 0 |")
     else:
-        for (experiment, profile), group in runs.groupby(["experiment", "profile"], dropna=False):
+        for (experiment, profile), group in runs.groupby(
+            ["experiment", "profile"], dropna=False
+        ):
             clean = int(group["status"].eq("complete").sum())
             with_failures = int(group["status"].eq("complete_with_failures").sum())
             failed = int(
@@ -153,7 +173,10 @@ def write_report(results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summ
         "",
         "## Interpretation safeguards",
         "",
-        "- BPTT is isolated as a performance baseline; local-learning models do not import autograd or optimizers and cannot load BPTT checkpoints.",
+        "- Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.",
+        "- Absolute accuracy, BPTT non-inferiority, and GRU non-inferiority are independent claims and are never merged into one decision.",
+        "- A low matrix/tangent rank without improved held-out behavior or prediction cannot support the revised mechanism.",
+        "- P0 L1 and L2 budget panels are matched separately; the non-selected norm is diagnostic and no simultaneous dual-norm match is claimed.",
         "- PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.",
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
@@ -190,7 +213,12 @@ def main() -> None:
     if args.plots:
         for script in ("core_results_plot.py", "phase_models_plot.py"):
             subprocess.run(
-                [sys.executable, str(PROJECT_ROOT / "figures" / script), "--results-root", str(results_root)],
+                [
+                    sys.executable,
+                    str(PROJECT_ROOT / "figures" / script),
+                    "--results-root",
+                    str(results_root),
+                ],
                 check=True,
                 cwd=PROJECT_ROOT,
             )

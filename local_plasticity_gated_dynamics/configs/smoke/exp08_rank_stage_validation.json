@@ -1,0 +1,56 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "latent_dim": 4,
+  "feedback_dims": [1, 4, "full"],
+  "feedback_angles_degrees": [0, 45],
+  "parameterizations": ["direct", "multiplicative", "full-per-synapse"],
+  "architecture": {
+    "name": "ei_n16_fi25_rank_stage",
+    "kind": "ei",
+    "n_units": 16,
+    "n_inputs": 3,
+    "excitatory_fraction": 0.75,
+    "connection_probability": 0.5,
+    "tau_e": 5.0,
+    "tau_i": 3.0,
+    "dt": 1.0,
+    "bulk_gain": 0.35,
+    "inhibitory_gain": 1.5,
+    "input_scale": 0.5,
+    "activation": "rectified_tanh",
+    "allow_self_connections": false,
+    "normalize_fan_in_after_update": true
+  },
+  "update": {
+    "learning_rate": 0.01,
+    "max_abs_log_step": 0.05
+  },
+  "trajectory": {
+    "train_trials": 8,
+    "test_trials": 8,
+    "time_steps": 8,
+    "input_scale": 0.4,
+    "noise_std": 0.005,
+    "initial_state_scale": 0.1
+  },
+  "rank": {
+    "rtol": 1e-8,
+    "tangent_rtol": 1e-8,
+    "atol": 1e-12,
+    "edge_chunk_size": 128
+  },
+  "jacobian_edge_quantile": 0.9,
+  "jacobian_tolerance": 1e-9,
+  "hankel": {
+    "feature_count": 8,
+    "past_lags": 2,
+    "future_lags": 2,
+    "normalize": true,
+    "n_permutations": 10,
+    "null_quantile": 0.9,
+    "rtol": 1e-8,
+    "atol": 1e-12,
+    "window_chunk_size": 32
+  }
+}
