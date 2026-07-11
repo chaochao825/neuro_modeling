@@ -1,4 +1,4 @@
-"""Aggregate immutable runs into raw_metrics.csv, summary.csv, and report.md."""
+"""Aggregate immutable runs into compressed raw metrics, claims, and a report."""
 
 from __future__ import annotations
 
@@ -16,6 +16,9 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.analysis.claims import evaluate_core_claims  # noqa: E402
+
+
+MAX_PUBLISHED_RAW_BYTES = 95 * 1024 * 1024
 
 
 def _csv_value(value):
@@ -127,6 +130,38 @@ def _read_compact_csv(path: Path) -> pd.DataFrame:
         return pd.DataFrame()
 
 
+def _raw_snapshot_path(results_root: Path) -> Path:
+    """Prefer the lossless compressed snapshot over the legacy plain CSV."""
+
+    compressed = results_root / "raw_metrics.csv.gz"
+    if compressed.exists():
+        if compressed.stat().st_size == 0:
+            raise ValueError("authoritative raw_metrics.csv.gz is empty")
+        return compressed
+    return results_root / "raw_metrics.csv"
+
+
+def write_compact_raw(results_root: Path, raw: pd.DataFrame) -> None:
+    """Write an authoritative deterministic gzip plus a local plotting cache."""
+
+    compressed = results_root / "raw_metrics.csv.gz"
+    staged = results_root / "raw_metrics.csv.gz.tmp"
+    raw.to_csv(
+        staged,
+        index=False,
+        lineterminator="\n",
+        compression={"method": "gzip", "compresslevel": 6, "mtime": 0},
+    )
+    if staged.stat().st_size >= MAX_PUBLISHED_RAW_BYTES:
+        raise ValueError(
+            "compressed raw snapshot exceeds the 95 MiB publication safety limit"
+        )
+    staged.replace(compressed)
+    # Figure scripts deliberately consume a plain CSV. It is reproducible from
+    # the tracked gzip snapshot and ignored by git to stay below host limits.
+    raw.to_csv(results_root / "raw_metrics.csv", index=False, lineterminator="\n")
+
+
 def _identity_token(value: object) -> str | None:
     """Normalize scalar identifiers without turning missing values into text."""
 
@@ -189,7 +224,7 @@ def merge_compact_snapshot(
 
     if not isinstance(results_root, Path):
         raise TypeError("results_root must be a pathlib.Path")
-    existing_raw = _read_compact_csv(results_root / "raw_metrics.csv")
+    existing_raw = _read_compact_csv(_raw_snapshot_path(results_root))
     existing_runs = _read_compact_csv(results_root / "runs.csv")
     discovered_run_keys = _run_identity(discovered_runs)
     discovered_raw_keys = _run_identity(discovered_raw)
@@ -281,9 +316,14 @@ def write_report(
         "",
         "- Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.",
         "- Absolute accuracy, BPTT non-inferiority, and GRU non-inferiority are independent claims and are never merged into one decision.",
+        "- P0 non-inferiority means retaining at least 90% of a tuned baseline, not parity or outperformance; accuracy intervals are seed-level statements, not guarantees for every seed.",
         "- Legacy exp03 is a supervised/oracle-warm-start MD upper bound: its cue, gate fit, and recurrent third factor do not satisfy the hidden-context contract, so it cannot support P2.",
         "- A low matrix/tangent rank without improved held-out behavior or prediction cannot support the revised mechanism.",
         "- P0 L1 and L2 budget panels are matched separately; the non-selected norm is diagnostic and no simultaneous dual-norm match is claimed.",
+        "- P0 task+homeostasis has one matched task component plus one matched homeostasis component, so its total component budget is twice homeostasis-only; normalization corrections are reported outside those selected component budgets.",
+        "- The P0 homeostasis control is yoked inhibitory strengthening, not closed-loop E/I stability evidence; formal normal-perturbation decay, Lyapunov, and closure-error gates remain pending P4.",
+        "- P1 cross-parameterization budgets are descriptive and unmatched; physical-rank versus credit-tangent results cannot rank parameterizations by task performance.",
+        "- Nominal feedback dimension is an upper bound on the empirical projected signal span; it is not reported as an automatically realized exact rank.",
         "- PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.",
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
@@ -296,7 +336,7 @@ def write_report(
         "",
         "## Generated artifacts",
         "",
-        "- `results/raw_metrics.csv`: every raw metric row, including failed and invalid conditions.",
+        "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
         "- `results/summary.csv`: one row per pre-registered core claim.",
         "- `results/core_results.pdf` and `results/phase_models.pdf`: script-generated data figures when applicable.",
@@ -314,7 +354,7 @@ def main() -> None:
     results_root.mkdir(parents=True, exist_ok=True)
     discovered_raw, discovered_runs = collect_runs(results_root)
     raw, runs = merge_compact_snapshot(results_root, discovered_raw, discovered_runs)
-    raw.to_csv(results_root / "raw_metrics.csv", index=False)
+    write_compact_raw(results_root, raw)
     runs.to_csv(results_root / "runs.csv", index=False)
     summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])
     summary.to_csv(results_root / "summary.csv", index=False)

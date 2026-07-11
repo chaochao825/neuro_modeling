@@ -2,7 +2,7 @@
 
 The committed summary is an immutable snapshot of the completed runs, not a claim that every mechanism is identified.
 
-This monorepo carries the compact evidence snapshot (`raw_metrics.csv`,
+This monorepo carries the compact evidence snapshot (`raw_metrics.csv.gz`,
 `runs.csv`, `summary.csv`, the generated report, and PNG/PDF figures). The
 timestamped `results/runs/` directories and per-attempt logs remain in the
 source experiment workspace and are intentionally not duplicated here; the
@@ -17,12 +17,12 @@ committed configs and scripts regenerate that layout.
   BPTT model and failed the absolute threshold. The current evaluator reports
   absolute performance, BPTT non-inferiority, and GRU non-inferiority as three
   separate claims.
-- `exp07` repairs the design, but a smoke/calibration run is not confirmatory
-  evidence. P0 remains `inconclusive` until all 30 formal seeds complete with
-  exact selected-norm budget attainment. If aligned feedback does not improve
-  held-out behavior or prediction over frozen and shuffled controls, the local
-  mechanism claim must be classified as `oppose` or `inconclusive` even when a
-  matrix or tangent rank is low.
+- `exp07` completed all 30 formal seeds with exact selected-norm budget
+  attainment. Its six Holm-adjusted P0 claims support mechanism
+  identifiability, absolute seed-level mean accuracy, and the preregistered 90%
+  baseline-retention margins. This is not parity or outperformance: mean local
+  accuracy remains below tuned BPTT and GRU, five seeds fall below 0.85, and
+  the aligned behavioral-accuracy advantage over frozen/shuffled is small.
 - P0's matched homeostatic component is a yoked, one-sided inhibitory-
   strengthening nuisance control. It guarantees exact replay across feedback
   branches but does not establish firing-rate homeostasis, E/I balance, or
@@ -32,6 +32,14 @@ committed configs and scripts regenerate that layout.
   a low-dimensional auxiliary slice, and cross-parameterization update budgets
   are not matched; Jacobian/PR/Hankel differences across those
   parameterizations are therefore descriptive rather than causal evidence.
-- The sequence-memory dataset was unavailable. The IBL result contains one session/animal and is descriptive only.
+- The P0 primary Jacobian maximum real part is positive in all 30 seeds. Normal
+  Lyapunov, normal-perturbation decay, and formal closure error are not yet
+  available, so the complete stable E/I low-dimensional-dynamics chain remains
+  inconclusive.
+- The legacy learned MD gate uses true-context information and cannot support
+  the hidden-context claim. The sequence-memory dataset was unavailable. The
+  IBL result contains one session/animal and is descriptive only; strict P6
+  support requires at least 5 animals and 20 sessions on a leakage-free shared
+  hidden-context panel.
 
 See `../docs/integrated_method_audit_zh.md` for the cross-workstream audit and the next falsification tests.

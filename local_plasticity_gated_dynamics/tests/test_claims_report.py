@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import re
 from pathlib import Path
 
@@ -7,7 +8,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scripts.build_report import collect_runs, merge_compact_snapshot, write_report
+from scripts.build_report import (
+    collect_runs,
+    merge_compact_snapshot,
+    write_compact_raw,
+    write_report,
+)
 from src.analysis.claims import evaluate_core_claims
 from src.utils.artifacts import ExperimentRun
 
@@ -1351,6 +1357,61 @@ def test_collect_runs_handles_empty_results(tmp_path: Path) -> None:
     (tmp_path / "runs").mkdir()
     raw, runs = collect_runs(tmp_path)
     assert raw.empty and runs.empty
+
+
+def test_compact_raw_snapshot_is_lossless_deterministic_and_preferred(
+    tmp_path: Path,
+) -> None:
+    authoritative = pd.DataFrame(
+        [
+            {"run_id": "new", "metric": 1.25, "status": "complete"},
+            {"run_id": "failed", "metric": np.nan, "status": "failed"},
+        ]
+    )
+    write_compact_raw(tmp_path, authoritative)
+    compressed = tmp_path / "raw_metrics.csv.gz"
+    plain = tmp_path / "raw_metrics.csv"
+    first_bytes = compressed.read_bytes()
+    write_compact_raw(tmp_path, authoritative)
+
+    assert compressed.read_bytes() == first_bytes
+    assert not (tmp_path / "raw_metrics.csv.gz.tmp").exists()
+    pd.testing.assert_frame_equal(pd.read_csv(compressed), pd.read_csv(plain))
+    with gzip.open(compressed, "rb") as handle:
+        assert b"\r\n" not in handle.read()
+
+    second_root = tmp_path / "second-root"
+    second_root.mkdir()
+    write_compact_raw(second_root, authoritative)
+    assert (second_root / "raw_metrics.csv.gz").read_bytes() == first_bytes
+
+    pd.DataFrame([{"run_id": "stale", "metric": -1.0}]).to_csv(plain, index=False)
+    merged, _ = merge_compact_snapshot(tmp_path, pd.DataFrame(), pd.DataFrame())
+    assert set(merged["run_id"]) == {"new", "failed"}
+
+
+def test_empty_authoritative_raw_snapshot_fails_closed(tmp_path: Path) -> None:
+    pd.DataFrame([{"run_id": "legacy"}]).to_csv(
+        tmp_path / "raw_metrics.csv", index=False
+    )
+    (tmp_path / "raw_metrics.csv.gz").touch()
+
+    with pytest.raises(ValueError, match="authoritative raw_metrics.csv.gz is empty"):
+        merge_compact_snapshot(tmp_path, pd.DataFrame(), pd.DataFrame())
+
+
+def test_oversized_raw_snapshot_is_not_promoted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import scripts.build_report as build_report
+
+    monkeypatch.setattr(build_report, "MAX_PUBLISHED_RAW_BYTES", 1)
+    with pytest.raises(ValueError, match="95 MiB publication safety limit"):
+        build_report.write_compact_raw(
+            tmp_path, pd.DataFrame([{"run_id": "too-large"}])
+        )
+    assert not (tmp_path / "raw_metrics.csv.gz").exists()
+    assert (tmp_path / "raw_metrics.csv.gz.tmp").exists()
 
 
 def test_compact_snapshot_merge_preserves_history_replaces_runs_and_is_idempotent(

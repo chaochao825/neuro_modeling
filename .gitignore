@@ -10,6 +10,7 @@ __pycache__/
 trash/
 *.tmp
 *.log
+local_plasticity_gated_dynamics/results/raw_metrics.csv
 minimal_computation_original/
 minimal_computation_python/results/runs/
 

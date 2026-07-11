@@ -85,7 +85,9 @@ session-level artifact. The IBL experiment lazily imports ONE-api, selects 1–5
 public sessions, caches downloads under `data/ibl_cache/`, and analyzes only
 stimulus-pre and movement-pre windows.
 
-`results/raw_metrics.csv` retains every complete, invalid, and failed condition.
+`results/raw_metrics.csv.gz` losslessly retains every complete, invalid, and
+failed condition. The ignored uncompressed CSV is regenerated as a local
+plotting cache.
 `results/summary.csv` uses only the latest formal run attempt per experiment and
 seed for inference while preserving all earlier attempts in the raw table and
 run-coverage report. Figures compute uncertainty across seeds or sessions, never
