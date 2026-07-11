@@ -759,6 +759,52 @@ def test_thirty_seed_p1_theorem_claims_are_separate_from_behavior() -> None:
     assert all(incomplete[item].conclusion == "inconclusive" for item in p1_ids)
 
 
+def test_compact_csv_boolean_tokens_preserve_p0_and_p1_claims() -> None:
+    p0 = _p0_formal()
+    p0["budget_match_valid"] = p0["budget_match_valid"].map(
+        lambda value: "True" if value is True else value
+    )
+    p1 = _p1_formal()
+    p1["geometry_valid"] = "True"
+    claims = {
+        item.claim_id: item
+        for item in evaluate_core_claims(pd.concat([p0, p1], ignore_index=True))
+    }
+
+    assert claims["P0_overall"].conclusion == "support"
+    assert claims["P1a_masked_outer_product_identity"].conclusion == "support"
+    assert claims["P1b_credit_tangent_respects_feedback_bound"].conclusion == "support"
+    assert (
+        claims["P1c_highrank_physical_update_coexists_with_lowdim_credit"].conclusion
+        == "support"
+    )
+
+
+def test_invalid_compact_boolean_tokens_fail_closed() -> None:
+    p0 = _p0_formal()
+    p0.loc[p0["seed"].eq(29), "budget_match_valid"] = "garbage"
+    p1 = _p1_formal()
+    p1["geometry_valid"] = p1["geometry_valid"].astype(object)
+    p1.loc[p1["seed"].eq(29), "geometry_valid"] = "garbage"
+    claims = {
+        item.claim_id: item
+        for item in evaluate_core_claims(pd.concat([p0, p1], ignore_index=True))
+    }
+
+    p0_claim = claims["P0b_aligned_task_beats_shuffled"]
+    assert p0_claim.conclusion == "inconclusive"
+    assert p0_claim.n_complete == 29
+    assert p0_claim.n_failed == 1
+    assert claims["P0_overall"].conclusion == "inconclusive"
+    for claim_id in (
+        "P1a_masked_outer_product_identity",
+        "P1b_credit_tangent_respects_feedback_bound",
+        "P1c_highrank_physical_update_coexists_with_lowdim_credit",
+    ):
+        assert claims[claim_id].conclusion == "inconclusive"
+        assert claims[claim_id].n_complete == 29
+
+
 def test_phase2_claims_do_not_fallback_to_nonprimary_architecture() -> None:
     claims = {
         claim.claim_id: claim

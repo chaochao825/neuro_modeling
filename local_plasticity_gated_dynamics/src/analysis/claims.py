@@ -302,6 +302,15 @@ def _strict_boolean_requirement(
     return bool(parsed.notna().all() and parsed.eq(expected).all())
 
 
+def _strict_boolean_mask(frame: pd.DataFrame, column: str, expected: bool) -> pd.Series:
+    """Return a serialization-safe boolean selector for artifact rows."""
+
+    if column not in frame or not isinstance(expected, bool):
+        return pd.Series(False, index=frame.index, dtype=bool)
+    parsed = frame[column].map(_strict_boolean_value)
+    return parsed.notna() & parsed.eq(expected)
+
+
 def _complete(frame: pd.DataFrame) -> pd.Series:
     return _eq(frame, "status", "complete")
 
@@ -504,7 +513,7 @@ def _p0_failed_seed_ids(frame: pd.DataFrame, mask: pd.Series) -> set[int]:
         scope
         & status.eq("complete")
         & local_cell
-        & ~_eq(frame, "budget_match_valid", True)
+        & ~_strict_boolean_mask(frame, "budget_match_valid", True)
     )
     failed = (
         (scope & status.isin({"failed", "invalid"}))
@@ -2096,7 +2105,7 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         ~task_enabled & homeostasis_enabled & ~normalization_enabled & aligned
     )
     frozen = ~task_enabled & ~homeostasis_enabled & ~normalization_enabled & aligned
-    valid_budget = _eq(p0, "budget_match_valid", True)
+    valid_budget = _strict_boolean_mask(p0, "budget_match_valid", True)
     p0_complete_seed_ids_by_claim: dict[str, set[int]] = {}
     p0_failed_seed_ids_by_claim: dict[str, set[int]] = {}
 
@@ -2252,7 +2261,7 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         _eq(p1, "parameterization", "direct")
         & _eq(p1, "requested_feedback_dim", 4)
         & pd.to_numeric(_series(p1, "feedback_angle_degrees"), errors="coerce").eq(0.0)
-        & _eq(p1, "geometry_valid", True)
+        & _strict_boolean_mask(p1, "geometry_valid", True)
     )
     identity_residual, _, units = _paired_rows(
         p1,
