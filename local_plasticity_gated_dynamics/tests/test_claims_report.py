@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import json
 import re
 from pathlib import Path
 
@@ -9,9 +10,14 @@ import pandas as pd
 import pytest
 
 from scripts.build_report import (
+    PORTABLE_RUNS_ROOT,
+    REDACTED_HOST_TEXT,
+    _assert_no_host_paths,
+    _portable_run_path,
     collect_runs,
     merge_compact_snapshot,
     write_compact_raw,
+    write_compact_runs,
     write_report,
 )
 from src.analysis.claims import evaluate_core_claims
@@ -1406,6 +1412,293 @@ def test_collect_runs_handles_empty_results(tmp_path: Path) -> None:
     (tmp_path / "runs").mkdir()
     raw, runs = collect_runs(tmp_path)
     assert raw.empty and runs.empty
+
+
+def test_collect_runs_publishes_portable_paths_and_keeps_raw_runs_ignored(
+    tmp_path: Path,
+) -> None:
+    with ExperimentRun(
+        "portable_collection",
+        3,
+        {"profile": "smoke"},
+        results_root=tmp_path,
+    ) as run:
+        run.record({"metric": 1.0})
+        expected_run_id = run.run_id
+
+    raw, runs = collect_runs(tmp_path)
+    assert raw["run_id"].tolist() == [expected_run_id]
+    assert runs["run_id"].tolist() == [expected_run_id]
+    assert raw.iloc[0]["run_path"].startswith(
+        f"{PORTABLE_RUNS_ROOT}/portable_collection/seed_0003/"
+    )
+    assert runs.iloc[0]["path"] == raw.iloc[0]["run_path"]
+    assert str(tmp_path.resolve()) not in raw.iloc[0]["run_path"]
+
+    gitignore = (Path(__file__).resolve().parents[1] / ".gitignore").read_text(
+        encoding="utf-8"
+    )
+    assert "results/runs/" in gitignore.splitlines()
+
+
+@pytest.mark.parametrize(
+    ("source", "relative"),
+    [
+        (
+            "/home/user/project/results/runs/exp/seed_0000/attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            "/mnt/work/project/results/runs/exp/seed_0000/attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            r"C:\Users\user\project\results\runs\exp\seed_0000\attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            "D:/work/project/results/runs/exp/seed_0000/attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            r"\\server\share\project\results\runs\exp\seed_0000\attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            "//server/share/project/results/runs/exp/seed_0000/attempt",
+            "exp/seed_0000/attempt",
+        ),
+        ("results/runs/exp/seed_0000/attempt", "exp/seed_0000/attempt"),
+        ("runs/exp/seed_0000/attempt", "exp/seed_0000/attempt"),
+        (
+            f"{PORTABLE_RUNS_ROOT}/exp/seed_0000/attempt",
+            "exp/seed_0000/attempt",
+        ),
+        (
+            rf"{PORTABLE_RUNS_ROOT}\exp\seed_0000\attempt",
+            "exp/seed_0000/attempt",
+        ),
+        ("/srv/private/runs/patient-007/session", None),
+        (r"\\server\share\patient-007\session", None),
+        ("../results/runs/exp/seed_0000/attempt", None),
+        ("runs/../private", None),
+        ("other/results/runs/exp/seed_0000/attempt", None),
+    ],
+)
+def test_portable_run_path_accepts_only_project_run_locations(
+    source: str, relative: str | None
+) -> None:
+    portable = _portable_run_path(source)
+    if relative is None:
+        assert str(portable).startswith(f"{PORTABLE_RUNS_ROOT}/_sanitized/")
+    else:
+        assert portable == f"{PORTABLE_RUNS_ROOT}/{relative}"
+
+
+def test_portable_run_path_preserves_missing_and_empty_values() -> None:
+    assert _portable_run_path(None) is None
+    assert _portable_run_path("") == ""
+    assert pd.isna(_portable_run_path(np.nan))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        json.dumps({"path": r"\\server\share name\secret,old.txt"}),
+        json.dumps({"path": r"C:\Users\John Doe\secret,old.txt"}),
+        json.dumps({"path": "/home/John Doe/secret,old.txt"}),
+    ],
+)
+def test_final_path_audit_independently_rejects_json_escaped_paths(
+    text: str,
+) -> None:
+    with pytest.raises(ValueError, match="column 'details', row 0"):
+        _assert_no_host_paths(pd.DataFrame([{"details": text}]))
+
+
+def test_collect_runs_redacts_paths_inside_failed_condition_text(
+    tmp_path: Path,
+) -> None:
+    normal_text = (
+        "mirror https://example.org/data; ratio 1/2; support/oppose; "
+        "relative ./file ../other ~/cache relative/path"
+    )
+    with ExperimentRun(
+        "portable_failure",
+        4,
+        {"profile": "smoke"},
+        results_root=tmp_path,
+    ) as run:
+        run.mark_condition_failure(
+            FileNotFoundError(
+                "missing /mnt/John Doe/trials,private.csv; "
+                "cache C:/Users/John Doe/cache; "
+                rf"UNC \\server\share\private; {normal_text}"
+            ),
+            condition="runtime",
+        )
+        run.record_failed_condition(
+            {
+                "failure_reason": r"invalid cache D:\private model\model,old.bin",
+                "note": normal_text,
+                "details": {
+                    "unc": r"\\server\share name\secret,old.txt",
+                    "relative": "relative/file.txt",
+                },
+            },
+            condition="scientific",
+        )
+
+    raw, _ = collect_runs(tmp_path)
+    error = raw.set_index("condition").loc["runtime", "error"]
+    reason = raw.set_index("condition").loc["scientific", "failure_reason"]
+    redacted_pattern = rf"{re.escape(REDACTED_HOST_TEXT)}/[0-9a-f]{{24}}"
+    assert re.fullmatch(redacted_pattern, error)
+    assert re.fullmatch(redacted_pattern, reason)
+    assert raw.set_index("condition").loc["scientific", "note"] == normal_text
+    details = json.loads(raw.set_index("condition").loc["scientific", "details"])
+    assert re.fullmatch(redacted_pattern, details["unc"])
+    assert details["relative"] == "relative/file.txt"
+    assert "/mnt/" not in error
+    assert "C:/" not in error
+    assert "\\\\server\\" not in error
+
+
+def test_merge_and_write_sanitize_existing_and_discovered_host_paths(
+    tmp_path: Path,
+) -> None:
+    existing_raw = pd.DataFrame(
+        [
+            {
+                "run_id": "posix-run",
+                "metric": 1.0,
+                "run_path": (
+                    "/home/researcher/project/results/runs/exp_posix/"
+                    "seed_0000/attempt_a"
+                ),
+                "details": json.dumps(
+                    {
+                        "unc": r"\\server\share name\secret,old.txt",
+                        "relative": "relative/file.txt",
+                    }
+                ),
+            }
+        ]
+    )
+    existing_runs = pd.DataFrame(
+        [
+            {
+                "run_id": "posix-run",
+                "status": "complete",
+                "path": (
+                    "/home/researcher/project/results/runs/exp_posix/"
+                    "seed_0000/attempt_a"
+                ),
+            }
+        ]
+    )
+    existing_raw.to_csv(tmp_path / "raw_metrics.csv", index=False)
+    existing_runs.to_csv(tmp_path / "runs.csv", index=False)
+    discovered_raw = pd.DataFrame(
+        [
+            {
+                "run_id": "windows-run",
+                "metric": 2.0,
+                "run_path": (
+                    r"C:\Users\Researcher\project\results\runs\exp_windows"
+                    r"\seed_0001\attempt_b"
+                ),
+                "error": "missing /mnt/John Doe/data/trials,private.csv",
+            },
+            {
+                "run_id": "opaque-run",
+                "metric": 3.0,
+                "run_path": r"E:\private\legacy-artifact",
+                "failure_reason": r"cache D:\private model\model,old.bin unavailable",
+                "note": (
+                    "mirror https://example.org/a; ratio 1/2; support/oppose; "
+                    "relative ./file ../other ~/cache relative/path"
+                ),
+                "details": {
+                    "unc": r"\\server\share name\secret,old.txt",
+                    "windows": r"C:\Users\John Doe\secret,old.txt",
+                    "posix": "/home/John Doe/secret,old.txt",
+                    "relative": "relative/path.txt",
+                    "url": "https://example.org/data/file.txt",
+                },
+            },
+        ]
+    )
+    discovered_runs = pd.DataFrame(
+        [
+            {
+                "run_id": "windows-run",
+                "status": "complete",
+                "path": (
+                    r"E:\checkout\results\runs\exp_windows"
+                    r"\seed_0001\attempt_b"
+                ),
+            },
+            {
+                "run_id": "opaque-run",
+                "status": "failed",
+                "path": r"C:\Users\Researcher\opaque-artifact",
+            },
+        ]
+    )
+
+    raw, runs = merge_compact_snapshot(tmp_path, discovered_raw, discovered_runs)
+    assert set(raw["run_id"]) == {"posix-run", "windows-run", "opaque-run"}
+    assert set(runs["run_id"]) == {"posix-run", "windows-run", "opaque-run"}
+    assert raw.set_index("run_id").loc["posix-run", "run_path"] == (
+        f"{PORTABLE_RUNS_ROOT}/exp_posix/seed_0000/attempt_a"
+    )
+    assert raw.set_index("run_id").loc["windows-run", "run_path"] == (
+        f"{PORTABLE_RUNS_ROOT}/exp_windows/seed_0001/attempt_b"
+    )
+    assert (
+        raw.set_index("run_id")
+        .loc["opaque-run", "run_path"]
+        .startswith(f"{PORTABLE_RUNS_ROOT}/_sanitized/")
+    )
+    redacted_pattern = rf"{re.escape(REDACTED_HOST_TEXT)}/[0-9a-f]{{24}}"
+    assert re.fullmatch(
+        redacted_pattern,
+        raw.set_index("run_id").loc["windows-run", "error"],
+    )
+    assert re.fullmatch(
+        redacted_pattern,
+        raw.set_index("run_id").loc["opaque-run", "failure_reason"],
+    )
+    assert raw.set_index("run_id").loc["opaque-run", "note"] == (
+        "mirror https://example.org/a; ratio 1/2; support/oppose; "
+        "relative ./file ../other ~/cache relative/path"
+    )
+    details = json.loads(raw.set_index("run_id").loc["opaque-run", "details"])
+    for key in ("unc", "windows", "posix"):
+        assert re.fullmatch(redacted_pattern, details[key])
+    assert details["relative"] == "relative/path.txt"
+    assert details["url"] == "https://example.org/data/file.txt"
+    historical_details = json.loads(raw.set_index("run_id").loc["posix-run", "details"])
+    assert re.fullmatch(redacted_pattern, historical_details["unc"])
+    assert historical_details["relative"] == "relative/file.txt"
+
+    write_compact_raw(tmp_path, raw)
+    write_compact_runs(tmp_path, runs)
+    raw_text = (tmp_path / "raw_metrics.csv").read_text(encoding="utf-8")
+    runs_text = (tmp_path / "runs.csv").read_text(encoding="utf-8")
+    compressed_text = gzip.decompress(
+        (tmp_path / "raw_metrics.csv.gz").read_bytes()
+    ).decode("utf-8")
+    for published in (raw_text, runs_text, compressed_text):
+        assert "/home/" not in published
+        assert "/mnt/" not in published
+        assert "C:\\Users\\" not in published
+        assert "C:/Users/" not in published
+        assert "D:\\" not in published
+        assert "E:\\" not in published
+        assert "\\\\server\\" not in published
+        assert published.count(PORTABLE_RUNS_ROOT) >= 3
 
 
 def test_compact_raw_snapshot_is_lossless_deterministic_and_preferred(

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -19,12 +21,177 @@ from src.analysis.claims import evaluate_core_claims  # noqa: E402
 
 
 MAX_PUBLISHED_RAW_BYTES = 95 * 1024 * 1024
+PORTABLE_RUNS_ROOT = "${CORE_PROJECT_ROOT}/results/runs"
+REDACTED_HOST_TEXT = "${REDACTED_HOST_TEXT}"
+_PORTABLE_SEGMENT = re.compile(r"[A-Za-z0-9._@+=-]+\Z")
+_HOST_ABSOLUTE_PATHS = (
+    re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]", flags=re.IGNORECASE),
+    re.compile(r"(?<![A-Za-z0-9_\\])\\\\[^\\/\s]+[\\/]"),
+    re.compile(r"(?<![A-Za-z0-9_:])//[^/\s]+/"),
+    re.compile(r"(?<![A-Za-z0-9_:$}/.~])/(?!/)[^\s/]+"),
+)
+_HOST_PATH_AUDIT = (
+    re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[\\/]+", flags=re.IGNORECASE),
+    re.compile(r"(?<![A-Za-z0-9_:])(?:\\{2,}|/{2})[^\\/\s]+[\\/]+"),
+    re.compile(r"(?<![A-Za-z0-9_:$}/.~])/(?!/)[A-Za-z0-9._~-]+"),
+)
 
 
 def _csv_value(value):
     if isinstance(value, (dict, list, tuple)):
-        return json.dumps(value, ensure_ascii=False, sort_keys=True)
+        return json.dumps(
+            _redact_nested_host_paths(value),
+            ensure_ascii=False,
+            sort_keys=True,
+            default=str,
+        )
     return value
+
+
+def _portable_run_path(value: object) -> object:
+    """Remove machine-specific prefixes from a published run path.
+
+    Run artifacts remain in ignored local ``results/runs`` directories.  The
+    compact snapshots retain their relative artifact location beneath a
+    symbolic project root, so moving a snapshot between Windows and POSIX
+    hosts cannot publish either host's absolute checkout path.  An unusual
+    legacy path that has no recognizable ``runs`` component is represented by
+    a deterministic digest instead of leaking or silently coalescing it.
+    """
+
+    if value is None or (
+        not isinstance(value, (dict, list, tuple)) and bool(pd.isna(value))
+    ):
+        return value
+    original = str(value).strip()
+    if not original:
+        return original
+    normalized = original.replace("\\", "/")
+    folded = normalized.casefold()
+    portable_folded = PORTABLE_RUNS_ROOT.casefold()
+    is_host_absolute = normalized.startswith("/") or bool(
+        re.match(r"[A-Za-z]:/", normalized)
+    )
+
+    suffix: str | None = None
+    if folded == portable_folded:
+        suffix = ""
+    elif folded.startswith(portable_folded + "/"):
+        suffix = normalized[len(PORTABLE_RUNS_ROOT) + 1 :]
+    elif is_host_absolute:
+        for marker in ("/results/runs/",):
+            offset = folded.rfind(marker)
+            if offset >= 0:
+                suffix = normalized[offset + len(marker) :]
+                break
+        if suffix is None and folded.endswith("/results/runs"):
+            suffix = ""
+    else:
+        for marker in ("results/runs/", "runs/"):
+            if folded.startswith(marker):
+                suffix = normalized[len(marker) :]
+                break
+        if suffix is None and folded in ("results/runs", "runs"):
+            suffix = ""
+
+    parts = [] if suffix is None else [part for part in suffix.split("/") if part]
+    if suffix is not None and all(
+        part not in {".", ".."} and _PORTABLE_SEGMENT.fullmatch(part) for part in parts
+    ):
+        return PORTABLE_RUNS_ROOT + (f"/{'/'.join(parts)}" if parts else "")
+
+    digest = hashlib.sha256(original.encode("utf-8")).hexdigest()[:24]
+    return f"{PORTABLE_RUNS_ROOT}/_sanitized/{digest}"
+
+
+def _portable_discovered_run_path(run_dir: Path, results_root: Path) -> str:
+    """Build a portable path directly from a discovered artifact directory."""
+
+    try:
+        relative = run_dir.relative_to(results_root / "runs")
+    except ValueError as error:
+        raise ValueError("discovered run directory escaped results/runs") from error
+    return str(_portable_run_path(f"runs/{relative.as_posix()}"))
+
+
+def _redact_host_text(text: str) -> str:
+    """Replace a path-bearing text unit without retaining ambiguous fragments."""
+
+    if not any(pattern.search(text) for pattern in _HOST_ABSOLUTE_PATHS):
+        return text
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()[:24]
+    return f"{REDACTED_HOST_TEXT}/{digest}"
+
+
+def _redact_nested_host_paths(value: object) -> object:
+    """Recursively redact before JSON escaping can obscure UNC markers."""
+
+    if isinstance(value, Path):
+        return _redact_host_text(str(value))
+    if isinstance(value, str):
+        return _redact_host_text(value)
+    if isinstance(value, dict):
+        return {
+            str(_redact_nested_host_paths(key)): _redact_nested_host_paths(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_redact_nested_host_paths(item) for item in value]
+    return value
+
+
+def _redact_host_paths(value: object) -> object:
+    """Redact scalar or compound host paths at the compact publication boundary."""
+
+    if isinstance(value, str) and value.lstrip().startswith(("{", "[")):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        else:
+            if isinstance(decoded, (dict, list)):
+                redacted = _redact_nested_host_paths(decoded)
+                return json.dumps(
+                    redacted,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    default=str,
+                )
+    redacted = _redact_nested_host_paths(value)
+    if isinstance(value, (dict, list, tuple)):
+        return json.dumps(redacted, ensure_ascii=False, sort_keys=True, default=str)
+    return redacted
+
+
+def _assert_no_host_paths(frame: pd.DataFrame) -> None:
+    """Fail closed if a compact frame still contains a host absolute path."""
+
+    for column in frame:
+        for index, value in frame[column].items():
+            if not isinstance(value, str) and isinstance(
+                value, (Path, dict, list, tuple)
+            ):
+                value = json.dumps(value, ensure_ascii=False, default=str)
+            if isinstance(value, str) and any(
+                pattern.search(value) for pattern in _HOST_PATH_AUDIT
+            ):
+                raise ValueError(
+                    "absolute host path remained in compact snapshot at "
+                    f"column {column!r}, row {index!r}"
+                )
+
+
+def _sanitize_compact_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return a copy containing neither host paths nor host-path fragments."""
+
+    sanitized = frame.copy()
+    for column in ("run_path", "path"):
+        if column in sanitized:
+            sanitized[column] = sanitized[column].map(_portable_run_path)
+    for column in sanitized.columns.difference(["run_path", "path"]):
+        sanitized[column] = sanitized[column].map(_redact_host_paths)
+    _assert_no_host_paths(sanitized)
+    return sanitized
 
 
 def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -32,6 +199,7 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     runs = []
     for status_path in sorted((results_root / "runs").glob("**/status.json")):
         run_dir = status_path.parent
+        portable_run_path = _portable_discovered_run_path(run_dir, results_root)
         status = json.loads(status_path.read_text(encoding="utf-8"))
         config_path = run_dir / "config.json"
         config = (
@@ -72,7 +240,7 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "n_planned": n_planned,
                 "condition_failures": status.get("condition_failures", 0),
                 "condition_invalid": status.get("condition_invalid", 0),
-                "path": str(run_dir.resolve()),
+                "path": portable_run_path,
             }
         )
         metrics_path = run_dir / "metrics.jsonl"
@@ -82,7 +250,7 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
                     continue
                 record = json.loads(line)
                 record.setdefault("profile", config.get("profile", "unspecified"))
-                record.setdefault("run_path", str(run_dir.resolve()))
+                record["run_path"] = portable_run_path
                 record.setdefault("run_status", run_status)
                 record.setdefault("run_started_at", run_started_at)
                 records.append(
@@ -99,7 +267,7 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "seed": config.get("seed"),
                 "recorded_at": status.get("ended_at") or run_started_at,
                 "profile": config.get("profile", "unspecified"),
-                "run_path": str(run_dir.resolve()),
+                "run_path": portable_run_path,
                 "run_status": run_status,
                 "run_started_at": run_started_at,
                 "status": "failed",
@@ -118,7 +286,9 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
             records.append(
                 {key: _csv_value(value) for key, value in run_failure.items()}
             )
-    return pd.DataFrame.from_records(records), pd.DataFrame.from_records(runs)
+    return _sanitize_compact_frame(
+        pd.DataFrame.from_records(records)
+    ), _sanitize_compact_frame(pd.DataFrame.from_records(runs))
 
 
 def _read_compact_csv(path: Path) -> pd.DataFrame:
@@ -144,6 +314,7 @@ def _raw_snapshot_path(results_root: Path) -> Path:
 def write_compact_raw(results_root: Path, raw: pd.DataFrame) -> None:
     """Write an authoritative deterministic gzip plus a local plotting cache."""
 
+    raw = _sanitize_compact_frame(raw)
     compressed = results_root / "raw_metrics.csv.gz"
     staged = results_root / "raw_metrics.csv.gz.tmp"
     raw.to_csv(
@@ -160,6 +331,13 @@ def write_compact_raw(results_root: Path, raw: pd.DataFrame) -> None:
     # Figure scripts deliberately consume a plain CSV. It is reproducible from
     # the tracked gzip snapshot and ignored by git to stay below host limits.
     raw.to_csv(results_root / "raw_metrics.csv", index=False, lineterminator="\n")
+
+
+def write_compact_runs(results_root: Path, runs: pd.DataFrame) -> None:
+    """Write run coverage with the same portable-path publication boundary."""
+
+    runs = _sanitize_compact_frame(runs)
+    runs.to_csv(results_root / "runs.csv", index=False, lineterminator="\n")
 
 
 def _identity_token(value: object) -> str | None:
@@ -224,8 +402,14 @@ def merge_compact_snapshot(
 
     if not isinstance(results_root, Path):
         raise TypeError("results_root must be a pathlib.Path")
-    existing_raw = _read_compact_csv(_raw_snapshot_path(results_root))
-    existing_runs = _read_compact_csv(results_root / "runs.csv")
+    existing_raw = _sanitize_compact_frame(
+        _read_compact_csv(_raw_snapshot_path(results_root))
+    )
+    existing_runs = _sanitize_compact_frame(
+        _read_compact_csv(results_root / "runs.csv")
+    )
+    discovered_raw = _sanitize_compact_frame(discovered_raw)
+    discovered_runs = _sanitize_compact_frame(discovered_runs)
     discovered_run_keys = _run_identity(discovered_runs)
     discovered_raw_keys = _run_identity(discovered_raw)
     if discovered_run_keys.isna().any() or discovered_raw_keys.isna().any():
@@ -363,7 +547,7 @@ def main() -> None:
     discovered_raw, discovered_runs = collect_runs(results_root)
     raw, runs = merge_compact_snapshot(results_root, discovered_raw, discovered_runs)
     write_compact_raw(results_root, raw)
-    runs.to_csv(results_root / "runs.csv", index=False, lineterminator="\n")
+    write_compact_runs(results_root, runs)
     summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)

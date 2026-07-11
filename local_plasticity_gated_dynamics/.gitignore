@@ -19,6 +19,8 @@ results/*.pdf
 !results/core_results.pdf
 !results/phase_models.png
 !results/phase_models.pdf
+!results/hidden_context.png
+!results/hidden_context.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/
