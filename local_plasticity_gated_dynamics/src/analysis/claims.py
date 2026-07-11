@@ -2259,7 +2259,7 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
     p1 = formal.loc[_eq(formal, "experiment", "exp08_rank_stage_validation")].copy()
     p1_primary = (
         _eq(p1, "parameterization", "direct")
-        & _eq(p1, "requested_feedback_dim", 4)
+        & pd.to_numeric(_series(p1, "requested_feedback_dim"), errors="coerce").eq(4.0)
         & pd.to_numeric(_series(p1, "feedback_angle_degrees"), errors="coerce").eq(0.0)
         & _strict_boolean_mask(p1, "geometry_valid", True)
     )

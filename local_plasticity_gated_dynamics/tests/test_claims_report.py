@@ -765,6 +765,7 @@ def test_compact_csv_boolean_tokens_preserve_p0_and_p1_claims() -> None:
         lambda value: "True" if value is True else value
     )
     p1 = _p1_formal()
+    p1["requested_feedback_dim"] = "4"
     p1["geometry_valid"] = "True"
     claims = {
         item.claim_id: item
