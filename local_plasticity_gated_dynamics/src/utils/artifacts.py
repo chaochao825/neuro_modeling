@@ -304,7 +304,11 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         final_status = (
             "failed"
             if exc is not None
-            else ("complete_with_failures" if self._condition_failures else "complete")
+            else (
+                "complete_with_failures"
+                if self._condition_failures or self._condition_invalid
+                else "complete"
+            )
         )
         status: dict[str, Any] = {
             "status": final_status,

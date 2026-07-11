@@ -32,9 +32,9 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp08_*.py` are executable entry points as implementation advances. `exp07`
+`exp09_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
-effective dimensions. Formal runs write immutable run
+effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit. Formal runs write immutable run
 folders under `results/runs/`. `scripts/build_report.py` aggregates all statuses
 (including failures) into `results/summary.csv` and `results/report.md`.
 
@@ -62,8 +62,22 @@ override, and a results root. For example:
   --config configs\formal\exp07_mechanism_identifiability.json --results-root results
 .\.venv\Scripts\python.exe experiments\exp08_rank_stage_validation.py `
   --config configs\formal\exp08_rank_stage_validation.json --results-root results
+.\.venv\Scripts\python.exe experiments\exp09_hidden_context_gate.py `
+  --config configs\formal\exp09_hidden_context_gate.json --results-root results
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
+
+`exp09` separates cue observations, task-facing inputs, and evaluation truth
+into immutable capabilities. The learned HMM and MD-like recurrent belief gate
+fit cue episodes only; the supervised gate is an ineligible upper bound, and
+the oracle knows the generative q/h values but never the realized state.
+The MD candidate is a named hybrid—causal two-slice local soft counts with
+Hebbian lag-1--5 moment shrinkage—and its component parameter estimates are
+saved separately to avoid attributing results to a pure soft-count rule.
+Clamp, one-trial delay, and trajectory derangement are applied after fitting to
+the frozen MD belief trajectory. This is deliberately a gate-only behavioral
+benchmark: it tests hidden-context inference and effective control, not yet a
+coupled N=256/512 recurrent PFC E/I implementation.
 
 For `exp07`, normalization is an explicit causal axis rather than a hidden
 side effect. Each L1/L2 panel contains task-only feedback geometries plus

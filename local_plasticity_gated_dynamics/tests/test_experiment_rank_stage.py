@@ -244,7 +244,7 @@ def test_exp08_smoke_retains_complete_grid_and_audit_contract(tmp_path: Path) ->
         if record["parameterization"] != "full-per-synapse"
     )
     status = json.loads((run_path / "status.json").read_text(encoding="utf-8"))
-    assert status["status"] == "complete"
+    assert status["status"] == "complete_with_failures"
     assert status["condition_failures"] == 0
     assert status["condition_invalid"] == 3
 

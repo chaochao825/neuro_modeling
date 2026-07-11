@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from figures.core_results_plot import _latest_attempt, plot_core_results
+from figures.hidden_context_plot import plot_hidden_context
 from figures.phase_models_plot import _complete_profile, plot_phase_models
 from figures.plot_style import save_figure
 
@@ -27,8 +28,10 @@ def test_saved_figure_bytes_are_deterministic(tmp_path: Path) -> None:
 def test_plot_functions_accept_empty_and_minimal_bound_data(tmp_path: Path) -> None:
     empty_core = plot_core_results(pd.DataFrame())
     empty_phase = plot_phase_models(pd.DataFrame())
+    empty_hidden = plot_hidden_context(pd.DataFrame())
     assert len(empty_core.axes) == 4
     assert len(empty_phase.axes) == 4
+    assert len(empty_hidden.axes) == 4
     minimal = pd.DataFrame(
         [
             {

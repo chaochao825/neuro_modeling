@@ -1,0 +1,46 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "cue_reliabilities": [0.55, 0.70, 0.85, 1.0],
+  "context_hazards": [0.01, 0.05, 0.10, 0.20],
+  "task": {
+    "n_episodes": 12,
+    "trials_per_episode": 100,
+    "dt_ms": 100,
+    "cue_ms": 100,
+    "sensory_ms": 400,
+    "delay_ms": 100,
+    "response_ms": 100,
+    "coherence_values": [-0.5, -0.25, 0.25, 0.5],
+    "sensory_noise_std": 1.0,
+    "input_scale": 1.0,
+    "response_target": "choice"
+  },
+  "outer_test_fraction": 0.3333333333333333,
+  "validation_fraction": 0.25,
+  "learned_hmm": {
+    "max_iterations": 50,
+    "tolerance": 1e-7,
+    "min_probability": 1e-6
+  },
+  "md_gate": {
+    "learning_rate": 0.03,
+    "inverse_temperature": 1.2,
+    "pseudocount": 0.05,
+    "n_passes": 2
+  },
+  "supervised_gate": {
+    "ridge": 0.001
+  },
+  "switch_metrics": {
+    "max_latency": 5,
+    "sustain_trials": 2,
+    "posterior_threshold": 0.8,
+    "minimum_state_duration": 5,
+    "match_tolerance": 1,
+    "minimum_eligible_switches": 1
+  },
+  "interventions": {
+    "delay_trials": 1
+  }
+}

@@ -107,6 +107,18 @@ def test_artifact_top_level_exception_is_persisted(tmp_path: Path) -> None:
     assert status["error_type"] == "ValueError"
 
 
+def test_invalid_only_artifact_is_not_reported_as_clean(tmp_path: Path) -> None:
+    with ExperimentRun("exp", 0, {}, results_root=tmp_path) as run:
+        run.register_conditions([{"condition": "undefined"}])
+        run.mark_condition_invalid("scientifically undefined", condition="undefined")
+        path = run.path
+
+    status = json.loads((path / "status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "complete_with_failures"
+    assert status["condition_failures"] == 0
+    assert status["condition_invalid"] == 1
+
+
 def test_running_artifact_persists_start_time(tmp_path: Path) -> None:
     run = ExperimentRun("exp", 0, {}, results_root=tmp_path)
     try:

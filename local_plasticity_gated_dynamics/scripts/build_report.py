@@ -323,6 +323,12 @@ def write_report(
         "- P0 task+homeostasis has one matched task component plus one matched homeostasis component, so its total component budget is twice homeostasis-only; normalization corrections are reported outside those selected component budgets.",
         "- The P0 homeostasis control is yoked inhibitory strengthening, not closed-loop E/I stability evidence; formal normal-perturbation decay, Lyapunov, and closure-error gates remain pending P4.",
         "- P1 cross-parameterization budgets are descriptive and unmatched; physical-rank versus credit-tangent results cannot rank parameterizations by task performance.",
+        "- P2 learned-HMM and MD-like gates receive cue observations rather than realized context. Learned-HMM fitting uses legal train-episode batch smoothing, while every held-out belief trajectory is causal and frozen before truth scoring.",
+        "- P2 supervised context inference is an explicitly ineligible upper bound. The oracle filter knows q/h but never receives realized state or switch boundaries.",
+        "- P2 q/h cells are paired within seed and then equally averaged; post-fit clamp, delay, and shuffle interventions reuse the intact MD checkpoint and readout.",
+        "- The P2 MD candidate is specifically causal two-slice local soft counts with Hebbian lag-1--5 moment shrinkage; it is not evidence for a pure soft-count learner.",
+        "- P2_overall is a gate-only belief/effective-control stage gate. It cannot support coupled N=256/N=512 PFC/E/I dynamics, recurrent three-factor credit assignment, or homeostasis.",
+        "- P2 energy_proxy_per_trial measures belief confidence and trajectory change, not physical energy consumption; P2i is diagnostic and excluded from P2_overall.",
         "- Nominal feedback dimension is an upper bound on the empirical projected signal span; it is not reported as an automatically realized exact rank.",
         "- PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.",
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
@@ -339,7 +345,7 @@ def write_report(
         "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
         "- `results/summary.csv`: one row per pre-registered core claim.",
-        "- `results/core_results.pdf` and `results/phase_models.pdf`: script-generated data figures when applicable.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, and `results/hidden_context.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -362,7 +368,11 @@ def main() -> None:
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
     if args.plots:
-        for script in ("core_results_plot.py", "phase_models_plot.py"):
+        for script in (
+            "core_results_plot.py",
+            "phase_models_plot.py",
+            "hidden_context_plot.py",
+        ):
             subprocess.run(
                 [
                     sys.executable,

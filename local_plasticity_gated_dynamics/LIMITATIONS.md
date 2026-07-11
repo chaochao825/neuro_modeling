@@ -41,5 +41,13 @@ committed configs and scripts regenerate that layout.
   IBL result contains one session/animal and is descriptive only; strict P6
   support requires at least 5 animals and 20 sessions on a leakage-free shared
   hidden-context panel.
+- `exp09` repairs the hidden-context leakage at the gate-only level and adds
+  cue-only HMM/MD inference plus frozen post-fit interventions. The MD
+  candidate combines causal two-slice soft counts with 80% Hebbian multi-lag
+  moment shrinkage when the cue process is identifiable; it is not a pure
+  recurrent soft-count mechanism. It does not yet
+  couple that belief gate to the local-plasticity N=256/N=512 recurrent PFC/E/I
+  models, so even positive P2 gate results cannot by themselves establish the
+  complete credit-assignment-to-recurrent-dynamics mechanism.
 
 See `../docs/integrated_method_audit_zh.md` for the cross-workstream audit and the next falsification tests.

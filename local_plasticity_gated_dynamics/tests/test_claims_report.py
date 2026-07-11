@@ -278,7 +278,7 @@ def test_missing_formal_evidence_is_explicitly_inconclusive() -> None:
         ]
     )
     claims = evaluate_core_claims(raw)
-    assert len(claims) == 23
+    assert len(claims) == 36
     assert {claim.conclusion for claim in claims} == {"inconclusive"}
     assert {
         "A1_rank_matches_feedback",
@@ -405,7 +405,9 @@ def test_unrelated_phase1_failures_do_not_contaminate_required_panels() -> None:
 
 def test_holm_is_applied_across_full_registered_family() -> None:
     claims = evaluate_core_claims(_phase1_formal())
-    statistical_claims = [item for item in claims if item.claim_id != "P0_overall"]
+    derived = {"P0_overall", "P2_overall"}
+    statistical_claims = [item for item in claims if item.claim_id not in derived]
+    assert len(statistical_claims) == 34
     adjusted_pairs = []
     for claim in statistical_claims:
         if claim.p_value is None:

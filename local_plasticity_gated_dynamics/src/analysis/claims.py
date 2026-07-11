@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 
 from src.analysis.model_comparison import paired_bootstrap, paired_wilcoxon
+from src.analysis.p2_protocol import FORMAL_P2_PROTOCOL_ID
 
 
 SEED_PLAN = 20
@@ -31,6 +32,44 @@ P0_REQUIRED_CLAIMS = (
     "P0d_local_absolute_accuracy",
     "P0e_local_noninferior_tuned_bptt",
     "P0f_local_noninferior_tuned_gru",
+)
+P2_SEED_PLAN = 30
+P2_PLANNED_SEEDS = frozenset(range(P2_SEED_PLAN))
+P2_Q = (0.55, 0.70, 0.85, 1.0)
+P2_H = (0.01, 0.05, 0.10, 0.20)
+P2_GATES = (
+    "oracle_bayes",
+    "supervised_upper_bound",
+    "learned_hmm",
+    "md_recurrent_belief",
+    "no_gate",
+)
+P2_INTERVENTIONS = ("clamp", "delay", "shuffle")
+P2_PRIMARY_CLAIMS = (
+    "P2a_hmm_context_nll",
+    "P2b_md_context_nll",
+    "P2c_md_context_brier",
+    "P2d_md_calibration",
+    "P2e_md_switch_latency",
+    "P2f_md_false_switch",
+    "P2g_md_behavior",
+    "P2h_md_retains_oracle_gain",
+    "P2i_md_energy",
+    "P2j_clamp_causal",
+    "P2k_delay_causal",
+    "P2l_shuffle_causal",
+)
+P2_REQUIRED_CLAIMS = (
+    "P2b_md_context_nll",
+    "P2c_md_context_brier",
+    "P2d_md_calibration",
+    "P2e_md_switch_latency",
+    "P2f_md_false_switch",
+    "P2g_md_behavior",
+    "P2h_md_retains_oracle_gain",
+    "P2j_clamp_causal",
+    "P2k_delay_causal",
+    "P2l_shuffle_causal",
 )
 
 
@@ -705,6 +744,819 @@ def _p0_overall_gate(
             "at least one opposes; otherwise inconclusive"
         ),
         note=f"non-inferential stage gate; {audit}",
+    )
+
+
+@dataclass(frozen=True)
+class _StrictP2Panel:
+    """Leakage- and pairing-validated formal hidden-context seed panel."""
+
+    frame: pd.DataFrame
+    complete_seed_ids: frozenset[int]
+    failed_seed_ids: frozenset[int]
+    issues: tuple[str, ...]
+
+
+_P2_METRICS = (
+    "context_nll",
+    "context_brier",
+    "context_ece",
+    "switch_latency_trials",
+    "false_switch_rate",
+    "behavior_balanced_accuracy",
+    "energy_proxy_per_trial",
+)
+_P2_COMMON_BOOLEAN_PROVENANCE = {
+    "hidden_context_task": True,
+    "cue_encodes_observation_not_state": True,
+    "gate_test_accessed_true_context": False,
+    "third_factor_accessed_true_context": False,
+    "oracle_warm_start_used": False,
+    "md_fit_used_context_bias": False,
+    "gate_fit_accessed_task_target": False,
+    "gate_test_accessed_task_target": False,
+    "gate_test_future_observations_accessed": False,
+    "state_label_alignment_accessed_true_context": False,
+    "test_switch_boundaries_accessed_by_model": False,
+    "preprocessing_fit_train_only": True,
+    "hyperparameters_preregistered": True,
+    "dev_used_for_selection": False,
+    "train_dev_test_episode_disjoint": True,
+    "belief_online_causal": True,
+    "predictions_frozen_before_truth_scoring": True,
+}
+_P2_PAIRING_IDENTIFIERS = (
+    "random_tape_id",
+    "hidden_state_tape_id",
+    "observation_tape_id",
+    "task_tape_id",
+    "noise_tape_id",
+    "network_initialization_id",
+    "split_id",
+    "readout_fit_data_id",
+    "readout_protocol_id",
+)
+_P2_INTERVENTION_PROVENANCE = {
+    "intervention_postfit": True,
+    "intervention_reuses_intact_checkpoint": True,
+    "intervention_reuses_intact_readout": True,
+    "intervention_permutation_accessed_true_context": False,
+}
+
+
+def _p2_expected_cells() -> frozenset[tuple[float, float, str, str]]:
+    base = {
+        (reliability, hazard, gate, "none")
+        for reliability in P2_Q
+        for hazard in P2_H
+        for gate in P2_GATES
+    }
+    interventions = {
+        (reliability, hazard, "md_recurrent_belief", intervention)
+        for reliability in P2_Q
+        for hazard in P2_H
+        for intervention in P2_INTERVENTIONS
+    }
+    return frozenset(base | interventions)
+
+
+def _p2_grid_value(value: object, allowed: tuple[float, ...]) -> float | None:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(numeric):
+        return None
+    matches = [item for item in allowed if np.isclose(numeric, item, atol=1e-12)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _p2_identifier_is_present(value: object) -> bool:
+    if value is None:
+        return False
+    if not isinstance(value, (list, dict)):
+        try:
+            if bool(pd.isna(value)):
+                return False
+        except (TypeError, ValueError):
+            pass
+    return bool(str(value).strip())
+
+
+def _strict_p2_panel(frame: pd.DataFrame) -> _StrictP2Panel:
+    """Require the exact 128-cell grid before any seed-level averaging."""
+
+    empty = _StrictP2Panel(
+        frame=frame.iloc[:0].copy(),
+        complete_seed_ids=frozenset(),
+        failed_seed_ids=frozenset(),
+        issues=(),
+    )
+    if frame.empty:
+        return replace(empty, issues=("formal exp09 evidence is unavailable",))
+    if "seed" not in frame:
+        return replace(empty, issues=("exp09 rows are missing the seed field",))
+
+    numeric_seed = pd.to_numeric(frame["seed"], errors="coerce")
+    planned_mask = numeric_seed.isin(P2_PLANNED_SEEDS)
+    selected = frame.loc[planned_mask].copy()
+    selected["seed"] = numeric_seed.loc[planned_mask].astype(int)
+    observed_seeds = frozenset(int(value) for value in selected["seed"].tolist())
+    if selected.empty:
+        return replace(
+            empty,
+            issues=("no preregistered exp09 seed in the exact 0..29 plan",),
+        )
+
+    required_columns = {
+        "seed",
+        "status",
+        "cue_reliability",
+        "context_hazard",
+        "gate_model",
+        "intervention",
+        "eligible_switch_count",
+        "gate_fit_accessed_true_context",
+        "gate_fit_used_batch_smoothing",
+        "eligible_for_p2_support",
+        "gate_received_true_q_h",
+        "gate_fit_supervision",
+        "true_context_access_scope",
+        "checkpoint_id",
+        "readout_id",
+        "belief_trajectory_id",
+        "intact_belief_trajectory_id",
+        "p2_protocol_id",
+        "train_trial_count",
+        "dev_trial_count",
+        "test_trial_count",
+        "latency_limit_trials",
+        "latency_sustain_trials",
+        "posterior_threshold",
+        "minimum_state_duration",
+        "switch_tolerance_trials",
+        "minimum_eligible_switches",
+        "delay_trials",
+        *_P2_METRICS,
+        *_P2_COMMON_BOOLEAN_PROVENANCE,
+        *_P2_PAIRING_IDENTIFIERS,
+        *_P2_INTERVENTION_PROVENANCE,
+    }
+    missing_columns = sorted(required_columns - set(selected))
+    if missing_columns:
+        return replace(
+            empty,
+            failed_seed_ids=observed_seeds,
+            issues=("missing strict exp09 columns: " + ", ".join(missing_columns),),
+        )
+
+    selected["cue_reliability"] = selected["cue_reliability"].map(
+        lambda value: _p2_grid_value(value, P2_Q)
+    )
+    selected["context_hazard"] = selected["context_hazard"].map(
+        lambda value: _p2_grid_value(value, P2_H)
+    )
+    selected["gate_model"] = selected["gate_model"].astype("string")
+    selected["intervention"] = selected["intervention"].astype("string")
+
+    invalid_seeds: set[int] = set()
+    incomplete_seeds: set[int] = set()
+    issues: list[str] = []
+    expected_cells = _p2_expected_cells()
+    for seed in sorted(P2_PLANNED_SEEDS):
+        rows = selected.loc[selected["seed"].eq(seed)]
+        if rows.empty:
+            incomplete_seeds.add(seed)
+            continue
+        invalid_dimensions = (
+            rows["cue_reliability"].isna()
+            | rows["context_hazard"].isna()
+            | ~rows["gate_model"].isin(P2_GATES)
+            | ~rows["intervention"].isin(("none", *P2_INTERVENTIONS))
+        )
+        if invalid_dimensions.any():
+            invalid_seeds.add(seed)
+            issues.append(f"seed {seed}: invalid or unregistered grid dimension")
+        cells = [
+            (
+                float(row.cue_reliability),
+                float(row.context_hazard),
+                str(row.gate_model),
+                str(row.intervention),
+            )
+            for row in rows.loc[~invalid_dimensions].itertuples(index=False)
+        ]
+        observed_cells = set(cells)
+        if len(cells) != len(observed_cells):
+            invalid_seeds.add(seed)
+            issues.append(f"seed {seed}: duplicate exp09 condition cell")
+        if observed_cells != expected_cells:
+            incomplete_seeds.add(seed)
+            missing_count = len(expected_cells - observed_cells)
+            extra_count = len(observed_cells - expected_cells)
+            issues.append(
+                f"seed {seed}: incomplete exact 128-cell grid "
+                f"(missing={missing_count}, extra={extra_count})"
+            )
+            if extra_count:
+                invalid_seeds.add(seed)
+        if not rows["status"].eq("complete").all():
+            invalid_seeds.add(seed)
+            issues.append(f"seed {seed}: failed or invalid planned exp09 cell")
+
+    def invalidate_rows(mask: pd.Series, message: str) -> None:
+        affected = set(selected.loc[mask, "seed"].astype(int).tolist())
+        if affected:
+            invalid_seeds.update(affected)
+            issues.append(f"{message}; seeds={','.join(map(str, sorted(affected)))}")
+
+    for field, expected in _P2_COMMON_BOOLEAN_PROVENANCE.items():
+        parsed = selected[field].map(_strict_boolean_value)
+        invalidate_rows(
+            parsed.isna() | parsed.ne(expected),
+            f"{field} is not uniformly {expected}",
+        )
+
+    supervised = selected["gate_model"].eq("supervised_upper_bound")
+    fit_access = selected["gate_fit_accessed_true_context"].map(_strict_boolean_value)
+    eligible = selected["eligible_for_p2_support"].map(_strict_boolean_value)
+    receives_q_h = selected["gate_received_true_q_h"].map(_strict_boolean_value)
+    batch_smoothing = selected["gate_fit_used_batch_smoothing"].map(
+        _strict_boolean_value
+    )
+    oracle = selected["gate_model"].eq("oracle_bayes")
+    invalidate_rows(
+        fit_access.isna() | fit_access.ne(supervised),
+        "gate_fit_accessed_true_context violates the supervised-only exception",
+    )
+    invalidate_rows(
+        eligible.isna() | eligible.ne(~supervised),
+        "eligible_for_p2_support does not exclude exactly the supervised upper bound",
+    )
+    invalidate_rows(
+        receives_q_h.isna() | receives_q_h.ne(oracle),
+        "gate_received_true_q_h does not isolate oracle Bayes",
+    )
+    learned_hmm = selected["gate_model"].eq("learned_hmm")
+    invalidate_rows(
+        batch_smoothing.isna() | batch_smoothing.ne(learned_hmm),
+        "gate_fit_used_batch_smoothing does not isolate learned-HMM train EM",
+    )
+
+    expected_supervision = selected["gate_model"].map(
+        {
+            "oracle_bayes": "known_generative_params",
+            "supervised_upper_bound": "train_context_labels",
+            "learned_hmm": "none",
+            "md_recurrent_belief": "none",
+            "no_gate": "none",
+        }
+    )
+    invalidate_rows(
+        selected["gate_fit_supervision"].astype("string").ne(expected_supervision),
+        "gate_fit_supervision is inconsistent with the registered gate",
+    )
+    expected_scope = pd.Series(
+        np.where(
+            supervised,
+            "train_gate_fit_and_evaluation",
+            "evaluation_only",
+        ),
+        index=selected.index,
+        dtype="string",
+    )
+    invalidate_rows(
+        selected["true_context_access_scope"].astype("string").ne(expected_scope),
+        "true_context_access_scope is inconsistent with gate capability",
+    )
+
+    intervention_rows = selected["intervention"].isin(P2_INTERVENTIONS)
+    for field, expected in _P2_INTERVENTION_PROVENANCE.items():
+        parsed = selected[field].map(_strict_boolean_value)
+        invalidate_rows(
+            intervention_rows & (parsed.isna() | parsed.ne(expected)),
+            f"{field} is invalid for a post-fit intervention",
+        )
+
+    protocol_valid = (
+        selected["p2_protocol_id"].astype("string").eq(FORMAL_P2_PROTOCOL_ID)
+    )
+    invalidate_rows(~protocol_valid, "p2_protocol_id is not the formal preregistration")
+    exact_protocol_values = {
+        "train_trial_count": 6000.0,
+        "dev_trial_count": 2000.0,
+        "test_trial_count": 4000.0,
+        "latency_limit_trials": 5.0,
+        "latency_sustain_trials": 2.0,
+        "posterior_threshold": 0.8,
+        "minimum_state_duration": 5.0,
+        "switch_tolerance_trials": 1.0,
+        "minimum_eligible_switches": 20.0,
+        "delay_trials": 1.0,
+    }
+    for field, expected in exact_protocol_values.items():
+        observed = pd.to_numeric(selected[field], errors="coerce")
+        invalidate_rows(
+            ~np.isclose(observed.to_numpy(float), expected, atol=1e-12),
+            f"{field} differs from the formal P2 protocol",
+        )
+
+    numeric_metrics: dict[str, pd.Series] = {}
+    for metric in (*_P2_METRICS, "eligible_switch_count"):
+        numeric_metrics[metric] = pd.to_numeric(selected[metric], errors="coerce")
+        selected[metric] = numeric_metrics[metric]
+    finite = pd.Series(True, index=selected.index, dtype=bool)
+    for metric in _P2_METRICS:
+        finite &= np.isfinite(numeric_metrics[metric].to_numpy(float))
+    invalidate_rows(~finite, "one or more registered P2 metrics are non-finite")
+    invalidate_rows(
+        numeric_metrics["context_nll"].lt(0.0)
+        | numeric_metrics["switch_latency_trials"].lt(0.0)
+        | numeric_metrics["energy_proxy_per_trial"].le(0.0),
+        "NLL/latency/energy violates its numeric domain",
+    )
+    for metric in (
+        "context_brier",
+        "context_ece",
+        "false_switch_rate",
+        "behavior_balanced_accuracy",
+    ):
+        invalidate_rows(
+            ~numeric_metrics[metric].between(0.0, 1.0, inclusive="both"),
+            f"{metric} lies outside [0, 1]",
+        )
+    switch_counts = numeric_metrics["eligible_switch_count"]
+    invalidate_rows(
+        ~np.isfinite(switch_counts.to_numpy(float))
+        | switch_counts.lt(20.0)
+        | ~np.isclose(switch_counts, np.rint(switch_counts), atol=1e-9),
+        "eligible_switch_count is not an integer >=20",
+    )
+
+    for (seed, reliability, hazard), rows in selected.groupby(
+        ["seed", "cue_reliability", "context_hazard"],
+        dropna=False,
+        sort=False,
+    ):
+        seed = int(seed)
+        for field in _P2_PAIRING_IDENTIFIERS:
+            values = rows[field]
+            if (
+                not values.map(_p2_identifier_is_present).all()
+                or values.nunique(dropna=False) != 1
+            ):
+                invalid_seeds.add(seed)
+                issues.append(
+                    f"seed {seed}, q={reliability}, h={hazard}: "
+                    f"pairing identifier {field} differs or is missing"
+                )
+        if rows["eligible_switch_count"].nunique(dropna=False) != 1:
+            invalid_seeds.add(seed)
+            issues.append(
+                f"seed {seed}, q={reliability}, h={hazard}: "
+                "eligible switch count differs across paired gates"
+            )
+        md_rows = rows.loc[rows["gate_model"].eq("md_recurrent_belief")]
+        for field in ("checkpoint_id", "readout_id"):
+            values = md_rows[field]
+            if (
+                len(values) != 4
+                or not values.map(_p2_identifier_is_present).all()
+                or values.nunique(dropna=False) != 1
+            ):
+                invalid_seeds.add(seed)
+                issues.append(
+                    f"seed {seed}, q={reliability}, h={hazard}: MD {field} "
+                    "is not reused by all three interventions"
+                )
+        intact_ids = md_rows["intact_belief_trajectory_id"]
+        belief_ids = md_rows["belief_trajectory_id"]
+        base_md = md_rows.loc[md_rows["intervention"].eq("none")]
+        intervened_md = md_rows.loc[md_rows["intervention"].isin(P2_INTERVENTIONS)]
+        trajectory_valid = (
+            len(md_rows) == 4
+            and intact_ids.map(_p2_identifier_is_present).all()
+            and intact_ids.nunique(dropna=False) == 1
+            and belief_ids.map(_p2_identifier_is_present).all()
+            and belief_ids.nunique(dropna=False) == 4
+            and len(base_md) == 1
+            and base_md["belief_trajectory_id"].iloc[0]
+            == base_md["intact_belief_trajectory_id"].iloc[0]
+            and len(intervened_md) == 3
+            and intervened_md["belief_trajectory_id"]
+            .ne(intervened_md["intact_belief_trajectory_id"])
+            .all()
+        )
+        if not trajectory_valid:
+            invalid_seeds.add(seed)
+            issues.append(
+                f"seed {seed}, q={reliability}, h={hazard}: MD intervention "
+                "belief trajectories do not branch uniquely from one intact trajectory"
+            )
+
+    bad_seeds = invalid_seeds | incomplete_seeds
+    complete_seeds = P2_PLANNED_SEEDS - bad_seeds
+    eligible_frame = selected.loc[selected["seed"].isin(complete_seeds)].copy()
+    if incomplete_seeds:
+        issues.append(
+            "incomplete planned seeds="
+            + ",".join(str(value) for value in sorted(incomplete_seeds))
+        )
+    return _StrictP2Panel(
+        frame=eligible_frame,
+        complete_seed_ids=frozenset(complete_seeds),
+        failed_seed_ids=frozenset(invalid_seeds),
+        issues=tuple(dict.fromkeys(issues)),
+    )
+
+
+def _p2_gate_values(
+    panel: _StrictP2Panel,
+    metric: str,
+    *,
+    gate: str,
+    intervention: str = "none",
+    hazards: tuple[float, ...] = P2_H,
+) -> tuple[np.ndarray, np.ndarray]:
+    frame = panel.frame
+    required = {"seed", "gate_model", "intervention", "context_hazard", metric}
+    if frame.empty or not required <= set(frame):
+        return np.array([]), np.array([], dtype=object)
+    mask = (
+        _eq(frame, "gate_model", gate)
+        & _eq(frame, "intervention", intervention)
+        & _series(frame, "context_hazard").isin(hazards)
+    )
+    selected = frame.loc[mask, ["seed", metric]].copy()
+    if selected.empty:
+        return np.array([]), np.array([], dtype=object)
+    aggregated = selected.groupby("seed", as_index=False, sort=False)[metric].mean()
+    return aggregated[metric].to_numpy(float), aggregated["seed"].to_numpy(object)
+
+
+def _p2_paired_values(
+    panel: _StrictP2Panel,
+    metric: str,
+    *,
+    first_gate: str,
+    second_gate: str,
+    first_intervention: str = "none",
+    second_intervention: str = "none",
+    hazards: tuple[float, ...] = P2_H,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    first, first_ids = _p2_gate_values(
+        panel,
+        metric,
+        gate=first_gate,
+        intervention=first_intervention,
+        hazards=hazards,
+    )
+    second, second_ids = _p2_gate_values(
+        panel,
+        metric,
+        gate=second_gate,
+        intervention=second_intervention,
+        hazards=hazards,
+    )
+    first_frame = pd.DataFrame({"seed": first_ids, "first": first})
+    second_frame = pd.DataFrame({"seed": second_ids, "second": second})
+    paired = first_frame.merge(second_frame, on="seed", validate="one_to_one")
+    return (
+        paired["first"].to_numpy(float),
+        paired["second"].to_numpy(float),
+        paired["seed"].to_numpy(object),
+    )
+
+
+def _p2_retained_oracle_gain(
+    panel: _StrictP2Panel,
+) -> tuple[np.ndarray, np.ndarray]:
+    frame = panel.frame
+    required = {
+        "seed",
+        "cue_reliability",
+        "context_hazard",
+        "gate_model",
+        "intervention",
+        "behavior_balanced_accuracy",
+    }
+    if frame.empty or not required <= set(frame):
+        return np.array([]), np.array([], dtype=object)
+    selected = frame.loc[
+        _eq(frame, "intervention", "none")
+        & _series(frame, "gate_model").isin(
+            ["md_recurrent_belief", "oracle_bayes", "no_gate"]
+        ),
+        [
+            "seed",
+            "cue_reliability",
+            "context_hazard",
+            "gate_model",
+            "behavior_balanced_accuracy",
+        ],
+    ]
+    if selected.empty:
+        return np.array([]), np.array([], dtype=object)
+    table = selected.pivot(
+        index=["seed", "cue_reliability", "context_hazard"],
+        columns="gate_model",
+        values="behavior_balanced_accuracy",
+    )
+    retained = (
+        table["md_recurrent_belief"]
+        - table["no_gate"]
+        - 0.9 * (table["oracle_bayes"] - table["no_gate"])
+    )
+    seed_values = retained.groupby(level="seed").mean()
+    return seed_values.to_numpy(float), seed_values.index.to_numpy(object)
+
+
+def _evaluate_p2_claims(
+    frame: pd.DataFrame,
+) -> tuple[
+    list[ClaimResult],
+    dict[str, set[int]],
+    dict[str, set[int]],
+    tuple[str, ...],
+]:
+    panel = _strict_p2_panel(frame)
+    results: list[ClaimResult] = []
+    complete_by_claim: dict[str, set[int]] = {}
+    failed_by_claim: dict[str, set[int]] = {}
+
+    def append_claim(
+        *,
+        claim_id: str,
+        metric: str,
+        comparison: str,
+        criterion: str,
+        candidate: np.ndarray,
+        reference: np.ndarray,
+        unit_ids: np.ndarray,
+        support_low: float | None = None,
+        support_high: float | None = None,
+        oppose_below: float | None = None,
+        oppose_above: float | None = None,
+    ) -> None:
+        complete_by_claim[claim_id] = {
+            int(value) for value in unit_ids.tolist() if int(value) in P2_PLANNED_SEEDS
+        }
+        failed_by_claim[claim_id] = set(panel.failed_seed_ids)
+        result = _paired_claim(
+            claim_id=claim_id,
+            experiment="exp09",
+            metric=metric,
+            comparison=comparison,
+            stats_unit="seed",
+            candidate=candidate,
+            reference=reference,
+            unit_ids=unit_ids,
+            n_planned=P2_SEED_PLAN,
+            n_failed=len(panel.failed_seed_ids),
+            minimum_units=P2_SEED_PLAN,
+            support_low=support_low,
+            support_high=support_high,
+            oppose_below=oppose_below,
+            oppose_above=oppose_above,
+            criterion=criterion,
+            seed=len(results) + 101,
+        )
+        if panel.issues:
+            result = replace(
+                result,
+                note=result.note + "; strict P2 panel: " + " | ".join(panel.issues),
+            )
+        results.append(result)
+
+    no_nll, hmm_nll, units = _p2_paired_values(
+        panel,
+        "context_nll",
+        first_gate="no_gate",
+        second_gate="learned_hmm",
+    )
+    append_claim(
+        claim_id="P2a_hmm_context_nll",
+        metric="context_nll",
+        comparison="no-gate minus learned-HMM context NLL",
+        criterion="learned HMM improves context NLL by at least 0.02 nats/trial",
+        candidate=no_nll,
+        reference=hmm_nll,
+        unit_ids=units,
+        support_low=0.02,
+        oppose_below=0.0,
+    )
+    no_nll, md_nll, units = _p2_paired_values(
+        panel,
+        "context_nll",
+        first_gate="no_gate",
+        second_gate="md_recurrent_belief",
+    )
+    append_claim(
+        claim_id="P2b_md_context_nll",
+        metric="context_nll",
+        comparison="no-gate minus MD-belief context NLL",
+        criterion="MD belief improves context NLL by at least 0.02 nats/trial",
+        candidate=no_nll,
+        reference=md_nll,
+        unit_ids=units,
+        support_low=0.02,
+        oppose_below=0.0,
+    )
+    no_brier, md_brier, units = _p2_paired_values(
+        panel,
+        "context_brier",
+        first_gate="no_gate",
+        second_gate="md_recurrent_belief",
+    )
+    append_claim(
+        claim_id="P2c_md_context_brier",
+        metric="context_brier",
+        comparison="no-gate minus MD-belief Brier score",
+        criterion="MD belief improves Brier score by at least 0.01",
+        candidate=no_brier,
+        reference=md_brier,
+        unit_ids=units,
+        support_low=0.01,
+        oppose_below=0.0,
+    )
+    md_ece, units = _p2_gate_values(panel, "context_ece", gate="md_recurrent_belief")
+    append_claim(
+        claim_id="P2d_md_calibration",
+        metric="context_ece",
+        comparison="MD-belief ECE minus absolute calibration threshold 0.05",
+        criterion="MD ECE upper CI <=0.05; ECE lower CI >=0.10 opposes",
+        candidate=md_ece,
+        reference=np.full(len(md_ece), 0.05),
+        unit_ids=units,
+        support_high=0.0,
+        oppose_above=0.05,
+    )
+    md_latency, oracle_latency, units = _p2_paired_values(
+        panel,
+        "switch_latency_trials",
+        first_gate="md_recurrent_belief",
+        second_gate="oracle_bayes",
+    )
+    append_claim(
+        claim_id="P2e_md_switch_latency",
+        metric="switch_latency_trials",
+        comparison="MD-belief minus oracle-Bayes switch latency",
+        criterion="MD excess switch latency upper CI <=1 trial",
+        candidate=md_latency,
+        reference=oracle_latency,
+        unit_ids=units,
+        support_high=1.0,
+        oppose_above=1.0,
+    )
+    md_false, oracle_false, units = _p2_paired_values(
+        panel,
+        "false_switch_rate",
+        first_gate="md_recurrent_belief",
+        second_gate="oracle_bayes",
+    )
+    append_claim(
+        claim_id="P2f_md_false_switch",
+        metric="false_switch_rate",
+        comparison="MD-belief minus oracle-Bayes false-switch rate",
+        criterion="MD excess false-switch-rate upper CI <=0.01",
+        candidate=md_false,
+        reference=oracle_false,
+        unit_ids=units,
+        support_high=0.01,
+        oppose_above=0.01,
+    )
+    md_accuracy, no_accuracy, units = _p2_paired_values(
+        panel,
+        "behavior_balanced_accuracy",
+        first_gate="md_recurrent_belief",
+        second_gate="no_gate",
+    )
+    append_claim(
+        claim_id="P2g_md_behavior",
+        metric="behavior_balanced_accuracy",
+        comparison="MD-belief minus no-gate held-out balanced accuracy",
+        criterion="MD gate improves held-out balanced accuracy by at least 0.02",
+        candidate=md_accuracy,
+        reference=no_accuracy,
+        unit_ids=units,
+        support_low=0.02,
+        oppose_below=0.0,
+    )
+    retained, units = _p2_retained_oracle_gain(panel)
+    append_claim(
+        claim_id="P2h_md_retains_oracle_gain",
+        metric="behavior_balanced_accuracy",
+        comparison="MD gain minus 90% of oracle-Bayes gain over no gate",
+        criterion="MD retains at least 90% of the paired oracle behavioral gain",
+        candidate=retained,
+        reference=np.zeros(len(retained)),
+        unit_ids=units,
+        support_low=0.0,
+        oppose_below=0.0,
+    )
+    md_energy, no_energy, units = _p2_paired_values(
+        panel,
+        "energy_proxy_per_trial",
+        first_gate="md_recurrent_belief",
+        second_gate="no_gate",
+    )
+    append_claim(
+        claim_id="P2i_md_energy",
+        metric="log_energy_ratio",
+        comparison="log(MD-belief energy / no-gate energy)",
+        criterion="MD energy upper ratio CI <=1.10",
+        candidate=np.log(md_energy),
+        reference=np.log(no_energy),
+        unit_ids=units,
+        support_high=float(np.log(1.10)),
+        oppose_above=float(np.log(1.10)),
+    )
+    for claim_id, intervention, label, hazards in (
+        ("P2j_clamp_causal", "clamp", "clamp", P2_H),
+        ("P2k_delay_causal", "delay", "one-trial delay", (0.10, 0.20)),
+        ("P2l_shuffle_causal", "shuffle", "trajectory shuffle", P2_H),
+    ):
+        intact, intervened, units = _p2_paired_values(
+            panel,
+            "behavior_balanced_accuracy",
+            first_gate="md_recurrent_belief",
+            second_gate="md_recurrent_belief",
+            second_intervention=intervention,
+            hazards=hazards,
+        )
+        append_claim(
+            claim_id=claim_id,
+            metric="behavior_balanced_accuracy",
+            comparison=f"intact MD-belief minus {label} accuracy",
+            criterion=f"post-fit {label} reduces balanced accuracy by at least 0.01",
+            candidate=intact,
+            reference=intervened,
+            unit_ids=units,
+            support_low=0.01,
+            oppose_below=0.0,
+        )
+    if tuple(item.claim_id for item in results) != P2_PRIMARY_CLAIMS:
+        raise RuntimeError("P2 claim construction does not match the fixed registry")
+    return results, complete_by_claim, failed_by_claim, panel.issues
+
+
+def _p2_overall_gate(
+    adjusted_claims: list[ClaimResult],
+    *,
+    complete_seed_ids_by_claim: dict[str, set[int]],
+    failed_seed_ids_by_claim: dict[str, set[int]],
+    panel_issues: tuple[str, ...],
+) -> ClaimResult:
+    """Derive the leakage-safe P2 mechanism gate after constituent Holm tests."""
+
+    lookup = {item.claim_id: item for item in adjusted_claims}
+    constituents = [lookup.get(claim_id) for claim_id in P2_REQUIRED_CLAIMS]
+    conclusions = [
+        item.conclusion if item is not None else "inconclusive" for item in constituents
+    ]
+    if all(value == "support" for value in conclusions):
+        conclusion = "support"
+    elif any(value == "oppose" for value in conclusions):
+        conclusion = "oppose"
+    else:
+        conclusion = "inconclusive"
+    complete_sets = [
+        complete_seed_ids_by_claim.get(claim_id, set())
+        for claim_id in P2_REQUIRED_CLAIMS
+    ]
+    jointly_complete = set.intersection(*complete_sets) if complete_sets else set()
+    failed = set().union(
+        *(
+            failed_seed_ids_by_claim.get(claim_id, set())
+            for claim_id in P2_REQUIRED_CLAIMS
+        )
+    )
+    audit = "; ".join(
+        f"{claim_id}={value}"
+        for claim_id, value in zip(P2_REQUIRED_CLAIMS, conclusions, strict=True)
+    )
+    issue_note = " | ".join(panel_issues) if panel_issues else "none"
+    return ClaimResult(
+        claim_id="P2_overall",
+        experiment="exp09",
+        metric="noninferential_stage_gate",
+        comparison="conjunction of leakage-safe Holm-adjusted P2 claims",
+        stats_unit="seed",
+        n_planned=P2_SEED_PLAN,
+        n_complete=len(jointly_complete),
+        n_failed=len(failed),
+        estimate=None,
+        ci_low=None,
+        ci_high=None,
+        effect_size=None,
+        p_value=None,
+        multiplicity_method="derived_after_holm(no_additional_test)",
+        conclusion=conclusion,
+        criterion=(
+            "support iff every critical Holm-adjusted P2 claim supports; oppose iff "
+            "at least one opposes; otherwise inconclusive"
+        ),
+        note=f"non-inferential P2 stage gate; {audit}; strict panel issues: {issue_note}",
     )
 
 
@@ -1535,6 +2387,20 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         )
     results.append(b2)
 
+    # P2 hidden-context audit. The five gates share an exact 4x4 HMM grid;
+    # supervised context labels are retained only as an explicitly ineligible
+    # upper bound. Every registered P2 claim is appended even when exp09 has
+    # not run so the project-wide Holm family never depends on data arrival.
+    (
+        p2_results,
+        p2_complete_seed_ids_by_claim,
+        p2_failed_seed_ids_by_claim,
+        (p2_panel_issues),
+    ) = _evaluate_p2_claims(
+        formal.loc[_eq(formal, "experiment", "exp09_hidden_context_gate")].copy()
+    )
+    results.extend(p2_results)
+
     exp02 = phase2.loc[_eq(phase2, "experiment", "exp02_context_ei_oracle_gate")].copy()
     stability_metric = next(
         (
@@ -2361,5 +3227,11 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             adjusted,
             complete_seed_ids_by_claim=p0_complete_seed_ids_by_claim,
             failed_seed_ids_by_claim=p0_failed_seed_ids_by_claim,
+        ),
+        _p2_overall_gate(
+            adjusted,
+            complete_seed_ids_by_claim=p2_complete_seed_ids_by_claim,
+            failed_seed_ids_by_claim=p2_failed_seed_ids_by_claim,
+            panel_issues=p2_panel_issues,
         ),
     ]
