@@ -118,6 +118,112 @@ def collect_runs(results_root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     return pd.DataFrame.from_records(records), pd.DataFrame.from_records(runs)
 
 
+def _read_compact_csv(path: Path) -> pd.DataFrame:
+    if not path.exists() or path.stat().st_size == 0:
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(path, low_memory=False)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
+
+
+def _identity_token(value: object) -> str | None:
+    """Normalize scalar identifiers without turning missing values into text."""
+
+    if value is None or (not isinstance(value, (list, dict)) and pd.isna(value)):
+        return None
+    if isinstance(value, (int, np.integer)) and not isinstance(value, (bool, np.bool_)):
+        return str(int(value))
+    if isinstance(value, (float, np.floating)) and np.isfinite(value):
+        numeric = float(value)
+        return str(int(numeric)) if numeric.is_integer() else repr(numeric)
+    token = str(value).strip()
+    return token or None
+
+
+def _run_identity(frame: pd.DataFrame) -> pd.Series:
+    """Return nullable run keys shared by raw-metric and run-summary tables."""
+
+    identities = pd.Series(pd.NA, index=frame.index, dtype="string")
+    if frame.empty:
+        return identities
+    if "run_id" in frame:
+        for index, value in frame["run_id"].items():
+            token = _identity_token(value)
+            if token is not None:
+                identities.at[index] = f"run:{token}"
+
+    start_column = next(
+        (name for name in ("run_started_at", "started_at") if name in frame),
+        None,
+    )
+    if start_column is None:
+        return identities
+    for index in identities.loc[identities.isna()].index:
+        experiment = _identity_token(
+            frame.at[index, "experiment"] if "experiment" in frame else None
+        )
+        seed = _identity_token(frame.at[index, "seed"] if "seed" in frame else None)
+        started = _identity_token(frame.at[index, start_column])
+        if experiment is not None and seed is not None and started is not None:
+            identities.at[index] = f"legacy:{experiment}:{seed}:{started}"
+    return identities
+
+
+def merge_compact_snapshot(
+    results_root: Path,
+    discovered_raw: pd.DataFrame,
+    discovered_runs: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Merge new immutable artifacts without erasing compact-only history.
+
+    The repository intentionally tracks compact CSV snapshots while omitting
+    older timestamped ``results/runs`` directories.  Rebuilding from only the
+    currently present directories would therefore erase valid historical rows.
+    For every newly discovered ``run_id`` we replace its prior compact rows as
+    one unit (so a running/failed attempt can later become complete), retain all
+    undiscovered run IDs, and append the freshly collected records.  Replacing
+    by run rather than by timestamp also preserves experiments that emit
+    multiple condition rows with the same ``recorded_at`` value.
+    """
+
+    if not isinstance(results_root, Path):
+        raise TypeError("results_root must be a pathlib.Path")
+    existing_raw = _read_compact_csv(results_root / "raw_metrics.csv")
+    existing_runs = _read_compact_csv(results_root / "runs.csv")
+    discovered_run_keys = _run_identity(discovered_runs)
+    discovered_raw_keys = _run_identity(discovered_raw)
+    if discovered_run_keys.isna().any() or discovered_raw_keys.isna().any():
+        raise ValueError(
+            "every discovered artifact row needs a run_id or stable "
+            "experiment/seed/start-time provenance"
+        )
+    duplicate_runs = discovered_run_keys.loc[discovered_run_keys.duplicated(False)]
+    if not duplicate_runs.empty:
+        raise ValueError(
+            "multiple discovered run directories share one run identity: "
+            + ", ".join(sorted(set(duplicate_runs.astype(str).tolist())))
+        )
+    discovered_ids = set(discovered_run_keys.dropna().astype(str).tolist())
+    discovered_ids.update(discovered_raw_keys.dropna().astype(str).tolist())
+
+    def without_replaced(frame: pd.DataFrame) -> pd.DataFrame:
+        if frame.empty or not discovered_ids:
+            return frame
+        identities = _run_identity(frame)
+        return frame.loc[~identities.isin(discovered_ids)].copy()
+
+    retained_raw = without_replaced(existing_raw)
+    retained_runs = without_replaced(existing_runs)
+    raw = pd.concat([retained_raw, discovered_raw], ignore_index=True, sort=False)
+    runs = pd.concat([retained_runs, discovered_runs], ignore_index=True, sort=False)
+    # Exact duplicate removal is only a fallback for truly unidentified legacy
+    # rows; records within a run are deliberately never keyed by timestamp.
+    raw = raw.drop_duplicates(keep="last", ignore_index=True)
+    runs = runs.drop_duplicates(keep="last", ignore_index=True)
+    return raw, runs
+
+
 def _format_number(value) -> str:
     if value is None or (isinstance(value, float) and not np.isfinite(value)):
         return "—"
@@ -175,12 +281,14 @@ def write_report(
         "",
         "- Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.",
         "- Absolute accuracy, BPTT non-inferiority, and GRU non-inferiority are independent claims and are never merged into one decision.",
+        "- Legacy exp03 is a supervised/oracle-warm-start MD upper bound: its cue, gate fit, and recurrent third factor do not satisfy the hidden-context contract, so it cannot support P2.",
         "- A low matrix/tangent rank without improved held-out behavior or prediction cannot support the revised mechanism.",
         "- P0 L1 and L2 budget panels are matched separately; the non-selected norm is diagnostic and no simultaneous dual-norm match is claimed.",
         "- PCA, normalization, nuisance regression, subspaces, and dynamics are fit on training trials/blocks only.",
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
         "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as causal gating.",
+        "- IBL support requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
         "",
         "## External-data status",
         "",
@@ -204,7 +312,8 @@ def main() -> None:
     args = parser.parse_args()
     results_root = Path(args.results_root)
     results_root.mkdir(parents=True, exist_ok=True)
-    raw, runs = collect_runs(results_root)
+    discovered_raw, discovered_runs = collect_runs(results_root)
+    raw, runs = merge_compact_snapshot(results_root, discovered_raw, discovered_runs)
     raw.to_csv(results_root / "raw_metrics.csv", index=False)
     runs.to_csv(results_root / "runs.csv", index=False)
     summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])

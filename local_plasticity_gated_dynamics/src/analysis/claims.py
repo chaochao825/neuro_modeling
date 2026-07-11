@@ -276,6 +276,32 @@ def _eq(frame: pd.DataFrame, column: str, value: object) -> pd.Series:
     return _series(frame, column).eq(value)
 
 
+def _strict_boolean_value(value: object) -> bool | None:
+    """Parse only unambiguous booleans from JSON or compact CSV artifacts."""
+
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token == "true":
+            return True
+        if token == "false":
+            return False
+    return None
+
+
+def _strict_boolean_requirement(
+    frame: pd.DataFrame, column: str, expected: bool
+) -> bool:
+    """Require an explicit boolean value, including safe compact-CSV tokens."""
+
+    if frame.empty or column not in frame or not isinstance(expected, bool):
+        return False
+
+    parsed = frame[column].map(_strict_boolean_value)
+    return bool(parsed.notna().all() and parsed.eq(expected).all())
+
+
 def _complete(frame: pd.DataFrame) -> pd.Series:
     return _eq(frame, "status", "complete")
 
@@ -836,6 +862,250 @@ def _model_unit_table(
     )
 
 
+@dataclass(frozen=True)
+class _StrictIblPanel:
+    """One strictly validated stimulus-pre model panel for P6 inference."""
+
+    nll: pd.DataFrame
+    parameters: pd.DataFrame
+    sessions: frozenset[object]
+    animals: frozenset[object]
+    session_animal_pairs: frozenset[tuple[object, object]]
+    n_failed: int
+    issues: tuple[str, ...]
+
+
+def _strict_ibl_model_panel(
+    frame: pd.DataFrame,
+    *,
+    failure_filter: pd.Series,
+    provenance: dict[str, bool],
+) -> _StrictIblPanel:
+    """Validate P6 cells before any session or animal aggregation.
+
+    A session is usable only when every stimulus-pre fold has exactly one row
+    for each registered model, all provenance is explicit, and counted
+    parameters are finite non-negative integers that do not change across
+    folds.  If one session of an animal is invalid, the whole animal is
+    removed so a partial independent unit can never enter inference.
+    """
+
+    required_models = frozenset({"common", "shared", "full"})
+    session = _session_column(frame)
+    empty = _StrictIblPanel(
+        nll=pd.DataFrame(),
+        parameters=pd.DataFrame(),
+        sessions=frozenset(),
+        animals=frozenset(),
+        session_animal_pairs=frozenset(),
+        n_failed=0,
+        issues=(),
+    )
+    if session is None:
+        return replace(empty, issues=("missing session identifier",))
+    if "animal_id" not in frame:
+        return replace(empty, issues=("missing animal_id",))
+
+    model_scope = _series(frame, "model_family").isin(required_models)
+    selected = frame.loc[model_scope & _complete(frame)].copy()
+    n_failed = _failed_units(
+        frame,
+        "animal_id",
+        failure_filter,
+    )
+    if selected.empty:
+        return replace(
+            empty,
+            n_failed=n_failed,
+            issues=("complete common/shared/full stimulus-pre panel unavailable",),
+        )
+
+    issues: list[str] = []
+    bad_sessions: set[object] = set()
+    required_columns = {
+        session,
+        "animal_id",
+        "view",
+        "fold",
+        "model_family",
+        "heldout_nll_per_scalar",
+        "parameter_count",
+    }
+    missing = sorted(required_columns - set(selected))
+    if missing:
+        return replace(
+            empty,
+            n_failed=n_failed,
+            issues=(f"missing strict panel columns: {', '.join(missing)}",),
+        )
+
+    missing_identity = selected[session].isna() | selected["animal_id"].isna()
+    if missing_identity.any():
+        bad_sessions.update(selected.loc[missing_identity, session].dropna().tolist())
+        issues.append("session/animal identity is missing")
+
+    wrong_view = selected["view"].isna() | selected["view"].ne("stimulus_pre")
+    if wrong_view.any():
+        bad_sessions.update(selected.loc[wrong_view, session].dropna().tolist())
+        issues.append("model panel contains a non-stimulus-pre or missing view")
+
+    for field, expected in provenance.items():
+        if field not in selected:
+            issues.append(f"missing provenance field {field}")
+            bad_sessions.update(selected[session].dropna().tolist())
+            continue
+        parsed = selected[field].map(_strict_boolean_value)
+        invalid = parsed.isna() | parsed.ne(expected)
+        if invalid.any():
+            issues.append(f"{field} is not uniformly {expected}")
+            bad_sessions.update(selected.loc[invalid, session].dropna().tolist())
+
+    selected["_nll"] = pd.to_numeric(
+        selected["heldout_nll_per_scalar"], errors="coerce"
+    )
+    selected["_parameters"] = pd.to_numeric(
+        selected["parameter_count"], errors="coerce"
+    )
+    nll_valid = np.isfinite(selected["_nll"].to_numpy(float))
+    parameter_values = selected["_parameters"].to_numpy(float)
+    parameter_valid = (
+        np.isfinite(parameter_values)
+        & (parameter_values >= 0)
+        & np.isclose(parameter_values, np.rint(parameter_values), rtol=0.0, atol=1e-9)
+    )
+    invalid_numeric = ~(nll_valid & parameter_valid)
+    if invalid_numeric.any():
+        bad_sessions.update(selected.loc[invalid_numeric, session].dropna().tolist())
+        issues.append(
+            "NLL must be finite and parameter_count must be a finite non-negative integer"
+        )
+
+    cell_keys = [session, "view", "fold"]
+    row_counts = selected.groupby(
+        [*cell_keys, "model_family"], dropna=False, sort=False
+    ).size()
+    duplicate_cells = row_counts.loc[row_counts.ne(1)]
+    if not duplicate_cells.empty:
+        bad_sessions.update(
+            duplicate_cells.index.get_level_values(session).dropna().tolist()
+        )
+        issues.append("duplicate (session, view, fold, model) cell")
+
+    cell_models = selected.groupby(cell_keys, dropna=False, sort=False)[
+        "model_family"
+    ].agg(lambda values: frozenset(values.tolist()))
+    incomplete_cells = cell_models.loc[cell_models.ne(required_models)]
+    if not incomplete_cells.empty:
+        bad_sessions.update(
+            incomplete_cells.index.get_level_values(session).dropna().tolist()
+        )
+        issues.append("a stimulus-pre fold lacks exactly common/shared/full")
+
+    if selected["fold"].isna().any():
+        bad_sessions.update(
+            selected.loc[selected["fold"].isna(), session].dropna().tolist()
+        )
+        issues.append("fold identifier is missing")
+    planned_folds = frozenset(selected["fold"].dropna().tolist())
+    session_folds = selected.groupby(session, dropna=False, sort=False)["fold"].agg(
+        lambda values: frozenset(values.dropna().tolist())
+    )
+    incomplete_fold_sets = session_folds.loc[session_folds.ne(planned_folds)]
+    if not incomplete_fold_sets.empty:
+        bad_sessions.update(incomplete_fold_sets.index.dropna().tolist())
+        issues.append("sessions do not share the complete registered fold set")
+
+    animal_variation = selected.groupby(session, dropna=False, sort=False)[
+        "animal_id"
+    ].nunique(dropna=False)
+    invalid_mapping = animal_variation.loc[animal_variation.ne(1)]
+    if not invalid_mapping.empty:
+        bad_sessions.update(invalid_mapping.index.dropna().tolist())
+        issues.append("a session does not map to exactly one animal")
+
+    parameter_variation = selected.groupby(
+        [session, "model_family"], dropna=False, sort=False
+    )["_parameters"].nunique(dropna=False)
+    varying_parameters = parameter_variation.loc[parameter_variation.ne(1)]
+    if not varying_parameters.empty:
+        bad_sessions.update(
+            varying_parameters.index.get_level_values(session).dropna().tolist()
+        )
+        issues.append("parameter_count changes across folds or is missing")
+
+    failed_sessions = set(
+        frame.loc[
+            _eq(frame, "status", "failed")
+            & failure_filter.reindex(frame.index, fill_value=False),
+            session,
+        ]
+        .dropna()
+        .tolist()
+    )
+    if failed_sessions:
+        bad_sessions.update(failed_sessions)
+
+    bad_animals = set(
+        selected.loc[selected[session].isin(bad_sessions), "animal_id"]
+        .dropna()
+        .tolist()
+    )
+    n_failed = max(n_failed, len(bad_animals) or len(bad_sessions))
+    eligible = selected.loc[
+        ~selected[session].isin(bad_sessions) & ~selected["animal_id"].isin(bad_animals)
+    ].copy()
+    if eligible.empty:
+        return replace(
+            empty,
+            n_failed=n_failed,
+            issues=tuple(dict.fromkeys(issues))
+            or ("no strictly eligible stimulus-pre session",),
+        )
+
+    session_model = eligible.groupby(
+        [session, "animal_id", "model_family"],
+        as_index=False,
+        dropna=False,
+        sort=False,
+    ).agg(_nll=("_nll", "mean"), _parameters=("_parameters", "first"))
+    animal_model = session_model.groupby(
+        ["animal_id", "model_family"],
+        as_index=False,
+        dropna=False,
+        sort=False,
+    ).agg(_nll=("_nll", "mean"), _parameters=("_parameters", "mean"))
+    nll = animal_model.pivot(index="animal_id", columns="model_family", values="_nll")
+    parameters = animal_model.pivot(
+        index="animal_id", columns="model_family", values="_parameters"
+    )
+    return _StrictIblPanel(
+        nll=nll,
+        parameters=parameters,
+        sessions=frozenset(eligible[session].dropna().tolist()),
+        animals=frozenset(eligible["animal_id"].dropna().tolist()),
+        session_animal_pairs=frozenset(
+            eligible[[session, "animal_id"]]
+            .drop_duplicates()
+            .itertuples(index=False, name=None)
+        ),
+        n_failed=n_failed,
+        issues=tuple(dict.fromkeys(issues)),
+    )
+
+
+def _planned_ibl_animals(frame: pd.DataFrame) -> int:
+    """Return the preregistered animal count, never the minimum threshold."""
+
+    explicit = pd.to_numeric(
+        _series(frame, "n_planned_animals"), errors="coerce"
+    ).dropna()
+    if not explicit.empty:
+        return max(1, int(explicit.max()))
+    if "animal_id" in frame:
+        return max(1, int(frame["animal_id"].dropna().nunique()))
+    return 1
+
+
 def _real_plan(frame: pd.DataFrame, unit_column: str, n_failed: int) -> int:
     explicit = pd.to_numeric(_series(frame, "n_planned"), errors="coerce").dropna()
     if not explicit.empty:
@@ -1201,8 +1471,23 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
         pair_columns=("experiment",),
         required_pairs=required_experiments,
     )
-    results.append(
-        _paired_claim(
+    hidden_gate_rows = phase2.loc[(no_gate_mask | local_mask) & _complete(phase2)]
+    hidden_gate_requirements = {
+        "hidden_context_task": True,
+        "cue_encodes_observation_not_state": True,
+        "gate_test_accessed_true_context": False,
+        "gate_fit_accessed_true_context": False,
+        "third_factor_accessed_true_context": False,
+        "oracle_warm_start_used": False,
+        "md_fit_used_context_bias": False,
+    }
+    hidden_gate_provenance_valid = not hidden_gate_rows.empty
+    for field, expected in hidden_gate_requirements.items():
+        if not _strict_boolean_requirement(hidden_gate_rows, field, expected):
+            hidden_gate_provenance_valid = False
+            break
+    if hidden_gate_provenance_valid:
+        b2 = _paired_claim(
             claim_id="B2_gate_reduces_switch_cost",
             experiment="exp02/03",
             metric="switch_cost",
@@ -1218,7 +1503,28 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             oppose_below=0.0,
             criterion="no-gate switch cost exceeds gated-local switch cost (paired CI)",
         )
-    )
+    else:
+        b2 = _inconclusive(
+            "B2_gate_reduces_switch_cost",
+            "exp02/03",
+            "switch_cost",
+            "no-gate switch cost minus gated-local switch cost",
+            "seed",
+            (
+                "hidden-context gate improves switch cost without true-context "
+                "access in the cue, gate fit/test, oracle warm start, or recurrent "
+                "third factor"
+            ),
+            (
+                "legacy exp02/03 lacks leakage-free hidden-context provenance; "
+                "exp03 is a supervised/oracle-warm-start upper bound and the "
+                "legacy no-gate third factor receives true context"
+            ),
+            n_planned=SEED_PLAN,
+            n_complete=0,
+            n_failed=_failed_units(phase2, "seed", no_gate_mask | local_mask),
+        )
+    results.append(b2)
 
     exp02 = phase2.loc[_eq(phase2, "experiment", "exp02_context_ei_oracle_gate")].copy()
     stability_metric = next(
@@ -1463,23 +1769,74 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
     results.append(d2)
 
     # Phase 4: hidden-context IBL switching LDS and descriptive lead/lag.
+    # The preregistered primary view is stimulus-pre. Movement-pre and future
+    # full-trial sensitivity analyses remain separate repeated outcomes and are
+    # never averaged into the primary claim.
     exp06 = formal.loc[_eq(formal, "experiment", "exp06_ibl_context_switch")].copy()
-    model06 = _series(exp06, "model_family").isin(["common", "shared", "full"])
+    stimulus_pre = _eq(exp06, "view", "stimulus_pre")
+    viewless_failure = _eq(exp06, "status", "failed") & _series(exp06, "view").isna()
+    exp06_primary = exp06.loc[stimulus_pre | viewless_failure].copy()
+    model06 = _series(exp06_primary, "model_family").isin(["common", "shared", "full"])
     model06_failures = model06 | (
-        _eq(exp06, "status", "failed") & _series(exp06, "model_family").isna()
+        _eq(exp06_primary, "status", "failed")
+        & _series(exp06_primary, "model_family").isna()
     )
-    nll06, unit06, stats06, failed06 = _model_unit_table(
-        exp06,
-        "heldout_nll_per_scalar",
-        fold_filter=model06,
+    method_requirements06 = {
+        "hierarchical_observation_model": True,
+        "nested_cv_latent_dimension": True,
+        "unit_qc_applied": True,
+        "context_coverage_valid": True,
+        "parameter_count_includes_preprocessing": True,
+        "hidden_context_inference": True,
+        "test_context_observed": False,
+        "belief_filter_used_true_block_boundaries": False,
+        "condition_schedule_observed": False,
+    }
+    strict06 = _strict_ibl_model_panel(
+        exp06_primary,
         failure_filter=model06_failures,
+        provenance=method_requirements06,
     )
-    if required_models <= set(nll06):
-        panel = nll06[list(required_models)].dropna()
+    required_model_order = ("common", "shared", "full")
+    required_models = set(required_model_order)
+    nll06 = strict06.nll
+    params06 = strict06.parameters
+    failed06 = strict06.n_failed
+    stats06 = "animal"
+    session_count06 = len(strict06.sessions)
+    animal_count06 = len(strict06.animals)
+    planned_animals06 = _planned_ibl_animals(exp06_primary)
+    method_issues06 = list(strict06.issues)
+    cohort_valid06 = session_count06 >= 20 and animal_count06 >= 5
+    panel_columns_valid = required_models <= set(nll06) and required_models <= set(
+        params06
+    )
+    panel_index_valid = nll06.index.equals(params06.index)
+    e1_ready = (
+        panel_columns_valid
+        and panel_index_valid
+        and cohort_valid06
+        and not method_issues06
+    )
+    panel = pd.DataFrame()
+    retained = pd.Series(dtype=float)
+    if e1_ready:
+        panel = nll06[list(required_model_order)]
         denominator = panel["common"] - panel["full"]
         retained = (panel["common"] - panel["shared"]) / denominator
-        valid = np.isfinite(retained) & denominator.gt(0)
-        panel, retained = panel.loc[valid], retained.loc[valid]
+        retained_valid = bool(
+            np.isfinite(retained.to_numpy(float)).all()
+            and np.isfinite(denominator.to_numpy(float)).all()
+            and denominator.gt(0).all()
+        )
+        if not retained_valid:
+            method_issues06.append(
+                "every animal must have a finite positive full-vs-common gain denominator"
+            )
+            e1_ready = False
+
+    if e1_ready:
+        params06 = params06[list(required_model_order)]
         e1 = _paired_claim(
             claim_id="E1_ibl_shared_switching",
             experiment="exp06",
@@ -1489,14 +1846,17 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             candidate=panel["common"].to_numpy(float),
             reference=panel["shared"].to_numpy(float),
             unit_ids=panel.index.to_numpy(object),
-            n_planned=_real_plan(exp06, unit06, failed06),
+            n_planned=planned_animals06,
             n_failed=failed06,
-            minimum_units=2,
+            minimum_units=5,
             support_low=0.0,
             oppose_below=0.0,
-            criterion="shared improves on common and retains >= 0.90 of full-model gain",
+            criterion=(
+                "stimulus-pre hierarchical shared model improves on common, retains "
+                ">=0.90 of full-model gain, and uses fewer counted parameters"
+            ),
         )
-        if e1.estimate is not None:
+        if e1.estimate is not None and required_models <= set(params06):
             gain = paired_bootstrap(
                 retained.to_numpy(float),
                 np.full(len(retained), 0.90),
@@ -1506,49 +1866,170 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
                 confidence=0.95,
                 seed=5,
             )
-            support = e1.ci_low is not None and e1.ci_low > 0 and gain.ci_low >= 0
-            oppose = e1.ci_high is not None and (e1.ci_high <= 0 or gain.ci_high < 0)
+            parameter = paired_bootstrap(
+                params06["full"].to_numpy(float),
+                params06["shared"].to_numpy(float),
+                unit_ids=params06.index.to_numpy(object),
+                replicate_unit=stats06,
+                n_resamples=5000,
+                confidence=0.95,
+                seed=6,
+            )
+            support = (
+                e1.ci_low is not None
+                and e1.ci_low > 0
+                and gain.ci_low >= 0
+                and parameter.ci_low > 0
+            )
+            oppose = e1.ci_high is not None and (
+                e1.ci_high <= 0 or gain.ci_high < 0 or parameter.ci_high <= 0
+            )
             e1 = replace(
                 e1,
                 conclusion="support"
                 if support
                 else ("oppose" if oppose else "inconclusive"),
-                note=f"{e1.note}; retained-gain-minus-0.90 CI [{gain.ci_low:.6g}, {gain.ci_high:.6g}]",
+                note=(
+                    f"{e1.note}; retained-gain-minus-0.90 CI "
+                    f"[{gain.ci_low:.6g}, {gain.ci_high:.6g}]; full-minus-shared "
+                    f"parameter CI [{parameter.ci_low:.6g}, {parameter.ci_high:.6g}]; "
+                    f"eligible cohort {animal_count06} animals/{session_count06} sessions"
+                ),
             )
     else:
+        reasons = [
+            f"strict eligible cohort has {animal_count06} animals/{session_count06} "
+            "sessions (minimum 5/20)"
+        ]
+        reasons.extend(method_issues06)
+        if not panel_columns_valid or not panel_index_valid:
+            reasons.append("complete common/shared/full stimulus-pre panel unavailable")
         e1 = _inconclusive(
             "E1_ibl_shared_switching",
             "exp06",
             "heldout_nll_per_scalar",
             "shared versus common/full hidden-context LDS",
             stats06,
-            "shared improves on common and retains >= 0.90 of full-model gain",
-            "complete common/shared/full formal panel unavailable",
-            n_planned=_real_plan(exp06, unit06, failed06),
+            (
+                "stimulus-pre hierarchical shared model improves on common, "
+                "retains >=0.90 of full gain, and uses fewer counted parameters"
+            ),
+            "; ".join(reasons),
+            n_planned=planned_animals06,
+            n_complete=animal_count06,
             n_failed=failed06,
         )
     results.append(e1)
 
-    lead_mask = _eq(exp06, "model_family", "lead_lag")
-    schedule_valid = (
-        not exp06.loc[lead_mask & _complete(exp06), "condition_schedule_observed"]
-        .fillna(True)
-        .astype(bool)
-        .any()
-        if "condition_schedule_observed" in exp06
-        else False
+    # Lead/lag is likewise stimulus-pre only. A movement-pre failure cannot be
+    # averaged with or cancel the primary view. The behavioral estimator must
+    # explicitly attest that it did not reset on true block boundaries.
+    lead_frame = exp06_primary.copy()
+    lead_mask = _eq(lead_frame, "model_family", "lead_lag")
+    complete_lead = lead_frame.loc[lead_mask & _complete(lead_frame)]
+    lead_requirements = {
+        **method_requirements06,
+        "lead_lag_is_causal_claim": False,
+        "behavior_bias_used_true_block_boundaries": False,
+    }
+    lead_issues: list[str] = []
+    for field, expected in lead_requirements.items():
+        if not _strict_boolean_requirement(complete_lead, field, expected):
+            lead_issues.append(f"{field} is not uniformly {expected}")
+
+    session_column06 = _session_column(lead_frame)
+    lead_failure_scope = lead_mask | (
+        _eq(lead_frame, "status", "failed") & _series(lead_frame, "model_family").isna()
     )
-    if "lead_lag_is_causal_claim" in exp06:
-        schedule_valid &= (
-            not exp06.loc[lead_mask & _complete(exp06), "lead_lag_is_causal_claim"]
-            .fillna(True)
-            .astype(bool)
-            .any()
+    lead_failed = _failed_units(lead_frame, "animal_id", lead_failure_scope)
+    lead_stats = "animal"
+    lead = np.array([], dtype=float)
+    lead_ids = np.array([], dtype=object)
+    lead_sessions: frozenset[object] = frozenset()
+    lead_animals: frozenset[object] = frozenset()
+    lead_session_animal_pairs: frozenset[tuple[object, object]] = frozenset()
+    required_lead_columns = {
+        "animal_id",
+        "view",
+        "latent_lead_trials",
+    }
+    lead_structure_valid = True
+    if session_column06 is None:
+        lead_issues.append("missing lead session identifier")
+        lead_structure_valid = False
+    else:
+        required_lead_columns.add(session_column06)
+    missing_lead_columns = sorted(required_lead_columns - set(complete_lead))
+    if missing_lead_columns:
+        lead_issues.append(f"missing lead columns: {', '.join(missing_lead_columns)}")
+        lead_structure_valid = False
+    if not complete_lead.empty and not missing_lead_columns:
+        prepared_lead = complete_lead.copy()
+        prepared_lead["_lead"] = pd.to_numeric(
+            prepared_lead["latent_lead_trials"], errors="coerce"
         )
-    lead, lead_ids, lead_unit, lead_stats, lead_failed = _real_scalar_values(
-        exp06, "latent_lead_trials", lead_mask
+        invalid_lead = (
+            prepared_lead[session_column06].isna()
+            | prepared_lead["animal_id"].isna()
+            | prepared_lead["view"].ne("stimulus_pre")
+            | ~np.isfinite(prepared_lead["_lead"].to_numpy(float))
+        )
+        if invalid_lead.any():
+            lead_issues.append("lead rows have invalid identity, view, or value")
+            lead_structure_valid = False
+        lead_cell_keys = [session_column06, "view"]
+        if "fold" in prepared_lead and prepared_lead["fold"].notna().any():
+            lead_cell_keys.append("fold")
+        duplicate_lead = prepared_lead.groupby(
+            lead_cell_keys, dropna=False, sort=False
+        ).size()
+        if duplicate_lead.ne(1).any():
+            lead_issues.append("duplicate lead session/view/fold cell")
+            lead_structure_valid = False
+        lead_mapping = prepared_lead.groupby(
+            session_column06, dropna=False, sort=False
+        )["animal_id"].nunique(dropna=False)
+        if lead_mapping.ne(1).any():
+            lead_issues.append("a lead session does not map to exactly one animal")
+            lead_structure_valid = False
+        if lead_structure_valid:
+            lead_sessions = frozenset(prepared_lead[session_column06].dropna().tolist())
+            lead_animals = frozenset(prepared_lead["animal_id"].dropna().tolist())
+            lead_session_animal_pairs = frozenset(
+                prepared_lead[[session_column06, "animal_id"]]
+                .drop_duplicates()
+                .itertuples(index=False, name=None)
+            )
+            session_lead = prepared_lead.groupby(
+                [session_column06, "animal_id"],
+                as_index=False,
+                dropna=False,
+                sort=False,
+            )["_lead"].mean()
+            animal_lead = session_lead.groupby(
+                "animal_id", as_index=False, dropna=False, sort=False
+            )["_lead"].mean()
+            lead = animal_lead["_lead"].to_numpy(float)
+            lead_ids = animal_lead["animal_id"].to_numpy(object)
+
+    same_cohort = (
+        lead_sessions == strict06.sessions
+        and lead_animals == strict06.animals
+        and lead_session_animal_pairs == strict06.session_animal_pairs
+        and len(lead_sessions) >= 20
+        and len(lead_animals) >= 5
     )
-    if schedule_valid:
+    model_method_valid = (
+        cohort_valid06 and not strict06.issues and strict06.n_failed == 0
+    )
+    if not same_cohort:
+        lead_issues.append(
+            "lead records do not exactly match the strict E1 session/animal cohort"
+        )
+    if not model_method_valid:
+        lead_issues.append("the strict E1 model cohort or method provenance is invalid")
+
+    if not lead_issues and lead_failed == 0:
         e2 = _paired_claim(
             claim_id="E2_latent_precedes_behavior_bias",
             experiment="exp06",
@@ -1558,15 +2039,19 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             candidate=lead,
             reference=np.zeros(len(lead)),
             unit_ids=lead_ids,
-            n_planned=_real_plan(exp06, lead_unit, lead_failed),
+            n_planned=planned_animals06,
             n_failed=lead_failed,
-            minimum_units=2,
+            minimum_units=5,
             support_low=0.0,
             oppose_below=0.0,
             criterion="independent-unit bootstrap CI of latent lead is above zero",
         )
         e2 = replace(
-            e2, note=f"{e2.note}; descriptive temporal association, not causal"
+            e2,
+            note=(
+                f"{e2.note}; descriptive temporal association, not causal; "
+                f"eligible cohort {len(lead_animals)} animals/{len(lead_sessions)} sessions"
+            ),
         )
     else:
         e2 = _inconclusive(
@@ -1576,8 +2061,9 @@ def evaluate_core_claims(raw_metrics: pd.DataFrame) -> list[ClaimResult]:
             "latent lead minus zero trials",
             lead_stats,
             "independent-unit bootstrap CI of latent lead is above zero",
-            "hidden-context schedule provenance is absent or held-out truth was observed",
-            n_planned=_real_plan(exp06, lead_unit, lead_failed),
+            "; ".join(dict.fromkeys(lead_issues))
+            or "strict stimulus-pre lead panel unavailable",
+            n_planned=planned_animals06,
             n_complete=len(set(lead_ids.tolist())),
             n_failed=lead_failed,
         )

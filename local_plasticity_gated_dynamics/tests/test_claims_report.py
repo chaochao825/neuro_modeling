@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scripts.build_report import collect_runs, write_report
+from scripts.build_report import collect_runs, merge_compact_snapshot, write_report
 from src.analysis.claims import evaluate_core_claims
 from src.utils.artifacts import ExperimentRun
 
@@ -88,6 +88,13 @@ def _phase2_formal(
                 "seed": seed,
                 "architecture": architecture,
                 "model_kind": "ei" if architecture.startswith("ei_") else "non_dale",
+                "hidden_context_task": True,
+                "cue_encodes_observation_not_state": True,
+                "gate_test_accessed_true_context": False,
+                "gate_fit_accessed_true_context": False,
+                "third_factor_accessed_true_context": False,
+                "oracle_warm_start_used": False,
+                "md_fit_used_context_bias": False,
             }
             rows.extend(
                 [
@@ -421,6 +428,58 @@ def test_twenty_seed_primary_ei_phase2_claims_are_evaluated() -> None:
     ):
         assert claims[claim_id].conclusion == "support"
         assert claims[claim_id].n_complete == 20
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing_provenance",
+        "hidden_context_false",
+        "cue_encodes_state",
+        "gate_test_context",
+        "gate_fit_context",
+        "true_context_third_factor",
+        "oracle_warm_start",
+        "supervised_context_bias",
+        "string_false_pollution",
+    ],
+)
+def test_legacy_or_leaky_phase2_gate_cannot_support_hidden_context_claim(
+    mutation: str,
+) -> None:
+    raw = _phase2_formal()
+    if mutation == "missing_provenance":
+        raw = raw.drop(
+            columns=[
+                "hidden_context_task",
+                "cue_encodes_observation_not_state",
+                "gate_test_accessed_true_context",
+                "third_factor_accessed_true_context",
+            ]
+        )
+    else:
+        field, value = {
+            "hidden_context_false": ("hidden_context_task", False),
+            "cue_encodes_state": ("cue_encodes_observation_not_state", False),
+            "gate_test_context": ("gate_test_accessed_true_context", True),
+            "gate_fit_context": ("gate_fit_accessed_true_context", True),
+            "true_context_third_factor": (
+                "third_factor_accessed_true_context",
+                True,
+            ),
+            "oracle_warm_start": ("oracle_warm_start_used", True),
+            "supervised_context_bias": ("md_fit_used_context_bias", True),
+            "string_false_pollution": ("hidden_context_task", "False"),
+        }[mutation]
+        raw[field] = value
+    claim = next(
+        item
+        for item in evaluate_core_claims(raw)
+        if item.claim_id == "B2_gate_reduces_switch_cost"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert claim.n_complete == 0
+    assert "supervised/oracle-warm-start" in claim.note
 
 
 def test_thirty_seed_p0_claims_require_both_budget_panels() -> None:
@@ -1054,7 +1113,7 @@ def test_streamed_sequence_session_failure_invalidates_earlier_complete_folds() 
     assert claim.n_failed == 1
 
 
-def test_ibl_lead_requires_both_views_and_never_cancels_a_failed_view() -> None:
+def test_ibl_stimulus_pre_lead_does_not_average_or_inherit_movement_failure() -> None:
     rows: list[dict[str, object]] = []
     for animal in ("a0", "a1"):
         for view in ("stimulus_pre", "movement_pre"):
@@ -1070,6 +1129,7 @@ def test_ibl_lead_requires_both_views_and_never_cancels_a_failed_view() -> None:
                     "latent_lead_trials": 2.0,
                     "condition_schedule_observed": False,
                     "lead_lag_is_causal_claim": False,
+                    "behavior_bias_used_true_block_boundaries": False,
                 }
             )
     rows.append(
@@ -1088,14 +1148,375 @@ def test_ibl_lead_requires_both_views_and_never_cancels_a_failed_view() -> None:
         if item.claim_id == "E2_latent_precedes_behavior_bias"
     )
     assert claim.conclusion == "inconclusive"
-    assert claim.n_complete == 1
-    assert claim.n_failed == 1
+    assert claim.n_complete == 2
+    assert claim.n_failed == 0
+    assert "strict E1" in claim.note
+
+
+def _valid_multianimal_ibl_panel() -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    for animal_index in range(10):
+        animal = f"animal-{animal_index}"
+        for session_index in range(2):
+            session = f"{animal}-session-{session_index}"
+            for fold in range(2):
+                for model, nll, parameters in (
+                    ("common", 2.0, 10),
+                    ("shared", 1.05, 20),
+                    ("full", 1.0, 50),
+                ):
+                    rows.append(
+                        {
+                            "profile": "formal",
+                            "experiment": "exp06_ibl_context_switch",
+                            "status": "complete",
+                            "animal_id": animal,
+                            "session_id": session,
+                            "view": "stimulus_pre",
+                            "fold": fold,
+                            "model_family": model,
+                            "heldout_nll_per_scalar": nll,
+                            "parameter_count": parameters,
+                            "hierarchical_observation_model": True,
+                            "nested_cv_latent_dimension": True,
+                            "unit_qc_applied": True,
+                            "context_coverage_valid": True,
+                            "parameter_count_includes_preprocessing": True,
+                            "hidden_context_inference": True,
+                            "test_context_observed": False,
+                            "belief_filter_used_true_block_boundaries": False,
+                            "condition_schedule_observed": False,
+                        }
+                    )
+    return pd.DataFrame(rows)
+
+
+def test_ibl_primary_claim_requires_full_cohort_and_method_provenance() -> None:
+    valid = _valid_multianimal_ibl_panel()
+    claim = next(
+        item
+        for item in evaluate_core_claims(valid)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert claim.conclusion == "support"
+    assert claim.stats_unit == "animal"
+    assert claim.n_complete == 10
+    assert "full-minus-shared parameter CI" in claim.note
+
+    invalid = valid.copy()
+    invalid["context_coverage_valid"] = "False"
+    invalid_claim = next(
+        item
+        for item in evaluate_core_claims(invalid)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert invalid_claim.conclusion == "inconclusive"
+    assert "context_coverage_valid" in invalid_claim.note
+
+
+def test_ibl_primary_claim_rejects_any_invalid_retained_gain_denominator() -> None:
+    invalid = _valid_multianimal_ibl_panel()
+    affected = invalid["animal_id"].isin(
+        [f"animal-{index}" for index in range(5)]
+    ) & invalid["model_family"].eq("full")
+    invalid.loc[affected, "heldout_nll_per_scalar"] = 2.1
+
+    claim = next(
+        item
+        for item in evaluate_core_claims(invalid)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert "positive full-vs-common gain denominator" in claim.note
+
+
+@pytest.mark.parametrize("bad_parameter", [np.nan, 20.5])
+def test_ibl_primary_claim_rejects_partial_or_noninteger_parameter_count(
+    bad_parameter: float,
+) -> None:
+    invalid = _valid_multianimal_ibl_panel()
+    invalid["parameter_count"] = invalid["parameter_count"].astype(float)
+    target = (
+        invalid["animal_id"].eq("animal-0")
+        & invalid["fold"].eq(1)
+        & invalid["model_family"].eq("shared")
+    )
+    invalid.loc[target, "parameter_count"] = bad_parameter
+
+    claim = next(
+        item
+        for item in evaluate_core_claims(invalid)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert "parameter_count" in claim.note
+
+
+def test_ibl_primary_claim_rejects_duplicate_model_cell() -> None:
+    valid = _valid_multianimal_ibl_panel()
+    duplicate = pd.concat([valid, valid.iloc[[0]]], ignore_index=True)
+
+    claim = next(
+        item
+        for item in evaluate_core_claims(duplicate)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert "duplicate" in claim.note
+
+
+def test_ibl_primary_claim_requires_hidden_context_provenance() -> None:
+    invalid = _valid_multianimal_ibl_panel().drop(columns=["test_context_observed"])
+
+    claim = next(
+        item
+        for item in evaluate_core_claims(invalid)
+        if item.claim_id == "E1_ibl_shared_switching"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert "test_context_observed" in claim.note
+
+
+def _ibl_panel_with_lead_records(*, lead_sessions: int = 20) -> pd.DataFrame:
+    model_rows = _valid_multianimal_ibl_panel()
+    sessions = (
+        model_rows[["animal_id", "session_id"]]
+        .drop_duplicates()
+        .sort_values(["animal_id", "session_id"])
+        .head(lead_sessions)
+    )
+    lead_rows: list[dict[str, object]] = []
+    for row in sessions.itertuples(index=False):
+        lead_rows.append(
+            {
+                "profile": "formal",
+                "experiment": "exp06_ibl_context_switch",
+                "status": "complete",
+                "animal_id": row.animal_id,
+                "session_id": row.session_id,
+                "view": "stimulus_pre",
+                "model_family": "lead_lag",
+                "latent_lead_trials": 2.0,
+                "hierarchical_observation_model": True,
+                "nested_cv_latent_dimension": True,
+                "unit_qc_applied": True,
+                "context_coverage_valid": True,
+                "parameter_count_includes_preprocessing": True,
+                "hidden_context_inference": True,
+                "test_context_observed": False,
+                "belief_filter_used_true_block_boundaries": False,
+                "condition_schedule_observed": False,
+                "lead_lag_is_causal_claim": False,
+                "behavior_bias_used_true_block_boundaries": False,
+            }
+        )
+    return pd.concat([model_rows, pd.DataFrame(lead_rows)], ignore_index=True)
+
+
+def test_ibl_lead_claim_requires_exact_same_twenty_session_cohort() -> None:
+    complete_claim = next(
+        item
+        for item in evaluate_core_claims(_ibl_panel_with_lead_records())
+        if item.claim_id == "E2_latent_precedes_behavior_bias"
+    )
+    assert complete_claim.conclusion == "support"
+    assert complete_claim.n_complete == 10
+    assert "10 animals/20 sessions" in complete_claim.note
+
+    incomplete_claim = next(
+        item
+        for item in evaluate_core_claims(_ibl_panel_with_lead_records(lead_sessions=10))
+        if item.claim_id == "E2_latent_precedes_behavior_bias"
+    )
+    assert incomplete_claim.conclusion == "inconclusive"
+    assert "exactly match" in incomplete_claim.note
+
+
+def test_ibl_lead_claim_rejects_swapped_session_animal_mapping() -> None:
+    invalid = _ibl_panel_with_lead_records()
+    lead_mask = invalid["model_family"].eq("lead_lag")
+    lead_animals = invalid.loc[lead_mask, "animal_id"].to_numpy(copy=True)
+    invalid.loc[lead_mask, "animal_id"] = np.roll(lead_animals, 2)
+
+    claim = next(
+        item
+        for item in evaluate_core_claims(invalid)
+        if item.claim_id == "E2_latent_precedes_behavior_bias"
+    )
+    assert claim.conclusion == "inconclusive"
+    assert "exactly match" in claim.note
 
 
 def test_collect_runs_handles_empty_results(tmp_path: Path) -> None:
     (tmp_path / "runs").mkdir()
     raw, runs = collect_runs(tmp_path)
     assert raw.empty and runs.empty
+
+
+def test_compact_snapshot_merge_preserves_history_replaces_runs_and_is_idempotent(
+    tmp_path: Path,
+) -> None:
+    historical_raw = pd.DataFrame(
+        [
+            {
+                "run_id": "history-only",
+                "recorded_at": "2026-01-01T00:00:00Z",
+                "condition": "failed-control",
+                "status": "failed",
+            },
+            {
+                "run_id": "rediscovered",
+                "recorded_at": "2026-01-02T00:00:00Z",
+                "condition": "stale-partial",
+                "status": "failed",
+            },
+        ]
+    )
+    historical_runs = pd.DataFrame(
+        [
+            {"run_id": "history-only", "status": "failed"},
+            {"run_id": "rediscovered", "status": "running"},
+        ]
+    )
+    historical_raw.to_csv(tmp_path / "raw_metrics.csv", index=False)
+    historical_runs.to_csv(tmp_path / "runs.csv", index=False)
+    # Two legitimate rows deliberately share a timestamp.  A timestamp key
+    # would erase one of them, whereas run-level replacement preserves both.
+    discovered_raw = pd.DataFrame(
+        [
+            {
+                "run_id": "rediscovered",
+                "recorded_at": "2026-01-02T01:00:00Z",
+                "condition": "aligned",
+                "status": "complete",
+            },
+            {
+                "run_id": "rediscovered",
+                "recorded_at": "2026-01-02T01:00:00Z",
+                "condition": "shuffled",
+                "status": "complete",
+            },
+        ]
+    )
+    discovered_runs = pd.DataFrame([{"run_id": "rediscovered", "status": "complete"}])
+
+    raw, runs = merge_compact_snapshot(tmp_path, discovered_raw, discovered_runs)
+    assert set(raw["run_id"]) == {"history-only", "rediscovered"}
+    assert set(raw.loc[raw["run_id"].eq("rediscovered"), "condition"]) == {
+        "aligned",
+        "shuffled",
+    }
+    assert "stale-partial" not in set(raw["condition"])
+    assert runs.set_index("run_id").loc["history-only", "status"] == "failed"
+    assert runs.set_index("run_id").loc["rediscovered", "status"] == "complete"
+
+    raw.to_csv(tmp_path / "raw_metrics.csv", index=False)
+    runs.to_csv(tmp_path / "runs.csv", index=False)
+    repeated_raw, repeated_runs = merge_compact_snapshot(
+        tmp_path, discovered_raw, discovered_runs
+    )
+    pd.testing.assert_frame_equal(repeated_raw, raw)
+    pd.testing.assert_frame_equal(repeated_runs, runs)
+
+
+def test_compact_snapshot_normalizes_numeric_ids_and_legacy_fallbacks(
+    tmp_path: Path,
+) -> None:
+    historical_raw = pd.DataFrame(
+        [
+            {
+                "run_id": 1,
+                "experiment": "numeric",
+                "seed": 0,
+                "run_started_at": "2026-01-01T00:00:00Z",
+                "condition": "stale-numeric",
+            },
+            {
+                "run_id": None,
+                "experiment": "legacy",
+                "seed": 2,
+                "run_started_at": "2026-01-03T00:00:00Z",
+                "condition": "stale-legacy",
+            },
+        ]
+    )
+    historical_runs = pd.DataFrame(
+        [
+            {
+                "run_id": 1,
+                "experiment": "numeric",
+                "seed": 0,
+                "started_at": "2026-01-01T00:00:00Z",
+                "status": "failed",
+            },
+            {
+                "run_id": None,
+                "experiment": "legacy",
+                "seed": 2,
+                "started_at": "2026-01-03T00:00:00Z",
+                "status": "failed",
+            },
+        ]
+    )
+    historical_raw.to_csv(tmp_path / "raw_metrics.csv", index=False)
+    historical_runs.to_csv(tmp_path / "runs.csv", index=False)
+    discovered_raw = pd.DataFrame(
+        [
+            {
+                "run_id": 1,
+                "experiment": "numeric",
+                "seed": 0,
+                "run_started_at": "2026-01-01T00:00:00Z",
+                "condition": "fresh-numeric",
+            },
+            {
+                "run_id": None,
+                "experiment": "legacy",
+                "seed": 2,
+                "run_started_at": "2026-01-03T00:00:00Z",
+                "condition": "fresh-legacy",
+            },
+        ]
+    )
+    discovered_runs = pd.DataFrame(
+        [
+            {
+                "run_id": 1,
+                "experiment": "numeric",
+                "seed": 0,
+                "started_at": "2026-01-01T00:00:00Z",
+                "status": "complete",
+            },
+            {
+                "run_id": None,
+                "experiment": "legacy",
+                "seed": 2,
+                "started_at": "2026-01-03T00:00:00Z",
+                "status": "complete",
+            },
+        ]
+    )
+
+    raw, runs = merge_compact_snapshot(tmp_path, discovered_raw, discovered_runs)
+    assert set(raw["condition"]) == {"fresh-numeric", "fresh-legacy"}
+    assert set(runs["status"]) == {"complete"}
+
+
+def test_compact_snapshot_rejects_duplicate_or_unidentified_discovered_runs(
+    tmp_path: Path,
+) -> None:
+    duplicate_runs = pd.DataFrame(
+        [
+            {"run_id": "duplicate", "status": "complete"},
+            {"run_id": "duplicate", "status": "failed"},
+        ]
+    )
+    with pytest.raises(ValueError, match="share one run identity"):
+        merge_compact_snapshot(tmp_path, pd.DataFrame(), duplicate_runs)
+
+    unidentified = pd.DataFrame([{"status": "complete"}])
+    with pytest.raises(ValueError, match="stable.*provenance"):
+        merge_compact_snapshot(tmp_path, pd.DataFrame(), unidentified)
 
 
 def test_collect_runs_materializes_empty_top_level_failure(tmp_path: Path) -> None:
