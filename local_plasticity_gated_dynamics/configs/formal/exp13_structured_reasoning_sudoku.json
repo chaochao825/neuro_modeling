@@ -1,0 +1,32 @@
+{
+  "profile": "formal",
+  "family": "sudoku",
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+  "conditions": ["support_heuristic", "flat_local", "hierarchical_local", "trace_local", "gru_bptt", "candidate_oracle"],
+  "fit_splits": ["train"],
+  "n_bootstrap": 10000,
+  "minimum_test_tasks": 100,
+  "hyperparameters_frozen_before_test": true,
+  "data": {
+    "path": "data/structured/sudoku-extreme.csv",
+    "dataset_name": "sapientinc/sudoku-extreme",
+    "revision": "58942f96baeb572ca3127e2a9e9c70f330783d6b",
+    "license": null,
+    "license_status": "unverified",
+    "unavailable_reason": "upstream dataset metadata has no declared data license"
+  },
+  "model": {
+    "fast_dim": 24,
+    "slow_dim": 12,
+    "control_dim": 4,
+    "cycles": 3,
+    "fast_steps_per_cycle": 2,
+    "trace_pairs": 8,
+    "trace_decay": 0.9,
+    "ridge": 0.001,
+    "gru_hidden_dim": 16,
+    "gru_epochs": 30,
+    "gru_learning_rate": 0.01,
+    "max_internal_steps": 128
+  }
+}

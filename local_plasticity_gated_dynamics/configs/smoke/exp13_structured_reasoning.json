@@ -1,0 +1,36 @@
+{
+  "profile": "smoke",
+  "family": "arc",
+  "seeds": [0],
+  "conditions": [
+    "support_heuristic",
+    "flat_local",
+    "hierarchical_local",
+    "trace_local",
+    "gru_bptt",
+    "candidate_oracle"
+  ],
+  "fit_splits": ["train"],
+  "n_bootstrap": 200,
+  "max_arc_candidates": 64,
+  "hyperparameters_frozen_before_test": true,
+  "synthetic_fixture": {
+    "n_train_tasks": 10,
+    "n_test_tasks": 6,
+    "seed": 1729
+  },
+  "model": {
+    "fast_dim": 12,
+    "slow_dim": 8,
+    "control_dim": 3,
+    "cycles": 2,
+    "fast_steps_per_cycle": 2,
+    "trace_pairs": 4,
+    "trace_decay": 0.9,
+    "ridge": 0.001,
+    "gru_hidden_dim": 8,
+    "gru_epochs": 3,
+    "gru_learning_rate": 0.01,
+    "max_internal_steps": 64
+  }
+}
