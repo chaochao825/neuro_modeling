@@ -125,7 +125,7 @@ def _read_compact_csv(path: Path) -> pd.DataFrame:
     if not path.exists() or path.stat().st_size == 0:
         return pd.DataFrame()
     try:
-        return pd.read_csv(path, low_memory=False)
+        return pd.read_csv(path, low_memory=False, float_precision="round_trip")
     except pd.errors.EmptyDataError:
         return pd.DataFrame()
 
@@ -342,7 +342,9 @@ def write_report(
         "- `results/core_results.pdf` and `results/phase_models.pdf`: script-generated data figures when applicable.",
         "",
     ]
-    (results_root / "report.md").write_text("\n".join(lines), encoding="utf-8")
+    (results_root / "report.md").write_text(
+        "\n".join(lines), encoding="utf-8", newline="\n"
+    )
 
 
 def main() -> None:
@@ -355,9 +357,9 @@ def main() -> None:
     discovered_raw, discovered_runs = collect_runs(results_root)
     raw, runs = merge_compact_snapshot(results_root, discovered_raw, discovered_runs)
     write_compact_raw(results_root, raw)
-    runs.to_csv(results_root / "runs.csv", index=False)
+    runs.to_csv(results_root / "runs.csv", index=False, lineterminator="\n")
     summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])
-    summary.to_csv(results_root / "summary.csv", index=False)
+    summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
     if args.plots:
         for script in ("core_results_plot.py", "phase_models_plot.py"):

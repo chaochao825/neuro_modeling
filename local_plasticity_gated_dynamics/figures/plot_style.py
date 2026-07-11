@@ -38,5 +38,12 @@ def setup_style() -> None:
 
 def save_figure(fig: plt.Figure, name: str, results_root: Path) -> None:
     results_root.mkdir(parents=True, exist_ok=True)
-    fig.savefig(results_root / f"{name}.pdf", format="pdf", bbox_inches="tight")
-    fig.savefig(results_root / f"{name}.png", format="png", dpi=DPI, bbox_inches="tight")
+    fig.savefig(
+        results_root / f"{name}.pdf",
+        format="pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    fig.savefig(
+        results_root / f"{name}.png", format="png", dpi=DPI, bbox_inches="tight"
+    )

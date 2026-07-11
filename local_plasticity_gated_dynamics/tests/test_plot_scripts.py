@@ -1,9 +1,27 @@
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from figures.core_results_plot import _latest_attempt, plot_core_results
 from figures.phase_models_plot import _complete_profile, plot_phase_models
+from figures.plot_style import save_figure
+
+
+def test_saved_figure_bytes_are_deterministic(tmp_path: Path) -> None:
+    figure, axis = plt.subplots()
+    axis.plot([0.0, 1.0], [1.0, 0.0])
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    save_figure(figure, "bound", first)
+    save_figure(figure, "bound", second)
+    plt.close(figure)
+
+    pdf_bytes = (first / "bound.pdf").read_bytes()
+    assert pdf_bytes == (second / "bound.pdf").read_bytes()
+    assert b"CreationDate" not in pdf_bytes
+    assert b"ModDate" not in pdf_bytes
+    assert (first / "bound.png").read_bytes() == (second / "bound.png").read_bytes()
 
 
 def test_plot_functions_accept_empty_and_minimal_bound_data(tmp_path: Path) -> None:

@@ -1364,7 +1364,11 @@ def test_compact_raw_snapshot_is_lossless_deterministic_and_preferred(
 ) -> None:
     authoritative = pd.DataFrame(
         [
-            {"run_id": "new", "metric": 1.25, "status": "complete"},
+            {
+                "run_id": "new",
+                "metric": 3.7940759646432964e-16,
+                "status": "complete",
+            },
             {"run_id": "failed", "metric": np.nan, "status": "failed"},
         ]
     )
@@ -1372,7 +1376,11 @@ def test_compact_raw_snapshot_is_lossless_deterministic_and_preferred(
     compressed = tmp_path / "raw_metrics.csv.gz"
     plain = tmp_path / "raw_metrics.csv"
     first_bytes = compressed.read_bytes()
-    write_compact_raw(tmp_path, authoritative)
+    for _ in range(3):
+        round_tripped, _ = merge_compact_snapshot(
+            tmp_path, pd.DataFrame(), pd.DataFrame()
+        )
+        write_compact_raw(tmp_path, round_tripped)
 
     assert compressed.read_bytes() == first_bytes
     assert not (tmp_path / "raw_metrics.csv.gz.tmp").exists()

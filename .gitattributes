@@ -16,5 +16,6 @@ pytest.ini text eol=lf
 # Binary scientific figures are never text-normalized.
 *.png binary
 *.pdf binary
+*.gz binary
 *.mat binary
 *.npy binary
