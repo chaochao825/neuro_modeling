@@ -235,6 +235,9 @@ def test_p2_full_grid_supports_with_fixed_full_holm_family() -> None:
         claims["P2_overall"].multiplicity_method
         == "derived_after_holm(no_additional_test)"
     )
+    delay = claims["P2k_delay_causal"]
+    assert "h=0.10/0.20" in delay.comparison
+    assert "h=0.10/0.20" in delay.criterion
 
 
 def test_p2_missing_cell_and_extra_seed_cannot_replace_planned_seed() -> None:

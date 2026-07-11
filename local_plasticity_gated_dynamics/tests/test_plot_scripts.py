@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from figures.core_results_plot import _latest_attempt, plot_core_results
@@ -109,3 +110,67 @@ def test_phase_plot_falls_back_to_complete_ibl_when_sequence_only_failed() -> No
     figure = plot_phase_models(raw)
     assert figure.axes[3].get_title() == "IBL LDS; folds nested in session"
     assert len(figure.axes[3].patches) == 1
+
+
+def test_hidden_context_delay_bar_matches_preregistered_high_hazard_scope() -> None:
+    rows = []
+    for hazard in (0.01, 0.05, 0.10, 0.20):
+        common = {
+            "experiment": "exp09_hidden_context_gate",
+            "profile": "formal",
+            "seed": 0,
+            "status": "complete",
+            "cue_reliability": 0.70,
+            "context_hazard": hazard,
+        }
+        rows += [
+            {
+                **common,
+                "gate_model": "no_gate",
+                "intervention": "none",
+                "behavior_balanced_accuracy": 0.5,
+                "context_nll": 0.7,
+            },
+            {
+                **common,
+                "gate_model": "md_recurrent_belief",
+                "intervention": "none",
+                "behavior_balanced_accuracy": 1.0,
+                "context_nll": 0.4,
+            },
+            {
+                **common,
+                "gate_model": "md_recurrent_belief",
+                "intervention": "clamp",
+                "behavior_balanced_accuracy": 0.5,
+                "context_nll": 0.4,
+            },
+            {
+                **common,
+                "gate_model": "md_recurrent_belief",
+                "intervention": "delay",
+                "behavior_balanced_accuracy": 0.8 if hazard >= 0.10 else 0.99,
+                "context_nll": 0.4,
+            },
+            {
+                **common,
+                "gate_model": "md_recurrent_belief",
+                "intervention": "shuffle",
+                "behavior_balanced_accuracy": 0.7,
+                "context_nll": 0.4,
+            },
+        ]
+
+    figure = plot_hidden_context(pd.DataFrame(rows))
+    axis = next(
+        item
+        for item in figure.axes
+        if item.get_ylabel() == "Intact minus intervention accuracy"
+    )
+    assert np.allclose([patch.get_height() for patch in axis.patches], [0.5, 0.2, 0.3])
+    assert [label.get_text() for label in axis.get_xticklabels()] == [
+        "clamp",
+        "delay\n(h=.10/.20)",
+        "shuffle",
+    ]
+    plt.close(figure)

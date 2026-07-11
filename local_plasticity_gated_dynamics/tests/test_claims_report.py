@@ -325,6 +325,96 @@ def test_report_exposes_attempt_categories_and_claim_evidence_notes(
     assert "### Evidence details" in report
     assert "`B1` (failed=1)" in report
     assert "absolute accuracy-minus-0.85 CI [-0.2, -0.1]" in report
+    assert "## P2 formal diagnostics" not in report
+
+
+def test_report_adds_formal_p2_macro_and_fit_diagnostics(tmp_path: Path) -> None:
+    rows: list[dict[str, object]] = []
+    gates = (
+        "oracle_bayes",
+        "supervised_upper_bound",
+        "learned_hmm",
+        "md_recurrent_belief",
+        "no_gate",
+    )
+    gate_nll = {
+        "oracle_bayes": 0.2,
+        "supervised_upper_bound": 0.22,
+        "learned_hmm": 0.25,
+        "md_recurrent_belief": 0.3,
+        "no_gate": 0.69,
+    }
+    for seed in range(2):
+        for q in (0.55, 0.70, 0.85, 1.0):
+            for hazard in (0.01, 0.05, 0.10, 0.20):
+                cell_offset = 0.02 * (1.0 - q) + 0.01 * hazard
+                for gate in gates:
+                    row: dict[str, object] = {
+                        "experiment": "exp09_hidden_context_gate",
+                        "profile": "formal",
+                        "seed": seed,
+                        "status": "complete",
+                        "gate_model": gate,
+                        "intervention": "none",
+                        "cue_reliability": q,
+                        "context_hazard": hazard,
+                        "context_nll": gate_nll[gate] + cell_offset,
+                        "context_brier": 0.1 + cell_offset,
+                        "context_ece": 0.03 + cell_offset,
+                        "switch_latency_trials": 1.0 + 2.0 * hazard,
+                        "false_switch_rate": 0.01 + 0.01 * hazard,
+                        "behavior_balanced_accuracy": 0.8 + 0.1 * q,
+                        "energy_proxy_per_trial": 0.9 + 0.05 * q,
+                    }
+                    if gate == "learned_hmm":
+                        row["hmm_fit_converged"] = not (
+                            seed == 1 and q == 0.55 and hazard == 0.20
+                        )
+                        row["hmm_fit_iterations"] = 10 + seed
+                    if gate == "md_recurrent_belief":
+                        identifiable = q >= 0.70
+                        row["md_moment_anchor_identifiable"] = identifiable
+                        row["estimated_context_hazard"] = (
+                            hazard if identifiable else 0.499999
+                        )
+                        row["estimated_cue_reliability"] = (
+                            q if identifiable else 0.500001
+                        )
+                    rows.append(row)
+    summary = pd.DataFrame(
+        [
+            {
+                "claim_id": "P2i_md_energy",
+                "criterion": "MD energy upper ratio CI <=1.10",
+                "n_complete": 30,
+                "n_planned": 30,
+                "n_failed": 0,
+                "estimate": np.log(0.90),
+                "ci_low": np.log(0.85),
+                "ci_high": np.log(0.95),
+                "conclusion": "support",
+                "note": "registered log energy ratio",
+            }
+        ]
+    )
+
+    write_report(tmp_path, pd.DataFrame(rows), pd.DataFrame(), summary)
+    report = (tmp_path / "report.md").read_text(encoding="utf-8")
+
+    assert "## P2 formal diagnostics" in report
+    assert (
+        "macro average does not assert that the result holds in every q/h cell"
+        in report
+    )
+    assert "| MD recurrent belief | 2 |" in report
+    assert "Learned-HMM convergence: 31/32 reported fits converged" in report
+    assert "non-converged fits are retained as a sensitivity caveat" in report
+    assert "| q = 0.55 (weak cue) | 0/8 | 0 | 8/8 |" in report
+    assert "| q >= 0.70 | 24/24 | 1 | unavailable |" in report
+    assert "returns neutral parameter estimates (q̂≈0.5, ĥ≈0.5)" in report
+    assert "### MD q/h-cell range" in report
+    assert "### P2i energy-ratio interpretation" in report
+    assert "energy ratio of 0.9 [0.85, 0.95]" in report
 
 
 def test_twenty_seed_phase1_support_and_missing_seed_is_inconclusive() -> None:

@@ -220,11 +220,15 @@ def plot_hidden_context(raw: pd.DataFrame):
             else []
         )
         if labels:
-            drops = (
-                pd.DataFrame({name: pivot["none"] - pivot[name] for name in labels})
-                .groupby(level="seed")
-                .mean()
-            )
+            seed_drops = {}
+            for name in labels:
+                effect = pivot["none"] - pivot[name]
+                if name == "delay":
+                    # P2k is preregistered only for the high-hazard panel.
+                    hazards = effect.index.get_level_values("context_hazard")
+                    effect = effect[hazards.isin((0.10, 0.20))]
+                seed_drops[name] = effect.groupby(level="seed").mean()
+            drops = pd.DataFrame(seed_drops)
             means = drops.mean(axis=0)
             errors = drops.sem(axis=0).fillna(0.0)
             axes[1, 1].bar(
@@ -235,7 +239,9 @@ def plot_hidden_context(raw: pd.DataFrame):
                 capsize=3,
             )
             axes[1, 1].set_xticks(np.arange(len(labels)))
-            axes[1, 1].set_xticklabels(labels)
+            axes[1, 1].set_xticklabels(
+                ["delay\n(h=.10/.20)" if name == "delay" else name for name in labels]
+            )
     axes[1, 1].axhline(0.0, color="black", linewidth=0.8)
     axes[1, 1].set_ylabel("Intact minus intervention accuracy")
     axes[1, 1].text(0.02, 0.96, "(d)", transform=axes[1, 1].transAxes, va="top")

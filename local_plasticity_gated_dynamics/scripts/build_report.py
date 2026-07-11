@@ -17,7 +17,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.analysis.claims import evaluate_core_claims  # noqa: E402
+from src.analysis.claims import (  # noqa: E402
+    P2_GATES,
+    P2_H,
+    P2_PLANNED_SEEDS,
+    P2_Q,
+    evaluate_core_claims,
+    select_latest_attempts,
+)
 
 
 MAX_PUBLISHED_RAW_BYTES = 95 * 1024 * 1024
@@ -449,6 +456,329 @@ def _format_number(value) -> str:
     return f"{value:.4g}" if isinstance(value, (float, np.floating)) else str(value)
 
 
+_P2_DIAGNOSTIC_METRICS = (
+    ("context_nll", "Context NLL"),
+    ("context_brier", "Context Brier"),
+    ("context_ece", "Context ECE"),
+    ("switch_latency_trials", "Switch latency (trials)"),
+    ("false_switch_rate", "False-switch rate"),
+    ("behavior_balanced_accuracy", "Behavior balanced accuracy"),
+    ("energy_proxy_per_trial", "Energy proxy / trial"),
+)
+
+
+def _p2_grid_coordinate(value: object, allowed: tuple[float, ...]) -> float | None:
+    """Map serialized q/h values back to their preregistered grid coordinate."""
+
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(numeric):
+        return None
+    matches = [item for item in allowed if np.isclose(numeric, item, atol=1e-12)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _p2_report_bool(value: object) -> bool | None:
+    """Parse artifact booleans without treating non-empty strings as true."""
+
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if isinstance(value, (int, np.integer)) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().casefold()
+        if normalized in {"true", "1"}:
+            return True
+        if normalized in {"false", "0"}:
+            return False
+    return None
+
+
+def _complete_p2_base_cells(raw: pd.DataFrame) -> pd.DataFrame:
+    """Return latest complete base gates with an exact q/h grid per seed/gate."""
+
+    required = {
+        "experiment",
+        "profile",
+        "seed",
+        "status",
+        "gate_model",
+        "intervention",
+        "cue_reliability",
+        "context_hazard",
+        *(metric for metric, _ in _P2_DIAGNOSTIC_METRICS),
+    }
+    if raw.empty or not required <= set(raw):
+        return raw.iloc[:0].copy()
+    formal = raw.loc[
+        raw["experiment"].astype("string").eq("exp09_hidden_context_gate")
+        & raw["profile"].astype("string").eq("formal")
+    ].copy()
+    if formal.empty:
+        return formal
+    formal = select_latest_attempts(formal)
+    numeric_seed = pd.to_numeric(formal["seed"], errors="coerce")
+    base = formal.loc[
+        numeric_seed.isin(P2_PLANNED_SEEDS)
+        & formal["status"].astype("string").eq("complete")
+        & formal["intervention"].astype("string").eq("none")
+        & formal["gate_model"].astype("string").isin(P2_GATES)
+    ].copy()
+    if base.empty:
+        return base
+    base["seed"] = numeric_seed.loc[base.index].astype(int)
+    base["cue_reliability"] = base["cue_reliability"].map(
+        lambda value: _p2_grid_coordinate(value, P2_Q)
+    )
+    base["context_hazard"] = base["context_hazard"].map(
+        lambda value: _p2_grid_coordinate(value, P2_H)
+    )
+    for metric, _ in _P2_DIAGNOSTIC_METRICS:
+        base[metric] = pd.to_numeric(base[metric], errors="coerce")
+
+    expected = {(q, h) for q in P2_Q for h in P2_H}
+    valid_indices: list[object] = []
+    for _, group in base.groupby(["seed", "gate_model"], sort=False):
+        coordinates = list(
+            zip(
+                group["cue_reliability"],
+                group["context_hazard"],
+                strict=True,
+            )
+        )
+        metrics = group[[metric for metric, _ in _P2_DIAGNOSTIC_METRICS]]
+        if (
+            len(coordinates) == len(expected)
+            and len(set(coordinates)) == len(expected)
+            and set(coordinates) == expected
+            and np.isfinite(metrics.to_numpy(dtype=float)).all()
+        ):
+            valid_indices.extend(group.index.tolist())
+    return base.loc[valid_indices].copy()
+
+
+def _p2_energy_ratio_lines(summary: pd.DataFrame) -> list[str]:
+    """Translate P2i's registered log effect back to an interpretable ratio."""
+
+    if summary.empty or "claim_id" not in summary:
+        return [
+            "P2i energy ratio is unavailable because its summary row is missing.",
+            "",
+        ]
+    selected = summary.loc[summary["claim_id"].astype("string").eq("P2i_md_energy")]
+    if len(selected) != 1:
+        return [
+            "P2i energy ratio is unavailable because there is not exactly one "
+            "summary row.",
+            "",
+        ]
+    row = selected.iloc[0]
+    logged = pd.to_numeric(
+        pd.Series([row.get("estimate"), row.get("ci_low"), row.get("ci_high")]),
+        errors="coerce",
+    ).to_numpy(float)
+    if not np.isfinite(logged).all():
+        return [
+            "P2i energy ratio is unavailable because its log estimate or CI is "
+            "non-finite.",
+            "",
+        ]
+    ratio = np.exp(logged)
+    return [
+        "P2i is registered on the log(MD/no-gate energy) scale. Exponentiating "
+        f"the summary estimate and CI gives an energy ratio of "
+        f"{_format_number(ratio[0])} [{_format_number(ratio[1])}, "
+        f"{_format_number(ratio[2])}].",
+        "",
+    ]
+
+
+def _p2_formal_diagnostics(raw: pd.DataFrame, summary: pd.DataFrame) -> list[str]:
+    """Build descriptive P2 diagnostics only when formal exp09 rows exist."""
+
+    required_scope = {"experiment", "profile"}
+    if raw.empty or not required_scope <= set(raw):
+        return []
+    has_formal_p2 = (
+        raw["experiment"].astype("string").eq("exp09_hidden_context_gate")
+        & raw["profile"].astype("string").eq("formal")
+    ).any()
+    if not has_formal_p2:
+        return []
+
+    base = _complete_p2_base_cells(raw)
+    lines = [
+        "",
+        "## P2 formal diagnostics",
+        "",
+        "These are descriptive seed-level diagnostics. Each base-gate entry first "
+        "averages the 16 q/h cells within a complete seed, then averages those "
+        "seed macros. Therefore a macro average does not assert that the result "
+        "holds in every q/h cell.",
+        "Fit counts below audit seed-by-q/h cells descriptively; they are not "
+        "independent inferential replicates. Core-claim inference remains at the "
+        "seed level.",
+        "",
+        "### Base-gate macro averages",
+        "",
+        "| Base gate | Complete seed macros | NLL | Brier | ECE | Latency | False switch | Behavior | Energy |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    gate_labels = {
+        "oracle_bayes": "Oracle Bayes",
+        "supervised_upper_bound": "Supervised upper bound (ineligible)",
+        "learned_hmm": "Learned HMM",
+        "md_recurrent_belief": "MD recurrent belief",
+        "no_gate": "No gate",
+    }
+    metric_names = [metric for metric, _ in _P2_DIAGNOSTIC_METRICS]
+    seed_macros = (
+        base.groupby(["seed", "gate_model"], as_index=False, sort=False)[
+            metric_names
+        ].mean()
+        if not base.empty
+        else pd.DataFrame()
+    )
+    for gate in P2_GATES:
+        selected = (
+            seed_macros.loc[seed_macros["gate_model"].eq(gate)]
+            if not seed_macros.empty
+            else seed_macros
+        )
+        if selected.empty:
+            values = ["unavailable"] * len(metric_names)
+        else:
+            values = [
+                _format_number(float(selected[metric].mean()))
+                for metric in metric_names
+            ]
+        lines.append(
+            f"| {gate_labels[gate]} | {len(selected)} | " + " | ".join(values) + " |"
+        )
+
+    lines += ["", "### Fit and identifiability diagnostics", ""]
+    hmm = (
+        base.loc[base["gate_model"].eq("learned_hmm")].copy()
+        if not base.empty
+        else base
+    )
+    if {"hmm_fit_converged", "hmm_fit_iterations"} <= set(hmm) and not hmm.empty:
+        convergence = hmm["hmm_fit_converged"].map(_p2_report_bool)
+        iterations = pd.to_numeric(hmm["hmm_fit_iterations"], errors="coerce")
+        reported = convergence.notna()
+        finite_iterations = iterations[np.isfinite(iterations.to_numpy(float))]
+        iteration_text = (
+            f"mean {_format_number(float(finite_iterations.mean()))}, median "
+            f"{_format_number(float(finite_iterations.median()))}, range "
+            f"{_format_number(float(finite_iterations.min()))}–"
+            f"{_format_number(float(finite_iterations.max()))}"
+            if not finite_iterations.empty
+            else "unavailable"
+        )
+        lines.append(
+            f"- Learned-HMM convergence: {int(convergence.eq(True).sum())}/"
+            f"{int(reported.sum())} reported fits converged; EM iterations: "
+            f"{iteration_text}."
+        )
+        lines.append(
+            "- All finite held-out HMM scores remain in the preregistered P2a "
+            "seed macro whether or not EM met its tolerance; non-converged fits "
+            "are retained as a sensitivity caveat, not silently dropped."
+        )
+    else:
+        lines.append("- Learned-HMM convergence and iteration diagnostics unavailable.")
+
+    md = (
+        base.loc[base["gate_model"].eq("md_recurrent_belief")].copy()
+        if not base.empty
+        else base
+    )
+    identifiable = (
+        md["md_moment_anchor_identifiable"].map(_p2_report_bool)
+        if "md_moment_anchor_identifiable" in md
+        else pd.Series(None, index=md.index, dtype=object)
+    )
+    md["_identifiable"] = identifiable
+    lines += [
+        "",
+        "| MD cue band | Identifiable / reported fits | Identifiable rate | Neutral fallback among non-identifiable |",
+        "|---|---:|---:|---:|",
+    ]
+    reliability = (
+        md["cue_reliability"]
+        if "cue_reliability" in md
+        else pd.Series(np.nan, index=md.index, dtype=float)
+    )
+    for label, mask in (
+        ("q = 0.55 (weak cue)", reliability.eq(0.55)),
+        ("q >= 0.70", reliability.ge(0.70)),
+    ):
+        selected = md.loc[mask]
+        reported = selected["_identifiable"].notna()
+        identified_count = int(selected.loc[reported, "_identifiable"].eq(True).sum())
+        reported_count = int(reported.sum())
+        rate = (
+            _format_number(identified_count / reported_count)
+            if reported_count
+            else "unavailable"
+        )
+        nonidentifiable = selected.loc[selected["_identifiable"].eq(False)]
+        if {
+            "estimated_context_hazard",
+            "estimated_cue_reliability",
+        } <= set(nonidentifiable) and not nonidentifiable.empty:
+            estimated_h = pd.to_numeric(
+                nonidentifiable["estimated_context_hazard"], errors="coerce"
+            )
+            estimated_q = pd.to_numeric(
+                nonidentifiable["estimated_cue_reliability"], errors="coerce"
+            )
+            neutral = np.isclose(estimated_h, 0.5, atol=1e-4) & np.isclose(
+                estimated_q, 0.5, atol=1e-4
+            )
+            neutral_text = f"{int(neutral.sum())}/{len(nonidentifiable)}"
+        else:
+            neutral_text = "unavailable"
+        lines.append(
+            f"| {label} | {identified_count}/{reported_count} | {rate} | "
+            f"{neutral_text} |"
+        )
+    lines += [
+        "",
+        "The weak-cue safeguard returns neutral parameter estimates (q̂≈0.5, "
+        "ĥ≈0.5) whenever the MD moment anchor is not identifiable; the final "
+        "column audits that fallback in the observed formal fits.",
+        "",
+        "### MD q/h-cell range",
+        "",
+        "Each endpoint below is first averaged across seeds within a q/h cell. "
+        "The extrema expose cell heterogeneity hidden by the macro average.",
+        "",
+        "| Endpoint | Minimum cell mean (q, h) | Maximum cell mean (q, h) |",
+        "|---|---:|---:|",
+    ]
+    if md.empty:
+        lines.append("| unavailable | unavailable | unavailable |")
+    else:
+        cell_means = md.groupby(["cue_reliability", "context_hazard"], sort=True)[
+            metric_names
+        ].mean()
+        for metric, label in _P2_DIAGNOSTIC_METRICS:
+            minimum = cell_means[metric].idxmin()
+            maximum = cell_means[metric].idxmax()
+            lines.append(
+                f"| {label} | {_format_number(cell_means.loc[minimum, metric])} "
+                f"(q={_format_number(minimum[0])}, h={_format_number(minimum[1])}) | "
+                f"{_format_number(cell_means.loc[maximum, metric])} "
+                f"(q={_format_number(maximum[0])}, h={_format_number(maximum[1])}) |"
+            )
+    lines += ["", "### P2i energy-ratio interpretation", ""]
+    lines += _p2_energy_ratio_lines(summary)
+    return lines
+
+
 def write_report(
     results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summary: pd.DataFrame
 ) -> None:
@@ -494,6 +824,7 @@ def write_report(
     for row in summary.to_dict("records"):
         note = str(row.get("note") or "—").replace("\n", " ")
         lines.append(f"- `{row['claim_id']}` (failed={row['n_failed']}): {note}")
+    lines += _p2_formal_diagnostics(raw, summary)
     lines += [
         "",
         "## Interpretation safeguards",

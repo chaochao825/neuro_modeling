@@ -1473,7 +1473,12 @@ def _evaluate_p2_claims(
     )
     for claim_id, intervention, label, hazards in (
         ("P2j_clamp_causal", "clamp", "clamp", P2_H),
-        ("P2k_delay_causal", "delay", "one-trial delay", (0.10, 0.20)),
+        (
+            "P2k_delay_causal",
+            "delay",
+            "one-trial delay at h=0.10/0.20",
+            (0.10, 0.20),
+        ),
         ("P2l_shuffle_causal", "shuffle", "trajectory shuffle", P2_H),
     ):
         intact, intervened, units = _p2_paired_values(
