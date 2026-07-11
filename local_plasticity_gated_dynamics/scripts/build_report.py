@@ -25,6 +25,12 @@ from src.analysis.claims import (  # noqa: E402
     evaluate_core_claims,
     select_latest_attempts,
 )
+from src.analysis.run_provenance import (  # noqa: E402
+    build_exp10_run_manifest,
+    latest_exp10_formal_attempts,
+    validate_exp10_checkpoint_contract,
+    validate_exp10_run_manifest,
+)
 
 
 MAX_PUBLISHED_RAW_BYTES = 95 * 1024 * 1024
@@ -43,6 +49,23 @@ _HOST_PATH_AUDIT = (
     re.compile(r"(?<![A-Za-z0-9_:$}/.~])/(?!/)[A-Za-z0-9._~-]+"),
 )
 
+_EXP11_GLOBAL_CLAIM_IDS = {
+    "hmm_context_nll_gain": "R1_ibl_hmm_context_inference",
+    "history_context_nll_gain": "R2_ibl_history_context_inference",
+    "hmm_behavior_log_loss_gain": "R3_ibl_hmm_behavior_prediction",
+    "history_behavior_log_loss_gain": "R4_ibl_history_behavior_prediction",
+}
+_EXP10_FORMAL_GLOBAL_CLAIM_IDS = {
+    "hmm_context_vs_no_gate": "S1_exp10_hmm_context_inference",
+    "md_context_vs_no_gate": "S2_exp10_md_context_inference",
+    "hmm_behavior_vs_no_gate": "S3_exp10_hmm_functional_pipeline",
+    "md_behavior_vs_no_gate": "S4_exp10_md_functional_pipeline",
+    "md_retains_90pct_oracle_gain": "S5_exp10_md_retains_oracle_gain",
+    "md_vs_clamp": "S6_exp10_md_clamp_counterfactual",
+    "md_vs_delay": "S7_exp10_md_delay_counterfactual",
+    "md_vs_shuffle": "S8_exp10_md_shuffle_counterfactual",
+}
+
 
 def _csv_value(value):
     if isinstance(value, (dict, list, tuple)):
@@ -53,6 +76,646 @@ def _csv_value(value):
             default=str,
         )
     return value
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _only_value(frame: pd.DataFrame, column: str, *, source: str) -> str:
+    if column not in frame.columns:
+        raise ValueError(f"{source} lacks binding column {column}")
+    values = frame[column].dropna().astype(str).unique()
+    if len(values) != 1:
+        raise ValueError(f"{source} must contain exactly one {column}")
+    return str(values[0])
+
+
+def append_exp10_formal_claims(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+) -> pd.DataFrame:
+    """Append fail-closed N=256 seed-macro bridge claims to global summary."""
+
+    summary_path = results_root / "exp10_bridge_formal_summary.csv"
+    raw_path = results_root / "exp10_bridge_formal_raw.csv.gz"
+    run_manifest_path = results_root / "exp10_bridge_formal_run_manifest.csv"
+    if not summary_path.is_file():
+        return core_summary.copy()
+    if not raw_path.is_file():
+        raise FileNotFoundError("exp10 formal summary requires its scoped raw snapshot")
+    if not run_manifest_path.is_file():
+        raise FileNotFoundError("exp10 formal summary requires its clean-run manifest")
+    formal = pd.read_csv(summary_path)
+    expected_comparisons = {
+        *_EXP10_FORMAL_GLOBAL_CLAIM_IDS,
+        "oracle_behavior_vs_no_gate",
+    }
+    required = {
+        "comparison",
+        "comparison_scope",
+        "metric",
+        "n_seeds",
+        "n_q_h_cells",
+        "mean_difference",
+        "bootstrap_ci_low",
+        "bootstrap_ci_high",
+        "minimum_q_h_cell_mean",
+        "maximum_q_h_cell_mean",
+        "holm_p",
+        "classification",
+        "conclusion",
+        "profile",
+        "network_n_units",
+        "statistics_unit",
+        "within_seed_aggregation",
+        "multiple_comparison_correction",
+        "base_conditions_share_readout",
+        "recurrent_learning",
+        "biological_mechanism_claim_eligible",
+        "three_factor_plasticity_claim_eligible",
+        "efficiency_claim_eligible",
+        "bridge_protocol_id",
+        "scoped_raw_sha256",
+        "run_manifest_sha256",
+        "run_git_commit",
+        "run_git_dirty",
+        "all_q_h_cell_means_positive",
+    }
+    missing = sorted(required - set(formal.columns))
+    if missing:
+        raise ValueError(f"exp10 formal global-summary rows lack columns: {missing}")
+    if (
+        len(formal) != len(expected_comparisons)
+        or formal["comparison"].astype(str).duplicated().any()
+        or set(formal["comparison"].astype(str)) != expected_comparisons
+    ):
+        raise ValueError("exp10 formal comparison family is incomplete")
+    expected_scopes = {
+        "hmm_context_vs_no_gate": "simulated_hidden_context_inference",
+        "md_context_vs_no_gate": "simulated_hidden_context_inference",
+        "hmm_behavior_vs_no_gate": "separately_refit_functional_pipeline",
+        "md_behavior_vs_no_gate": "separately_refit_functional_pipeline",
+        "oracle_behavior_vs_no_gate": "descriptive_oracle_ceiling",
+        "md_retains_90pct_oracle_gain": ("separately_refit_noninferiority_margin"),
+        "md_vs_clamp": "fixed_checkpoint_within_model_counterfactual",
+        "md_vs_delay": "fixed_checkpoint_within_model_counterfactual",
+        "md_vs_shuffle": "fixed_checkpoint_within_model_counterfactual",
+    }
+    observed_scopes = dict(
+        zip(
+            formal["comparison"].astype(str),
+            formal["comparison_scope"].astype(str),
+            strict=True,
+        )
+    )
+    if observed_scopes != expected_scopes:
+        raise ValueError(
+            "exp10 formal comparison scopes violate their evidence contract"
+        )
+    raw_sha = _file_sha256(raw_path)
+    if (
+        _only_value(formal, "scoped_raw_sha256", source="exp10 formal summary")
+        != raw_sha
+    ):
+        raise ValueError("exp10 formal summary does not bind its scoped raw rows")
+    if (
+        set(formal["profile"].astype(str)) != {"formal"}
+        or set(formal["network_n_units"].astype(int)) != {256}
+        or set(formal["statistics_unit"].astype(str)) != {"seed"}
+        or set(formal["within_seed_aggregation"].astype(str))
+        != {"equal_macro_average_across_4_q_h_cells"}
+        or set(formal["multiple_comparison_correction"].astype(str))
+        != {"Holm_across_exp10_formal_family"}
+        or formal["base_conditions_share_readout"].astype(bool).any()
+        or formal["recurrent_learning"].astype(bool).any()
+        or formal["biological_mechanism_claim_eligible"].astype(bool).any()
+        or formal["three_factor_plasticity_claim_eligible"].astype(bool).any()
+        or formal["efficiency_claim_eligible"].astype(bool).any()
+        or set(formal["run_git_dirty"].astype(str).str.lower()) != {"false"}
+        or set(formal["n_seeds"].astype(int)) != {30}
+        or set(formal["n_q_h_cells"].astype(int)) != {4}
+    ):
+        raise ValueError("exp10 formal scoped statistical contract is invalid")
+    for row in formal.to_dict("records"):
+        classification = str(row["classification"])
+        if classification not in {"support", "oppose", "inconclusive"}:
+            raise ValueError("exp10 formal classification is invalid")
+        if classification == "support" and not (
+            float(row["holm_p"]) < 0.05 and float(row["bootstrap_ci_low"]) > 0.0
+        ):
+            raise ValueError("exp10 formal support row fails its criterion")
+        if classification == "oppose" and not (
+            float(row["holm_p"]) < 0.05 and float(row["bootstrap_ci_high"]) < 0.0
+        ):
+            raise ValueError("exp10 formal oppose row fails its criterion")
+
+    raw = pd.read_csv(raw_path, low_memory=False)
+    raw_required = {
+        "seed",
+        "run_id",
+        "status",
+        "profile",
+        "network_n_units",
+        "cue_reliability",
+        "context_hazard",
+        "gate_model",
+        "intervention",
+        "bridge_protocol_id",
+        "recurrent_learning",
+        "base_conditions_share_readout",
+        "efficiency_claim_eligible",
+        "three_factor_plasticity_claim_eligible",
+        "base_comparison_scope",
+        "intervention_postfit",
+        "intervention_reuses_intact_gate_checkpoint",
+        "intervention_reuses_intact_readout",
+        "intervention_reuses_intact_receiver",
+        "readout_checkpoint_id",
+        "gate_checkpoint_id",
+        "network_initialization_id",
+    }
+    missing_raw = sorted(raw_required - set(raw.columns))
+    if missing_raw:
+        raise ValueError(f"exp10 formal scoped raw rows lack columns: {missing_raw}")
+    cell_sizes = raw.groupby(["seed", "cue_reliability", "context_hazard"]).size()
+    if (
+        len(raw) != 840
+        or raw["seed"].nunique() != 30
+        or raw["run_id"].nunique() != 30
+        or set(raw["status"].astype(str)) != {"complete"}
+        or set(raw["profile"].astype(str)) != {"formal"}
+        or set(raw["network_n_units"].astype(int)) != {256}
+        or set(np.round(raw["cue_reliability"].astype(float), 8)) != {0.70, 0.85}
+        or set(np.round(raw["context_hazard"].astype(float), 8)) != {0.05, 0.20}
+        or not cell_sizes.eq(7).all()
+        or raw["recurrent_learning"].astype(bool).any()
+        or raw["base_conditions_share_readout"].astype(bool).any()
+        or raw["efficiency_claim_eligible"].astype(bool).any()
+        or raw["three_factor_plasticity_claim_eligible"].astype(bool).any()
+    ):
+        raise ValueError("exp10 formal scoped raw grid violates its contract")
+    validate_exp10_checkpoint_contract(raw)
+    protocol_id = _only_value(raw, "bridge_protocol_id", source="exp10 formal raw")
+    if (
+        _only_value(formal, "bridge_protocol_id", source="exp10 formal summary")
+        != protocol_id
+    ):
+        raise ValueError("exp10 formal raw/summary protocol IDs differ")
+    run_manifest = pd.read_csv(run_manifest_path, low_memory=False)
+    validate_exp10_run_manifest(run_manifest, raw)
+    run_manifest_sha = _file_sha256(run_manifest_path)
+    run_git_commit = _only_value(
+        run_manifest, "git_commit", source="exp10 clean-run manifest"
+    )
+    if (
+        _only_value(formal, "run_manifest_sha256", source="exp10 formal summary")
+        != run_manifest_sha
+        or _only_value(formal, "run_git_commit", source="exp10 formal summary")
+        != run_git_commit
+    ):
+        raise ValueError("exp10 formal summary does not bind its clean-run manifest")
+    latest_attempts = latest_exp10_formal_attempts(results_root)
+    if latest_attempts:
+        rebuilt_manifest = build_exp10_run_manifest(results_root, raw)
+        published = run_manifest.sort_values("seed").reset_index(drop=True)
+        rebuilt = (
+            rebuilt_manifest[published.columns]
+            .sort_values("seed")
+            .reset_index(drop=True)
+        )
+        try:
+            pd.testing.assert_frame_equal(published, rebuilt, check_dtype=False)
+        except AssertionError as error:
+            raise ValueError(
+                "exp10 published run manifest differs from latest local artifacts"
+            ) from error
+
+    selected = formal.loc[
+        formal["comparison"].astype(str).isin(_EXP10_FORMAL_GLOBAL_CLAIM_IDS)
+    ].copy()
+    rows: list[dict[str, object]] = []
+    for row in selected.to_dict("records"):
+        rows.append(
+            {
+                "claim_id": _EXP10_FORMAL_GLOBAL_CLAIM_IDS[str(row["comparison"])],
+                "experiment": "exp10_hidden_context_ei_bridge",
+                "metric": str(row["metric"]),
+                "comparison": str(row["comparison"]),
+                "stats_unit": "seed",
+                "n_planned": 30,
+                "n_complete": 30,
+                "n_failed": 0,
+                "estimate": float(row["mean_difference"]),
+                "ci_low": float(row["bootstrap_ci_low"]),
+                "ci_high": float(row["bootstrap_ci_high"]),
+                "effect_size": float(row["mean_difference"]),
+                "p_value": float(row["holm_p"]),
+                "multiplicity_method": "Holm(exp10_formal_claim_family)",
+                "conclusion": str(row["classification"]),
+                "criterion": (
+                    "Holm p<0.05 and seed-macro bootstrap CI excludes zero "
+                    "after equal averaging across four q/h cells"
+                ),
+                "note": (
+                    f"scope={row['comparison_scope']}; detailed conclusion="
+                    f"{row['conclusion']}; q/h-cell mean range="
+                    f"[{float(row['minimum_q_h_cell_mean']):.6g}, "
+                    f"{float(row['maximum_q_h_cell_mean']):.6g}]; "
+                    "frozen recurrent; separately refit base readouts; no "
+                    "biological-mechanism, recurrent-plasticity, or efficiency "
+                    f"claim; protocol={protocol_id}; scoped raw sha256={raw_sha}"
+                    f"; clean-run manifest sha256={run_manifest_sha}; "
+                    f"run git commit={run_git_commit}"
+                ),
+            }
+        )
+    appended = pd.DataFrame(rows)
+    if core_summary.empty:
+        return appended
+    missing_core = sorted(set(appended.columns) - set(core_summary.columns))
+    if missing_core:
+        raise ValueError(f"core summary schema lacks columns: {missing_core}")
+    return pd.concat(
+        [core_summary, appended[core_summary.columns]],
+        ignore_index=True,
+    )
+
+
+def _validate_exp11_artifact_binding(
+    exp11: pd.DataFrame,
+    results_root: Path,
+) -> dict[str, str]:
+    """Fail closed unless scoped summary, raw rows, manifest, and run agree."""
+
+    manifest_path = results_root / "exp11_ibl_behavior_cohort_manifest.csv"
+    raw_path = results_root / "exp11_ibl_behavior_real_raw.csv.gz"
+    if not manifest_path.is_file() or not raw_path.is_file():
+        raise FileNotFoundError(
+            "exp11 global claims require scoped raw rows and cohort manifest"
+        )
+    manifest_sha = _file_sha256(manifest_path)
+    raw_sha = _file_sha256(raw_path)
+    if (
+        _only_value(exp11, "cohort_manifest_sha256", source="exp11 summary")
+        != manifest_sha
+    ):
+        raise ValueError("exp11 summary does not bind the published cohort manifest")
+    if _only_value(exp11, "scoped_raw_sha256", source="exp11 summary") != raw_sha:
+        raise ValueError("exp11 summary does not bind the scoped raw snapshot")
+
+    raw = pd.read_csv(raw_path, low_memory=False)
+    manifest = pd.read_csv(manifest_path, low_memory=False)
+    expected_conditions = {
+        "no_memory",
+        "exponential_history",
+        "learned_categorical_hmm",
+        "oracle_ceiling",
+    }
+    raw_required = {
+        "run_id",
+        "source_run_attempt",
+        "source_run_status",
+        "source_metrics_path",
+        "cohort_manifest_sha256",
+        "eid",
+        "animal_id",
+        "condition",
+        "status",
+        "profile",
+        "behavior_only_benchmark",
+        "neural_activity_analyzed",
+        "compact_table_sha256",
+        "dataset_uuid",
+        "dataset_revision",
+        "dataset_hash",
+        "dataset_qc",
+        "bwm_repository_commit",
+        "cohort_id",
+    }
+    missing_raw = sorted(raw_required - set(raw.columns))
+    if missing_raw:
+        raise ValueError(f"exp11 scoped raw rows lack columns: {missing_raw}")
+    scoped = raw.loc[raw["condition"].astype(str).isin(expected_conditions)].copy()
+    if scoped.empty or scoped.duplicated(["eid", "condition"]).any():
+        raise ValueError("exp11 scoped raw grid is empty or duplicated")
+    if set(scoped["condition"].astype(str)) != expected_conditions:
+        raise ValueError("exp11 scoped raw condition family is incomplete")
+    if not scoped.groupby("eid")["condition"].nunique().eq(4).all():
+        raise ValueError("exp11 scoped raw grid lacks a condition for some session")
+    if set(scoped["profile"].dropna().astype(str)) != {"formal"}:
+        raise ValueError("exp11 scoped raw rows must be formal")
+    if set(scoped["behavior_only_benchmark"].dropna().astype(str)) != {"True"}:
+        raise ValueError("exp11 scoped raw rows must be behavior-only")
+    if set(scoped["neural_activity_analyzed"].dropna().astype(str)) != {"False"}:
+        raise ValueError("exp11 scoped raw rows cannot claim neural activity")
+
+    source_run_id = _only_value(scoped, "run_id", source="exp11 scoped raw")
+    source_run_attempt = _only_value(
+        scoped, "source_run_attempt", source="exp11 scoped raw"
+    )
+    source_run_status = _only_value(
+        scoped, "source_run_status", source="exp11 scoped raw"
+    )
+    source_metrics_path = _only_value(
+        scoped, "source_metrics_path", source="exp11 scoped raw"
+    )
+    if _only_value(exp11, "source_run_id", source="exp11 summary") != source_run_id:
+        raise ValueError("exp11 summary and scoped raw run_id differ")
+    if (
+        _only_value(exp11, "source_run_attempt", source="exp11 summary")
+        != source_run_attempt
+    ):
+        raise ValueError("exp11 summary and scoped raw attempt differ")
+    if (
+        _only_value(exp11, "source_run_status", source="exp11 summary")
+        != source_run_status
+    ):
+        raise ValueError("exp11 summary and scoped raw run status differ")
+    if (
+        _only_value(exp11, "source_metrics_path", source="exp11 summary")
+        != source_metrics_path
+    ):
+        raise ValueError("exp11 summary and scoped raw metrics paths differ")
+    if (
+        _only_value(scoped, "cohort_manifest_sha256", source="exp11 scoped raw")
+        != manifest_sha
+    ):
+        raise ValueError("exp11 scoped raw rows bind a different cohort manifest")
+
+    manifest_required = {
+        "eid",
+        "subject",
+        "status",
+        "compact_table_sha256",
+        "dataset_uuid",
+        "dataset_revision",
+        "dataset_hash",
+        "dataset_qc",
+        "bwm_repository_commit",
+        "cohort_id",
+    }
+    missing_manifest = sorted(manifest_required - set(manifest.columns))
+    if missing_manifest:
+        raise ValueError(f"exp11 cohort manifest lacks columns: {missing_manifest}")
+    eligible = manifest.loc[manifest["status"].astype(str).eq("eligible")].copy()
+    if eligible.empty or eligible["eid"].astype(str).duplicated().any():
+        raise ValueError("exp11 eligible manifest cohort is empty or duplicated")
+    if set(eligible["eid"].astype(str)) != set(scoped["eid"].astype(str)):
+        raise ValueError("exp11 scoped raw sessions differ from eligible manifest")
+    provenance_columns = {
+        "animal_id": "subject",
+        "compact_table_sha256": "compact_table_sha256",
+        "dataset_uuid": "dataset_uuid",
+        "dataset_revision": "dataset_revision",
+        "dataset_hash": "dataset_hash",
+        "dataset_qc": "dataset_qc",
+        "bwm_repository_commit": "bwm_repository_commit",
+        "cohort_id": "cohort_id",
+    }
+    session_rows = scoped[["eid", *provenance_columns]].drop_duplicates()
+    if session_rows["eid"].astype(str).duplicated().any():
+        raise ValueError("exp11 scoped raw session provenance is inconsistent")
+    joined = session_rows.merge(
+        eligible[["eid", *provenance_columns.values()]],
+        on="eid",
+        how="outer",
+        validate="one_to_one",
+        suffixes=("_raw", "_manifest"),
+    )
+    for raw_name, manifest_name in provenance_columns.items():
+        left = (
+            joined[f"{raw_name}_raw"] if raw_name == manifest_name else joined[raw_name]
+        )
+        right = (
+            joined[f"{manifest_name}_manifest"]
+            if raw_name == manifest_name
+            else joined[manifest_name]
+        )
+        if not left.astype(str).eq(right.astype(str)).all():
+            raise ValueError(f"exp11 raw/manifest provenance mismatch: {raw_name}")
+
+    run_root = results_root / "runs" / "exp11_ibl_behavior_belief"
+    formal_runs: list[Path] = []
+    if run_root.is_dir():
+        for config_path in run_root.glob("seed_*/*/config.json"):
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            if str(config.get("profile", "")) == "formal":
+                formal_runs.append(config_path.parent)
+    if formal_runs:
+        latest = max(formal_runs, key=lambda item: item.name)
+        if latest.name != source_run_attempt:
+            raise ValueError(
+                "exp11 scoped summary is stale relative to latest formal run"
+            )
+        status = json.loads((latest / "status.json").read_text(encoding="utf-8"))
+        run_manifest = json.loads(
+            (latest / "manifest.json").read_text(encoding="utf-8")
+        )
+        if str(status.get("status")) != source_run_status:
+            raise ValueError("exp11 latest run status differs from scoped summary")
+        if str(run_manifest.get("run_id")) != source_run_id:
+            raise ValueError("exp11 latest run_id differs from scoped summary")
+        expected_suffix = (
+            "results/runs/exp11_ibl_behavior_belief/seed_0000/"
+            f"{source_run_attempt}/metrics.jsonl"
+        )
+        if not source_metrics_path.replace("\\", "/").endswith(expected_suffix):
+            raise ValueError("exp11 scoped metrics path does not identify latest run")
+    return {
+        "manifest_sha256": manifest_sha,
+        "raw_sha256": raw_sha,
+        "source_run_id": source_run_id,
+        "source_run_attempt": source_run_attempt,
+        "source_run_status": source_run_status,
+        "source_metrics_path": source_metrics_path,
+        "eligible_sessions": str(len(eligible)),
+        "eligible_animals": str(eligible["subject"].astype(str).nunique()),
+    }
+
+
+def append_exp11_behavior_claims(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+) -> pd.DataFrame:
+    """Append scoped animal-primary exp11 claims to the global summary."""
+
+    path = results_root / "exp11_ibl_behavior_real_summary.csv"
+    if not path.is_file():
+        return core_summary.copy()
+    exp11 = pd.read_csv(path)
+    required = {
+        "claim",
+        "candidate",
+        "reference",
+        "metric",
+        "n_planned_sessions",
+        "n_paired_complete_sessions",
+        "n_planned_animals",
+        "n_animals",
+        "n_invalid_gate_sessions",
+        "animal_mean_difference",
+        "hierarchical_bootstrap_ci_low",
+        "hierarchical_bootstrap_ci_high",
+        "holm_p",
+        "conclusion",
+        "cohort_manifest_sha256",
+        "behavior_only_benchmark",
+        "neural_activity_analyzed",
+        "biological_mechanism_claim_eligible",
+        "shared_neural_dynamics_claim_eligible",
+        "profile",
+        "statistics_unit",
+        "multiple_comparison_correction",
+        "difference_direction",
+        "evidence_scope",
+        "cohort_complete_for_inference",
+        "run_attempt_finalized",
+        "all_hmm_predictions_included_before_validity_gate",
+        "source_run_status",
+        "source_run_id",
+        "source_run_attempt",
+        "source_metrics_path",
+        "scoped_raw_sha256",
+    }
+    missing = sorted(required - set(exp11.columns))
+    if missing:
+        raise ValueError(f"exp11 global-summary rows lack columns: {missing}")
+    if (
+        len(exp11) != len(_EXP11_GLOBAL_CLAIM_IDS)
+        or exp11["claim"].astype(str).duplicated().any()
+        or set(exp11["claim"].astype(str)) != set(_EXP11_GLOBAL_CLAIM_IDS)
+    ):
+        raise ValueError("exp11 global-summary claim family is incomplete")
+    if (
+        set(exp11["behavior_only_benchmark"].astype(str)) != {"True"}
+        or set(exp11["neural_activity_analyzed"].astype(str)) != {"False"}
+        or set(exp11["biological_mechanism_claim_eligible"].astype(str)) != {"False"}
+        or set(exp11["shared_neural_dynamics_claim_eligible"].astype(str)) != {"False"}
+    ):
+        raise ValueError("exp11 global-summary evidence scope is not behavior-only")
+    if (
+        set(exp11["profile"].astype(str)) != {"formal"}
+        or set(exp11["statistics_unit"].astype(str))
+        != {"animal_primary_session_nested"}
+        or set(exp11["multiple_comparison_correction"].astype(str))
+        != {"Holm_across_exp11_claim_family"}
+        or set(exp11["difference_direction"].astype(str))
+        != {"reference_minus_candidate_positive_is_better"}
+        or set(exp11["all_hmm_predictions_included_before_validity_gate"].astype(str))
+        != {"True"}
+    ):
+        raise ValueError("exp11 global-summary statistical contract is invalid")
+    expected_claim_contract = {
+        "hmm_context_nll_gain": (
+            "learned_categorical_hmm",
+            "context_nll",
+            "IBL_trials_only_behavior_hidden_block_inference",
+        ),
+        "history_context_nll_gain": (
+            "exponential_history",
+            "context_nll",
+            "IBL_trials_only_behavior_hidden_block_inference",
+        ),
+        "hmm_behavior_log_loss_gain": (
+            "learned_categorical_hmm",
+            "behavior_log_loss",
+            "IBL_trials_only_heldout_choice_prediction",
+        ),
+        "history_behavior_log_loss_gain": (
+            "exponential_history",
+            "behavior_log_loss",
+            "IBL_trials_only_heldout_choice_prediction",
+        ),
+    }
+    for row in exp11.to_dict("records"):
+        candidate, metric, scope = expected_claim_contract[str(row["claim"])]
+        if (
+            str(row["candidate"]) != candidate
+            or str(row["reference"]) != "no_memory"
+            or str(row["metric"]) != metric
+            or str(row["evidence_scope"]) != scope
+        ):
+            raise ValueError(f"exp11 claim contract mismatch: {row['claim']}")
+        conclusive = str(row["conclusion"]) in {"support", "oppose"}
+        if conclusive and (
+            str(row["cohort_complete_for_inference"]).lower() != "true"
+            or str(row["run_attempt_finalized"]).lower() != "true"
+            or int(row["n_planned_sessions"]) != int(row["n_paired_complete_sessions"])
+        ):
+            raise ValueError("conclusive exp11 claim lacks a complete finalized cohort")
+        if str(row["conclusion"]) == "support" and not (
+            float(row["holm_p"]) < 0.05
+            and float(row["hierarchical_bootstrap_ci_low"]) > 0.0
+        ):
+            raise ValueError("exp11 support row fails its directional criterion")
+        if str(row["conclusion"]) == "oppose" and not (
+            float(row["holm_p"]) < 0.05
+            and float(row["hierarchical_bootstrap_ci_high"]) < 0.0
+        ):
+            raise ValueError("exp11 oppose row fails its directional criterion")
+    binding = _validate_exp11_artifact_binding(exp11, results_root)
+    hashes = np.asarray([binding["manifest_sha256"]], dtype=object)
+    if set(exp11["n_planned_sessions"].astype(int)) != {
+        int(binding["eligible_sessions"])
+    } or set(exp11["n_planned_animals"].astype(int)) != {
+        int(binding["eligible_animals"])
+    }:
+        raise ValueError("exp11 summary counts differ from the bound cohort manifest")
+
+    rows: list[dict[str, object]] = []
+    for row in exp11.to_dict("records"):
+        planned_animals = int(row["n_planned_animals"])
+        complete_animals = int(row["n_animals"])
+        rows.append(
+            {
+                "claim_id": _EXP11_GLOBAL_CLAIM_IDS[str(row["claim"])],
+                "experiment": "exp11_ibl_behavior_belief",
+                "metric": str(row["metric"]),
+                "comparison": (
+                    f"{row['reference']} minus {row['candidate']} (positive is better)"
+                ),
+                "stats_unit": "animal (session nested)",
+                "n_planned": planned_animals,
+                "n_complete": complete_animals,
+                "n_failed": max(0, planned_animals - complete_animals),
+                "estimate": float(row["animal_mean_difference"]),
+                "ci_low": float(row["hierarchical_bootstrap_ci_low"]),
+                "ci_high": float(row["hierarchical_bootstrap_ci_high"]),
+                "effect_size": float(row["animal_mean_difference"]),
+                "p_value": float(row["holm_p"]),
+                "multiplicity_method": "Holm(exp11_behavior_claim_family)",
+                "conclusion": str(row["conclusion"]),
+                "criterion": (
+                    "complete planned cohort plus Holm p<0.05 and animal-primary "
+                    "hierarchical CI excluding zero"
+                ),
+                "note": (
+                    "IBL trial-table behavior only; no neural activity or shared "
+                    "neural dynamics; planned/paired sessions="
+                    f"{int(row['n_planned_sessions'])}/"
+                    f"{int(row['n_paired_complete_sessions'])}; invalid HMM fits="
+                    f"{int(row['n_invalid_gate_sessions'])}; latest run status="
+                    f"{row['source_run_status']}; source run id="
+                    f"{binding['source_run_id']}; cohort manifest sha256={hashes[0]}; "
+                    f"scoped raw sha256={binding['raw_sha256']}"
+                ),
+            }
+        )
+    appended = pd.DataFrame(rows)
+    if core_summary.empty:
+        return appended
+    missing_core = sorted(set(appended.columns) - set(core_summary.columns))
+    if missing_core:
+        raise ValueError(f"core summary schema lacks columns: {missing_core}")
+    return pd.concat(
+        [core_summary, appended[core_summary.columns]],
+        ignore_index=True,
+    )
 
 
 def _portable_run_path(value: object) -> object:
@@ -847,6 +1510,47 @@ def write_report(
                 f"| {row['comparison']} | {row.get('comparison_scope', 'scope unavailable')} | {interval} | "
                 f"{float(row['holm_p']):.4g} | **{row['conclusion']}** |"
             )
+    formal_bridge_path = results_root / "exp10_bridge_formal_summary.csv"
+    if formal_bridge_path.is_file():
+        formal_bridge = pd.read_csv(formal_bridge_path)
+        lines += [
+            "",
+            "## exp10 N=256 bridge formal grid",
+            "",
+            "Thirty seeds are paired within each of four q/h cells and then equally macro-averaged within seed. Base-gate behavior comparisons use separately fitted readouts and therefore support only whole functional pipelines. Clamp/delay/shuffle reuse the intact MD-like receiver and readout as within-model counterfactuals. Recurrent weights are frozen; no row is eligible for biological-mechanism, three-factor-plasticity, or efficiency claims.",
+            "",
+            "| Comparison | Scope | Seed-macro difference [95% CI] | q/h-cell mean range | exp10-family Holm p | Conclusion |",
+            "|---|---|---:|---:|---:|---|",
+        ]
+        for row in formal_bridge.to_dict("records"):
+            interval = (
+                f"{float(row['mean_difference']):.4f} "
+                f"[{float(row['bootstrap_ci_low']):.4f}, "
+                f"{float(row['bootstrap_ci_high']):.4f}]"
+            )
+            cell_range = (
+                f"[{float(row['minimum_q_h_cell_mean']):.4f}, "
+                f"{float(row['maximum_q_h_cell_mean']):.4f}]"
+            )
+            lines.append(
+                f"| {row['comparison']} | {row['comparison_scope']} | {interval} | "
+                f"{cell_range} | {float(row['holm_p']):.4g} | "
+                f"**{row['conclusion']}** |"
+            )
+        if (
+            not formal_bridge.loc[
+                formal_bridge["comparison"]
+                .astype(str)
+                .eq("md_retains_90pct_oracle_gain"),
+                "all_q_h_cell_means_positive",
+            ]
+            .astype(bool)
+            .all()
+        ):
+            lines += [
+                "",
+                "The MD-like 90%-of-oracle margin supports only the predeclared seed-macro average: at least one q/h cell has a negative mean margin, so no every-cell retention claim is made.",
+            ]
     exp11_path = results_root / "exp11_ibl_behavior_real_summary.csv"
     if exp11_path.is_file():
         exp11 = pd.read_csv(exp11_path)
@@ -860,7 +1564,9 @@ def write_report(
             + str(cohort_hash)
             + "`.",
             "",
-            "| Claim | planned / paired sessions | animals | animal-mean difference [hierarchical 95% CI] | Holm p | Conclusion |",
+            "Difference is reference minus candidate, so positive values favor the candidate. Holm correction is across the four exp11 behavior-only claims, separately from the legacy core-claim family.",
+            "",
+            "| Claim | planned / paired sessions | animals | animal-mean difference (positive = better) [hierarchical 95% CI] | exp11-family Holm p | Conclusion |",
             "|---|---:|---:|---:|---:|---|",
         ]
         for row in exp11.to_dict("records"):
@@ -906,7 +1612,7 @@ def write_report(
         "- Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.",
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
         "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.",
-        "- IBL support requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
+        "- Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
         "",
         "## External-data status",
         "",
@@ -916,8 +1622,11 @@ def write_report(
         "",
         "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
-        "- `results/summary.csv`: one row per pre-registered core claim.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.",
+        "- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.",
+        "- `results/exp10_bridge_formal_raw.csv.gz` and `results/exp10_bridge_formal_summary.csv`: 30-seed N=256 formal bridge rows and seed-macro conclusions.",
+        "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
+        "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -936,8 +1645,11 @@ def main() -> None:
     raw, runs = merge_compact_snapshot(results_root, discovered_raw, discovered_runs)
     write_compact_raw(results_root, raw)
     write_compact_runs(results_root, runs)
-    summary = pd.DataFrame([result.to_dict() for result in evaluate_core_claims(raw)])
-    summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
+    core_summary = pd.DataFrame(
+        [result.to_dict() for result in evaluate_core_claims(raw)]
+    )
+    # Core plots expect this file before scoped plot scripts run.
+    core_summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     if args.plots:
         scripts = [
             "core_results_plot.py",
@@ -945,6 +1657,19 @@ def main() -> None:
             "hidden_context_plot.py",
             "exp10_bridge_pilot_plot.py",
         ]
+        exp10_formal_available = (
+            results_root / "exp10_bridge_formal_raw.csv.gz"
+        ).is_file()
+        if not exp10_formal_available:
+            for config_path in (
+                results_root / "runs" / "exp10_hidden_context_ei_bridge"
+            ).glob("seed_*/*/config.json"):
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if str(config.get("profile", "")) == "formal":
+                    exp10_formal_available = True
+                    break
+        if exp10_formal_available:
+            scripts.append("exp10_bridge_formal_plot.py")
         exp11_source_available = (
             results_root / "exp11_ibl_behavior_real_raw.csv.gz"
         ).is_file() or (results_root / "runs" / "exp11_ibl_behavior_belief").is_dir()
@@ -961,8 +1686,11 @@ def main() -> None:
                 check=True,
                 cwd=PROJECT_ROOT,
             )
-    # Plot scripts bind their own scoped summaries; write the report afterward
-    # so a single --plots invocation includes newly generated exp10/exp11 rows.
+    # Plot scripts bind their own scoped summaries. Append exp11 only afterward
+    # so one --plots invocation updates the global table and report together.
+    summary = append_exp10_formal_claims(core_summary, results_root)
+    summary = append_exp11_behavior_claims(summary, results_root)
+    summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
 
 

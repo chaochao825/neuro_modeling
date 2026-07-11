@@ -25,6 +25,8 @@ results/*.pdf
 !results/hidden_context.pdf
 !results/exp10_bridge_pilot.png
 !results/exp10_bridge_pilot.pdf
+!results/exp10_bridge_formal.png
+!results/exp10_bridge_formal.pdf
 !results/exp11_ibl_behavior_real.png
 !results/exp11_ibl_behavior_real.pdf
 

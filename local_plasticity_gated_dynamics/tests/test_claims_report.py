@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -14,6 +15,8 @@ from scripts.build_report import (
     REDACTED_HOST_TEXT,
     _assert_no_host_paths,
     _portable_run_path,
+    append_exp10_formal_claims,
+    append_exp11_behavior_claims,
     collect_runs,
     merge_compact_snapshot,
     write_compact_raw,
@@ -21,6 +24,10 @@ from scripts.build_report import (
     write_report,
 )
 from src.analysis.claims import evaluate_core_claims
+from src.analysis.run_provenance import (
+    EXP10_RUN_FILES,
+    canonical_seed_rows_sha256,
+)
 from src.utils.artifacts import ExperimentRun
 
 
@@ -383,6 +390,506 @@ def test_report_keeps_exp10_and_exp11_evidence_scopes_self_contained(
     assert "exp11 IBL hidden-block benchmark (behavior only)" in report
     assert "no spikes, neural activity, or shared neural dynamics" in report
     assert "`" + "d" * 64 + "`" in report
+
+
+def _bound_exp11_summary_fixture(tmp_path: Path) -> pd.DataFrame:
+    core = pd.DataFrame(
+        [
+            {
+                "claim_id": "core",
+                "experiment": "exp00",
+                "metric": "metric",
+                "comparison": "comparison",
+                "stats_unit": "seed",
+                "n_planned": 1,
+                "n_complete": 1,
+                "n_failed": 0,
+                "estimate": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.0,
+                "effect_size": 0.0,
+                "p_value": 1.0,
+                "multiplicity_method": "none",
+                "conclusion": "inconclusive",
+                "criterion": "registered",
+                "note": "core row",
+            }
+        ]
+    )
+    claims = (
+        ("hmm_context_nll_gain", "learned_categorical_hmm", "context_nll"),
+        ("history_context_nll_gain", "exponential_history", "context_nll"),
+        (
+            "hmm_behavior_log_loss_gain",
+            "learned_categorical_hmm",
+            "behavior_log_loss",
+        ),
+        (
+            "history_behavior_log_loss_gain",
+            "exponential_history",
+            "behavior_log_loss",
+        ),
+    )
+    run_id = "11111111-2222-4333-8444-555555555555"
+    attempt = "20260101T000000.000000Z"
+    source_metrics_path = (
+        f"results/runs/exp11_ibl_behavior_belief/seed_0000/{attempt}/metrics.jsonl"
+    )
+    bwm_commit = "a" * 40
+    manifest_rows = []
+    raw_rows = []
+    conditions = (
+        "no_memory",
+        "exponential_history",
+        "learned_categorical_hmm",
+        "oracle_ceiling",
+    )
+    for session in range(20):
+        eid = f"eid-{session:02d}"
+        animal = f"mouse-{session // 2:02d}"
+        provenance = {
+            "compact_table_sha256": hashlib.sha256(eid.encode()).hexdigest(),
+            "dataset_uuid": f"dataset-{session:02d}",
+            "dataset_revision": "2025-03-03",
+            "dataset_hash": hashlib.sha256(f"dataset:{eid}".encode()).hexdigest(),
+            "dataset_qc": "PASS",
+            "bwm_repository_commit": bwm_commit,
+            "cohort_id": "bound-test-cohort",
+        }
+        manifest_rows.append(
+            {
+                "eid": eid,
+                "subject": animal,
+                "status": "eligible",
+                **provenance,
+            }
+        )
+        for condition in conditions:
+            raw_rows.append(
+                {
+                    "run_id": run_id,
+                    "source_run_attempt": attempt,
+                    "source_run_status": "complete",
+                    "source_metrics_path": source_metrics_path,
+                    "eid": eid,
+                    "animal_id": animal,
+                    "condition": condition,
+                    "status": "complete",
+                    "profile": "formal",
+                    "behavior_only_benchmark": True,
+                    "neural_activity_analyzed": False,
+                    **provenance,
+                }
+            )
+    manifest_path = tmp_path / "exp11_ibl_behavior_cohort_manifest.csv"
+    pd.DataFrame(manifest_rows).to_csv(manifest_path, index=False)
+    manifest_hash = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    for row in raw_rows:
+        row["cohort_manifest_sha256"] = manifest_hash
+    raw_path = tmp_path / "exp11_ibl_behavior_real_raw.csv.gz"
+    pd.DataFrame(raw_rows).to_csv(
+        raw_path,
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    raw_hash = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+
+    summary_rows = []
+    for claim_index, (claim, candidate, metric) in enumerate(claims):
+        context = metric == "context_nll"
+        if claim_index == 0:
+            estimate, low, high, p_value, conclusion = 0.1, 0.05, 0.15, 0.01, "support"
+        elif claim_index == 1:
+            estimate, low, high, p_value, conclusion = (
+                -0.1,
+                -0.15,
+                -0.05,
+                0.01,
+                "oppose",
+            )
+        else:
+            estimate, low, high, p_value, conclusion = (
+                0.0,
+                -0.1,
+                0.1,
+                1.0,
+                "inconclusive",
+            )
+        summary_rows.append(
+            {
+                "claim": claim,
+                "candidate": candidate,
+                "reference": "no_memory",
+                "metric": metric,
+                "n_planned_sessions": 20,
+                "n_paired_complete_sessions": 20,
+                "n_planned_animals": 10,
+                "n_animals": 10,
+                "n_invalid_gate_sessions": 0,
+                "animal_mean_difference": estimate,
+                "hierarchical_bootstrap_ci_low": low,
+                "hierarchical_bootstrap_ci_high": high,
+                "holm_p": p_value,
+                "conclusion": conclusion,
+                "cohort_manifest_sha256": manifest_hash,
+                "behavior_only_benchmark": True,
+                "neural_activity_analyzed": False,
+                "biological_mechanism_claim_eligible": False,
+                "shared_neural_dynamics_claim_eligible": False,
+                "profile": "formal",
+                "statistics_unit": "animal_primary_session_nested",
+                "multiple_comparison_correction": "Holm_across_exp11_claim_family",
+                "difference_direction": "reference_minus_candidate_positive_is_better",
+                "evidence_scope": (
+                    "IBL_trials_only_behavior_hidden_block_inference"
+                    if context
+                    else "IBL_trials_only_heldout_choice_prediction"
+                ),
+                "cohort_complete_for_inference": True,
+                "run_attempt_finalized": True,
+                "all_hmm_predictions_included_before_validity_gate": True,
+                "source_run_status": "complete",
+                "source_run_id": run_id,
+                "source_run_attempt": attempt,
+                "source_metrics_path": source_metrics_path,
+                "scoped_raw_sha256": raw_hash,
+            }
+        )
+    pd.DataFrame(summary_rows).to_csv(
+        tmp_path / "exp11_ibl_behavior_real_summary.csv", index=False
+    )
+    run_dir = tmp_path / "runs" / "exp11_ibl_behavior_belief" / "seed_0000" / attempt
+    run_dir.mkdir(parents=True)
+    (run_dir / "config.json").write_text(
+        json.dumps({"profile": "formal"}), encoding="utf-8"
+    )
+    (run_dir / "status.json").write_text(
+        json.dumps({"status": "complete"}), encoding="utf-8"
+    )
+    (run_dir / "manifest.json").write_text(
+        json.dumps({"run_id": run_id}), encoding="utf-8"
+    )
+    return core
+
+
+def test_global_summary_appends_scoped_exp11_behavior_claims(tmp_path: Path) -> None:
+    core = _bound_exp11_summary_fixture(tmp_path)
+
+    combined = append_exp11_behavior_claims(core, tmp_path)
+    assert len(combined) == 5
+    real = combined.loc[combined["experiment"].eq("exp11_ibl_behavior_belief")]
+    assert set(real["claim_id"]) == {
+        "R1_ibl_hmm_context_inference",
+        "R2_ibl_history_context_inference",
+        "R3_ibl_hmm_behavior_prediction",
+        "R4_ibl_history_behavior_prediction",
+    }
+    assert set(real["stats_unit"]) == {"animal (session nested)"}
+    assert real["note"].str.contains("no neural activity").all()
+    assert real["note"].str.contains("source run id").all()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["newer_formal_run", "manifest_hash_mismatch", "duplicate_claim"],
+)
+def test_exp11_global_summary_binding_fails_closed(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    core = _bound_exp11_summary_fixture(tmp_path)
+    if mutation == "newer_formal_run":
+        newer = (
+            tmp_path
+            / "runs"
+            / "exp11_ibl_behavior_belief"
+            / "seed_0000"
+            / "20260102T000000.000000Z"
+        )
+        newer.mkdir(parents=True)
+        (newer / "config.json").write_text(
+            json.dumps({"profile": "formal"}), encoding="utf-8"
+        )
+        (newer / "status.json").write_text(
+            json.dumps({"status": "complete"}), encoding="utf-8"
+        )
+        (newer / "manifest.json").write_text(
+            json.dumps({"run_id": "newer"}), encoding="utf-8"
+        )
+    elif mutation == "manifest_hash_mismatch":
+        manifest = tmp_path / "exp11_ibl_behavior_cohort_manifest.csv"
+        manifest.write_text(
+            manifest.read_text(encoding="utf-8") + "\n",
+            encoding="utf-8",
+        )
+    else:
+        path = tmp_path / "exp11_ibl_behavior_real_summary.csv"
+        summary = pd.read_csv(path)
+        pd.concat([summary, summary.iloc[[0]]], ignore_index=True).to_csv(
+            path, index=False
+        )
+    with pytest.raises((ValueError, FileNotFoundError)):
+        append_exp11_behavior_claims(core, tmp_path)
+
+
+def _bound_exp10_formal_fixture(tmp_path: Path) -> pd.DataFrame:
+    core = pd.DataFrame(
+        [
+            {
+                "claim_id": "core",
+                "experiment": "exp00",
+                "metric": "metric",
+                "comparison": "comparison",
+                "stats_unit": "seed",
+                "n_planned": 1,
+                "n_complete": 1,
+                "n_failed": 0,
+                "estimate": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.0,
+                "effect_size": 0.0,
+                "p_value": 1.0,
+                "multiplicity_method": "none",
+                "conclusion": "inconclusive",
+                "criterion": "registered",
+                "note": "core row",
+            }
+        ]
+    )
+    conditions = (
+        ("no_gate", "none"),
+        ("learned_hmm", "none"),
+        ("md_recurrent_belief", "none"),
+        ("oracle_bayes", "none"),
+        ("md_recurrent_belief", "clamp"),
+        ("md_recurrent_belief", "delay"),
+        ("md_recurrent_belief", "shuffle"),
+    )
+    raw_rows = []
+    for seed in range(30):
+        for cue_reliability in (0.70, 0.85):
+            for context_hazard in (0.05, 0.20):
+                for gate_model, intervention in conditions:
+                    is_intervention = intervention != "none"
+                    cell_id = f"{seed}:{cue_reliability}:{context_hazard}"
+                    raw_rows.append(
+                        {
+                            "seed": seed,
+                            "run_id": f"run-{seed:02d}",
+                            "status": "complete",
+                            "profile": "formal",
+                            "network_n_units": 256,
+                            "cue_reliability": cue_reliability,
+                            "context_hazard": context_hazard,
+                            "gate_model": gate_model,
+                            "intervention": intervention,
+                            "bridge_protocol_id": "f" * 64,
+                            "recurrent_learning": False,
+                            "base_conditions_share_readout": False,
+                            "efficiency_claim_eligible": False,
+                            "three_factor_plasticity_claim_eligible": False,
+                            "base_comparison_scope": (
+                                "separately_train_optimized_pipeline_comparison"
+                            ),
+                            "intervention_postfit": is_intervention,
+                            "intervention_reuses_intact_gate_checkpoint": (
+                                is_intervention
+                            ),
+                            "intervention_reuses_intact_readout": is_intervention,
+                            "intervention_reuses_intact_receiver": is_intervention,
+                            "readout_checkpoint_id": (
+                                f"readout:{cell_id}:{gate_model}"
+                            ),
+                            "gate_checkpoint_id": f"gate:{cell_id}:{gate_model}",
+                            "network_initialization_id": f"network:{cell_id}",
+                        }
+                    )
+    raw_path = tmp_path / "exp10_bridge_formal_raw.csv.gz"
+    raw_frame = pd.DataFrame(raw_rows)
+    raw_frame.to_csv(
+        raw_path,
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    raw_hash = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+    manifest_rows = []
+    for seed in range(30):
+        manifest_row: dict[str, object] = {
+            "seed": seed,
+            "run_id": f"run-{seed:02d}",
+            "source_run_attempt": f"20260101T{seed:06d}.000000Z",
+            "git_commit": "a" * 40,
+            "git_dirty": False,
+            "metrics_row_count": 28,
+            "scoped_rows_sha256": canonical_seed_rows_sha256(raw_frame, seed),
+        }
+        for name in EXP10_RUN_FILES:
+            manifest_row[name.replace(".", "_") + "_sha256"] = hashlib.sha256(
+                f"{seed}:{name}".encode()
+            ).hexdigest()
+        manifest_rows.append(manifest_row)
+    run_manifest_path = tmp_path / "exp10_bridge_formal_run_manifest.csv"
+    pd.DataFrame(manifest_rows).to_csv(run_manifest_path, index=False)
+    run_manifest_hash = hashlib.sha256(run_manifest_path.read_bytes()).hexdigest()
+    comparisons = (
+        (
+            "hmm_context_vs_no_gate",
+            "simulated_hidden_context_inference",
+            "context_nll",
+        ),
+        (
+            "md_context_vs_no_gate",
+            "simulated_hidden_context_inference",
+            "context_nll",
+        ),
+        (
+            "hmm_behavior_vs_no_gate",
+            "separately_refit_functional_pipeline",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "md_behavior_vs_no_gate",
+            "separately_refit_functional_pipeline",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "oracle_behavior_vs_no_gate",
+            "descriptive_oracle_ceiling",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "md_retains_90pct_oracle_gain",
+            "separately_refit_noninferiority_margin",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "md_vs_clamp",
+            "fixed_checkpoint_within_model_counterfactual",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "md_vs_delay",
+            "fixed_checkpoint_within_model_counterfactual",
+            "behavior_balanced_accuracy",
+        ),
+        (
+            "md_vs_shuffle",
+            "fixed_checkpoint_within_model_counterfactual",
+            "behavior_balanced_accuracy",
+        ),
+    )
+    summary_rows = []
+    for comparison, scope, metric in comparisons:
+        retention = comparison == "md_retains_90pct_oracle_gain"
+        summary_rows.append(
+            {
+                "comparison": comparison,
+                "comparison_scope": scope,
+                "metric": metric,
+                "n_seeds": 30,
+                "n_q_h_cells": 4,
+                "mean_difference": 0.1,
+                "bootstrap_ci_low": 0.05,
+                "bootstrap_ci_high": 0.15,
+                "minimum_q_h_cell_mean": -0.01 if retention else 0.02,
+                "maximum_q_h_cell_mean": 0.2,
+                "holm_p": 0.01,
+                "classification": "support",
+                "conclusion": "scoped_support",
+                "profile": "formal",
+                "network_n_units": 256,
+                "statistics_unit": "seed",
+                "within_seed_aggregation": ("equal_macro_average_across_4_q_h_cells"),
+                "multiple_comparison_correction": ("Holm_across_exp10_formal_family"),
+                "base_conditions_share_readout": False,
+                "recurrent_learning": False,
+                "biological_mechanism_claim_eligible": False,
+                "three_factor_plasticity_claim_eligible": False,
+                "efficiency_claim_eligible": False,
+                "bridge_protocol_id": "f" * 64,
+                "scoped_raw_sha256": raw_hash,
+                "run_manifest_sha256": run_manifest_hash,
+                "run_git_commit": "a" * 40,
+                "run_git_dirty": False,
+                "all_q_h_cell_means_positive": not retention,
+            }
+        )
+    pd.DataFrame(summary_rows).to_csv(
+        tmp_path / "exp10_bridge_formal_summary.csv", index=False
+    )
+    return core
+
+
+def test_global_summary_appends_scoped_exp10_formal_claims(tmp_path: Path) -> None:
+    core = _bound_exp10_formal_fixture(tmp_path)
+    combined = append_exp10_formal_claims(core, tmp_path)
+    formal = combined.loc[combined["experiment"].eq("exp10_hidden_context_ei_bridge")]
+    assert len(formal) == 8
+    assert set(formal["claim_id"]) == {
+        "S1_exp10_hmm_context_inference",
+        "S2_exp10_md_context_inference",
+        "S3_exp10_hmm_functional_pipeline",
+        "S4_exp10_md_functional_pipeline",
+        "S5_exp10_md_retains_oracle_gain",
+        "S6_exp10_md_clamp_counterfactual",
+        "S7_exp10_md_delay_counterfactual",
+        "S8_exp10_md_shuffle_counterfactual",
+    }
+    assert set(formal["conclusion"]) == {"support"}
+    retention = formal.loc[
+        formal["claim_id"].eq("S5_exp10_md_retains_oracle_gain")
+    ].iloc[0]
+    assert "q/h-cell mean range=[-0.01, 0.2]" in retention["note"]
+
+
+def test_exp10_formal_global_summary_raw_hash_fails_closed(tmp_path: Path) -> None:
+    core = _bound_exp10_formal_fixture(tmp_path)
+    path = tmp_path / "exp10_bridge_formal_raw.csv.gz"
+    raw = pd.read_csv(path)
+    raw.loc[0, "network_n_units"] = 128
+    raw.to_csv(path, index=False, compression={"method": "gzip", "mtime": 0})
+    with pytest.raises(ValueError, match="bind"):
+        append_exp10_formal_claims(core, tmp_path)
+
+
+@pytest.mark.parametrize("mutation", ["reuse_flag", "readout_checkpoint"])
+def test_exp10_formal_global_summary_rejects_false_counterfactual_binding(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    core = _bound_exp10_formal_fixture(tmp_path)
+    raw_path = tmp_path / "exp10_bridge_formal_raw.csv.gz"
+    raw = pd.read_csv(raw_path)
+    target = raw["seed"].eq(0) & raw["intervention"].eq("clamp")
+    if mutation == "reuse_flag":
+        raw.loc[target, "intervention_reuses_intact_readout"] = False
+    else:
+        raw.loc[target, "readout_checkpoint_id"] = "tampered-readout"
+    raw.to_csv(raw_path, index=False, compression={"method": "gzip", "mtime": 0})
+    summary_path = tmp_path / "exp10_bridge_formal_summary.csv"
+    summary = pd.read_csv(summary_path)
+    summary["scoped_raw_sha256"] = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+    summary.to_csv(summary_path, index=False)
+    with pytest.raises(ValueError, match="(intervention|checkpoint/readout)"):
+        append_exp10_formal_claims(core, tmp_path)
+
+
+def test_exp10_formal_global_summary_rejects_dirty_run_manifest(
+    tmp_path: Path,
+) -> None:
+    core = _bound_exp10_formal_fixture(tmp_path)
+    manifest_path = tmp_path / "exp10_bridge_formal_run_manifest.csv"
+    manifest = pd.read_csv(manifest_path)
+    manifest.loc[0, "git_dirty"] = True
+    manifest.to_csv(manifest_path, index=False)
+    summary_path = tmp_path / "exp10_bridge_formal_summary.csv"
+    summary = pd.read_csv(summary_path)
+    summary["run_manifest_sha256"] = hashlib.sha256(
+        manifest_path.read_bytes()
+    ).hexdigest()
+    summary.to_csv(summary_path, index=False)
+    with pytest.raises(ValueError, match="clean 30-seed contract"):
+        append_exp10_formal_claims(core, tmp_path)
 
 
 def test_report_adds_formal_p2_macro_and_fit_diagnostics(tmp_path: Path) -> None:

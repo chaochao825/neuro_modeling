@@ -12,6 +12,11 @@ from figures.exp10_bridge_pilot_plot import (
     _latest_complete_rows,
     make_figure,
 )
+from figures.exp10_bridge_formal_plot import (
+    _latest_formal_rows as _latest_exp10_formal_rows,
+    formal_comparison_summary,
+    make_figure as make_exp10_formal_figure,
+)
 from figures.exp11_ibl_behavior_plot import (
     load_real_rows,
     make_figure as make_ibl_behavior_figure,
@@ -261,6 +266,176 @@ def test_exp10_pilot_plot_uses_seed_paired_differences(tmp_path: Path) -> None:
     still_pilot = _latest_complete_rows(tmp_path)
     assert len(still_pilot) == 210
     assert set(still_pilot["network_n_units"]) == {32}
+
+
+def _exp10_formal_frame() -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    conditions = (
+        ("no_gate", "none", 0.60, np.log(2.0)),
+        ("learned_hmm", "none", 0.70, 0.40),
+        ("md_recurrent_belief", "none", 0.70, 0.42),
+        ("oracle_bayes", "none", 0.71, 0.39),
+        ("md_recurrent_belief", "clamp", 0.61, 0.42),
+        ("md_recurrent_belief", "delay", 0.68, 0.42),
+        ("md_recurrent_belief", "shuffle", 0.60, 0.42),
+    )
+    for seed in range(30):
+        for cue_reliability in (0.70, 0.85):
+            for context_hazard in (0.05, 0.20):
+                for gate, intervention, accuracy, context_nll in conditions:
+                    is_intervention = intervention != "none"
+                    cell_id = f"{seed}:{cue_reliability}:{context_hazard}"
+                    rows.append(
+                        {
+                            "seed": seed,
+                            "gate_model": gate,
+                            "intervention": intervention,
+                            "behavior_balanced_accuracy": accuracy
+                            + 1e-4 * seed
+                            + 1e-3 * (cue_reliability - context_hazard),
+                            "context_nll": context_nll,
+                            "status": "complete",
+                            "profile": "formal",
+                            "cue_reliability": cue_reliability,
+                            "context_hazard": context_hazard,
+                            "network_n_units": 256,
+                            "bridge_protocol_id": "f" * 64,
+                            "recurrent_learning": False,
+                            "base_conditions_share_readout": False,
+                            "base_comparison_scope": (
+                                "separately_train_optimized_pipeline_comparison"
+                            ),
+                            "efficiency_claim_eligible": False,
+                            "three_factor_plasticity_claim_eligible": False,
+                            "intervention_postfit": is_intervention,
+                            "intervention_reuses_intact_gate_checkpoint": (
+                                is_intervention
+                            ),
+                            "intervention_reuses_intact_readout": is_intervention,
+                            "intervention_reuses_intact_receiver": is_intervention,
+                            "readout_checkpoint_id": f"readout:{cell_id}:{gate}",
+                            "gate_checkpoint_id": f"gate:{cell_id}:{gate}",
+                            "network_initialization_id": f"network:{cell_id}",
+                        }
+                    )
+    return pd.DataFrame(rows)
+
+
+def test_exp10_formal_plot_macro_averages_q_h_cells_with_seed_as_unit(
+    tmp_path: Path,
+) -> None:
+    frame = _exp10_formal_frame()
+    summary = formal_comparison_summary(frame)
+    assert len(summary) == 9
+    hmm = summary.loc[summary["comparison"].eq("hmm_behavior_vs_no_gate")].iloc[0]
+    assert hmm["mean_difference"] == pytest.approx(0.10)
+    assert hmm["n_seeds"] == 30
+    assert hmm["n_q_h_cells"] == 4
+    assert hmm["classification"] == "support"
+    assert hmm["conclusion"] == "support_functional_pipeline_formal"
+    assert not hmm["biological_mechanism_claim_eligible"]
+    retention = summary.loc[
+        summary["comparison"].eq("md_retains_90pct_oracle_gain")
+    ].iloc[0]
+    assert retention["mean_difference"] == pytest.approx(0.001)
+    assert retention["classification"] == "support"
+    assert retention["conclusion"] == ("support_macro_average_90pct_oracle_gain_margin")
+    make_exp10_formal_figure(frame, tmp_path)
+    assert (tmp_path / "exp10_bridge_formal.pdf").stat().st_size > 0
+    assert (tmp_path / "exp10_bridge_formal.png").stat().st_size > 0
+    frame.to_csv(
+        tmp_path / "exp10_bridge_formal_raw.csv.gz",
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    reloaded = _latest_exp10_formal_rows(tmp_path)
+    assert len(reloaded) == 840
+    assert set(reloaded["network_n_units"]) == {256}
+
+
+def _write_exp10_formal_attempt(
+    root: Path,
+    frame: pd.DataFrame,
+    *,
+    seed: int,
+    attempt: str,
+    status: str = "complete",
+) -> Path:
+    run_dir = (
+        root / "runs" / "exp10_hidden_context_ei_bridge" / f"seed_{seed:04d}" / attempt
+    )
+    run_dir.mkdir(parents=True)
+    (run_dir / "config.json").write_text(
+        json.dumps({"profile": "formal", "seed": seed}), encoding="utf-8"
+    )
+    (run_dir / "status.json").write_text(
+        json.dumps({"status": status}), encoding="utf-8"
+    )
+    rows = frame.loc[frame["seed"].eq(seed)].to_dict("records")
+    (run_dir / "metrics.jsonl").write_text(
+        "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
+    )
+    return run_dir
+
+
+def test_exp10_formal_plot_rejects_newer_failed_retry(tmp_path: Path) -> None:
+    frame = _exp10_formal_frame()
+    frame.to_csv(
+        tmp_path / "exp10_bridge_formal_raw.csv.gz",
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    for seed in range(30):
+        _write_exp10_formal_attempt(
+            tmp_path, frame, seed=seed, attempt="20260101T000000.000000Z"
+        )
+    _write_exp10_formal_attempt(
+        tmp_path,
+        frame,
+        seed=0,
+        attempt="20990101T000000.000000Z",
+        status="failed",
+    )
+    with pytest.raises(
+        RuntimeError, match="latest exp10 formal attempt is not complete"
+    ):
+        _latest_exp10_formal_rows(tmp_path)
+
+
+def test_exp10_formal_plot_rejects_partial_local_grid_snapshot_fallback(
+    tmp_path: Path,
+) -> None:
+    frame = _exp10_formal_frame()
+    frame.to_csv(
+        tmp_path / "exp10_bridge_formal_raw.csv.gz",
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    _write_exp10_formal_attempt(
+        tmp_path, frame, seed=0, attempt="20260101T000000.000000Z"
+    )
+    with pytest.raises(ValueError, match="partial; refusing snapshot fallback"):
+        _latest_exp10_formal_rows(tmp_path)
+
+
+@pytest.mark.parametrize("mutation", ["reuse_flag", "readout_checkpoint"])
+def test_exp10_formal_plot_rejects_false_counterfactual_binding(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    frame = _exp10_formal_frame()
+    target = frame["intervention"].eq("clamp") & frame["seed"].eq(0)
+    if mutation == "reuse_flag":
+        frame.loc[target, "intervention_reuses_intact_readout"] = False
+    else:
+        frame.loc[target, "readout_checkpoint_id"] = "tampered-readout"
+    frame.to_csv(
+        tmp_path / "exp10_bridge_formal_raw.csv.gz",
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    with pytest.raises(ValueError, match="(intervention|checkpoint/readout)"):
+        _latest_exp10_formal_rows(tmp_path)
 
 
 def test_exp11_summary_uses_animal_primary_paired_inference(tmp_path: Path) -> None:

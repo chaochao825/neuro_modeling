@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -33,6 +34,14 @@ def _source_label(path: Path) -> str:
         return str(path.relative_to(PROJECT_ROOT))
     except ValueError:
         return str(path)
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def load_real_rows(results_root: Path) -> pd.DataFrame:
@@ -243,6 +252,21 @@ def real_data_comparison_summary(
         # Direct unit-level calls do not represent an artifact-selection path.
         source_run_status = "direct_frame_not_applicable"
         run_attempt_finalized = True
+    source_identifiers: dict[str, str] = {}
+    for output_name, frame_name in (
+        ("source_run_id", "run_id"),
+        ("source_run_attempt", "source_run_attempt"),
+        ("source_metrics_path", "source_metrics_path"),
+    ):
+        if frame_name not in frame.columns:
+            source_identifiers[output_name] = "direct_frame_not_applicable"
+            continue
+        values = frame[frame_name].dropna().astype(str).unique()
+        if len(values) > 1:
+            raise ValueError(f"exp11 rows mix multiple {frame_name} values")
+        source_identifiers[output_name] = (
+            str(values[0]) if len(values) == 1 else "unavailable"
+        )
     comparisons = (
         (
             "hmm_context_nll_gain",
@@ -260,7 +284,7 @@ def real_data_comparison_summary(
             "hmm_behavior_log_loss_gain",
             "learned_categorical_hmm",
             "behavior_log_loss",
-            False,
+            True,
         ),
         (
             "history_behavior_log_loss_gain",
@@ -412,7 +436,14 @@ def real_data_comparison_summary(
     summary["statistics_unit"] = "animal_primary_session_nested"
     summary["multiple_comparison_correction"] = "Holm_across_exp11_claim_family"
     summary["cohort_manifest_sha256"] = cohort_hash
-    summary["evidence_scope"] = "IBL_trials_only_behavior_hidden_block_inference"
+    summary["profile"] = "formal"
+    for name, value in source_identifiers.items():
+        summary[name] = value
+    summary["evidence_scope"] = np.where(
+        summary["metric"].astype(str).eq("context_nll"),
+        "IBL_trials_only_behavior_hidden_block_inference",
+        "IBL_trials_only_heldout_choice_prediction",
+    )
     summary["behavior_only_benchmark"] = True
     summary["neural_activity_analyzed"] = False
     summary["biological_mechanism_claim_eligible"] = False
@@ -483,12 +514,12 @@ def make_figure(
         (
             axes[1],
             ["history_context_nll_gain", "hmm_context_nll_gain"],
-            "Context NLL Δ vs uniform belief",
+            "Context NLL Δ vs uniform belief\n(positive = better)",
         ),
         (
             axes[2],
             ["history_behavior_log_loss_gain", "hmm_behavior_log_loss_gain"],
-            "Choice log-loss Δ vs no-belief history baseline",
+            "Choice log-loss Δ vs no-belief history baseline\n(positive = better)",
         ),
     )
     for panel_index, (axis, claims, ylabel) in enumerate(panels, start=1):
@@ -553,8 +584,9 @@ def main() -> None:
     args = parser.parse_args()
     results_root = Path(args.results_root).resolve()
     frame = load_real_rows(results_root)
+    raw_path = results_root / "exp11_ibl_behavior_real_raw.csv.gz"
     frame.to_csv(
-        results_root / "exp11_ibl_behavior_real_raw.csv.gz",
+        raw_path,
         index=False,
         compression={"method": "gzip", "compresslevel": 9, "mtime": 0},
         lineterminator="\n",
@@ -562,6 +594,7 @@ def main() -> None:
     summary, paired = real_data_comparison_summary(
         frame, n_bootstrap=int(args.n_bootstrap)
     )
+    summary["scoped_raw_sha256"] = _file_sha256(raw_path)
     summary.to_csv(
         results_root / "exp11_ibl_behavior_real_summary.csv",
         index=False,
