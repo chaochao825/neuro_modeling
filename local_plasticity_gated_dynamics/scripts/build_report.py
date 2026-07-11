@@ -1513,11 +1513,28 @@ def write_report(
     formal_bridge_path = results_root / "exp10_bridge_formal_summary.csv"
     if formal_bridge_path.is_file():
         formal_bridge = pd.read_csv(formal_bridge_path)
+        formal_raw_sha = _only_value(
+            formal_bridge, "scoped_raw_sha256", source="exp10 formal report"
+        )
+        formal_manifest_sha = _only_value(
+            formal_bridge, "run_manifest_sha256", source="exp10 formal report"
+        )
+        formal_git_commit = _only_value(
+            formal_bridge, "run_git_commit", source="exp10 formal report"
+        )
         lines += [
             "",
             "## exp10 N=256 bridge formal grid",
             "",
             "Thirty seeds are paired within each of four q/h cells and then equally macro-averaged within seed. Base-gate behavior comparisons use separately fitted readouts and therefore support only whole functional pipelines. Clamp/delay/shuffle reuse the intact MD-like receiver and readout as within-model counterfactuals. Recurrent weights are frozen; no row is eligible for biological-mechanism, three-factor-plasticity, or efficiency claims.",
+            "",
+            "The scoped rows are bound to clean Git commit `"
+            + formal_git_commit
+            + "` (`dirty=false`), clean-run manifest `"
+            + formal_manifest_sha
+            + "`, and scoped raw snapshot `"
+            + formal_raw_sha
+            + "`. The run manifest records per-seed run IDs plus SHA-256 values for config, planned conditions, status, manifest, environment, metrics, and run log artifacts.",
             "",
             "| Comparison | Scope | Seed-macro difference [95% CI] | q/h-cell mean range | exp10-family Holm p | Conclusion |",
             "|---|---|---:|---:|---:|---|",
@@ -1623,7 +1640,7 @@ def write_report(
         "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
         "- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.",
-        "- `results/exp10_bridge_formal_raw.csv.gz` and `results/exp10_bridge_formal_summary.csv`: 30-seed N=256 formal bridge rows and seed-macro conclusions.",
+        "- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.",
         "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
         "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.",

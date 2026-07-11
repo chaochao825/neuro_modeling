@@ -126,10 +126,62 @@ The committed `exp10_bridge_pilot` artifact is a small N=32, 30-seed bridge
 pilot, not the N=256 formal run. The learned-HMM pipeline differed from a
 separately optimized no-gate pipeline by +2.52 held-out balanced-accuracy points
 (seed-bootstrap 95% CI 0.75 to 4.38; one-sided paired Wilcoxon Holm-adjusted
-`p=0.032`). The current MD-like posterior-to-gain bridge improved by only 0.33
+`p=0.032`). The current MD-like posterior-to-gain bridge point estimate was +0.33
 points (CI 0.00 to 0.93; Holm `p=0.315`) and its clamp/delay/shuffle contrasts
-were inconclusive. These null/inconclusive MD results are retained rather than replaced
-by a stronger input-routing mechanism.
+were inconclusive. These null/inconclusive MD results are retained rather than
+replaced by a stronger input-routing mechanism.
+
+### Current exp10 N=256 formal result
+
+The registered N=256 bridge grid completed all 30 independent seeds, four
+cue-reliability/hazard cells, and seven conditions (840/840 rows; zero failed
+conditions). After equal macro-averaging across the four cells, the learned-HMM
+and MD-like functional pipelines improved held-out balanced accuracy over their
+separately optimized no-gate pipelines by 10.00 points (seed-bootstrap 95% CI
+9.62 to 10.38) and 9.64 points (CI 9.20 to 10.09), respectively. Both remain
+significant after Holm correction across the nine formal exp10 comparisons
+(`p=1.68e-8`). Because each base condition has its own fitted readout, these are
+whole-pipeline comparisons rather than isolated fixed-readout gate effects.
+
+At the frozen MD-like checkpoint and readout, clamp, one-trial delay, and
+within-seed belief shuffling reduced balanced accuracy by 8.99, 2.23, and 9.92
+points, respectively (all Holm `p=1.68e-8`). The MD-like pipeline retained at
+least 90% of the oracle gain only under the registered equal-cell macro average:
+the non-inferiority margin was +0.57 points (CI 0.34 to 0.78; Holm
+`p=4.41e-5`), but one of the four q/h cell means was negative (-0.61 points).
+This does not establish cell-wise non-inferiority. Recurrent weights are frozen,
+so the result supports simulated hidden-context inference, a functional
+belief-to-E/I control pipeline, and within-model gate counterfactuals—not
+three-factor recurrent plasticity, a biological mechanism, or efficiency.
+
+This formal snapshot was rerun from clean Git commit
+`52fdcaa1e55ae0e0510ecca553c5acf6a4358072` with `dirty=false`. The scoped raw
+SHA-256 is `5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749`;
+the clean 30-run manifest SHA-256 is
+`b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94`.
+The manifest publishes each seed's run ID and hashes of its config, planned
+conditions, status, manifest, environment, metrics, and log artifacts. Earlier
+interrupted and dirty retries remain in run coverage but are ineligible for
+inference.
+
+### Current exp11 real-data result
+
+The frozen BWM behavior cohort attempted 44 sessions and retained 30 sessions
+from 30 different animals; 14 pre-specified QC exclusions and zero download
+failures remain in the manifest. All 120 session-condition rows completed, and
+all 30 learned HMM fits converged and passed the emission-separation gate.
+The cohort manifest SHA-256 is
+`112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6`.
+
+At the animal-primary level, the task-informed HMM (initialized from the known
+0.2/0.8 task rates but fit without `probabilityLeft` labels) improved context
+NLL over uniform belief by 0.3768 (hierarchical 95% CI 0.3313 to 0.4178;
+Holm-adjusted `p=1.49e-8`), which supports hidden block-state inference. A simple exponential
+history rule was significantly worse than uniform belief and is classified as
+`oppose`. Neither learned-HMM nor exponential-history beliefs improved the
+strong past-only held-out choice model (`inconclusive` for both). Thus the real
+data support is limited to task-variable inference; it is not evidence for
+neural activity, shared neural dynamics, or a biological gating mechanism.
 
 `exp09` separates cue observations, task-facing inputs, and evaluation truth
 into immutable capabilities. The learned HMM and MD-like recurrent belief gate

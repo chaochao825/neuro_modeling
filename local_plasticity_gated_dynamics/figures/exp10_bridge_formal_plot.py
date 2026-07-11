@@ -397,7 +397,7 @@ def make_figure(frame: pd.DataFrame, results_root: Path) -> None:
         ["Learned HMM", "MD-like", "Oracle Bayes"],
         rng,
     )
-    axes[1].set_ylabel("Pipeline Δ vs separately refit no-gate (pp)")
+    axes[1].set_ylabel("Pipeline Δ (pp)\nvs refit no-gate")
 
     intervention_names = ("md_vs_clamp", "md_vs_delay", "md_vs_shuffle")
     _plot_seed_points(
@@ -415,7 +415,7 @@ def make_figure(frame: pd.DataFrame, results_root: Path) -> None:
         ["Learned HMM", "MD-like"],
         rng,
     )
-    axes[3].set_ylabel("Context NLL improvement vs uniform")
+    axes[3].set_ylabel("Context NLL gain\nvs uniform")
 
     for index, axis in enumerate(axes):
         axis.text(

@@ -842,6 +842,19 @@ def test_global_summary_appends_scoped_exp10_formal_claims(tmp_path: Path) -> No
     assert "q/h-cell mean range=[-0.01, 0.2]" in retention["note"]
 
 
+def test_exp10_formal_report_exposes_clean_run_binding(tmp_path: Path) -> None:
+    core = _bound_exp10_formal_fixture(tmp_path)
+    combined = append_exp10_formal_claims(core, tmp_path)
+    write_report(tmp_path, pd.DataFrame(), pd.DataFrame(), combined)
+    report = (tmp_path / "report.md").read_text(encoding="utf-8")
+    manifest_sha = hashlib.sha256(
+        (tmp_path / "exp10_bridge_formal_run_manifest.csv").read_bytes()
+    ).hexdigest()
+    assert "clean Git commit `" + "a" * 40 + "` (`dirty=false`)" in report
+    assert f"clean-run manifest `{manifest_sha}`" in report
+    assert "exp10_bridge_formal_run_manifest.csv" in report
+
+
 def test_exp10_formal_global_summary_raw_hash_fails_closed(tmp_path: Path) -> None:
     core = _bound_exp10_formal_fixture(tmp_path)
     path = tmp_path / "exp10_bridge_formal_raw.csv.gz"

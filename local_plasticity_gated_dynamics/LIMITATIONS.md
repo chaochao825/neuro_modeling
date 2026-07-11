@@ -38,9 +38,9 @@ committed configs and scripts regenerate that layout.
   inconclusive.
 - The legacy learned MD gate uses true-context information and cannot support
   the hidden-context claim. The sequence-memory dataset was unavailable. The
-  IBL result contains one session/animal and is descriptive only; strict P6
-  support requires at least 5 animals and 20 sessions on a leakage-free shared
-  hidden-context panel.
+  legacy `exp06` IBL result contains one session/animal and is descriptive
+  only; strict P6 support requires at least 5 animals and 20 sessions on a
+  leakage-free shared hidden-context panel.
 - `exp09` repairs the hidden-context leakage at the gate-only level and adds
   cue-only HMM/MD inference plus frozen post-fit interventions. The MD
   candidate combines past-only two-slice soft counts with 80% Hebbian multi-lag
@@ -49,20 +49,32 @@ committed configs and scripts regenerate that layout.
   couple that belief gate to the local-plasticity N=256/N=512 recurrent PFC/E/I
   models, so even positive P2 gate results cannot by themselves establish the
   complete credit-assignment-to-recurrent-dynamics mechanism.
-- `exp10` is the repository's first belief-to-Dale-E/I bridge, but recurrent weights remain
-  frozen and the control axis is rank one by construction. Its N=32 pilot
-  shows a small learned-HMM *pipeline* gain over a separately refit no-gate
-  readout; it does not support the current fixed-readout MD-like intervention
-  panel, and it cannot establish three-factor recurrent learning. The
-  registered N=256/30-seed run remains outstanding.
-- `exp11` now implements a leakage-safe trials-only IBL benchmark plus a cohort
-  freezer and immutable-manifest contract; no formal multi-animal artifact is
-  yet committed. A one-session developmental check was descriptively worse on
-  held-out choice log loss than the strong history readout, but the inferential
-  conclusion is `inconclusive_insufficient_cohort`, not `oppose`.
-  Multi-session/animal inference must be completed before either a support or
-  oppose conclusion. The distinct MFD_09 `exp06` neural pilot is not exp11
-  behavior evidence.
+- `exp10` is the repository's first belief-to-Dale-E/I bridge, but recurrent
+  weights remain frozen and the control axis is rank one by construction. The
+  N=32 pilot remains a separate null/inconclusive MD intervention result. The
+  registered N=256 grid completed all 30 seeds and supports separately refit
+  HMM/MD-like functional pipelines plus fixed-checkpoint clamp, delay, and
+  shuffle counterfactuals. The 90%-of-oracle margin is supported only after
+  equal macro-averaging across four q/h cells; one cell has a negative margin,
+  so cell-wise retention is not established. Because base pipelines use
+  separately fitted readouts, and recurrence is frozen, these results cannot
+  identify an isolated gate effect, three-factor recurrent learning, a
+  biological mechanism, or an efficiency advantage. Formal inference uses the
+  latest rerun from clean Git commit `52fdcaa1e55ae0e0510ecca553c5acf6a4358072`,
+  bound to clean-run manifest SHA-256
+  `b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94`;
+  earlier interrupted and dirty attempts remain visible but ineligible.
+- `exp11` now has a frozen 30-session/30-animal BWM behavior cohort, with all
+  120 session-condition rows complete and all learned HMM fits identifiable.
+  The task-informed HMM is initialized from known 0.2/0.8 task rates, although
+  fitting never sees trial-level `probabilityLeft` labels. Its hidden-block NLL
+  supports task-variable context inference, while
+  the exponential-history context model is opposed. Neither belief model
+  improves held-out choice log loss over the strong past-only history readout,
+  so behavioral prediction remains inconclusive. This trials-only result does
+  not analyze neural activity and cannot support shared neural dynamics or a
+  biological gating mechanism. The distinct MFD_09 `exp06` neural pilot is not
+  exp11 behavior evidence.
 - `exp12` validates only the task-safe candidate-routing interface on a
   synthetic smoke tape. No public ARC candidate tape has yet passed the frozen
   coverage contract, and the external feature/candidate extractor is not yet

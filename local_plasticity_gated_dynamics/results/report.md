@@ -22,7 +22,9 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | exp07_mechanism_identifiability | formal | 30 | 30 | 0 | 0 | 1020 |
 | exp08_rank_stage_validation | formal | 30 | 30 | 0 | 0 | 4410 |
 | exp09_hidden_context_gate | formal | 30 | 30 | 0 | 0 | 3840 |
+| exp10_hidden_context_ei_bridge | formal | 120 | 90 | 0 | 30 | 3360 |
 | exp10_hidden_context_ei_bridge | smoke | 60 | 60 | 0 | 0 | 420 |
+| exp11_ibl_behavior_belief | formal | 1 | 1 | 0 | 0 | 120 |
 
 ## Core proposition audit
 
@@ -64,6 +66,18 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | P1c_highrank_physical_update_coexists_with_lowdim_credit | masked physical numerical rank exceeds credit tangent dimension; this theoretical claim does not imply held-out task support | 30/30 | 124 [124, 124] | **support** |
 | P0_overall | support iff every Holm-adjusted P0a--P0f claim supports; oppose iff at least one opposes; otherwise inconclusive | 30/30 | — [—, —] | **support** |
 | P2_overall | support iff every critical Holm-adjusted P2 claim supports; oppose iff at least one opposes; otherwise inconclusive | 30/30 | — [—, —] | **support** |
+| S1_exp10_hmm_context_inference | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.2777 [0.2696, 0.286] | **support** |
+| S2_exp10_md_context_inference | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.2583 [0.2455, 0.2701] | **support** |
+| S3_exp10_hmm_functional_pipeline | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.09999 [0.09621, 0.1038] | **support** |
+| S4_exp10_md_functional_pipeline | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.09639 [0.092, 0.1009] | **support** |
+| S5_exp10_md_retains_oracle_gain | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.005702 [0.003435, 0.007813] | **support** |
+| S6_exp10_md_clamp_counterfactual | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.0899 [0.08662, 0.09337] | **support** |
+| S7_exp10_md_delay_counterfactual | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.02226 [0.01986, 0.02472] | **support** |
+| S8_exp10_md_shuffle_counterfactual | Holm p<0.05 and seed-macro bootstrap CI excludes zero after equal averaging across four q/h cells | 30/30 | 0.09923 [0.09425, 0.1045] | **support** |
+| R1_ibl_hmm_context_inference | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | 0.3768 [0.3313, 0.4178] | **support** |
+| R2_ibl_history_context_inference | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.5649 [-0.7772, -0.3784] | **oppose** |
+| R3_ibl_hmm_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.001087 [-0.003275, 0.0007699] | **inconclusive** |
+| R4_ibl_history_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.003753 [-0.00724, -0.000773] | **inconclusive** |
 
 ### Evidence details
 
@@ -103,6 +117,18 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 - `P1c_highrank_physical_update_coexists_with_lowdim_credit` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P0_overall` (failed=0): non-inferential stage gate; P0a_aligned_task_improves_prediction_vs_frozen=support; P0b_aligned_task_beats_shuffled=support; P0c_aligned_adds_value_over_matched_homeostasis=support; P0d_local_absolute_accuracy=support; P0e_local_noninferior_tuned_bptt=support; P0f_local_noninferior_tuned_gru=support
 - `P2_overall` (failed=0): non-inferential P2 stage gate; P2b_md_context_nll=support; P2c_md_context_brier=support; P2d_md_calibration=support; P2e_md_switch_latency=support; P2f_md_false_switch=support; P2g_md_behavior=support; P2h_md_retains_oracle_gain=support; P2j_clamp_causal=support; P2k_delay_causal=support; P2l_shuffle_causal=support; strict panel issues: none
+- `S1_exp10_hmm_context_inference` (failed=0): scope=simulated_hidden_context_inference; detailed conclusion=support_simulated_hidden_context_inference; q/h-cell mean range=[0.099677, 0.454324]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S2_exp10_md_context_inference` (failed=0): scope=simulated_hidden_context_inference; detailed conclusion=support_simulated_hidden_context_inference; q/h-cell mean range=[0.0474984, 0.450007]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S3_exp10_hmm_functional_pipeline` (failed=0): scope=separately_refit_functional_pipeline; detailed conclusion=support_functional_pipeline_formal; q/h-cell mean range=[0.0489918, 0.146146]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S4_exp10_md_functional_pipeline` (failed=0): scope=separately_refit_functional_pipeline; detailed conclusion=support_functional_pipeline_formal; q/h-cell mean range=[0.0407393, 0.145414]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S5_exp10_md_retains_oracle_gain` (failed=0): scope=separately_refit_noninferiority_margin; detailed conclusion=support_macro_average_90pct_oracle_gain_margin; q/h-cell mean range=[-0.00607921, 0.0131486]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S6_exp10_md_clamp_counterfactual` (failed=0): scope=fixed_checkpoint_within_model_counterfactual; detailed conclusion=support_within_model_counterfactual; q/h-cell mean range=[0.0361962, 0.138036]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S7_exp10_md_delay_counterfactual` (failed=0): scope=fixed_checkpoint_within_model_counterfactual; detailed conclusion=support_within_model_counterfactual; q/h-cell mean range=[0.00731382, 0.0490158]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `S8_exp10_md_shuffle_counterfactual` (failed=0): scope=fixed_checkpoint_within_model_counterfactual; detailed conclusion=support_within_model_counterfactual; q/h-cell mean range=[0.0401489, 0.150213]; frozen recurrent; separately refit base readouts; no biological-mechanism, recurrent-plasticity, or efficiency claim; protocol=3a2abc0021fe97db655430ca94986700880e898f980c0ded7e7d33f1c069ad5e; scoped raw sha256=5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749; clean-run manifest sha256=b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94; run git commit=52fdcaa1e55ae0e0510ecca553c5acf6a4358072
+- `R1_ibl_hmm_context_inference` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
+- `R2_ibl_history_context_inference` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
+- `R3_ibl_hmm_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
+- `R4_ibl_history_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
 
 ## P2 formal diagnostics
 
@@ -163,9 +189,38 @@ This N=32 pilot uses 30 independent seeds and is reported separately from the re
 | md_vs_delay | fixed_receiver_readout_within_model_counterfactual | 0.0015 [-0.0021, 0.0066] | 0.9809 | **inconclusive_within_model_counterfactual** |
 | md_vs_shuffle | fixed_receiver_readout_within_model_counterfactual | 0.0018 [-0.0003, 0.0058] | 0.9809 | **inconclusive_within_model_counterfactual** |
 
+## exp10 N=256 bridge formal grid
+
+Thirty seeds are paired within each of four q/h cells and then equally macro-averaged within seed. Base-gate behavior comparisons use separately fitted readouts and therefore support only whole functional pipelines. Clamp/delay/shuffle reuse the intact MD-like receiver and readout as within-model counterfactuals. Recurrent weights are frozen; no row is eligible for biological-mechanism, three-factor-plasticity, or efficiency claims.
+
+The scoped rows are bound to clean Git commit `52fdcaa1e55ae0e0510ecca553c5acf6a4358072` (`dirty=false`), clean-run manifest `b0e29f5053a37593a197832ee12adc93ccb80fb55bd65003f20f90fff67aba94`, and scoped raw snapshot `5c2f37e12864a73e5d2202dbceb077f3caae147fa94c6ce94b3309f2656c9749`. The run manifest records per-seed run IDs plus SHA-256 values for config, planned conditions, status, manifest, environment, metrics, and run log artifacts.
+
+| Comparison | Scope | Seed-macro difference [95% CI] | q/h-cell mean range | exp10-family Holm p | Conclusion |
+|---|---|---:|---:|---:|---|
+| hmm_context_vs_no_gate | simulated_hidden_context_inference | 0.2777 [0.2696, 0.2860] | [0.0997, 0.4543] | 1.676e-08 | **support_simulated_hidden_context_inference** |
+| md_context_vs_no_gate | simulated_hidden_context_inference | 0.2583 [0.2455, 0.2701] | [0.0475, 0.4500] | 1.676e-08 | **support_simulated_hidden_context_inference** |
+| hmm_behavior_vs_no_gate | separately_refit_functional_pipeline | 0.1000 [0.0962, 0.1038] | [0.0490, 0.1461] | 1.676e-08 | **support_functional_pipeline_formal** |
+| md_behavior_vs_no_gate | separately_refit_functional_pipeline | 0.0964 [0.0920, 0.1009] | [0.0407, 0.1454] | 1.676e-08 | **support_functional_pipeline_formal** |
+| oracle_behavior_vs_no_gate | descriptive_oracle_ceiling | 0.1008 [0.0971, 0.1044] | [0.0520, 0.1470] | 1.676e-08 | **descriptive_oracle_ceiling_support** |
+| md_retains_90pct_oracle_gain | separately_refit_noninferiority_margin | 0.0057 [0.0034, 0.0078] | [-0.0061, 0.0131] | 4.408e-05 | **support_macro_average_90pct_oracle_gain_margin** |
+| md_vs_clamp | fixed_checkpoint_within_model_counterfactual | 0.0899 [0.0866, 0.0934] | [0.0362, 0.1380] | 1.676e-08 | **support_within_model_counterfactual** |
+| md_vs_delay | fixed_checkpoint_within_model_counterfactual | 0.0223 [0.0199, 0.0247] | [0.0073, 0.0490] | 1.676e-08 | **support_within_model_counterfactual** |
+| md_vs_shuffle | fixed_checkpoint_within_model_counterfactual | 0.0992 [0.0942, 0.1045] | [0.0401, 0.1502] | 1.676e-08 | **support_within_model_counterfactual** |
+
+The MD-like 90%-of-oracle margin supports only the predeclared seed-macro average: at least one q/h cell has a negative mean margin, so no every-cell retention claim is made.
+
 ## exp11 IBL hidden-block benchmark (behavior only)
 
-No animal-primary formal exp11 summary is available. The behavior-only real-data conclusion is pending/inconclusive; this absence is not neural evidence.
+This section analyzes trial-table behavior only: no spikes, neural activity, or shared neural dynamics are fit. Conclusions use animal-primary inference with sessions nested within animal, preserve failed/missing conditions, and are bound to cohort manifest `112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6`.
+
+Difference is reference minus candidate, so positive values favor the candidate. Holm correction is across the four exp11 behavior-only claims, separately from the legacy core-claim family.
+
+| Claim | planned / paired sessions | animals | animal-mean difference (positive = better) [hierarchical 95% CI] | exp11-family Holm p | Conclusion |
+|---|---:|---:|---:|---:|---|
+| hmm_context_nll_gain | 30 / 30 | 30 | 0.3768 [0.3313, 0.4178] | 1.49e-08 | **support** |
+| history_context_nll_gain | 30 / 30 | 30 | -0.5649 [-0.7772, -0.3784] | 2.498e-06 | **oppose** |
+| hmm_behavior_log_loss_gain | 30 / 30 | 30 | -0.001087 [-0.003275, 0.0007699] | 0.9838 | **inconclusive** |
+| history_behavior_log_loss_gain | 30 / 30 | 30 | -0.003753 [-0.00724, -0.000773] | 0.2806 | **inconclusive** |
 
 ## Interpretation safeguards
 
@@ -189,7 +244,7 @@ No animal-primary formal exp11 summary is available. The behavior-only real-data
 - Time points never cross trial/block splits. Symmetric smoothing is visualization-only; predictive likelihood uses causal smoothing/raw counts.
 - Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.
 - IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.
-- IBL support requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.
+- Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.
 
 ## External-data status
 
@@ -199,5 +254,8 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 
 - `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.
 - `results/runs.csv`: run status and planned-cell coverage.
-- `results/summary.csv`: one row per pre-registered core claim.
-- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.
+- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.
+- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.
+- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.
+- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.
