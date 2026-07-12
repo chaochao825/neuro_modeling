@@ -1,0 +1,18 @@
+{
+  "profile": "smoke",
+  "family": "sudoku",
+  "seeds": [0],
+  "conditions": ["sudoku_local_no_branch", "sudoku_local_bounded_branch"],
+  "n_bootstrap": 200,
+  "minimum_test_tasks": 4,
+  "synthetic_fixture": {
+    "seed": 1729,
+    "n_train_tasks": 8,
+    "n_test_tasks": 4,
+    "clue_fraction": 0.48
+  },
+  "model": {
+    "max_propagation_steps": 128,
+    "branch_budget": 256
+  }
+}

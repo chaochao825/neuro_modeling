@@ -1,0 +1,25 @@
+{
+  "profile": "formal",
+  "claim_scope": "exploratory_only_no_matched_advantage_comparator",
+  "family": "sudoku",
+  "seeds": [0],
+  "conditions": ["sudoku_local_no_branch", "sudoku_local_bounded_branch"],
+  "n_bootstrap": 10000,
+  "minimum_test_tasks": 28,
+  "data": {
+    "path": "data/structured/sudoku_wichtounet_v2.jsonl",
+    "manifest_path": "data/structured/sudoku_wichtounet_v2.manifest.json",
+    "manifest_sha256": "1b0aa95575b50012e25499ddd82c35d462979fe150d6819ea0ade7f6f80c91f2",
+    "dataset_name": "wichtounet/sudoku_dataset-v2",
+    "revision": "0db6de036b80b4e8e4574abe6e15026331bd5c2c",
+    "license": "CC-BY-4.0",
+    "license_status": "verified",
+    "test_split_role": "non_ood",
+    "default_split": null,
+    "unavailable_reason": null
+  },
+  "model": {
+    "max_propagation_steps": 128,
+    "branch_budget": 256
+  }
+}

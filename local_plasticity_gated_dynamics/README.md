@@ -37,7 +37,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp14_*.py` are executable entry points as implementation advances. `exp07`
+`exp15_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -145,6 +145,13 @@ layers:
    same preprocessing and observations. The current endpoint is explicitly a
    teacher-forced within-trial one-step Poisson likelihood, not a full latent
    Poisson LDS. Registered inference is animal-primary with sessions nested.
+6. `exp15` is an additive task-specialization track. Sudoku uses sparse positive
+   candidate activity with local row/column/box interactions; ARC uses a slow
+   operator-family belief and fast demonstration-grounded program selection.
+   These are task adapters inspired by design principles, not BDH or HRM
+   reproductions. Spikes and BPTT are absent. Until a matched-compute comparator
+   is registered, Exp15 is forced to `inconclusive` even on formal public data.
+   See `docs/task_specialized_reasoning_contract_zh.md`.
 
 ### Current exp13 public ARC result
 

@@ -1,0 +1,26 @@
+{
+  "profile": "formal",
+  "claim_scope": "exploratory_only_no_matched_advantage_comparator",
+  "formal_manifest_verification": "unavailable_fail_closed",
+  "family": "arc",
+  "seeds": [0],
+  "conditions": ["arc_slow_fast_program"],
+  "n_bootstrap": 10000,
+  "minimum_test_tasks": 100,
+  "data": {
+    "path": "data/arc/ARC-AGI-1/399030444e0ab0cc8b4e199870fb20b863846f34",
+    "dataset_name": "ARC-AGI-1",
+    "revision": "399030444e0ab0cc8b4e199870fb20b863846f34",
+    "license": "Apache-2.0",
+    "license_status": "verified",
+    "manifest_sha256": "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda",
+    "test_split_role": "ood",
+    "exclude_relative_paths": ["evaluation/070dd51e.json"]
+  },
+  "model": {
+    "max_arc_candidates": 96,
+    "max_reasoning_steps": 8,
+    "belief_decay": 0.5,
+    "halt_margin": 0.98
+  }
+}

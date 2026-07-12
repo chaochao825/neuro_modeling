@@ -1,0 +1,19 @@
+{
+  "profile": "smoke",
+  "family": "arc",
+  "seeds": [0],
+  "conditions": ["arc_slow_fast_program"],
+  "n_bootstrap": 200,
+  "minimum_test_tasks": 4,
+  "synthetic_fixture": {
+    "seed": 1729,
+    "n_train_tasks": 8,
+    "n_test_tasks": 4
+  },
+  "model": {
+    "max_arc_candidates": 96,
+    "max_reasoning_steps": 8,
+    "belief_decay": 0.5,
+    "halt_margin": 0.98
+  }
+}
