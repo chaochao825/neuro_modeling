@@ -34,6 +34,14 @@ def _config() -> dict[str, object]:
         "minimum_region_sessions": 5,
         "latent_dims": [1, 2],
         "ridges": [0.1],
+        "learned_hmm": {
+            "n_restarts": 5,
+            "restart_selection_policy": (
+                "eligible_converged_identifiable_then_likelihood"
+            ),
+            "require_converged": True,
+            "require_identifiable": True,
+        },
         "expected_source_manifest_sha256": "a" * 64,
         "expected_acquisition_bundle_sha256": "b" * 64,
         "expected_compact_manifest_sha256": "a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09",
@@ -172,6 +180,16 @@ def _fake_run(
                             "anchor_regions_missing": (),
                             "n_anchor_regions_present": len(common_regions),
                             "n_anchor_regions_missing": 0,
+                            "hmm_fit_converged": True,
+                            "hmm_state_identifiable": True,
+                            "hmm_restart_selection_policy": config["learned_hmm"][
+                                "restart_selection_policy"
+                            ],
+                            "hmm_selected_restart": session_index % 5,
+                            "hmm_eligible_restart_count": 4,
+                            "hmm_eligible_restart_fallback": False,
+                            "belief_checkpoint_sha256": "1" * 64,
+                            "belief_trajectory_sha256": "2" * 64,
                             "source_manifest_sha256": config[
                                 "expected_source_manifest_sha256"
                             ],
@@ -413,6 +431,71 @@ def test_outer_mechanism_and_nested_selection_gates_are_fail_closed(
     _, _, comparisons, _ = collect_formal_run(other, config)
     assert set(comparisons["core_conclusion"]) == {"inconclusive"}
     assert not comparisons["nested_selection_valid"].any()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("hmm_restart_selection_policy", "likelihood_only"),
+        ("hmm_selected_restart", 5),
+        ("hmm_eligible_restart_count", 0),
+        ("hmm_eligible_restart_count", 6),
+        ("hmm_eligible_restart_fallback", True),
+        ("hmm_fit_converged", False),
+        ("hmm_state_identifiable", False),
+    ],
+)
+def test_outer_hmm_restart_receipts_are_fail_closed(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    config = _config()
+    attempt = _fake_run(tmp_path, config)
+    records = _records(attempt)
+    outer = next(row for row in records if row.get("stage") == "outer_test")
+    outer[field] = value
+    _replace_records(attempt, records)
+    with pytest.raises(ValueError, match="eligible-restart contract"):
+        collect_formal_run(tmp_path, config)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("hmm_selected_restart", 1),
+        ("hmm_eligible_restart_count", 3),
+        ("belief_checkpoint_sha256", "3" * 64),
+        ("belief_trajectory_sha256", "4" * 64),
+    ],
+)
+def test_paired_model_families_must_share_the_hmm_receipt(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    config = _config()
+    attempt = _fake_run(tmp_path, config)
+    records = _records(attempt)
+    outer = next(row for row in records if row.get("stage") == "outer_test")
+    outer[field] = value
+    _replace_records(attempt, records)
+    with pytest.raises(ValueError, match="families disagree"):
+        collect_formal_run(tmp_path, config)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("restart_selection_policy", "likelihood_only"),
+        ("n_restarts", 0),
+        ("require_converged", False),
+        ("require_identifiable", False),
+    ],
+)
+def test_formal_hmm_restart_config_is_fail_closed(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    config = _config()
+    config["learned_hmm"] = {**config["learned_hmm"], field: value}
+    with pytest.raises(ValueError, match="eligible-first HMM restart selection"):
+        collect_formal_run(tmp_path, config)
 
 
 @pytest.mark.parametrize(

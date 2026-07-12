@@ -39,6 +39,9 @@ from src.utils.reproducibility import derive_seed  # noqa: E402
 
 DEFAULT_PREFIX = "exp14_ibl_multisession_neural_formal"
 REGISTERED_CONFIG_PATH = "configs/formal/exp14_ibl_multisession_neural.json"
+REGISTERED_HMM_RESTART_SELECTION_POLICY = (
+    "eligible_converged_identifiable_then_likelihood"
+)
 _HASH_FIELDS = (
     "expected_source_manifest_sha256",
     "expected_acquisition_bundle_sha256",
@@ -48,6 +51,16 @@ _HASH_FIELDS = (
     "expected_macro_region_source_ontology_sha256",
     "expected_macro_region_source_provenance_sha256",
     "macro_region_mapping_formal_compact_manifest_sha256",
+)
+_PAIRED_HMM_RECEIPT_FIELDS = (
+    "belief_checkpoint_sha256",
+    "belief_trajectory_sha256",
+    "hmm_fit_converged",
+    "hmm_state_identifiable",
+    "hmm_restart_selection_policy",
+    "hmm_selected_restart",
+    "hmm_eligible_restart_count",
+    "hmm_eligible_restart_fallback",
 )
 
 
@@ -152,7 +165,81 @@ def _validate_formal_config(config: Mapping[str, Any]) -> None:
         raise ValueError("formal exp14 requires at least 100 bootstrap draws")
     if int(config.get("minimum_region_sessions", 0)) != 5:
         raise ValueError("formal exp14 minimum_region_sessions must equal 5")
+    _formal_hmm_contract(config)
     _formal_macro_mapping(config)
+
+
+def _formal_hmm_contract(config: Mapping[str, Any]) -> tuple[str, int]:
+    options = config.get("learned_hmm")
+    if not isinstance(options, Mapping):
+        raise ValueError("formal exp14 requires a learned_hmm mapping")
+    policy = options.get("restart_selection_policy")
+    n_restarts = options.get("n_restarts")
+    if (
+        policy != REGISTERED_HMM_RESTART_SELECTION_POLICY
+        or isinstance(n_restarts, bool)
+        or not isinstance(n_restarts, int)
+        or n_restarts < 1
+        or options.get("require_converged") is not True
+        or options.get("require_identifiable") is not True
+    ):
+        raise ValueError(
+            "formal exp14 requires eligible-first HMM restart selection and "
+            "converged identifiable fits"
+        )
+    return str(policy), int(n_restarts)
+
+
+def _validate_hmm_restart_receipt(
+    record: Mapping[str, Any], config: Mapping[str, Any]
+) -> None:
+    policy, n_restarts = _formal_hmm_contract(config)
+
+    def exact_bool(value: object, expected: bool) -> bool:
+        return isinstance(value, (bool, np.bool_)) and bool(value) is expected
+
+    def receipt_int(value: object, name: str) -> int:
+        if isinstance(value, (bool, np.bool_)):
+            raise ValueError(f"{name} must be an integer receipt")
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"{name} must be an integer receipt") from error
+        if not np.isfinite(numeric) or not numeric.is_integer():
+            raise ValueError(f"{name} must be an integer receipt")
+        return int(numeric)
+
+    selected = receipt_int(record.get("hmm_selected_restart"), "hmm_selected_restart")
+    eligible_count = receipt_int(
+        record.get("hmm_eligible_restart_count"), "hmm_eligible_restart_count"
+    )
+    if (
+        record.get("hmm_restart_selection_policy") != policy
+        or not exact_bool(record.get("hmm_fit_converged"), True)
+        or not exact_bool(record.get("hmm_state_identifiable"), True)
+        or not exact_bool(record.get("hmm_eligible_restart_fallback"), False)
+        or not 0 <= selected < n_restarts
+        or not 1 <= eligible_count <= n_restarts
+    ):
+        raise ValueError(
+            "outer-test HMM receipt violates the registered eligible-restart contract"
+        )
+
+
+def _validate_paired_hmm_receipts(outer_frame: pd.DataFrame) -> None:
+    missing = set(_PAIRED_HMM_RECEIPT_FIELDS) - set(outer_frame.columns)
+    if missing:
+        raise ValueError(f"outer-test rows lack paired HMM receipts: {sorted(missing)}")
+    for field in ("belief_checkpoint_sha256", "belief_trajectory_sha256"):
+        for value in outer_frame[field].tolist():
+            _require_digest(value, field)
+    group_keys = ["session_id", "view", "panel"]
+    grouped = outer_frame.groupby(group_keys, dropna=False)
+    if grouped.size().ne(len(FAMILIES)).any():
+        raise ValueError("outer-test HMM receipts lack one paired model family")
+    for field in _PAIRED_HMM_RECEIPT_FIELDS:
+        if grouped[field].nunique(dropna=False).ne(1).any():
+            raise ValueError("paired model families disagree on their HMM fit receipt")
 
 
 def _formal_macro_mapping(config: Mapping[str, Any]) -> AllenMacroRegionMapping:
@@ -540,6 +627,8 @@ def _flatten_comparison(
         "macro_region_mapping_formal_compact_manifest_sha256": config.get(
             "macro_region_mapping_formal_compact_manifest_sha256"
         ),
+        "hmm_restart_selection_policy": _formal_hmm_contract(config)[0],
+        "hmm_n_restarts": _formal_hmm_contract(config)[1],
     }
     for name, interval in intervals.items():
         for field in (
@@ -834,6 +923,7 @@ def collect_formal_run(
             row.get("comparison_preprocessing_sha256"),
             "comparison_preprocessing_sha256",
         )
+        _validate_hmm_restart_receipt(row, formal_config)
     comparison_records = [
         row for row in metrics if row.get("stage") == "animal_session_comparison"
     ]
@@ -847,6 +937,7 @@ def collect_formal_run(
     ):
         raise ValueError("animal/session comparison family is incomplete")
     outer_frame = pd.DataFrame(outer)
+    _validate_paired_hmm_receipts(outer_frame)
     if outer_frame.groupby("session_id")["animal_id"].nunique().ne(1).any():
         raise ValueError("a session maps to different animals across views or panels")
     preprocessing_counts = outer_frame.groupby(["view", "panel"])[
@@ -897,6 +988,7 @@ def collect_formal_run(
             )
     macro_mapping = _formal_macro_mapping(formal_config)
     macro_receipt = dict(macro_mapping.receipt())
+    hmm_policy, hmm_n_restarts = _formal_hmm_contract(formal_config)
     run_manifest = pd.DataFrame(
         [
             {
@@ -916,6 +1008,8 @@ def collect_formal_run(
                 "planned_sessions": int(formal_config["planned_sessions"]),
                 "planned_animals": int(formal_config["planned_animals"]),
                 "n_bootstrap": int(formal_config["n_bootstrap"]),
+                "hmm_restart_selection_policy": hmm_policy,
+                "hmm_n_restarts": hmm_n_restarts,
                 "minimum_region_sessions": int(
                     formal_config["minimum_region_sessions"]
                 ),
@@ -1005,6 +1099,7 @@ def load_validated_exp14_snapshot(
             "macro_region_source_provenance_sha256",
             "macro_region_mapping_formal_compact_manifest_sha256",
             "macro_region_formal_acronyms_sha256",
+            "hmm_restart_selection_policy",
         )
     }
     conditions, comparisons = (
@@ -1026,6 +1121,7 @@ def load_validated_exp14_snapshot(
                 "macro_region_source_ontology_sha256": "string",
                 "macro_region_source_provenance_sha256": "string",
                 "macro_region_formal_acronyms_sha256": "string",
+                "hmm_restart_selection_policy": "string",
             },
         ),
         pd.read_csv(
@@ -1085,6 +1181,8 @@ def load_validated_exp14_snapshot(
         ),
         "macro_region_formal_acronyms_sha256": ("macro_region_formal_acronyms_sha256"),
         "macro_region_formal_acronym_count": "macro_region_formal_acronym_count",
+        "hmm_restart_selection_policy": "hmm_restart_selection_policy",
+        "hmm_n_restarts": "hmm_n_restarts",
     }
     for output_column, manifest_column in binding_map.items():
         expected_value = str(run_manifest.iloc[0][manifest_column])
@@ -1135,6 +1233,10 @@ def load_validated_exp14_snapshot(
             "macro_region_formal_acronyms_sha256": (
                 registered_mapping.formal_compact_acronyms_sha256
             ),
+            "hmm_restart_selection_policy": registered["learned_hmm"][
+                "restart_selection_policy"
+            ],
+            "hmm_n_restarts": registered["learned_hmm"]["n_restarts"],
         }
         for column, expected_value in expected_bindings.items():
             if set(comparisons[column].astype(str)) != {str(expected_value)}:
@@ -1215,8 +1317,22 @@ def load_validated_exp14_snapshot(
             record.get("comparison_preprocessing_sha256"),
             "comparison_preprocessing_sha256",
         )
+        _validate_hmm_restart_receipt(
+            record,
+            {
+                "learned_hmm": {
+                    "restart_selection_policy": str(
+                        run_manifest.iloc[0]["hmm_restart_selection_policy"]
+                    ),
+                    "n_restarts": int(run_manifest.iloc[0]["hmm_n_restarts"]),
+                    "require_converged": True,
+                    "require_identifiable": True,
+                }
+            },
+        )
     if outer.groupby("session_id")["animal_id"].nunique().ne(1).any():
         raise ValueError("a raw session maps to multiple animals")
+    _validate_paired_hmm_receipts(outer)
     if (
         outer.groupby(["view", "panel"])["comparison_preprocessing_sha256"]
         .nunique()
@@ -1279,6 +1395,14 @@ def load_validated_exp14_snapshot(
         "expected_compact_manifest_sha256": str(
             run_manifest.iloc[0]["compact_manifest_sha256"]
         ),
+        "learned_hmm": {
+            "restart_selection_policy": str(
+                run_manifest.iloc[0]["hmm_restart_selection_policy"]
+            ),
+            "n_restarts": int(run_manifest.iloc[0]["hmm_n_restarts"]),
+            "require_converged": True,
+            "require_identifiable": True,
+        },
     }
     if (
         recompute_config["planned_sessions"] != 20
@@ -1374,6 +1498,9 @@ def _write_report(
         f"- Missing-region handling: `{primary['region_imputation_strategy']}` "
         "(training folds only).",
         f"- Shared anchor basis: `{', '.join(common_regions)}`.",
+        f"- HMM restart selection: `{primary['hmm_restart_selection_policy']}`; "
+        f"registered restarts={int(primary['hmm_n_restarts'])}; every retained "
+        "outer fit had at least one converged, identifiable eligible restart.",
         "",
         "## Anatomical anchor coverage",
         "",
@@ -1470,6 +1597,10 @@ def build_snapshot(
         "run_git_commit": run_manifest.iloc[0]["git_commit"],
         "run_git_dirty": False,
         "snapshot_scope": "registered_core" if registered else "exploratory_only",
+        "hmm_restart_selection_policy": config["learned_hmm"][
+            "restart_selection_policy"
+        ],
+        "hmm_n_restarts": int(config["learned_hmm"]["n_restarts"]),
     }
     for key, value in bindings.items():
         conditions[key] = value

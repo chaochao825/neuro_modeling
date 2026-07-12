@@ -675,6 +675,21 @@ def _forward_backward(
     return likelihood, gamma, xi_sum
 
 
+@dataclass(frozen=True, slots=True)
+class _HMMRestartCandidate:
+    restart: int
+    log_likelihood: float
+    initial: Array
+    transition: Array
+    emission: Array
+    iterations: int
+    converged: bool
+
+    def is_eligible(self, minimum_emission_gap: float) -> bool:
+        ordered = np.sort(np.asarray(self.emission, dtype=float)[:, 1])
+        return self.converged and float(np.diff(ordered)[0]) >= minimum_emission_gap
+
+
 class LearnedCategoricalHMM:
     """Task-informed unsupervised HMM with learned, emission-ordered states.
 
@@ -690,6 +705,7 @@ class LearnedCategoricalHMM:
         pseudocount: float = 0.1,
         n_restarts: int = 4,
         min_emission_gap: float = 0.1,
+        restart_selection_policy: str = "likelihood_only",
         seed: int = 0,
     ) -> None:
         self.max_iter = int(max_iter)
@@ -697,6 +713,7 @@ class LearnedCategoricalHMM:
         self.pseudocount = float(pseudocount)
         self.n_restarts = int(n_restarts)
         self.min_emission_gap = float(min_emission_gap)
+        self.restart_selection_policy = str(restart_selection_policy)
         self.seed = int(seed)
         if self.max_iter < 1 or self.n_restarts < 1:
             raise IBLBehaviorDataError("max_iter and n_restarts must be positive")
@@ -706,6 +723,11 @@ class LearnedCategoricalHMM:
             or not 0.0 < self.min_emission_gap < 1.0
         ):
             raise IBLBehaviorDataError("tolerance and pseudocount must be positive")
+        if self.restart_selection_policy not in {
+            "eligible_converged_identifiable_then_likelihood",
+            "likelihood_only",
+        }:
+            raise IBLBehaviorDataError("unknown HMM restart selection policy")
         self._fitted = False
 
     def _fit_restart(
@@ -755,12 +777,42 @@ class LearnedCategoricalHMM:
             raise TypeError("observations must be IBLBehaviorObservations")
         train = _validate_training_prefix(train_indices, observations.trial_ids.size)
         y = observations.stimulus_side[train]
-        candidates = [
-            self._fit_restart(y, restart) for restart in range(self.n_restarts)
+        candidates = []
+        for restart in range(self.n_restarts):
+            likelihood, initial, transition, emission, iterations, converged = (
+                self._fit_restart(y, restart)
+            )
+            candidates.append(
+                _HMMRestartCandidate(
+                    restart=restart,
+                    log_likelihood=likelihood,
+                    initial=initial,
+                    transition=transition,
+                    emission=emission,
+                    iterations=iterations,
+                    converged=converged,
+                )
+            )
+        eligible_candidates = [
+            candidate
+            for candidate in candidates
+            if candidate.is_eligible(self.min_emission_gap)
         ]
-        likelihood, initial, transition, emission, iterations, converged = max(
-            candidates, key=lambda item: item[0]
+        pool = (
+            eligible_candidates
+            if self.restart_selection_policy
+            == "eligible_converged_identifiable_then_likelihood"
+            and eligible_candidates
+            else candidates
         )
+        selected = max(pool, key=lambda item: item.log_likelihood)
+        selected_restart = selected.restart
+        likelihood = selected.log_likelihood
+        initial = selected.initial
+        transition = selected.transition
+        emission = selected.emission
+        iterations = selected.iterations
+        converged = selected.converged
         order = np.argsort(emission[:, 1])
         self.initial_ = np.array(initial[order], copy=True)
         self.transition_ = np.array(transition[np.ix_(order, order)], copy=True)
@@ -771,6 +823,13 @@ class LearnedCategoricalHMM:
         self.converged_ = bool(converged)
         self.emission_gap_ = float(np.diff(self.emission_[:, 1])[0])
         self.identifiable_ = self.emission_gap_ >= self.min_emission_gap
+        self.selected_restart_ = int(selected_restart)
+        self.n_eligible_restarts_ = len(eligible_candidates)
+        self.eligible_restart_fallback_ = (
+            self.restart_selection_policy
+            == "eligible_converged_identifiable_then_likelihood"
+            and not eligible_candidates
+        )
         for value in (
             self.initial_,
             self.transition_,
@@ -803,6 +862,10 @@ class LearnedCategoricalHMM:
                 ("train_log_likelihood", self.train_log_likelihood_),
                 ("n_iterations", self.n_iterations_),
                 ("n_restarts", self.n_restarts),
+                ("restart_selection_policy", self.restart_selection_policy),
+                ("selected_restart", self.selected_restart_),
+                ("eligible_restart_count", self.n_eligible_restarts_),
+                ("eligible_restart_fallback", self.eligible_restart_fallback_),
                 ("em_converged", self.converged_),
                 ("emission_gap", self.emission_gap_),
                 ("minimum_emission_gap", self.min_emission_gap),

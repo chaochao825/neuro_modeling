@@ -808,6 +808,10 @@ def _past_only_beliefs(
         "iterations": hmm.n_iterations_,
         "converged": hmm.converged_,
         "identifiable": hmm.identifiable_,
+        "restart_selection_policy": hmm.restart_selection_policy,
+        "selected_restart": hmm.selected_restart_,
+        "eligible_restart_count": hmm.n_eligible_restarts_,
+        "eligible_restart_fallback": hmm.eligible_restart_fallback_,
     }
     selected_beliefs = prediction.beliefs[selected_gate_positions]
     receipt = BeliefFitReceipt.bind(

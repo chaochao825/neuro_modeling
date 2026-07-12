@@ -34,6 +34,7 @@
     "tolerance": 1e-7,
     "pseudocount": 0.1,
     "n_restarts": 5,
+    "restart_selection_policy": "eligible_converged_identifiable_then_likelihood",
     "min_emission_gap": 0.1,
     "require_converged": true,
     "require_identifiable": true

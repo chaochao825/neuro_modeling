@@ -182,6 +182,16 @@ def _build_sessions(
                 "n_anchor_regions_missing": len(item.missing_anchor_regions),
                 "hmm_fit_converged": item.hmm_checkpoint["converged"],
                 "hmm_state_identifiable": item.hmm_checkpoint["identifiable"],
+                "hmm_restart_selection_policy": item.hmm_checkpoint[
+                    "restart_selection_policy"
+                ],
+                "hmm_selected_restart": item.hmm_checkpoint["selected_restart"],
+                "hmm_eligible_restart_count": item.hmm_checkpoint[
+                    "eligible_restart_count"
+                ],
+                "hmm_eligible_restart_fallback": item.hmm_checkpoint[
+                    "eligible_restart_fallback"
+                ],
             }
         )
     model_splits = {item.session.session_id: item.split for item in built}

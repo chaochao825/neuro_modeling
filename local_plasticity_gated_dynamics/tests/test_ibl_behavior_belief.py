@@ -187,6 +187,89 @@ def test_unsupervised_hmm_fits_train_stimuli_only_and_orders_emissions() -> None
         model.fit(session, split.train_indices)  # type: ignore[arg-type]
 
 
+def test_hmm_prefers_an_eligible_restart_over_a_tiny_likelihood_gain(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = _session()
+    split = contiguous_block_split(session.block_ids)
+
+    def fake_restart(
+        self: LearnedCategoricalHMM, y: np.ndarray, restart: int
+    ) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, int, bool]:
+        del self, y
+        initial = np.array([0.5, 0.5])
+        transition = np.array([[0.98, 0.02], [0.02, 0.98]])
+        candidates = {
+            0: (-1.0, np.array([[0.9, 0.1], [0.1, 0.9]]), 200, False),
+            1: (-1.0000054, np.array([[0.8, 0.2], [0.2, 0.8]]), 120, True),
+            2: (-2.0, np.array([[0.51, 0.49], [0.49, 0.51]]), 80, True),
+        }
+        likelihood, emission, iterations, converged = candidates[restart]
+        return likelihood, initial, transition, emission, iterations, converged
+
+    monkeypatch.setattr(LearnedCategoricalHMM, "_fit_restart", fake_restart)
+    model = LearnedCategoricalHMM(
+        n_restarts=3,
+        min_emission_gap=0.1,
+        restart_selection_policy="eligible_converged_identifiable_then_likelihood",
+    ).fit(session.observations, split.train_indices)
+
+    assert model.selected_restart_ == 1
+    assert model.converged_
+    assert model.identifiable_
+    assert model.n_eligible_restarts_ == 1
+    assert not model.eligible_restart_fallback_
+    metadata = dict(model.predict(session.observations).parameters)
+    assert metadata["restart_selection_policy"] == (
+        "eligible_converged_identifiable_then_likelihood"
+    )
+    assert metadata["selected_restart"] == 1
+    assert metadata["eligible_restart_count"] == 1
+    assert metadata["eligible_restart_fallback"] is False
+
+    likelihood_only = LearnedCategoricalHMM(
+        n_restarts=3,
+        min_emission_gap=0.1,
+        restart_selection_policy="likelihood_only",
+    ).fit(session.observations, split.train_indices)
+    assert likelihood_only.selected_restart_ == 0
+    assert not likelihood_only.converged_
+    assert likelihood_only.identifiable_
+    assert not likelihood_only.eligible_restart_fallback_
+
+
+def test_hmm_restart_policy_validation_and_explicit_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with pytest.raises(IBLBehaviorDataError, match="restart selection policy"):
+        LearnedCategoricalHMM(restart_selection_policy="unknown")
+
+    session = _session()
+    split = contiguous_block_split(session.block_ids)
+
+    def noneligible_restart(
+        self: LearnedCategoricalHMM, y: np.ndarray, restart: int
+    ) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, int, bool]:
+        del self, y
+        return (
+            float(restart),
+            np.array([0.5, 0.5]),
+            np.array([[0.95, 0.05], [0.05, 0.95]]),
+            np.array([[0.9, 0.1], [0.1, 0.9]]),
+            200,
+            False,
+        )
+
+    monkeypatch.setattr(LearnedCategoricalHMM, "_fit_restart", noneligible_restart)
+    model = LearnedCategoricalHMM(
+        n_restarts=2,
+        restart_selection_policy="eligible_converged_identifiable_then_likelihood",
+    ).fit(session.observations, split.train_indices)
+    assert model.selected_restart_ == 1
+    assert model.n_eligible_restarts_ == 0
+    assert model.eligible_restart_fallback_
+
+
 def test_context_scoring_and_behavior_readout_keep_truth_and_fit_scopes_explicit() -> (
     None
 ):
