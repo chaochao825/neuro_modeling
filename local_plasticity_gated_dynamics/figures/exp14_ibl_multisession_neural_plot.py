@@ -111,7 +111,7 @@ def plot_exp14(results_root: Path, prefix: str = DEFAULT_PREFIX) -> plt.Figure:
     )
     if not finite.any():
         ax_retention.text(
-            0.5,
+            0.28,
             0.5,
             "Retention undefined\n(full did not improve common)",
             transform=ax_retention.transAxes,
