@@ -5,15 +5,20 @@
   "conditions": ["support_heuristic", "flat_local", "hierarchical_local", "trace_local", "gru_bptt", "candidate_oracle"],
   "fit_splits": ["train"],
   "n_bootstrap": 10000,
-  "minimum_test_tasks": 100,
+  "minimum_test_tasks": 10,
+  "minimum_candidate_coverage": 0.9,
   "hyperparameters_frozen_before_test": true,
   "data": {
-    "path": "data/structured/maze-hard-30x30.jsonl",
-    "dataset_name": "sapientinc/maze-30x30-hard-1k",
-    "revision": "549754de3d67eebe57b6b22c7d226b9412d55b07",
-    "license": null,
-    "license_status": "unverified",
-    "unavailable_reason": "upstream dataset metadata has no declared data license"
+    "path": "data/structured/maze_mazebench_a71a2d1.jsonl",
+    "manifest_path": "data/structured/maze_mazebench_a71a2d1.manifest.json",
+    "manifest_sha256": "68a19d8a545942a09ae2b22274413bd8915778650d4483506066192add80983f",
+    "dataset_name": "albertoRodriguez97/MazeBench",
+    "revision": "a71a2d1e0931c79f74cd91c5accd13f164d34c73",
+    "license": "MIT",
+    "license_status": "verified",
+    "test_split_role": "ood",
+    "default_split": null,
+    "unavailable_reason": null
   },
   "model": {
     "fast_dim": 24,

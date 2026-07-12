@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from src.analysis.structured_reasoning_metrics import (
     evaluate_arc_predictions,
@@ -16,6 +17,7 @@ from src.analysis.structured_reasoning_metrics import (
 from src.data.arc_tasks import load_arc_directory
 from src.data.maze_tasks import load_maze_tasks
 from src.data.sudoku_tasks import load_sudoku_tasks
+from src.data.structured_protocol import StructuredProtocolError
 from src.tasks.structured_proposals import generate_structured_proposals
 
 
@@ -183,6 +185,23 @@ def test_sudoku_jsonl_loader(tmp_path: Path) -> None:
     dataset = load_sudoku_tasks(path, split="validation")
     assert dataset.validation_task_ids == ("json0",)
     assert dataset.target_store.training_view(dataset.tasks[0]).target.shape == (9, 9)
+
+
+def test_sudoku_loader_rejects_declared_puzzle_hash_mismatch(tmp_path: Path) -> None:
+    path = tmp_path / "sudoku.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "task_id": "hash-mismatch",
+                "puzzle": _PUZZLE,
+                "solution": _SOLUTION,
+                "puzzle_sha256": "0" * 64,
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(StructuredProtocolError, match="puzzle_sha256"):
+        load_sudoku_tasks(path)
 
 
 def test_public_fingerprints_are_invariant_to_hidden_target_mutations(

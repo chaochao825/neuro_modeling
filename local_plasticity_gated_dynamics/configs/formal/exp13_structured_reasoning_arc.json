@@ -23,6 +23,7 @@
     "license": "Apache-2.0",
     "license_status": "verified",
     "manifest_sha256": "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda",
+    "test_split_role": "ood",
     "exclude_relative_paths": ["evaluation/070dd51e.json"]
   },
   "model": {

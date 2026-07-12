@@ -61,3 +61,14 @@ HRM 只启发“慢—快分层更新和截断的一步梯度”，CTM 只启发
 
 若置信区间明确落在反方向，记为 `oppose`；样本不足、候选覆盖不足、数据来源或划分无法验证时记为 `inconclusive`。任何只呈现低秩矩阵、但不改善 held-out 任务或神经预测的结果不得计为支持。
 
+## 7. Maze/Sudoku 公开数据冻结
+
+`scripts/prepare_exp13_public_benchmarks.py` 是正式 Maze/Sudoku 数据的唯一准备入口：
+
+- Sudoku 固定到 `wichtounet/sudoku_dataset@0db6de0`，核验 README 和官方 160/40 描述文件，只下载描述文件列出的 `image*.dat`；每题确定性求解并要求唯一解。正式派生集按模型可见 puzzle 内容寻址，跨官方 split 的重复组采用 test precedence，并且每个内容只保留一个确定性代表：200 条来源记录得到 76 个唯一 puzzle（48 train、28 non-OOD test），124 条重复排除和全部来源 receipt 均保留在 manifest。训练集与测试集的内容哈希交集必须为零。
+- Maze 固定到 `albertoRodriguez97/MazeBench@a71a2d1`，核验数据卡和 annotations；对 110 张 PNG 使用固定 tile pipeline。reachable 样本只有在每一条公开 accepted path 都能在派生网格上合法到达同一 goal，且其长度等于独立 BFS 距离时才进入任务 JSONL；upstream-unreachable 和解析失败均保留在 manifest。
+- MazeBench 上游仅提供 evaluation set，因此项目划分是派生的：优先把最大 grid size 留作 OOD test；若尺寸分组不可行，才使用固定 revision + task ID 的 SHA-256 划分。manifest 明确记录该事实，不把它表述为官方 split。
+- 只有预注册且经 manifest 核验的 OOD test 可以进入核心 `support` 判定。Sudoku 的官方来源 split 不构成 OOD，因此其正式结果仅作 exploratory functional evidence；即使统计差异显著，也不得升级为核心支持。
+- `data/structured/` 是可重建、git-ignored 的本地数据。正式配置必须把人工复核后的 manifest SHA-256 写入配置；实验再次核验 manifest、派生 JSONL、revision、license 和路径，并把完整 preparation receipt 嵌入 run provenance。占位哈希保持 fail-closed。
+
+这些任务只提供结构化功能与 hybrid proposal-selection 证据；当前 fast/slow/trace 控制器只是受 HRM/CTM 启发的窄化抽象，不是两者的复现，也不能替代多 session 神经活动证据。

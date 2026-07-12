@@ -1,4 +1,4 @@
-"""Plot the data-bound exp13 ARC formal result panel."""
+"""Plot a data-bound exp13 structured-task formal result panel."""
 
 from __future__ import annotations
 

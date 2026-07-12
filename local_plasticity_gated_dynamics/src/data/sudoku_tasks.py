@@ -183,6 +183,11 @@ def load_sudoku_tasks(
             )
         task_id = str(record.get("task_id", f"sudoku_{index:06d}")).strip()
         public_digest = public_projection_sha256({"family": "sudoku", "puzzle": puzzle})
+        declared_digest = record.get("puzzle_sha256")
+        if declared_digest is not None and str(declared_digest) != public_digest:
+            raise StructuredProtocolError(
+                f"puzzle_sha256[{index}] disagrees with model-visible puzzle"
+            )
         source_group = str(
             record.get("source_group", record.get("source", public_digest))
         ).strip()
@@ -212,6 +217,11 @@ def load_sudoku_tasks(
                         else "sudoku_jsonl_v1"
                     ),
                     "source_version": str(record.get("source_version", "sudoku_v1")),
+                    "source_repository": record.get("source_repository"),
+                    "source_record_path": record.get("source_record_path"),
+                    "source_record_sha256": record.get("source_record_sha256"),
+                    "source_license": record.get("source_license"),
+                    "split_provenance": record.get("split_provenance"),
                     "source_sha256": public_digest,
                     "source_hash_scope": "public_projection",
                     "n_clues": int(clue_mask.sum()),

@@ -9,7 +9,9 @@ or a proposal-free HRM/CTM reproduction.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Mapping
@@ -193,6 +195,101 @@ def _resolve_data_path(value: str) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _validated_preparation_manifest(
+    data: Mapping[str, Any], *, family: str, dataset_path: Path
+) -> tuple[Path, Mapping[str, Any], str]:
+    """Bind a formal derived Maze/Sudoku file to its audited manifest."""
+
+    expected_digest = data.get("manifest_sha256")
+    if (
+        not isinstance(expected_digest, str)
+        or _SHA256.fullmatch(expected_digest) is None
+    ):
+        raise ValueError(
+            "formal Maze/Sudoku manifest_sha256 must be a pinned lowercase digest; "
+            "run the public-data preparation script, review it, and replace the "
+            "explicit placeholder"
+        )
+    raw_manifest_path = data.get("manifest_path")
+    if not isinstance(raw_manifest_path, str) or not raw_manifest_path:
+        raise ValueError("formal Maze/Sudoku data require manifest_path")
+    manifest_path = _resolve_data_path(raw_manifest_path)
+    if not manifest_path.is_file():
+        raise FileNotFoundError(manifest_path)
+    actual_digest = _file_sha256(manifest_path)
+    if actual_digest != expected_digest:
+        raise ValueError("formal Maze/Sudoku preparation manifest SHA-256 mismatch")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "formal Maze/Sudoku preparation manifest is invalid JSON"
+        ) from error
+    if not isinstance(manifest, Mapping):
+        raise ValueError("formal Maze/Sudoku preparation manifest must be an object")
+    if manifest.get("schema_version") != "exp13_public_benchmark_manifest_v1":
+        raise ValueError("unsupported Maze/Sudoku preparation manifest schema")
+    if manifest.get("family") != family:
+        raise ValueError("preparation manifest task family disagrees with config")
+    if manifest.get("status") not in {"complete", "complete_with_exclusions"}:
+        raise ValueError("preparation manifest does not describe a completed build")
+    builder = manifest.get("builder")
+    builder_script = PROJECT_ROOT / "scripts" / "prepare_exp13_public_benchmarks.py"
+    if (
+        not isinstance(builder, Mapping)
+        or builder.get("script") != builder_script.name
+        or builder.get("script_sha256") != _file_sha256(builder_script)
+    ):
+        raise ValueError(
+            "preparation manifest is not bound to the current public-data builder"
+        )
+    dataset = manifest.get("dataset")
+    output = manifest.get("output")
+    split_receipt = manifest.get("split")
+    if (
+        not isinstance(dataset, Mapping)
+        or not isinstance(output, Mapping)
+        or not isinstance(split_receipt, Mapping)
+    ):
+        raise ValueError("preparation manifest lacks dataset/output/split receipts")
+    if dataset.get("license_status") != "verified":
+        raise ValueError("preparation manifest does not verify the data license")
+    for manifest_key, config_key in (
+        ("name", "dataset_name"),
+        ("revision", "revision"),
+        ("license", "license"),
+    ):
+        if str(dataset.get(manifest_key)) != str(data.get(config_key)):
+            raise ValueError(
+                f"preparation manifest {manifest_key} disagrees with formal config"
+            )
+    if split_receipt.get("test_split_role") != data.get("test_split_role"):
+        raise ValueError(
+            "preparation manifest test_split_role disagrees with formal config"
+        )
+    output_name = output.get("path")
+    output_digest = output.get("sha256")
+    if not isinstance(output_name, str) or not output_name:
+        raise ValueError("preparation manifest output path is invalid")
+    manifested_dataset = manifest_path.parent / output_name
+    if manifested_dataset.resolve() != dataset_path.resolve():
+        raise ValueError("preparation manifest is bound to a different dataset path")
+    if not dataset_path.is_file():
+        raise FileNotFoundError(dataset_path)
+    if not isinstance(output_digest, str) or _SHA256.fullmatch(output_digest) is None:
+        raise ValueError("preparation manifest output SHA-256 is invalid")
+    if _file_sha256(dataset_path) != output_digest:
+        raise ValueError("prepared Maze/Sudoku dataset SHA-256 mismatch")
+    return manifest_path, manifest, actual_digest
+
+
 def _load_dataset(
     config: Mapping[str, Any], run_path: Path
 ) -> tuple[StructuredDataset, bool, Mapping[str, Any]]:
@@ -201,7 +298,9 @@ def _load_dataset(
     data = dict(config.get("data", {}))
     if fixture is not None:
         if str(config.get("profile")) != "smoke":
-            raise ValueError("synthetic structured fixtures are allowed only in smoke runs")
+            raise ValueError(
+                "synthetic structured fixtures are allowed only in smoke runs"
+            )
         fixture_root = run_path / "synthetic_fixture_not_scientific"
         if family == "arc":
             path = _write_arc_fixture(fixture_root, fixture)
@@ -219,21 +318,37 @@ def _load_dataset(
             dataset = load_sudoku_tasks(path, split=None)
         else:
             raise ValueError(f"unsupported structured family {family!r}")
-        return dataset, True, {
-            "source": "synthetic_smoke_fixture",
-            "license_status": "not_applicable",
-            "source_revision": "not_scientific",
-        }
+        return (
+            dataset,
+            True,
+            {
+                "source": "synthetic_smoke_fixture",
+                "license_status": "not_applicable",
+                "source_revision": "not_scientific",
+            },
+        )
 
-    if str(config.get("profile")) == "formal" and data.get("license_status") != "verified":
+    formal_profile = str(config.get("profile")) == "formal"
+    if formal_profile and data.get("license_status") != "verified":
         raise ValueError(
             "formal public data require license_status='verified'; acquisition stays fail-closed"
+        )
+    test_split_role = data.get("test_split_role")
+    if formal_profile and test_split_role not in {"ood", "non_ood"}:
+        raise ValueError(
+            "formal structured data must register test_split_role as ood or non_ood"
         )
     raw_path = data.get("path")
     if not isinstance(raw_path, str) or not raw_path:
         reason = data.get("unavailable_reason", "public data path is not configured")
         raise FileNotFoundError(str(reason))
     path = _resolve_data_path(raw_path)
+    preparation_manifest: Mapping[str, Any] | None = None
+    actual_manifest_sha256 = data.get("manifest_sha256")
+    if formal_profile and family in {"maze", "sudoku"}:
+        _, preparation_manifest, actual_manifest_sha256 = (
+            _validated_preparation_manifest(data, family=family, dataset_path=path)
+        )
     if family == "arc":
         dataset = load_arc_directory(
             path,
@@ -254,7 +369,21 @@ def _load_dataset(
         "source_revision": data.get("revision"),
         "license": data.get("license"),
         "license_status": data.get("license_status"),
-        "manifest_sha256": data.get("manifest_sha256"),
+        "manifest_sha256": actual_manifest_sha256,
+        "test_split_role": test_split_role,
+        "preparation_manifest_status": (
+            preparation_manifest.get("status")
+            if preparation_manifest is not None
+            else None
+        ),
+        "preparation_manifest_summary": (
+            preparation_manifest.get("summary")
+            if preparation_manifest is not None
+            else None
+        ),
+        # Embed the complete reviewed receipt in each run artifact because the
+        # generated data/structured directory is intentionally git-ignored.
+        "preparation_manifest": preparation_manifest,
         "exclude_relative_paths": data.get("exclude_relative_paths", []),
     }
     return dataset, False, provenance
@@ -279,8 +408,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str) -> Path:
         "exp13_structured_reasoning", seed, run_config, results_root=results_root
     ) as run:
         planned = [
-            {"condition": condition, "task_family": family}
-            for condition in conditions
+            {"condition": condition, "task_family": family} for condition in conditions
         ]
         run.register_conditions(planned)
         recorded: set[str] = set()
@@ -340,23 +468,32 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str) -> Path:
                     fit_receipts[condition] = fit_receipt_dict(result.fit_receipt)
                     metrics = dict(result.summary)
                     metrics.pop("condition", None)
+                    hyperparameters_frozen = bool(
+                        config.get("hyperparameters_frozen_before_test", False)
+                    )
+                    formal_evidence_eligible = (
+                        str(config.get("profile")) == "formal"
+                        and not fixture_only
+                        and source_provenance.get("license_status") == "verified"
+                        and hyperparameters_frozen
+                        and split_counts["test"]
+                        >= int(config.get("minimum_test_tasks", 100))
+                    )
                     metrics.update(
                         profile=str(config.get("profile", "unspecified")),
                         fixture_only=fixture_only,
+                        dataset_name=source_provenance.get("dataset_name"),
                         source_revision=source_provenance.get("source_revision"),
                         source_manifest_sha256=source_provenance.get("manifest_sha256"),
                         data_license=source_provenance.get("license"),
                         data_license_status=source_provenance.get("license_status"),
                         split_counts=split_counts,
-                        hyperparameters_frozen_before_test=bool(
-                            config.get("hyperparameters_frozen_before_test", False)
-                        ),
-                        formal_evidence_eligible=(
-                            str(config.get("profile")) == "formal"
-                            and not fixture_only
-                            and source_provenance.get("license_status") == "verified"
-                            and split_counts["test"]
-                            >= int(config.get("minimum_test_tasks", 100))
+                        hyperparameters_frozen_before_test=hyperparameters_frozen,
+                        test_split_role=source_provenance.get("test_split_role"),
+                        formal_evidence_eligible=formal_evidence_eligible,
+                        core_support_eligible=(
+                            formal_evidence_eligible
+                            and source_provenance.get("test_split_role") == "ood"
                         ),
                         core_claim_classification="inconclusive",
                         core_claim_reason=(

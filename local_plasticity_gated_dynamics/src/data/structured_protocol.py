@@ -218,6 +218,24 @@ class PublicTask:
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
     @property
+    def content_group(self) -> str:
+        """Content-address the model-visible task, excluding IDs and metadata.
+
+        Source identifiers are supplied by datasets and can therefore miss
+        duplicate examples.  This independent digest makes an exact public
+        task appearing under different IDs fail closed when it crosses a
+        train/validation/test boundary.
+        """
+
+        return public_projection_sha256(
+            {
+                "family": self.family,
+                "context": self.context,
+                "query": self.query,
+            }
+        )
+
+    @property
     def group_id(self) -> str:
         """Compatibility name for the source-level independence group."""
 
@@ -349,13 +367,14 @@ class TargetStore:
 
 
 def validate_group_disjointness(tasks: Sequence[PublicTask]) -> None:
-    """Reject source or augmentation families that cross data splits."""
+    """Reject declared or independently content-addressed split leakage."""
 
     memberships: dict[tuple[str, str], set[str]] = {}
     for task in tasks:
         for group_kind, group_id in (
             ("source_group", task.source_group),
             ("augmentation_group", task.augmentation_group),
+            ("public_content", task.content_group),
         ):
             memberships.setdefault((group_kind, group_id), set()).add(task.split)
     leaking = {
@@ -365,7 +384,7 @@ def validate_group_disjointness(tasks: Sequence[PublicTask]) -> None:
     }
     if leaking:
         raise StructuredProtocolError(
-            f"source/augmentation group crosses splits: {leaking!r}"
+            f"source/augmentation/public-content group crosses splits: {leaking!r}"
         )
 
 

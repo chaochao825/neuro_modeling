@@ -1,4 +1,4 @@
-"""Build a fail-closed formal ARC exp13 snapshot from immutable seed runs."""
+"""Build a fail-closed formal exp13 snapshot from immutable seed runs."""
 
 from __future__ import annotations
 
@@ -46,34 +46,50 @@ def _metric_records(path: Path) -> list[dict[str, Any]]:
     return records
 
 
+def _canonical_sha256(value: dict[str, Any]) -> str:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _expected_attempt_config(
+    formal_config: dict[str, Any], *, seed: int
+) -> dict[str, Any]:
+    """Reproduce the exact immutable config written by ``run_seed``."""
+
+    run_config = {
+        **formal_config,
+        "training_algorithm": "matched_hybrid_structured_candidate_selection",
+        "used_autograd": "baseline_only",
+        "parent_checkpoint": None,
+        "spiking_model": False,
+        "neural_evidence_claim": False,
+    }
+    return {
+        "experiment": "exp13_structured_reasoning",
+        "seed": int(seed),
+        **run_config,
+    }
+
+
 def _latest_matching_attempt(
     results_root: Path,
     *,
     seed: int,
-    family: str,
-    revision: str,
+    expected_config: dict[str, Any],
 ) -> Path:
     seed_root = (
-        results_root
-        / "runs"
-        / "exp13_structured_reasoning"
-        / f"seed_{seed:04d}"
+        results_root / "runs" / "exp13_structured_reasoning" / f"seed_{seed:04d}"
     )
     for attempt in sorted(seed_root.glob("*"), reverse=True):
         config_path = attempt / "config.json"
         if not config_path.is_file():
             continue
         config = _read_json(config_path)
-        data = config.get("data", {})
-        if (
-            config.get("profile") == "formal"
-            and config.get("family") == family
-            and isinstance(data, dict)
-            and data.get("revision") == revision
-        ):
+        if config == expected_config:
             return attempt
     raise FileNotFoundError(
-        f"no formal {family} exp13 attempt for seed={seed}, revision={revision}"
+        "no exp13 attempt exactly matches the complete registered formal config "
+        f"for seed={seed}"
     )
 
 
@@ -83,12 +99,32 @@ def collect_formal_runs(
     expected_seeds: list[int],
     family: str,
     revision: str,
+    source_manifest_sha256: str,
+    dataset_name: str,
+    test_split_role: str,
+    formal_config: dict[str, Any],
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    registered_data = formal_config.get("data")
+    if (
+        formal_config.get("profile") != "formal"
+        or formal_config.get("family") != family
+        or formal_config.get("hyperparameters_frozen_before_test") is not True
+        or not isinstance(registered_data, dict)
+        or registered_data.get("revision") != revision
+        or registered_data.get("manifest_sha256") != source_manifest_sha256
+        or registered_data.get("dataset_name") != dataset_name
+        or registered_data.get("test_split_role") != test_split_role
+    ):
+        raise ValueError("collector arguments disagree with the complete formal config")
+    formal_config_sha256 = _canonical_sha256(formal_config)
     raw_frames: list[pd.DataFrame] = []
     run_rows: list[dict[str, Any]] = []
     for seed in expected_seeds:
+        expected_config = _expected_attempt_config(formal_config, seed=seed)
         attempt = _latest_matching_attempt(
-            results_root, seed=seed, family=family, revision=revision
+            results_root,
+            seed=seed,
+            expected_config=expected_config,
         )
         status = _read_json(attempt / "status.json")
         environment = _read_json(attempt / "environment.json")
@@ -115,6 +151,22 @@ def collect_formal_runs(
         by_condition = {str(item["condition"]): item for item in metrics}
         if not all(bool(item.get("formal_evidence_eligible")) for item in metrics):
             raise ValueError(f"seed {seed} contains an evidence-ineligible condition")
+        if not all(
+            item.get("hyperparameters_frozen_before_test") is True for item in metrics
+        ):
+            raise ValueError(f"seed {seed} did not freeze hyperparameters before test")
+        if {str(item.get("test_split_role")) for item in metrics} != {test_split_role}:
+            raise ValueError(f"seed {seed} metric records use a different split role")
+        if {str(item.get("source_manifest_sha256")) for item in metrics} != {
+            source_manifest_sha256
+        }:
+            raise ValueError(
+                f"seed {seed} metric records use a different source manifest"
+            )
+        if {str(item.get("source_revision")) for item in metrics} != {revision}:
+            raise ValueError(f"seed {seed} metric records use a different revision")
+        if {str(item.get("dataset_name")) for item in metrics} != {dataset_name}:
+            raise ValueError(f"seed {seed} metric records use a different dataset")
         task_path = attempt / "task_metrics.csv.gz"
         task = pd.read_csv(task_path)
         if set(task["condition"].astype(str)) != set(STRUCTURED_CONDITIONS):
@@ -128,12 +180,18 @@ def collect_formal_runs(
                 "control_dim",
                 "control_operator_rank",
                 "formal_evidence_eligible",
+                "core_support_eligible",
+                "hyperparameters_frozen_before_test",
+                "test_split_role",
             ):
                 task.loc[mask, column] = record[column]
         task["run_id"] = str(manifest["run_id"])
         task["run_git_commit"] = str(git["commit"])
         task["run_git_dirty"] = bool(git["dirty"])
         task["source_revision"] = revision
+        task["source_manifest_sha256"] = source_manifest_sha256
+        task["dataset_name"] = dataset_name
+        task["formal_config_sha256"] = formal_config_sha256
         raw_frames.append(task)
         run_rows.append(
             {
@@ -143,6 +201,11 @@ def collect_formal_runs(
                 "git_commit": git["commit"],
                 "git_dirty": git["dirty"],
                 "status": status["status"],
+                "source_manifest_sha256": source_manifest_sha256,
+                "source_revision": revision,
+                "dataset_name": dataset_name,
+                "test_split_role": test_split_role,
+                "formal_config_sha256": formal_config_sha256,
                 "config_sha256": _sha256(attempt / "config.json"),
                 "environment_sha256": _sha256(attempt / "environment.json"),
                 "metrics_sha256": _sha256(attempt / "metrics.jsonl"),
@@ -161,11 +224,14 @@ def _write_report(
     revision: str,
     raw_sha256: str,
     run_manifest_sha256: str,
+    family: str,
+    dataset_name: str,
 ) -> None:
     core = comparisons.set_index("comparison").loc["hierarchical_vs_flat"]
     lines = [
-        "# Exp13 ARC formal report",
+        f"# Exp13 {family.upper()} formal report",
         "",
+        f"- Dataset: `{dataset_name}`",
         f"- Dataset revision: `{revision}`",
         f"- Raw task panel SHA-256: `{raw_sha256}`",
         f"- Clean-run manifest SHA-256: `{run_manifest_sha256}`",
@@ -212,8 +278,9 @@ def _write_report(
             f"[{core['ci_low']:.4f}, {core['ci_high']:.4f}]).",
             "",
             "This conclusion cannot be promoted to end-to-end neural reasoning: the same "
-            "deterministic program proposal library is supplied to every selector. ARC does "
-            "not replace the pending multi-session neural-activity experiment.",
+            "deterministic program/search proposal library is supplied to every selector. "
+            f"{family.upper()} does not replace the pending multi-session neural-activity "
+            "experiment.",
             "",
         ]
     )
@@ -227,7 +294,7 @@ def main() -> None:
         default="configs/formal/exp13_structured_reasoning_arc.json",
     )
     parser.add_argument("--results-root", default=str(PROJECT_ROOT / "results"))
-    parser.add_argument("--output-prefix", default="exp13_arc_formal")
+    parser.add_argument("--output-prefix")
     parser.add_argument("--n-bootstrap", type=int, default=100_000)
     parser.add_argument("--bootstrap-seed", type=int, default=20260712)
     args = parser.parse_args()
@@ -241,8 +308,15 @@ def main() -> None:
         expected_seeds=expected_seeds,
         family=str(config["family"]),
         revision=str(data["revision"]),
+        source_manifest_sha256=str(data["manifest_sha256"]),
+        dataset_name=str(data["dataset_name"]),
+        test_split_role=str(data["test_split_role"]),
+        formal_config=config,
     )
-    prefix = str(args.output_prefix)
+    family = str(config["family"]).strip().lower()
+    if family not in {"arc", "maze", "sudoku"}:
+        raise ValueError("formal exp13 family must be arc, maze, or sudoku")
+    prefix = str(args.output_prefix or f"exp13_{family}_formal")
     raw_path = results_root / f"{prefix}_raw.csv.gz"
     run_manifest_path = results_root / f"{prefix}_run_manifest.csv"
     raw.to_csv(
@@ -258,13 +332,17 @@ def main() -> None:
         expected_seeds=expected_seeds,
         seed=int(args.bootstrap_seed),
         n_bootstrap=int(args.n_bootstrap),
-        minimum_candidate_coverage=float(
-            config.get("minimum_candidate_coverage", 0.9)
-        ),
+        minimum_candidate_coverage=float(config.get("minimum_candidate_coverage", 0.9)),
+        task_family=family,
+        test_split_role=str(data["test_split_role"]),
     )
     bindings = {
+        "task_family": family,
+        "dataset_name": data["dataset_name"],
         "source_revision": data["revision"],
         "source_manifest_sha256": data["manifest_sha256"],
+        "test_split_role": data["test_split_role"],
+        "formal_config_sha256": _canonical_sha256(config),
         "scoped_raw_sha256": raw_sha,
         "run_manifest_sha256": run_manifest_sha,
         "run_git_commit": run_manifest["git_commit"].iloc[0],
@@ -284,6 +362,8 @@ def main() -> None:
         revision=str(data["revision"]),
         raw_sha256=raw_sha,
         run_manifest_sha256=run_manifest_sha,
+        family=family,
+        dataset_name=str(data["dataset_name"]),
     )
 
 

@@ -1,4 +1,4 @@
-"""Fail-closed formal aggregation for the ARC exp13 task panel."""
+"""Fail-closed formal aggregation for an exp13 structured-task panel."""
 
 from __future__ import annotations
 
@@ -48,6 +48,12 @@ PUBLISHED_EXP13_RAW_SHA256 = (
 PUBLISHED_EXP13_RUN_MANIFEST_SHA256 = (
     "7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead"
 )
+PUBLISHED_EXP13_SOURCE_MANIFEST_SHA256 = (
+    "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda"
+)
+PUBLISHED_EXP13_SOURCE_REVISION = "399030444e0ab0cc8b4e199870fb20b863846f34"
+PUBLISHED_EXP13_DATASET_NAME = "ARC-AGI-1"
+PUBLISHED_EXP13_TEST_SPLIT_ROLE = "ood"
 
 
 def _holm_adjust(values: Sequence[float]) -> np.ndarray:
@@ -172,19 +178,16 @@ def _validate_raw_panel(
 
 
 def _component_condition_panel(raw: pd.DataFrame) -> pd.DataFrame:
-    task_level = (
-        raw.groupby(
-            [
-                "task_id",
-                "source_group",
-                "augmentation_group",
-                "condition",
-            ],
-            as_index=False,
-            sort=False,
-        )[["exact", "candidate_covered"]]
-        .mean()
-    )
+    task_level = raw.groupby(
+        [
+            "task_id",
+            "source_group",
+            "augmentation_group",
+            "condition",
+        ],
+        as_index=False,
+        sort=False,
+    )[["exact", "candidate_covered"]].mean()
     identities = task_level[
         ["task_id", "source_group", "augmentation_group"]
     ].drop_duplicates("task_id")
@@ -194,12 +197,9 @@ def _component_condition_panel(raw: pd.DataFrame) -> pd.DataFrame:
         on="task_id",
         validate="many_to_one",
     )
-    return (
-        task_level.groupby(["component_id", "condition"], as_index=False)[
-            ["exact", "candidate_covered"]
-        ]
-        .mean()
-    )
+    return task_level.groupby(["component_id", "condition"], as_index=False)[
+        ["exact", "candidate_covered"]
+    ].mean()
 
 
 def summarize_structured_formal(
@@ -209,11 +209,20 @@ def summarize_structured_formal(
     seed: int = 20260712,
     n_bootstrap: int = 100_000,
     minimum_candidate_coverage: float = 0.9,
+    task_family: str = "arc",
+    test_split_role: str = "ood",
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return absolute condition results and paired component comparisons."""
 
     if not 0.0 <= minimum_candidate_coverage <= 1.0:
         raise ValueError("minimum_candidate_coverage must lie in [0, 1]")
+    task_family = str(task_family).strip().lower()
+    if task_family not in {"arc", "maze", "sudoku"}:
+        raise ValueError("task_family must be arc, maze, or sudoku")
+    test_split_role = str(test_split_role).strip().lower()
+    if test_split_role not in {"ood", "non_ood"}:
+        raise ValueError("test_split_role must be ood or non_ood")
+    registered_ood_split = test_split_role == "ood"
     frame = _validate_raw_panel(raw, expected_seeds=expected_seeds)
     component = _component_condition_panel(frame)
     n_components = int(component["component_id"].nunique())
@@ -244,23 +253,22 @@ def summarize_structured_formal(
                 "candidate_coverage": float(selected["candidate_covered"].mean()),
                 "minimum_candidate_coverage": float(minimum_candidate_coverage),
                 "coverage_gate_passed": bool(
-                    selected["candidate_covered"].mean()
-                    >= minimum_candidate_coverage
+                    selected["candidate_covered"].mean() >= minimum_candidate_coverage
                 ),
                 "n_tasks": n_tasks,
                 "n_dependency_components": n_components,
                 "n_seeds": len(tuple(expected_seeds)),
                 "statistics_unit": "source_augmentation_dependency_component",
                 "seed_nested_within_task": True,
+                "test_split_role": test_split_role,
+                "registered_ood_split": registered_ood_split,
                 "parameter_count": int(metadata["parameter_count"].iloc[0]),
                 "trainable_parameter_count": int(
                     metadata["trainable_parameter_count"].iloc[0]
                 ),
                 "used_bptt": bool(metadata["used_bptt"].iloc[0]),
                 "control_dim": int(metadata["control_dim"].iloc[0]),
-                "control_operator_rank": int(
-                    metadata["control_operator_rank"].iloc[0]
-                ),
+                "control_operator_rank": int(metadata["control_operator_rank"].iloc[0]),
             }
         )
     condition_summary = pd.DataFrame(condition_rows)
@@ -313,11 +321,13 @@ def summarize_structured_formal(
                 "wilcoxon_p": p_value,
                 "n_dependency_components": len(differences),
                 "n_nonzero_components": int(nonzero),
-                "multiple_comparison_family": "exp13_arc_six_registered_comparisons",
-                "candidate_coverage": float(
-                    component["candidate_covered"].mean()
+                "multiple_comparison_family": (
+                    f"exp13_{task_family}_six_registered_comparisons"
                 ),
+                "candidate_coverage": float(component["candidate_covered"].mean()),
                 "minimum_candidate_coverage": float(minimum_candidate_coverage),
+                "test_split_role": test_split_role,
+                "registered_ood_split": registered_ood_split,
             }
         )
     adjusted = _holm_adjust(raw_p_values)
@@ -327,10 +337,11 @@ def summarize_structured_formal(
             float(row["candidate_coverage"]) >= minimum_candidate_coverage
         )
         row["coverage_gate_passed"] = coverage_passed
-        row["core_claim_eligible"] = coverage_passed
-        if coverage_passed and holm_p < 0.05 and float(row["ci_low"]) > 0.0:
+        core_claim_eligible = coverage_passed and registered_ood_split
+        row["core_claim_eligible"] = core_claim_eligible
+        if core_claim_eligible and holm_p < 0.05 and float(row["ci_low"]) > 0.0:
             conclusion = "support"
-        elif coverage_passed and holm_p < 0.05 and float(row["ci_high"]) < 0.0:
+        elif core_claim_eligible and holm_p < 0.05 and float(row["ci_high"]) < 0.0:
             conclusion = "oppose"
         else:
             conclusion = "inconclusive"
@@ -358,6 +369,18 @@ def _one_text(frame: pd.DataFrame, column: str, *, source: str) -> str:
     if len(values) != 1:
         raise ValueError(f"{source} binding {column} is not unique")
     return str(values[0])
+
+
+def _assert_every_row_matches(
+    frame: pd.DataFrame, column: str, expected: str, *, source: str
+) -> None:
+    if column not in frame:
+        raise ValueError(f"{source} lacks binding column {column}")
+    if (
+        not frame[column].notna().all()
+        or not frame[column].astype(str).eq(expected).all()
+    ):
+        raise ValueError(f"{source} {column} differs from the run manifest")
 
 
 def _assert_recomputed_table(
@@ -404,6 +427,7 @@ def load_validated_structured_snapshot(
     prefix: str = "exp13_arc_formal",
     minimum_candidate_coverage: float = 0.9,
     require_published_root: bool = False,
+    task_family: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Load and independently recompute every exp13 derived summary table."""
 
@@ -419,6 +443,15 @@ def load_validated_structured_snapshot(
         raise FileNotFoundError(f"exp13 formal snapshot is incomplete: {missing}")
     conditions = pd.read_csv(paths["conditions"])
     comparisons = pd.read_csv(paths["comparisons"])
+    if task_family is None:
+        task_family = (
+            _one_text(comparisons, "task_family", source="comparisons")
+            if "task_family" in comparisons
+            else "arc"
+        )
+    task_family = str(task_family).strip().lower()
+    if require_published_root and task_family != "arc":
+        raise ValueError("the published exp13 trusted root is ARC-specific")
     raw_sha = _file_sha256(paths["raw"])
     run_sha = _file_sha256(paths["run_manifest"])
     for frame, source in ((conditions, "conditions"), (comparisons, "comparisons")):
@@ -431,6 +464,20 @@ def load_validated_structured_snapshot(
         or run_sha != PUBLISHED_EXP13_RUN_MANIFEST_SHA256
     ):
         raise ValueError("exp13 raw/run files differ from the published trusted root")
+    if require_published_root:
+        # The immutable published ARC tables predate explicit dataset/split-role
+        # columns.  Enrich only the in-memory view after the raw/run hashes have
+        # authenticated the legacy snapshot; never migrate trusted files.
+        legacy_bindings = {
+            "dataset_name": PUBLISHED_EXP13_DATASET_NAME,
+            "registered_ood_split": True,
+            "task_family": "arc",
+            "test_split_role": PUBLISHED_EXP13_TEST_SPLIT_ROLE,
+        }
+        for frame in (conditions, comparisons):
+            for column, value in legacy_bindings.items():
+                if column not in frame:
+                    frame[column] = value
     raw = pd.read_csv(paths["raw"], low_memory=False)
     run_manifest = pd.read_csv(paths["run_manifest"])
 
@@ -451,6 +498,31 @@ def load_validated_structured_snapshot(
     for frame, source in ((conditions, "conditions"), (comparisons, "comparisons")):
         if _one_text(frame, "run_git_commit", source=source) != commits[0]:
             raise ValueError(f"{source} commit differs from the run manifest")
+    if require_published_root:
+        binding_values = {
+            "source_manifest_sha256": PUBLISHED_EXP13_SOURCE_MANIFEST_SHA256,
+            "source_revision": PUBLISHED_EXP13_SOURCE_REVISION,
+            "dataset_name": PUBLISHED_EXP13_DATASET_NAME,
+            "test_split_role": PUBLISHED_EXP13_TEST_SPLIT_ROLE,
+        }
+    else:
+        binding_values = {
+            column: _one_text(run_manifest, column, source="run_manifest")
+            for column in (
+                "source_manifest_sha256",
+                "source_revision",
+                "dataset_name",
+                "formal_config_sha256",
+                "test_split_role",
+            )
+        }
+    for column, expected in binding_values.items():
+        for frame, source in (
+            (conditions, "conditions"),
+            (comparisons, "comparisons"),
+        ):
+            _assert_every_row_matches(frame, column, expected, source=source)
+    test_split_role = binding_values["test_split_role"]
     bootstrap_seed = int(_one_text(conditions, "bootstrap_seed", source="conditions"))
     n_bootstrap = int(_one_text(conditions, "n_bootstrap", source="conditions"))
     if (
@@ -466,6 +538,8 @@ def load_validated_structured_snapshot(
         seed=bootstrap_seed,
         n_bootstrap=n_bootstrap,
         minimum_candidate_coverage=minimum_candidate_coverage,
+        task_family=task_family,
+        test_split_role=test_split_role,
     )
     _assert_recomputed_table(
         conditions,
@@ -490,8 +564,12 @@ def load_validated_structured_snapshot(
 
 __all__ = [
     "FORMAL_COMPARISONS",
+    "PUBLISHED_EXP13_DATASET_NAME",
     "PUBLISHED_EXP13_RAW_SHA256",
     "PUBLISHED_EXP13_RUN_MANIFEST_SHA256",
+    "PUBLISHED_EXP13_SOURCE_MANIFEST_SHA256",
+    "PUBLISHED_EXP13_SOURCE_REVISION",
+    "PUBLISHED_EXP13_TEST_SPLIT_ROLE",
     "load_validated_structured_snapshot",
     "summarize_structured_formal",
 ]

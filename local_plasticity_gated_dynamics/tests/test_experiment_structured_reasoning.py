@@ -33,10 +33,10 @@ def test_exp13_smoke_runs_matched_target_safe_panel(tmp_path: Path) -> None:
     assert by_condition["flat_local"]["control_dim"] == 0
     assert by_condition["flat_local"]["control_operator_rank"] == 0
     assert by_condition["candidate_oracle"]["selection_accessed_query_target"] is True
-    assert all(
-        record["query_targets_exposed_to_solver"] is False for record in records
-    )
+    assert all(record["query_targets_exposed_to_solver"] is False for record in records)
     assert all(record["fixture_only"] is True for record in records)
+    assert not any(record["formal_evidence_eligible"] for record in records)
+    assert not any(record["core_support_eligible"] for record in records)
 
     task_metrics = pd.read_csv(path / "task_metrics.csv.gz")
     fingerprint_counts = task_metrics.groupby("task_id")[
@@ -48,15 +48,47 @@ def test_exp13_smoke_runs_matched_target_safe_panel(tmp_path: Path) -> None:
     assert (path / "fit_receipts.json").is_file()
 
 
-def test_formal_unlicensed_dataset_stays_fail_closed(tmp_path: Path) -> None:
-    config = load_json_config(
-        "configs/formal/exp13_structured_reasoning_maze.json"
-    )
+def test_formal_unpinned_preparation_manifest_stays_fail_closed(tmp_path: Path) -> None:
+    config = load_json_config("configs/formal/exp13_structured_reasoning_maze.json")
+    config["data"]["manifest_sha256"] = "REPLACE_AFTER_REVIEWED_PUBLIC_DATA_BUILD"
     path = run_seed(config, 0, str(tmp_path / "results"))
     records = _records(path)
     assert len(records) == len(config["conditions"])
     assert {record["status"] for record in records} == {"failed"}
-    assert all("license_status" in record["error"] for record in records)
+    assert all("manifest_sha256" in record["error"] for record in records)
+
+
+def test_formal_evidence_requires_frozen_hyperparameters(tmp_path: Path) -> None:
+    arc_root = tmp_path / "arc"
+    for split, offset in (("training", 0), ("evaluation", 4)):
+        directory = arc_root / split
+        directory.mkdir(parents=True)
+        payload = {
+            "train": [{"input": [[offset]], "output": [[offset + 1]]}],
+            "test": [{"input": [[offset + 2]], "output": [[offset + 3]]}],
+        }
+        (directory / f"{split}.json").write_text(json.dumps(payload), encoding="utf-8")
+    config = load_json_config("configs/smoke/exp13_structured_reasoning.json")
+    config.update(
+        profile="formal",
+        minimum_test_tasks=1,
+        hyperparameters_frozen_before_test=False,
+        data={
+            "path": str(arc_root),
+            "dataset_name": "ARC-fixture",
+            "revision": "fixture-revision",
+            "license": "Apache-2.0",
+            "license_status": "verified",
+            "manifest_sha256": "a" * 64,
+            "test_split_role": "ood",
+        },
+    )
+    config.pop("synthetic_fixture")
+    path = run_seed(config, 0, str(tmp_path / "results"))
+    records = _records(path)
+    assert {record["status"] for record in records} == {"complete"}
+    assert not any(record["hyperparameters_frozen_before_test"] for record in records)
+    assert not any(record["formal_evidence_eligible"] for record in records)
 
 
 def test_arc_duplicate_is_detected_and_explicit_exclusion_is_namespaced(
@@ -94,4 +126,3 @@ def test_arc_duplicate_is_detected_and_explicit_exclusion_is_namespaced(
         task.metadata["excluded_relative_paths"] == ("evaluation/renamed.json",)
         for task in dataset.tasks
     )
-

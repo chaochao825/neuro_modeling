@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import numpy as np
 import pandas as pd
 import pytest
@@ -11,6 +12,7 @@ from figures.plot_style import save_figure
 from src.analysis.structured_benchmark import STRUCTURED_CONDITIONS
 from src.analysis.structured_formal import summarize_structured_formal
 from scripts.build_report import append_exp13_structured_claims
+from scripts.summarize_exp13 import _expected_attempt_config, _latest_matching_attempt
 
 
 def _panel(n_seeds: int = 3) -> pd.DataFrame:
@@ -84,6 +86,58 @@ def test_formal_summary_uses_tasks_with_nested_seed_averages() -> None:
     }
 
 
+def test_formal_summary_labels_non_arc_multiple_comparison_family() -> None:
+    _, comparisons = summarize_structured_formal(
+        _panel(),
+        expected_seeds=(0, 1, 2),
+        seed=7,
+        n_bootstrap=100,
+        task_family="maze",
+    )
+    assert set(comparisons["multiple_comparison_family"]) == {
+        "exp13_maze_six_registered_comparisons"
+    }
+
+
+def test_non_ood_split_is_exploratory_and_cannot_support_core_claim() -> None:
+    _, comparisons = summarize_structured_formal(
+        _panel(),
+        expected_seeds=(0, 1, 2),
+        seed=7,
+        n_bootstrap=100,
+        task_family="sudoku",
+        test_split_role="non_ood",
+    )
+    assert not comparisons["registered_ood_split"].any()
+    assert not comparisons["core_claim_eligible"].any()
+    assert set(comparisons["conclusion"]) == {"inconclusive"}
+
+
+def test_attempt_selection_binds_complete_registered_config(tmp_path) -> None:
+    formal = {
+        "profile": "formal",
+        "family": "sudoku",
+        "fit_splits": ["train"],
+        "data": {
+            "revision": "revision",
+            "manifest_sha256": "a" * 64,
+            "test_split_role": "non_ood",
+        },
+        "model": {"ridge": 0.001, "control_dim": 4},
+    }
+    expected = _expected_attempt_config(formal, seed=0)
+    seed_root = tmp_path / "runs" / "exp13_structured_reasoning" / "seed_0000"
+    exact = seed_root / "20260101T000000Z"
+    exact.mkdir(parents=True)
+    (exact / "config.json").write_text(json.dumps(expected), encoding="utf-8")
+    mismatched = seed_root / "20260102T000000Z"
+    mismatched.mkdir()
+    changed = json.loads(json.dumps(expected))
+    changed["model"]["ridge"] = 1.0
+    (mismatched / "config.json").write_text(json.dumps(changed), encoding="utf-8")
+    assert _latest_matching_attempt(tmp_path, seed=0, expected_config=expected) == exact
+
+
 def test_formal_summary_rejects_candidate_or_seed_mismatch() -> None:
     raw = _panel()
     raw.loc[
@@ -115,16 +169,24 @@ def test_exp13_formal_figure_is_bound_to_summary_and_raw(tmp_path) -> None:
         index=False,
         compression={"method": "gzip", "mtime": 0},
     )
+    run_bindings = {
+        "source_manifest_sha256": "b" * 64,
+        "source_revision": "revision",
+        "dataset_name": "dataset",
+        "formal_config_sha256": "d" * 64,
+        "test_split_role": "ood",
+    }
     pd.DataFrame(
         {
             "seed": range(3),
             "status": "complete",
             "git_commit": "a" * 40,
             "git_dirty": False,
+            **run_bindings,
         }
     ).to_csv(manifest_path, index=False)
     bindings = {
-        "source_revision": "revision",
+        **run_bindings,
         "scoped_raw_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
         "run_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "run_git_commit": "a" * 40,
@@ -155,6 +217,13 @@ def test_exp13_global_claims_are_bound_to_clean_snapshot(tmp_path) -> None:
         index=False,
         compression={"method": "gzip", "mtime": 0},
     )
+    run_bindings = {
+        "source_manifest_sha256": "b" * 64,
+        "source_revision": "revision",
+        "dataset_name": "dataset",
+        "formal_config_sha256": "d" * 64,
+        "test_split_role": "ood",
+    }
     pd.DataFrame(
         {
             "seed": range(30),
@@ -162,6 +231,7 @@ def test_exp13_global_claims_are_bound_to_clean_snapshot(tmp_path) -> None:
             "status": "complete",
             "git_commit": "c" * 40,
             "git_dirty": False,
+            **run_bindings,
         }
     ).to_csv(manifest_path, index=False)
 
@@ -169,7 +239,7 @@ def test_exp13_global_claims_are_bound_to_clean_snapshot(tmp_path) -> None:
         return hashlib.sha256(path.read_bytes()).hexdigest()
 
     bindings = {
-        "source_revision": "revision",
+        **run_bindings,
         "scoped_raw_sha256": sha(raw_path),
         "run_manifest_sha256": sha(manifest_path),
         "run_git_commit": "c" * 40,
@@ -208,6 +278,22 @@ def test_exp13_global_claims_are_bound_to_clean_snapshot(tmp_path) -> None:
             pd.DataFrame(), tmp_path, require_published_root=False
         )
     conditions.to_csv(tmp_path / "exp13_arc_formal_conditions.csv", index=False)
+
+    for column, value in (
+        ("source_manifest_sha256", "e" * 64),
+        ("source_revision", "other-revision"),
+        ("dataset_name", "other-dataset"),
+    ):
+        tampered_source = comparisons.copy()
+        tampered_source.loc[0, column] = value
+        tampered_source.to_csv(
+            tmp_path / "exp13_arc_formal_comparisons.csv", index=False
+        )
+        with pytest.raises(ValueError, match="differs from the run manifest"):
+            append_exp13_structured_claims(
+                pd.DataFrame(), tmp_path, require_published_root=False
+            )
+    comparisons.to_csv(tmp_path / "exp13_arc_formal_comparisons.csv", index=False)
 
     raw_path.write_bytes(raw_path.read_bytes() + b"tampered")
     with pytest.raises(ValueError, match="not bound"):

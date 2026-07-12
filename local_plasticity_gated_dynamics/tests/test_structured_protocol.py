@@ -16,7 +16,13 @@ from src.data.structured_protocol import (
 )
 
 
-def _task(task_id: str, split: str, *, group: str | None = None) -> PublicTask:
+def _task(
+    task_id: str,
+    split: str,
+    *,
+    group: str | None = None,
+    content_id: str | None = None,
+) -> PublicTask:
     return PublicTask(
         task_id=task_id,
         family="toy",
@@ -24,7 +30,7 @@ def _task(task_id: str, split: str, *, group: str | None = None) -> PublicTask:
         source_group=group or task_id,
         augmentation_group=group or task_id,
         context={"support_inputs": [np.array([1])], "support_outputs": [[2]]},
-        query={"inputs": [np.array([3])]},
+        query={"inputs": [np.array([3])], "instance": content_id or task_id},
         metadata={"version": "fixture"},
     )
 
@@ -96,6 +102,14 @@ def test_source_and_augmentation_groups_cannot_cross_splits() -> None:
     train = _task("train_0", "train", group="shared")
     test = _task("test_0", "test", group="shared")
     with pytest.raises(StructuredProtocolError, match="crosses splits"):
+        build_structured_dataset((train, test), (1, 2), scorer=_score)
+
+
+def test_identical_public_content_cannot_hide_behind_distinct_group_ids() -> None:
+    train = _task("train_0", "train", group="declared-train", content_id="same-content")
+    test = _task("test_0", "test", group="declared-test", content_id="same-content")
+    assert train.content_group == test.content_group
+    with pytest.raises(StructuredProtocolError, match="public-content.*crosses splits"):
         build_structured_dataset((train, test), (1, 2), scorer=_score)
 
 
