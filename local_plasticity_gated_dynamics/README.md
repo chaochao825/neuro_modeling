@@ -178,6 +178,17 @@ heuristic, and oracle scored 100%; all mechanism comparisons are
 deterministic target-free proposal/search library for every learned selector,
 so neither result is an end-to-end neural reasoning claim.
 
+### Current exp15 task-specialized results
+
+On 399 ARC-AGI-1 evaluation tasks, the slow/fast program adapter achieved
+0.2506% exact accuracy (95% source-group CI 0–0.7519%). The actual ARC tree
+manifest is not yet verified, so this run is evidence-ineligible. On 28
+de-duplicated Sudoku V2 puzzles, pure local constraint dynamics achieved 75.0%
+exact accuracy (95% CI 57.14–89.29%); the separately reported bounded-search
+condition (up to 256 branches) achieved 100%. Because branch search is a distinct mechanism, the
+Sudoku split is non-OOD, and no matched-compute advantage comparator is
+registered, all Exp15 conclusions remain `inconclusive`.
+
 ### exp14 multi-session neural status
 
 The exp14 synthetic smoke path is complete and tests nested latent-dimension
