@@ -31,6 +31,9 @@ from src.analysis.run_provenance import (  # noqa: E402
     validate_exp10_checkpoint_contract,
     validate_exp10_run_manifest,
 )
+from src.analysis.structured_formal import (  # noqa: E402
+    load_validated_structured_snapshot,
+)
 
 
 MAX_PUBLISHED_RAW_BYTES = 95 * 1024 * 1024
@@ -729,6 +732,8 @@ def append_exp11_behavior_claims(
 def append_exp13_structured_claims(
     core_summary: pd.DataFrame,
     results_root: Path,
+    *,
+    require_published_root: bool = True,
 ) -> pd.DataFrame:
     """Append task-primary ARC claims without promoting them to neural evidence."""
 
@@ -742,9 +747,12 @@ def append_exp13_structured_claims(
         return core_summary.copy()
     if not all(path.is_file() for path in paths):
         raise FileNotFoundError("exp13 formal snapshot is only partially present")
-    conditions = pd.read_csv(condition_path)
-    comparisons = pd.read_csv(comparison_path)
-    run_manifest = pd.read_csv(manifest_path)
+    conditions, comparisons, _, run_manifest = load_validated_structured_snapshot(
+        results_root,
+        prefix="exp13_arc_formal",
+        minimum_candidate_coverage=0.9,
+        require_published_root=require_published_root,
+    )
     required_comparisons = {
         "comparison",
         "candidate",
@@ -826,12 +834,18 @@ def append_exp13_structured_claims(
     rows: list[dict[str, object]] = []
     for row in comparisons.to_dict("records"):
         n_units = int(row["n_dependency_components"])
+        noninferiority = str(row["comparison_mode"]) == "noninferiority_90pct"
+        comparison_label = (
+            f"{row['candidate']} minus 0.9 times {row['reference']}"
+            if noninferiority
+            else f"{row['candidate']} minus {row['reference']}"
+        )
         rows.append(
             {
                 "claim_id": _EXP13_GLOBAL_CLAIM_IDS[str(row["comparison"])],
                 "experiment": "exp13_structured_reasoning",
                 "metric": "exact_task_accuracy",
-                "comparison": f"{row['candidate']} minus {row['reference']}",
+                "comparison": comparison_label,
                 "stats_unit": "ARC dependency component (seed nested)",
                 "n_planned": n_units,
                 "n_complete": n_units,
@@ -846,6 +860,11 @@ def append_exp13_structured_claims(
                 "criterion": (
                     "candidate coverage gate plus Holm p<0.05 and task-component "
                     "bootstrap CI excluding zero"
+                    + (
+                        " for the candidate - 0.9*reference non-inferiority margin"
+                        if noninferiority
+                        else ""
+                    )
                 ),
                 "note": (
                     "Hybrid proposal selection only; no neural/biological claim; "

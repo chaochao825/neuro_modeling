@@ -29,6 +29,8 @@ results/*.pdf
 !results/exp10_bridge_formal.pdf
 !results/exp11_ibl_behavior_real.png
 !results/exp11_ibl_behavior_real.pdf
+!results/exp13_arc_formal.png
+!results/exp13_arc_formal.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

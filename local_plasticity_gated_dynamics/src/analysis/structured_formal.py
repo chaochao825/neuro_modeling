@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Sequence
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -38,6 +40,13 @@ FORMAL_COMPARISONS = (
         "hierarchical_local",
         "superiority",
     ),
+)
+
+PUBLISHED_EXP13_RAW_SHA256 = (
+    "0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d"
+)
+PUBLISHED_EXP13_RUN_MANIFEST_SHA256 = (
+    "7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead"
 )
 
 
@@ -327,4 +336,162 @@ def summarize_structured_formal(
             conclusion = "inconclusive"
         row["conclusion"] = conclusion
     comparisons = pd.DataFrame(comparison_rows)
+    condition_summary["bootstrap_seed"] = int(seed)
+    condition_summary["n_bootstrap"] = int(n_bootstrap)
+    comparisons["bootstrap_seed"] = int(seed)
+    comparisons["n_bootstrap"] = int(n_bootstrap)
     return condition_summary, comparisons
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _one_text(frame: pd.DataFrame, column: str, *, source: str) -> str:
+    if column not in frame:
+        raise ValueError(f"{source} lacks binding column {column}")
+    values = frame[column].dropna().astype(str).unique()
+    if len(values) != 1:
+        raise ValueError(f"{source} binding {column} is not unique")
+    return str(values[0])
+
+
+def _assert_recomputed_table(
+    observed: pd.DataFrame,
+    expected: pd.DataFrame,
+    *,
+    key: str,
+    source: str,
+) -> None:
+    if observed[key].astype(str).duplicated().any():
+        raise ValueError(f"{source} has duplicate {key} rows")
+    indexed = observed.set_index(observed[key].astype(str), drop=False)
+    expected_keys = expected[key].astype(str).tolist()
+    if set(indexed.index) != set(expected_keys):
+        raise ValueError(f"{source} registered row family differs from recomputation")
+    indexed = indexed.loc[expected_keys].reset_index(drop=True)
+    expected = expected.reset_index(drop=True)
+    missing = sorted(set(expected.columns) - set(indexed.columns))
+    if missing:
+        raise ValueError(f"{source} lacks recomputed columns: {missing}")
+    for column in expected.columns:
+        left = indexed[column]
+        right = expected[column]
+        if pd.api.types.is_numeric_dtype(right) and not pd.api.types.is_bool_dtype(
+            right
+        ):
+            if not np.allclose(
+                pd.to_numeric(left, errors="raise").to_numpy(dtype=float),
+                pd.to_numeric(right, errors="raise").to_numpy(dtype=float),
+                rtol=1e-12,
+                atol=1e-12,
+                equal_nan=True,
+            ):
+                raise ValueError(
+                    f"{source} column {column} differs from raw recomputation"
+                )
+        elif left.astype(str).tolist() != right.astype(str).tolist():
+            raise ValueError(f"{source} column {column} differs from raw recomputation")
+
+
+def load_validated_structured_snapshot(
+    results_root: str | Path,
+    *,
+    prefix: str = "exp13_arc_formal",
+    minimum_candidate_coverage: float = 0.9,
+    require_published_root: bool = False,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Load and independently recompute every exp13 derived summary table."""
+
+    root = Path(results_root)
+    paths = {
+        "conditions": root / f"{prefix}_conditions.csv",
+        "comparisons": root / f"{prefix}_comparisons.csv",
+        "raw": root / f"{prefix}_raw.csv.gz",
+        "run_manifest": root / f"{prefix}_run_manifest.csv",
+    }
+    missing = [name for name, path in paths.items() if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"exp13 formal snapshot is incomplete: {missing}")
+    conditions = pd.read_csv(paths["conditions"])
+    comparisons = pd.read_csv(paths["comparisons"])
+    raw_sha = _file_sha256(paths["raw"])
+    run_sha = _file_sha256(paths["run_manifest"])
+    for frame, source in ((conditions, "conditions"), (comparisons, "comparisons")):
+        if _one_text(frame, "scoped_raw_sha256", source=source) != raw_sha:
+            raise ValueError(f"{source} is not bound to the actual exp13 raw file")
+        if _one_text(frame, "run_manifest_sha256", source=source) != run_sha:
+            raise ValueError(f"{source} is not bound to the actual exp13 run manifest")
+    if require_published_root and (
+        raw_sha != PUBLISHED_EXP13_RAW_SHA256
+        or run_sha != PUBLISHED_EXP13_RUN_MANIFEST_SHA256
+    ):
+        raise ValueError("exp13 raw/run files differ from the published trusted root")
+    raw = pd.read_csv(paths["raw"], low_memory=False)
+    run_manifest = pd.read_csv(paths["run_manifest"])
+
+    expected_seeds = sorted(raw["seed"].astype(int).unique().tolist())
+    if (
+        len(expected_seeds) < 2
+        or set(run_manifest["seed"].astype(int)) != set(expected_seeds)
+        or run_manifest["seed"].astype(int).duplicated().any()
+    ):
+        raise ValueError("exp13 raw/run manifest seed panels disagree")
+    if set(run_manifest["status"].astype(str)) != {"complete"}:
+        raise ValueError("exp13 run manifest contains incomplete runs")
+    if run_manifest["git_dirty"].astype(bool).any():
+        raise ValueError("exp13 run manifest contains dirty runs")
+    commits = run_manifest["git_commit"].astype(str).unique()
+    if len(commits) != 1:
+        raise ValueError("exp13 run manifest contains multiple commits")
+    for frame, source in ((conditions, "conditions"), (comparisons, "comparisons")):
+        if _one_text(frame, "run_git_commit", source=source) != commits[0]:
+            raise ValueError(f"{source} commit differs from the run manifest")
+    bootstrap_seed = int(_one_text(conditions, "bootstrap_seed", source="conditions"))
+    n_bootstrap = int(_one_text(conditions, "n_bootstrap", source="conditions"))
+    if (
+        int(_one_text(comparisons, "bootstrap_seed", source="comparisons"))
+        != bootstrap_seed
+    ):
+        raise ValueError("exp13 bootstrap seed differs across derived tables")
+    if int(_one_text(comparisons, "n_bootstrap", source="comparisons")) != n_bootstrap:
+        raise ValueError("exp13 bootstrap count differs across derived tables")
+    recomputed_conditions, recomputed_comparisons = summarize_structured_formal(
+        raw,
+        expected_seeds=expected_seeds,
+        seed=bootstrap_seed,
+        n_bootstrap=n_bootstrap,
+        minimum_candidate_coverage=minimum_candidate_coverage,
+    )
+    _assert_recomputed_table(
+        conditions,
+        recomputed_conditions,
+        key="condition",
+        source="exp13 conditions",
+    )
+    _assert_recomputed_table(
+        comparisons,
+        recomputed_comparisons,
+        key="comparison",
+        source="exp13 comparisons",
+    )
+    condition_order = list(STRUCTURED_CONDITIONS)
+    comparison_order = [item[0] for item in FORMAL_COMPARISONS]
+    conditions = conditions.set_index("condition").loc[condition_order].reset_index()
+    comparisons = (
+        comparisons.set_index("comparison").loc[comparison_order].reset_index()
+    )
+    return conditions, comparisons, raw, run_manifest
+
+
+__all__ = [
+    "FORMAL_COMPARISONS",
+    "PUBLISHED_EXP13_RAW_SHA256",
+    "PUBLISHED_EXP13_RUN_MANIFEST_SHA256",
+    "load_validated_structured_snapshot",
+    "summarize_structured_formal",
+]

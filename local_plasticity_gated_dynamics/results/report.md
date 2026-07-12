@@ -78,6 +78,12 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | R2_ibl_history_context_inference | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.5649 [-0.7772, -0.3784] | **oppose** |
 | R3_ibl_hmm_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.001087 [-0.003275, 0.0007699] | **inconclusive** |
 | R4_ibl_history_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.003753 [-0.00724, -0.000773] | **inconclusive** |
+| T1_arc_hierarchical_vs_flat | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 1.739e-20 [-0.0002506, 0.0002506] | **inconclusive** |
+| T2_arc_trace_vs_flat | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
+| T3_arc_hierarchical_vs_heuristic | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
+| T4_arc_hierarchical_vs_gru | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
+| T5_arc_hierarchical_90pct_gru | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero for the candidate - 0.9*reference non-inferiority margin | 399/399 | -0.001504 [-0.006266, 0.001253] | **inconclusive** |
+| T6_arc_trace_increment | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
 
 ### Evidence details
 
@@ -129,6 +135,12 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 - `R2_ibl_history_context_inference` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
 - `R3_ibl_hmm_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
 - `R4_ibl_history_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
+- `T1_arc_hierarchical_vs_flat` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T2_arc_trace_vs_flat` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T3_arc_hierarchical_vs_heuristic` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T4_arc_hierarchical_vs_gru` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T5_arc_hierarchical_90pct_gru` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T6_arc_trace_increment` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
 
 ## P2 formal diagnostics
 
@@ -222,6 +234,23 @@ Difference is reference minus candidate, so positive values favor the candidate.
 | hmm_behavior_log_loss_gain | 30 / 30 | 30 | -0.001087 [-0.003275, 0.0007699] | 0.9838 | **inconclusive** |
 | history_behavior_log_loss_gain | 30 / 30 | 30 | -0.003753 [-0.00724, -0.000773] | 0.2806 | **inconclusive** |
 
+## exp13 public ARC hybrid-solver audit
+
+All selectors receive one target-free, recomputed proposal panel. The statistics unit is the source/augmentation dependency component with seeds nested within task. The candidate oracle accesses labels only after proposal generation and defines coverage; no result in this section is neural or biological evidence.
+
+Candidate coverage is 0.01253 against the registered 0.9 gate.
+
+| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |
+|---|---:|---:|---:|---|
+| hierarchical_vs_flat | 1.739e-20 [-0.0002506, 0.0002506] | 1 | False | **inconclusive** |
+| trace_vs_flat | 0.0004177 [0, 0.001086] | 1 | False | **inconclusive** |
+| hierarchical_vs_support_heuristic | -0.002005 [-0.007018, 0.001003] | 1 | False | **inconclusive** |
+| hierarchical_vs_gru_bptt | -0.002005 [-0.007018, 0.001003] | 1 | False | **inconclusive** |
+| hierarchical_retains_90pct_gru | -0.001504 [-0.006266, 0.001253] | 1 | False | **inconclusive** |
+| trace_vs_hierarchical | 0.0004177 [0, 0.001086] | 1 | False | **inconclusive** |
+
+This is an internally reproducible hybrid proposal-selection audit, not a proposal-free HRM/CTM solver. ARC cannot fill the pending multi-session neural-activity evidence gap.
+
 ## Interpretation safeguards
 
 - Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.
@@ -245,6 +274,7 @@ Difference is reference minus candidate, so positive values favor the candidate.
 - Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.
 - IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.
 - Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.
+- Exp13 is a public structured-task hybrid proposal selector. Its HRM/CTM-inspired continuous mechanisms, ARC accuracy, and candidate oracle cannot establish shared neural dynamics or a biological mechanism.
 
 ## External-data status
 
@@ -258,4 +288,5 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.
 - `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.
 - `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.
-- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.
+- `results/exp13_arc_formal_{raw,conditions,comparisons,run_manifest,report}`: public ARC task rows, task-primary statistics, provenance binding, and scoped interpretation.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, and `results/exp13_arc_formal.pdf`: script-generated data figures when applicable.

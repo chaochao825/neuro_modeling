@@ -11,7 +11,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,6 +18,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from figures.plot_style import COLORS, save_figure, setup_style  # noqa: E402
 from src.analysis.structured_benchmark import STRUCTURED_CONDITIONS  # noqa: E402
+from src.analysis.structured_formal import (  # noqa: E402
+    load_validated_structured_snapshot,
+)
 
 
 DISPLAY = {
@@ -32,23 +34,12 @@ DISPLAY = {
 
 
 def _load(results_root: Path, prefix: str):
-    conditions = pd.read_csv(results_root / f"{prefix}_conditions.csv")
-    comparisons = pd.read_csv(results_root / f"{prefix}_comparisons.csv")
-    raw = pd.read_csv(results_root / f"{prefix}_raw.csv.gz", low_memory=False)
-    if set(conditions["condition"].astype(str)) != set(STRUCTURED_CONDITIONS):
-        raise ValueError("exp13 figure requires the complete condition family")
-    binding_columns = (
-        "source_revision",
-        "scoped_raw_sha256",
-        "run_manifest_sha256",
-        "run_git_commit",
+    conditions, comparisons, raw, _ = load_validated_structured_snapshot(
+        results_root,
+        prefix=prefix,
+        require_published_root=prefix == "exp13_arc_formal",
     )
-    for column in binding_columns:
-        if conditions[column].nunique() != 1 or comparisons[column].nunique() != 1:
-            raise ValueError(f"formal figure binding {column} is not unique")
-        if str(conditions[column].iloc[0]) != str(comparisons[column].iloc[0]):
-            raise ValueError(f"condition/comparison binding differs for {column}")
-    return conditions.set_index("condition").loc[list(STRUCTURED_CONDITIONS)], comparisons, raw
+    return conditions.set_index("condition"), comparisons, raw
 
 
 def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figure:
@@ -75,8 +66,14 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
     bars[-1].set_hatch("//")
     ax_accuracy.set_xticks(positions, [DISPLAY[item] for item in conditions.index])
     ax_accuracy.set_ylabel("Exact task accuracy (%)")
-    ax_accuracy.set_ylim(0.0, max(5.0, min(100.0, values.max() * 1.18 + 1.0)))
-    ax_accuracy.text(-0.13, 1.03, "a", transform=ax_accuracy.transAxes, fontweight="bold")
+    ax_accuracy.set_ylim(
+        0.0,
+        min(
+            100.0,
+            max(1.0, conditions["exact_accuracy_ci_high"].max() * 100.0 + 0.25),
+        ),
+    )
+    ax_accuracy.text(-0.10, 1.03, "a", transform=ax_accuracy.transAxes, fontweight="bold")
 
     comparison_labels = [
         "Hier. − flat",
@@ -105,7 +102,7 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
     ax_difference.axvline(0.0, color="black", lw=0.8, ls="--")
     ax_difference.set_yticks(y, comparison_labels)
     ax_difference.set_xlabel("Paired exact-accuracy contrast (percentage points)")
-    ax_difference.text(-0.13, 1.03, "b", transform=ax_difference.transAxes, fontweight="bold")
+    ax_difference.text(-0.10, 1.03, "b", transform=ax_difference.transAxes, fontweight="bold")
 
     total = conditions["parameter_count"].to_numpy(dtype=float)
     trainable = conditions["trainable_parameter_count"].to_numpy(dtype=float)
@@ -126,9 +123,11 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
     )
     ax_parameters.set_yscale("log")
     ax_parameters.set_xticks(positions, [DISPLAY[item] for item in conditions.index])
-    ax_parameters.set_ylabel("Parameter count (log scale; zero shown at 1)")
-    ax_parameters.legend(loc="upper left")
-    ax_parameters.text(-0.13, 1.03, "c", transform=ax_parameters.transAxes, fontweight="bold")
+    ax_parameters.set_ylabel("Parameters (log scale; zero shown at 1)")
+    ax_parameters.legend(
+        loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2, columnspacing=1.0
+    )
+    ax_parameters.text(-0.10, 1.03, "c", transform=ax_parameters.transAxes, fontweight="bold")
 
     seed_condition = (
         raw.groupby(["seed", "condition"], as_index=False)["exact"].mean()
@@ -151,13 +150,18 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
         patch.set_alpha(0.7)
     ax_seeds.set_xticks(positions, [DISPLAY[item] for item in conditions.index])
     ax_seeds.set_ylabel("Per-seed exact task accuracy (%)")
-    ax_seeds.text(-0.13, 1.03, "d", transform=ax_seeds.transAxes, fontweight="bold")
+    maximum_seed_accuracy = max(
+        max(values_in_seed, default=0.0) for values_in_seed in distributions
+    )
+    ax_seeds.set_ylim(0.0, max(1.0, maximum_seed_accuracy + 0.15))
+    ax_seeds.text(-0.10, 1.03, "d", transform=ax_seeds.transAxes, fontweight="bold")
 
     for axis in axes.ravel():
         axis.tick_params(axis="x", pad=3)
         axis.spines["top"].set_visible(False)
         axis.spines["right"].set_visible(False)
     fig.tight_layout(w_pad=2.0, h_pad=2.2)
+    fig.subplots_adjust(left=0.11)
     return fig
 
 
@@ -174,4 +178,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
