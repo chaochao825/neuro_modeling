@@ -14,6 +14,7 @@ from scripts.summarize_exp14 import (
     _expected_attempt_config,
     _portable_formal_config_sha256,
     _recompute_comparison,
+    _assert_nested_close,
     build_snapshot,
     collect_formal_run,
     load_validated_exp14_snapshot,
@@ -54,6 +55,15 @@ def _config() -> dict[str, object]:
         "expected_macro_region_source_provenance_sha256": "a01b7fa535e6de437ac46e8cf9de68a87d6a9b5587d055a3935476d956109fdc",
         "macro_region_mapping_formal_compact_manifest_sha256": "a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09",
     }
+
+
+def test_nested_comparison_accepts_only_the_canonical_serialized_nan() -> None:
+    _assert_nested_close("nan", float("nan"))
+    _assert_nested_close(float("nan"), float("nan"))
+    with pytest.raises(ValueError, match="differs from recomputed"):
+        _assert_nested_close("NaN", float("nan"))
+    with pytest.raises(ValueError, match="differs from recomputed"):
+        _assert_nested_close("nan", 0.0)
 
 
 def _interval(estimate: float, low: float, high: float) -> dict[str, object]:

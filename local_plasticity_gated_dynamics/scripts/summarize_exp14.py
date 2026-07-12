@@ -739,8 +739,14 @@ def _assert_nested_close(
             _assert_nested_close(stored[key], value, path=f"{path}.{key}")
         return
     if isinstance(recomputed, float):
-        if not isinstance(stored, (int, float)) or not np.isclose(
-            float(stored), recomputed, rtol=1e-12, atol=1e-12, equal_nan=True
+        stored_is_serialized_nan = (
+            isinstance(stored, str) and stored == "nan" and np.isnan(recomputed)
+        )
+        if not stored_is_serialized_nan and (
+            not isinstance(stored, (int, float))
+            or not np.isclose(
+                float(stored), recomputed, rtol=1e-12, atol=1e-12, equal_nan=True
+            )
         ):
             raise ValueError(f"{path} differs from recomputed comparison")
         return
