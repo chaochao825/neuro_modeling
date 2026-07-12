@@ -33,13 +33,16 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp12_*.py` are executable entry points as implementation advances. `exp07`
+`exp13_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
 rank-one gain axis, `exp11` evaluates past-only online hidden-block inference
 on IBL behavioral trial tables (without spikes or neural activity), and `exp12`
-provides a secondary frozen-candidate ARC-style routing contract. Formal runs write immutable run
+provides a secondary frozen-candidate ARC-style routing contract. `exp13` adds
+a target-isolated hybrid ARC/maze/Sudoku benchmark with continuous fast/slow
+states, an explicit low-dimensional control bottleneck, and an optional
+discounted bilinear rate trace; spikes are not required. Formal runs write immutable run
 folders under `results/runs/`. `scripts/build_report.py` aggregates all statuses
 (including failures) into `results/summary.csv` and `results/report.md`.
 
@@ -71,6 +74,12 @@ override, and a results root. For example:
   --config configs\formal\exp09_hidden_context_gate.json --results-root results
 .\.venv\Scripts\python.exe experiments\exp10_hidden_context_ei_bridge.py `
   --config configs\formal\exp10_hidden_context_ei_bridge.json --results-root results
+.\.venv\Scripts\python.exe experiments\exp13_structured_reasoning.py `
+  --config configs\formal\exp13_structured_reasoning_arc.json --results-root results
+.\.venv\Scripts\python.exe scripts\summarize_exp13.py `
+  --config configs\formal\exp13_structured_reasoning_arc.json --results-root results
+.\.venv\Scripts\python.exe figures\exp13_structured_reasoning_plot.py `
+  --results-root results
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -93,6 +102,16 @@ layers:
    schema attestations, not independently reproduced feature provenance, so the
    current adapter is fail-closed for scientific claims even on a formal tape.
    ARC/maze/Sudoku results cannot replace neural evidence.
+4. `exp13` is a stronger but still separate functional track. Public tasks
+   expose demonstrations and query inputs but never query targets. One
+   recomputed proposal panel is shared by the heuristic, flat local,
+   hierarchical local, trace local, GRU/BPTT, and candidate-oracle conditions.
+   This is a hybrid proposal selector, not an official HRM/CTM reproduction or
+   a proposal-free neural solver. ARC source/augmentation dependency components
+   are the statistical unit and seeds are nested within task. The known exact
+   ARC-AGI-1 train/evaluation duplicate is explicitly excluded and recorded.
+   Maze-Hard and Sudoku-Extreme formal configs stay fail-closed because their
+   upstream dataset metadata does not declare a data license.
 
 ### Freeze and run the IBL behavior cohort
 

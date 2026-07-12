@@ -14,6 +14,7 @@
   "n_bootstrap": 10000,
   "max_arc_candidates": 96,
   "minimum_test_tasks": 100,
+  "minimum_candidate_coverage": 0.9,
   "hyperparameters_frozen_before_test": true,
   "data": {
     "path": "data/arc/ARC-AGI-1/399030444e0ab0cc8b4e199870fb20b863846f34",

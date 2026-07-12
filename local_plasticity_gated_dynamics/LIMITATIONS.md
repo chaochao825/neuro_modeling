@@ -82,6 +82,18 @@ committed configs and scripts regenerate that layout.
   treated only as schema attestations and cannot make a formal tape eligible
   for scientific claims. Maze, Sudoku, and ARC remain secondary functional
   tests and are not evidence for a biological mechanism.
+- `exp13` removes the frozen external-tape dependency: public ARC/maze/Sudoku
+  tasks, target-free program/search proposals, predictions, and family
+  evaluators are all recomputed in this repository. Query targets remain in an
+  identity-bound evaluator capability. This repairs provenance and label
+  leakage but does not make the controller a proposal-free solver: every
+  selector receives the same deterministic candidate library. Its
+  fast/slow/trace mechanisms are narrow HRM/CTM-inspired abstractions, not
+  reproductions of either model. Structured-task performance cannot replace
+  neural activity evidence. The pinned ARC-AGI-1 snapshot contains one exact
+  cross-split duplicate, which the formal config excludes explicitly. Formal
+  Maze-Hard and Sudoku-Extreme acquisition remains fail-closed because the
+  upstream dataset metadata has no declared data license.
 - The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
   Shared dynamics retains only about 25--29% of the full-model likelihood gain,
   far below the 90% criterion; pre-stim future-covariate and true-boundary-reset

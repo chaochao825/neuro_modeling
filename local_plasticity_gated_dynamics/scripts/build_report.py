@@ -65,6 +65,14 @@ _EXP10_FORMAL_GLOBAL_CLAIM_IDS = {
     "md_vs_delay": "S7_exp10_md_delay_counterfactual",
     "md_vs_shuffle": "S8_exp10_md_shuffle_counterfactual",
 }
+_EXP13_GLOBAL_CLAIM_IDS = {
+    "hierarchical_vs_flat": "T1_arc_hierarchical_vs_flat",
+    "trace_vs_flat": "T2_arc_trace_vs_flat",
+    "hierarchical_vs_support_heuristic": "T3_arc_hierarchical_vs_heuristic",
+    "hierarchical_vs_gru_bptt": "T4_arc_hierarchical_vs_gru",
+    "hierarchical_retains_90pct_gru": "T5_arc_hierarchical_90pct_gru",
+    "trace_vs_hierarchical": "T6_arc_trace_increment",
+}
 
 
 def _csv_value(value):
@@ -715,6 +723,147 @@ def append_exp11_behavior_claims(
     return pd.concat(
         [core_summary, appended[core_summary.columns]],
         ignore_index=True,
+    )
+
+
+def append_exp13_structured_claims(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+) -> pd.DataFrame:
+    """Append task-primary ARC claims without promoting them to neural evidence."""
+
+    prefix = results_root / "exp13_arc_formal"
+    condition_path = prefix.with_name(prefix.name + "_conditions.csv")
+    comparison_path = prefix.with_name(prefix.name + "_comparisons.csv")
+    raw_path = prefix.with_name(prefix.name + "_raw.csv.gz")
+    manifest_path = prefix.with_name(prefix.name + "_run_manifest.csv")
+    paths = (condition_path, comparison_path, raw_path, manifest_path)
+    if not any(path.is_file() for path in paths):
+        return core_summary.copy()
+    if not all(path.is_file() for path in paths):
+        raise FileNotFoundError("exp13 formal snapshot is only partially present")
+    conditions = pd.read_csv(condition_path)
+    comparisons = pd.read_csv(comparison_path)
+    run_manifest = pd.read_csv(manifest_path)
+    required_comparisons = {
+        "comparison",
+        "candidate",
+        "reference",
+        "comparison_mode",
+        "estimate",
+        "ci_low",
+        "ci_high",
+        "wilcoxon_p_holm",
+        "conclusion",
+        "n_dependency_components",
+        "candidate_coverage",
+        "minimum_candidate_coverage",
+        "coverage_gate_passed",
+        "core_claim_eligible",
+        "scoped_raw_sha256",
+        "run_manifest_sha256",
+        "run_git_commit",
+        "run_git_dirty",
+        "source_revision",
+    }
+    missing = required_comparisons - set(comparisons.columns)
+    if missing:
+        raise ValueError(f"exp13 comparison snapshot lacks: {sorted(missing)}")
+    if (
+        len(comparisons) != len(_EXP13_GLOBAL_CLAIM_IDS)
+        or set(comparisons["comparison"].astype(str))
+        != set(_EXP13_GLOBAL_CLAIM_IDS)
+        or comparisons["comparison"].duplicated().any()
+    ):
+        raise ValueError("exp13 registered comparison family is incomplete")
+    if set(conditions["condition"].astype(str)) != {
+        "support_heuristic",
+        "flat_local",
+        "hierarchical_local",
+        "trace_local",
+        "gru_bptt",
+        "candidate_oracle",
+    }:
+        raise ValueError("exp13 absolute condition family is incomplete")
+    raw_sha = _file_sha256(raw_path)
+    manifest_sha = _file_sha256(manifest_path)
+    if (
+        _only_value(comparisons, "scoped_raw_sha256", source="exp13 comparisons")
+        != raw_sha
+        or _only_value(
+            comparisons, "run_manifest_sha256", source="exp13 comparisons"
+        )
+        != manifest_sha
+    ):
+        raise ValueError("exp13 summary is not bound to its raw/run manifest")
+    if (
+        len(run_manifest) != 30
+        or set(run_manifest["seed"].astype(int)) != set(range(30))
+        or set(run_manifest["status"].astype(str)) != {"complete"}
+        or run_manifest["git_dirty"].astype(bool).any()
+        or run_manifest["git_commit"].astype(str).nunique() != 1
+        or _only_value(
+            comparisons, "run_git_commit", source="exp13 comparisons"
+        )
+        != str(run_manifest["git_commit"].iloc[0])
+        or comparisons["run_git_dirty"].astype(bool).any()
+    ):
+        raise ValueError("exp13 clean 30-seed run contract is invalid")
+    for row in comparisons.to_dict("records"):
+        conclusion = str(row["conclusion"])
+        eligible = bool(row["core_claim_eligible"])
+        if conclusion in {"support", "oppose"} and not eligible:
+            raise ValueError("exp13 conclusive row failed the candidate-coverage gate")
+        if conclusion == "support" and not (
+            float(row["wilcoxon_p_holm"]) < 0.05 and float(row["ci_low"]) > 0.0
+        ):
+            raise ValueError("exp13 support row fails its directional criterion")
+        if conclusion == "oppose" and not (
+            float(row["wilcoxon_p_holm"]) < 0.05 and float(row["ci_high"]) < 0.0
+        ):
+            raise ValueError("exp13 oppose row fails its directional criterion")
+
+    rows: list[dict[str, object]] = []
+    for row in comparisons.to_dict("records"):
+        n_units = int(row["n_dependency_components"])
+        rows.append(
+            {
+                "claim_id": _EXP13_GLOBAL_CLAIM_IDS[str(row["comparison"])],
+                "experiment": "exp13_structured_reasoning",
+                "metric": "exact_task_accuracy",
+                "comparison": f"{row['candidate']} minus {row['reference']}",
+                "stats_unit": "ARC dependency component (seed nested)",
+                "n_planned": n_units,
+                "n_complete": n_units,
+                "n_failed": 0,
+                "estimate": float(row["estimate"]),
+                "ci_low": float(row["ci_low"]),
+                "ci_high": float(row["ci_high"]),
+                "effect_size": float(row["estimate"]),
+                "p_value": float(row["wilcoxon_p_holm"]),
+                "multiplicity_method": "Holm(exp13_ARC_registered_family)",
+                "conclusion": str(row["conclusion"]),
+                "criterion": (
+                    "candidate coverage gate plus Holm p<0.05 and task-component "
+                    "bootstrap CI excluding zero"
+                ),
+                "note": (
+                    "Hybrid proposal selection only; no neural/biological claim; "
+                    f"coverage={float(row['candidate_coverage']):.4f} vs required "
+                    f"{float(row['minimum_candidate_coverage']):.4f}; revision="
+                    f"{row['source_revision']}; clean commit={row['run_git_commit']}; "
+                    f"raw sha256={raw_sha}"
+                ),
+            }
+        )
+    appended = pd.DataFrame(rows)
+    if core_summary.empty:
+        return appended
+    missing_core = sorted(set(appended.columns) - set(core_summary.columns))
+    if missing_core:
+        raise ValueError(f"core summary schema lacks columns: {missing_core}")
+    return pd.concat(
+        [core_summary, appended[core_summary.columns]], ignore_index=True
     )
 
 
@@ -1605,6 +1754,34 @@ def write_report(
             "",
             "No animal-primary formal exp11 summary is available. The behavior-only real-data conclusion is pending/inconclusive; this absence is not neural evidence.",
         ]
+    exp13_path = results_root / "exp13_arc_formal_comparisons.csv"
+    if exp13_path.is_file():
+        exp13 = pd.read_csv(exp13_path)
+        lines += [
+            "",
+            "## exp13 public ARC hybrid-solver audit",
+            "",
+            "All selectors receive one target-free, recomputed proposal panel. The statistics unit is the source/augmentation dependency component with seeds nested within task. The candidate oracle accesses labels only after proposal generation and defines coverage; no result in this section is neural or biological evidence.",
+            "",
+            f"Candidate coverage is {_format_number(exp13['candidate_coverage'].iloc[0])} against the registered {_format_number(exp13['minimum_candidate_coverage'].iloc[0])} gate.",
+            "",
+            "| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |",
+            "|---|---:|---:|---:|---|",
+        ]
+        for row in exp13.to_dict("records"):
+            interval = (
+                f"{_format_number(row['estimate'])} "
+                f"[{_format_number(row['ci_low'])}, {_format_number(row['ci_high'])}]"
+            )
+            lines.append(
+                f"| {row['comparison']} | {interval} | "
+                f"{_format_number(row['wilcoxon_p_holm'])} | "
+                f"{bool(row['coverage_gate_passed'])} | **{row['conclusion']}** |"
+            )
+        lines += [
+            "",
+            "This is an internally reproducible hybrid proposal-selection audit, not a proposal-free HRM/CTM solver. ARC cannot fill the pending multi-session neural-activity evidence gap.",
+        ]
     lines += [
         "",
         "## Interpretation safeguards",
@@ -1630,6 +1807,7 @@ def write_report(
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
         "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.",
         "- Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
+        "- Exp13 is a public structured-task hybrid proposal selector. Its HRM/CTM-inspired continuous mechanisms, ARC accuracy, and candidate oracle cannot establish shared neural dynamics or a biological mechanism.",
         "",
         "## External-data status",
         "",
@@ -1643,7 +1821,8 @@ def write_report(
         "- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.",
         "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, and `results/exp11_ibl_behavior_real.pdf`: script-generated data figures when applicable.",
+        "- `results/exp13_arc_formal_{raw,conditions,comparisons,run_manifest,report}`: public ARC task rows, task-primary statistics, provenance binding, and scoped interpretation.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, and `results/exp13_arc_formal.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -1692,6 +1871,8 @@ def main() -> None:
         ).is_file() or (results_root / "runs" / "exp11_ibl_behavior_belief").is_dir()
         if exp11_source_available:
             scripts.append("exp11_ibl_behavior_plot.py")
+        if (results_root / "exp13_arc_formal_conditions.csv").is_file():
+            scripts.append("exp13_structured_reasoning_plot.py")
         for script in scripts:
             subprocess.run(
                 [
@@ -1707,6 +1888,7 @@ def main() -> None:
     # so one --plots invocation updates the global table and report together.
     summary = append_exp10_formal_claims(core_summary, results_root)
     summary = append_exp11_behavior_claims(summary, results_root)
+    summary = append_exp13_structured_claims(summary, results_root)
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
 
