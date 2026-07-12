@@ -122,7 +122,8 @@ layers:
    hierarchical local, trace local, GRU/BPTT, and candidate-oracle conditions.
    This is a hybrid proposal selector, not an official HRM/CTM reproduction or
    a proposal-free neural solver. ARC source/augmentation dependency components
-   are the statistical unit and seeds are nested within task. The known exact
+   are the statistical unit; seed replicates are averaged within task before
+   component-level inference. The known exact
    ARC-AGI-1 train/evaluation duplicate is explicitly excluded and recorded.
    The former unlicensed Maze-Hard/Sudoku-Extreme placeholders are replaced by
    pinned licensed sources. The auditable builder retains 79/79 reachable
@@ -131,8 +132,8 @@ layers:
    extensive exact-puzzle duplication: all 200 source receipts are retained,
    while content addressing and test precedence yield 76 unique puzzles (48
    train, 28 non-OOD test) and audit 124 duplicate exclusions. Both formal
-   30-seed runs are complete. Maze supports only the registered 90%-of-GRU
-   selector-level 90%-of-GRU retention endpoint; its hierarchical-over-flat endpoint is
+   30-seed runs are complete. Maze supports only the registered selector-level
+   90%-of-GRU retention endpoint; its hierarchical-over-flat endpoint is
    inconclusive. Sudoku is at a 100% ceiling for every condition, leaving all
    registered mechanism comparisons inconclusive.
 5. `exp14` is the distinct neural track. A past-only learned HMM produces soft
