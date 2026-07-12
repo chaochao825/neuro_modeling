@@ -1,0 +1,16 @@
+{
+  "approval_sha256": "9e8b7b0ec1c28029c82da19211f69ad8ed0c912c55f3b6c4eb519e8d15e28ff1",
+  "command": [
+    "/home/spco/sow_linear/ibl_neural_exp14_staging/scripts/launch_postprocess.sh",
+    "--execute"
+  ],
+  "compact_schema_sha256": "f29c5506be93393499b90535c401bec1c82e0754737733897716cd4e2fade39d",
+  "exit_relative_path": "status/postprocess_execute_exit_v2_20260712T0315Z.json",
+  "launcher_sha256": "fe8a30ab705d7e0c8474e574fcae36ce68f510d2d53de81003edd3a3f05f2837",
+  "log_relative_path": "logs/postprocess_execute_v2_20260712T0315Z.log",
+  "postprocess_script_sha256": "951a516ae7eb2aa024f37e1890d6afd34dd19378905b90744dfadb32e7a76a17",
+  "schema_version": "ibl_exp14_postprocess_execute_job_v1",
+  "started_at_utc": "2026-07-12T03:17:40.410479+00:00",
+  "tmux_session": "ibl-exp14-postprocess",
+  "tmux_socket": "ibl-exp14-postprocess"
+}

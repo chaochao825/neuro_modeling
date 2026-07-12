@@ -6,8 +6,12 @@ of controllable/observable modes on top of a high-rank sparse E/I substrate.
 Low-dimensional gates may then modify effective dynamics without requiring the
 physical recurrent matrix or its masked update to be low rank. The repository
 also contains shared-subspace prototypes for public sequence-memory and IBL
-data. Its only neural IBL result is the legacy one-session `exp06` pilot and
-remains inconclusive; `exp11` is a distinct trials-only behavior benchmark.
+data. Its only *completed* neural IBL result is the legacy one-session `exp06`
+pilot and remains inconclusive; `exp11` is a distinct trials-only behavior
+benchmark. `exp14` now provides a fail-closed multi-session count-dynamics
+pipeline and a reviewed, hash-bound 20-session/20-animal compact cache. The
+registered neural model comparison is still pending, so the cache itself is
+not evidence for the shared-dynamics claim.
 
 The scientific protocol is intentionally falsifiable. Every core claim is
 classified as `support`, `oppose`, or `inconclusive`; failed seeds and missing
@@ -33,7 +37,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp13_*.py` are executable entry points as implementation advances. `exp07`
+`exp14_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -74,12 +78,22 @@ override, and a results root. For example:
   --config configs\formal\exp09_hidden_context_gate.json --results-root results
 .\.venv\Scripts\python.exe experiments\exp10_hidden_context_ei_bridge.py `
   --config configs\formal\exp10_hidden_context_ei_bridge.json --results-root results
+.\.venv\Scripts\python.exe scripts\prepare_exp13_public_benchmarks.py `
+  --family all --output-root data\structured
 .\.venv\Scripts\python.exe experiments\exp13_structured_reasoning.py `
   --config configs\formal\exp13_structured_reasoning_arc.json --results-root results
 .\.venv\Scripts\python.exe scripts\summarize_exp13.py `
   --config configs\formal\exp13_structured_reasoning_arc.json --results-root results
 .\.venv\Scripts\python.exe figures\exp13_structured_reasoning_plot.py `
   --results-root results
+# Replace `arc` with `maze` or `sudoku` in both the formal config and prefix:
+.\.venv\Scripts\python.exe scripts\summarize_exp13.py `
+  --config configs\formal\exp13_structured_reasoning_maze.json `
+  --results-root results --output-prefix exp13_maze_formal
+.\.venv\Scripts\python.exe figures\exp13_structured_reasoning_plot.py `
+  --results-root results --prefix exp13_maze_formal
+.\.venv\Scripts\python.exe experiments\exp14_ibl_multisession_neural.py `
+  --config configs\formal\exp14_ibl_multisession_neural.json --results-root results
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -110,8 +124,69 @@ layers:
    a proposal-free neural solver. ARC source/augmentation dependency components
    are the statistical unit and seeds are nested within task. The known exact
    ARC-AGI-1 train/evaluation duplicate is explicitly excluded and recorded.
-   Maze-Hard and Sudoku-Extreme formal configs stay fail-closed because their
-   upstream dataset metadata does not declare a data license.
+   The former unlicensed Maze-Hard/Sudoku-Extreme placeholders are replaced by
+   pinned licensed sources. The auditable builder retains 79/79 reachable
+   MazeBench images (61 train, 18 grid-size OOD test; 31 upstream-unreachable
+   images remain in the manifest). Sudoku's official 160/40 lists contain
+   extensive exact-puzzle duplication: all 200 source receipts are retained,
+   while content addressing and test precedence yield 76 unique puzzles (48
+   train, 28 non-OOD test) and audit 124 duplicate exclusions. Both formal
+   30-seed runs are complete. Maze supports only the registered 90%-of-GRU
+   selector-level 90%-of-GRU retention endpoint; its hierarchical-over-flat endpoint is
+   inconclusive. Sudoku is at a 100% ceiling for every condition, leaving all
+   registered mechanism comparisons inconclusive.
+5. `exp14` is the distinct neural track. A past-only learned HMM produces soft
+   beliefs without a `probabilityLeft` capability; raw non-negative counts are
+   adjusted through past-safe nuisance terms in the session log-rate map,
+   rather than residualized into invalid non-count targets. Whole chronological
+   blocks, unit selection, normalization/PCA, and the observation maps are
+   train-only. Common, shared-belief, and session-full models share exactly the
+   same preprocessing and observations. The current endpoint is explicitly a
+   teacher-forced within-trial one-step Poisson likelihood, not a full latent
+   Poisson LDS. Registered inference is animal-primary with sessions nested.
+
+### Current exp13 public ARC result
+
+The clean 30-seed ARC-AGI-1 audit evaluated 399 de-duplicated public evaluation
+tasks. The deterministic target-free proposal library covered only 5 tasks
+(1.253%), far below the registered 90% coverage gate. Exact-task accuracy was
+0.301% for flat local, 0.301% for hierarchical local, 0.343% for trace local,
+0.501% for GRU/BPTT, and 1.253% for the candidate oracle. All six registered
+contrasts are therefore `inconclusive`; this is a leakage-safe negative audit,
+not evidence for hierarchical advantage or a competitive ARC solver.
+
+### Current exp13 public Maze/Sudoku results
+
+On the 18 grid-size-OOD MazeBench test tasks, exact accuracy was 88.89% for the
+support heuristic, 99.44% for flat local, 99.07% for hierarchical local,
+98.89% for trace local, and 100% for GRU/BPTT. Hierarchical versus flat was
+-0.37 percentage points (95% CI [-2.04, 0.74]) and is `inconclusive`.
+Hierarchical local did satisfy the separately registered 90%-of-GRU retention
+endpoint (margin 9.07 points, 95% CI [7.41, 10.00], Holm-adjusted
+`p=0.000352`), which supports selector-level accuracy retention rather than
+superiority or end-to-end efficiency. On the 28 de-duplicated Sudoku V2 test puzzles, every selector,
+heuristic, and oracle scored 100%; all mechanism comparisons are
+`inconclusive` because the benchmark is saturated. Both tasks use the same
+deterministic target-free proposal/search library for every learned selector,
+so neither result is an end-to-end neural reasoning claim.
+
+### exp14 multi-session neural status
+
+The exp14 synthetic smoke path is complete and tests nested latent-dimension
+selection, past-only belief receipts, train-only anatomical unit selection,
+paired common/shared/full count models, exact Poisson likelihood, parameter
+counting, and animal-with-session bootstrap. The formal profile cannot fall
+back to synthetic data: it accepts only the reviewed compact cache derived from
+the frozen 20-session/20-animal BWM panel (35 probes, 3,183 units, sorting
+revision `2024-05-06`, good-unit threshold `>=1`). Acquisition and offline
+count binning are complete and their manifests, failures, producer snapshot,
+and compact bundle are hash-bound. The registered common/shared/full outer
+comparison has not yet run, so the neural claim remains `inconclusive`. The
+real-data preflight selected 1,347 of 3,183 units through training-fold-only
+anatomical/variance criteria; formal likelihoods therefore apply to those
+selected anchor units, not every recorded unit. Here `full` means
+session-specific gated operators on the same six-region basis, not a full
+latent LDS or an unrestricted unit-space model.
 
 ### Freeze and run the IBL behavior cohort
 

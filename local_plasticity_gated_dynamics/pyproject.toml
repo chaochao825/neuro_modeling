@@ -43,4 +43,6 @@ exclude = [
   "data",
   "results",
   "trash",
+  # Byte-exact, hash-pinned upstream/one-shot audit snapshot; never imported.
+  "provenance/exp14_ibl_compact",
 ]

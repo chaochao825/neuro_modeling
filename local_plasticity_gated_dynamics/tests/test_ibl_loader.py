@@ -187,6 +187,10 @@ def test_residualizer_is_train_fit_and_requires_complete_nuisances() -> None:
         wheel={"timestamps": np.linspace(0, 5, 101), "position": np.linspace(0, 1, 101)},
         pose_summary=np.arange(4, dtype=float),
     )
+    np.testing.assert_array_equal(
+        covariates["stimulus_side"].to_numpy(),
+        np.isfinite(_trials()["contrastLeft"]).astype(int),
+    )
     activity = np.arange(4 * 3, dtype=float).reshape(4, 3)
     model = TrialNuisanceResidualizer(
         ["stimulus", "choice", "wheel", "reward", "reaction_time", "pose"]

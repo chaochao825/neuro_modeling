@@ -1,0 +1,97 @@
+{
+  "schema_version": "exp14_ibl_compact_audit_index_v1",
+  "scope": "read_only_audit_index_not_execution_approval",
+  "server_profile": "210",
+  "staging_root": "/home/spco/sow_linear/ibl_neural_exp14_staging",
+  "acquisition": {
+    "run_id": "ibl-exp14-20260712T004706Z-67048f63",
+    "finished_at_utc": "2026-07-12T03:09:14Z",
+    "status": "completed_with_failures",
+    "exit_code": 2,
+    "sessions": 20,
+    "animals": 20,
+    "probes": 35,
+    "datasets_total": 727,
+    "datasets_downloaded": 408,
+    "datasets_cache_hits": 318,
+    "datasets_failed": 1,
+    "downloaded_bytes": 2826727696,
+    "cache_hit_bytes": 1690309234,
+    "retained_failure": {
+      "eid": "0cbeae00-e229-4b7d-bdcc-1b0569d7e0c3",
+      "dataset_uuid": "0f4a07c5-ec75-4e4a-860e-9ce22c613234",
+      "name": "clusters.waveforms.npy",
+      "bytes": 24256384,
+      "md5": "7a3bedb6d9d61433d472d162142e8d53",
+      "policy": "auxiliary_nonblocking_not_read_by_compact_producer"
+    },
+    "source_manifest_sha256": "112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6",
+    "dataset_inventory_sha256": "ad789bda710a203c66e924855cd4531274db4a2236e5314a8ee7c83af163e8c4",
+    "acquisition_bundle_sha256": "0c3e12126d2151e78382e41f0ef9ed6023ffb67fa4ad7e285f1bc570a9c8f3cd",
+    "acquisition_approval_sha256": "64e0b1ead4175b2007b0c4aa01524e9e9db4beebde63f016cf46e245f0da4287",
+    "download_summary_sha256": "fbd2580426bee7de0203a077178371c033e0e63323160f15f400cec752f24069",
+    "download_log_sha256": "1507041223e034d9304c99b7fc9bba13c8d5361833cf895f32b5e2551edce837",
+    "session_status_bundle_sha256": "31e97801b37f004de735f71015a56c966a18c19d4d0bbd19dd1b49d4c42c077d"
+  },
+  "producer": {
+    "script_sha256": "951a516ae7eb2aa024f37e1890d6afd34dd19378905b90744dfadb32e7a76a17",
+    "schema_sha256": "f29c5506be93393499b90535c401bec1c82e0754737733897716cd4e2fade39d",
+    "launcher_sha256": "fe8a30ab705d7e0c8474e574fcae36ce68f510d2d53de81003edd3a3f05f2837",
+    "ready_receipt_sha256": "e338ea6058782b486198bb12dc649f8416e864507221163862f0af1f8702ec2c",
+    "approval_receipt_sha256": "9e8b7b0ec1c28029c82da19211f69ad8ed0c912c55f3b6c4eb519e8d15e28ff1",
+    "pre_review_validation": [
+      {
+        "outcome": "failed_closed_before_execution",
+        "exit_code": 126,
+        "reason": "launcher lacked its reviewed executable bit",
+        "receipt": "postprocess_validate_v2_20260712T0310Z.jsonl",
+        "receipt_sha256": "d9208e4c061cb9483da8c58d0deea2f1c23e6cda6d9e7c0c1a1f09b9262df838"
+      },
+      {
+        "outcome": "inputs_valid_after_mode_fix",
+        "receipt": "postprocess_validate_v2_20260712T0311Z.jsonl",
+        "receipt_sha256": "78e548082556d247dd5ea7fb7536c47d03c11cc9a743f262f3c778194a083e96"
+      },
+      {
+        "outcome": "inputs_valid_postapproval",
+        "receipt": "postprocess_validate_postapproval_v2_20260712T0314Z.jsonl",
+        "receipt_sha256": "78e548082556d247dd5ea7fb7536c47d03c11cc9a743f262f3c778194a083e96"
+      }
+    ],
+    "execution_started_at_utc": "2026-07-12T03:17:40.410479+00:00",
+    "execution_finished_at_utc": "2026-07-12T03:18:17Z",
+    "execution_exit_code": 0,
+    "execution_job_receipt_sha256": "77117600084dc694797231eaab7f8818fb8fcadeb5b88e52d9f44a6c282217e0",
+    "execution_exit_receipt_sha256": "e9e070ed306aa3bb4bbe891c1497191a7b150960652a4dc364c385092757083d",
+    "execution_log_sha256": "3d4bc4de5fe5158f24f15b929b790568697713747eb3e5b62925212d0a0627e1"
+  },
+  "compact": {
+    "schema_version": "ibl_exp14_compact_schema_v2",
+    "complete_sessions": 20,
+    "failed_sessions": 0,
+    "unique_animals": 20,
+    "total_trials": 15012,
+    "total_units": 3183,
+    "stimulus_pre_valid_trials": 9780,
+    "movement_pre_valid_trials": 9780,
+    "total_binned_spikes_both_views": 13324407,
+    "files": 85,
+    "bytes": 19374178,
+    "manifest_sha256": "a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09",
+    "bundle_sha256": "f6cd351717986ede771a6bbbe755edeb3c30ef4bda48e86c8471bcf4364a41a4",
+    "contract_audit_receipt_sha256": "5690e0611fa4931ba2f2f11735df5b5f5886bd2cd8638714bcb88a452827a7eb"
+  },
+  "frozen_sources": {
+    "bwm_repository_commit": "118fc36cb3602934466ad2c6087c2b3b441f9f1f",
+    "bwm_loader_relative_path": "brainwidemap/bwm_loading.py",
+    "bwm_loader_sha256": "c2e570c62cd0e047303c97d7999711b659a1c37eaa56dd2740ffff2c81f85321",
+    "bwm_license": "MIT",
+    "region_mapping_sha256": "63654b8d35c7c1b5665636b645da774776ee8263658192f5dca1e815095e9147",
+    "region_mapping_provenance_sha256": "a01b7fa535e6de437ac46e8cf9de68a87d6a9b5587d055a3935476d956109fdc"
+  },
+  "non_authoritative_prefetch": {
+    "wave_1_summary_sha256": "8ae2f07ab4731d24e5f001d8461d70347d8cf98df16ab46d945a74f420fa42f3",
+    "wave_2_summary_sha256": "0ec64bd1a3a91c47874f0973ba111d84feb95a35e72e0c67637f7bbbdc6039a1",
+    "main_status_or_manifests_modified": false
+  }
+}

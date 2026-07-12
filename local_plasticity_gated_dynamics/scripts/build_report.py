@@ -779,8 +779,7 @@ def append_exp13_structured_claims(
         raise ValueError(f"exp13 comparison snapshot lacks: {sorted(missing)}")
     if (
         len(comparisons) != len(_EXP13_GLOBAL_CLAIM_IDS)
-        or set(comparisons["comparison"].astype(str))
-        != set(_EXP13_GLOBAL_CLAIM_IDS)
+        or set(comparisons["comparison"].astype(str)) != set(_EXP13_GLOBAL_CLAIM_IDS)
         or comparisons["comparison"].duplicated().any()
     ):
         raise ValueError("exp13 registered comparison family is incomplete")
@@ -798,9 +797,7 @@ def append_exp13_structured_claims(
     if (
         _only_value(comparisons, "scoped_raw_sha256", source="exp13 comparisons")
         != raw_sha
-        or _only_value(
-            comparisons, "run_manifest_sha256", source="exp13 comparisons"
-        )
+        or _only_value(comparisons, "run_manifest_sha256", source="exp13 comparisons")
         != manifest_sha
     ):
         raise ValueError("exp13 summary is not bound to its raw/run manifest")
@@ -810,9 +807,7 @@ def append_exp13_structured_claims(
         or set(run_manifest["status"].astype(str)) != {"complete"}
         or run_manifest["git_dirty"].astype(bool).any()
         or run_manifest["git_commit"].astype(str).nunique() != 1
-        or _only_value(
-            comparisons, "run_git_commit", source="exp13 comparisons"
-        )
+        or _only_value(comparisons, "run_git_commit", source="exp13 comparisons")
         != str(run_manifest["git_commit"].iloc[0])
         or comparisons["run_git_dirty"].astype(bool).any()
     ):
@@ -881,9 +876,145 @@ def append_exp13_structured_claims(
     missing_core = sorted(set(appended.columns) - set(core_summary.columns))
     if missing_core:
         raise ValueError(f"core summary schema lacks columns: {missing_core}")
-    return pd.concat(
-        [core_summary, appended[core_summary.columns]], ignore_index=True
+    return pd.concat([core_summary, appended[core_summary.columns]], ignore_index=True)
+
+
+def _exp14_claim_statistics(row: pd.Series) -> dict[str, object]:
+    conclusion = str(row["core_conclusion"])
+    shared_p = float(row["shared_vs_common_holm_adjusted_p"])
+    full_p = float(row["full_vs_common_holm_adjusted_p"])
+    retention_p = float(row["retention_margin_holm_adjusted_p"])
+    if conclusion == "support":
+        return {
+            "metric": "shared_gain_with_registered_full_and_retention_gates",
+            "comparison": (
+                "common minus shared NLL/count; support is the intersection of "
+                "shared, full-gain, and 90%-retention gates"
+            ),
+            "estimate": float(row["shared_vs_common_estimate"]),
+            "ci_low": float(row["shared_vs_common_ci_low"]),
+            "ci_high": float(row["shared_vs_common_ci_high"]),
+            "p_value": max(shared_p, full_p, retention_p),
+            "trigger": "intersection_union_support",
+        }
+    shared_worse = float(row["shared_vs_common_ci_high"]) < 0 and shared_p < 0.05
+    retention_worse = (
+        bool(row["retention_defined"])
+        and float(row["retention_margin_ci_high"]) < 0
+        and retention_p < 0.05
     )
+    if conclusion == "oppose" and shared_worse:
+        return {
+            "metric": "shared_vs_common_nll_gain",
+            "comparison": "common minus shared NLL/count (positive favors shared)",
+            "estimate": float(row["shared_vs_common_estimate"]),
+            "ci_low": float(row["shared_vs_common_ci_low"]),
+            "ci_high": float(row["shared_vs_common_ci_high"]),
+            "p_value": shared_p,
+            "trigger": "shared_worse_than_common",
+        }
+    if conclusion == "oppose" and retention_worse:
+        return {
+            "metric": "shared_90pct_full_gain_retention_margin",
+            "comparison": "shared gain minus 0.9 times full gain",
+            "estimate": float(row["retention_margin_estimate"]),
+            "ci_low": float(row["retention_margin_ci_low"]),
+            "ci_high": float(row["retention_margin_ci_high"]),
+            "p_value": retention_p,
+            "trigger": "retention_margin_below_zero",
+        }
+    return {
+        "metric": "shared_vs_common_nll_gain",
+        "comparison": "common minus shared NLL/count (positive favors shared)",
+        "estimate": float(row["shared_vs_common_estimate"]),
+        "ci_low": float(row["shared_vs_common_ci_low"]),
+        "ci_high": float(row["shared_vs_common_ci_high"]),
+        "p_value": shared_p,
+        "trigger": "none",
+    }
+
+
+def append_exp14_neural_claim(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+) -> pd.DataFrame:
+    """Append only the registered exp14 animal-primary neural comparison."""
+
+    from scripts.summarize_exp14 import (
+        DEFAULT_PREFIX,
+        load_validated_exp14_snapshot,
+    )
+
+    stems = ("raw.csv.gz", "conditions.csv", "comparisons.csv", "run_manifest.csv")
+    paths = [results_root / f"{DEFAULT_PREFIX}_{stem}" for stem in stems]
+    if not any(path.is_file() for path in paths):
+        return core_summary.copy()
+    if not all(path.is_file() for path in paths):
+        raise FileNotFoundError("exp14 formal snapshot is only partially present")
+    _, comparisons, _, _ = load_validated_exp14_snapshot(results_root)
+    primary = comparisons.loc[
+        (comparisons["view"].astype(str) == "stimulus_pre")
+        & (comparisons["panel"].astype(str) == "primary_past_safe")
+    ]
+    if len(primary) != 1:
+        raise ValueError("exp14 must contain one registered primary comparison")
+    row = primary.iloc[0]
+    conclusion = str(row["core_conclusion"])
+    if conclusion not in {"support", "oppose", "inconclusive"}:
+        raise ValueError("exp14 core conclusion is invalid")
+    statistics = _exp14_claim_statistics(row)
+    appended = pd.DataFrame(
+        [
+            {
+                "claim_id": "U1_ibl_shared_neural_dynamics",
+                "experiment": "exp14_ibl_multisession_neural",
+                "metric": statistics["metric"],
+                "comparison": statistics["comparison"],
+                "stats_unit": "animal with sessions nested",
+                "n_planned": int(row["n_sessions"]),
+                "n_complete": int(row["n_sessions"]),
+                "n_failed": 0,
+                "estimate": statistics["estimate"],
+                "ci_low": statistics["ci_low"],
+                "ci_high": statistics["ci_high"],
+                "effect_size": statistics["estimate"],
+                "p_value": statistics["p_value"],
+                "multiplicity_method": "Holm(exp14_registered_comparison_family)",
+                "conclusion": conclusion,
+                "criterion": (
+                    "registered stimulus-pre/past-safe panel; >=20 complete sessions "
+                    "and >=5 animals; Holm-significant shared>common; shared retains "
+                    ">=90% of significant full gain; fewer parameters"
+                ),
+                "note": (
+                    "One-step conditional Poisson likelihood, not a full latent LDS; "
+                    "sessions nested within animals; sensitivity views cannot update "
+                    f"this claim; compact manifest sha256={row['expected_compact_manifest_sha256']}; "
+                    f"compact bundle sha256={row['expected_compact_bundle_sha256']}; "
+                    f"registered formal JSON sha256={row['registered_formal_json_sha256']}; "
+                    f"portable formal-config sha256={row['formal_config_sha256']}; "
+                    f"macro mapping {row['macro_region_mapping_schema']} sha256="
+                    f"{row['macro_region_mapping_sha256']}; ontology/provenance sha256="
+                    f"{row['macro_region_source_ontology_sha256']}/"
+                    f"{row['macro_region_source_provenance_sha256']}; "
+                    f"mapping compact scope={row['macro_region_mapping_formal_compact_manifest_sha256']}; "
+                    f"acronym count/hash={int(row['macro_region_formal_acronym_count'])}/"
+                    f"{row['macro_region_formal_acronyms_sha256']}; "
+                    f"shared/full/retention Holm p={float(row['shared_vs_common_holm_adjusted_p']):.6g}/"
+                    f"{float(row['full_vs_common_holm_adjusted_p']):.6g}/"
+                    f"{float(row['retention_margin_holm_adjusted_p']):.6g}; "
+                    f"classification trigger={statistics['trigger']}; "
+                    f"raw sha256={row['scoped_raw_sha256']}; clean commit={row['run_git_commit']}"
+                ),
+            }
+        ]
+    )
+    if core_summary.empty:
+        return appended
+    missing_core = sorted(set(appended.columns) - set(core_summary.columns))
+    if missing_core:
+        raise ValueError(f"core summary schema lacks columns: {missing_core}")
+    return pd.concat([core_summary, appended[core_summary.columns]], ignore_index=True)
 
 
 def _portable_run_path(value: object) -> object:
@@ -1801,6 +1932,41 @@ def write_report(
             "",
             "This is an internally reproducible hybrid proposal-selection audit, not a proposal-free HRM/CTM solver. ARC cannot fill the pending multi-session neural-activity evidence gap.",
         ]
+    exp14_path = results_root / "exp14_ibl_multisession_neural_formal_comparisons.csv"
+    if exp14_path.is_file():
+        from scripts.summarize_exp14 import load_validated_exp14_snapshot
+
+        _, exp14, _, _ = load_validated_exp14_snapshot(results_root)
+        lines += [
+            "",
+            "## exp14 IBL multi-session neural audit",
+            "",
+            "The registered endpoint is held-out one-step conditional Poisson "
+            "likelihood. Inference is animal-primary with sessions nested within "
+            "animal; this is not a full latent-LDS marginal likelihood.",
+            "",
+            "| View | Panel | Scope | Common - shared NLL/count (positive favors shared) [95% CI] | Retained full gain | Scoped conclusion |",
+            "|---|---|---|---:|---:|---|",
+        ]
+        for row in exp14.to_dict("records"):
+            scoped_conclusion = (
+                row["core_conclusion"]
+                if row["claim_scope"] == "registered_primary"
+                else row["panel_conclusion"]
+            )
+            lines.append(
+                f"| {row['view']} | {row['panel']} | {row['claim_scope']} | "
+                f"{_format_number(row['shared_vs_common_estimate'])} "
+                f"[{_format_number(row['shared_vs_common_ci_low'])}, "
+                f"{_format_number(row['shared_vs_common_ci_high'])}] | "
+                f"{_format_number(row['retained_full_gain_ratio'])} | "
+                f"**{scoped_conclusion}** |"
+            )
+        lines += [
+            "",
+            "Only `stimulus_pre / primary_past_safe` updates the core claim. "
+            "Movement-pre and full-trial-covariate results remain sensitivity-only.",
+        ]
     lines += [
         "",
         "## Interpretation safeguards",
@@ -1841,7 +2007,8 @@ def write_report(
         "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
         "- `results/exp13_arc_formal_{raw,conditions,comparisons,run_manifest,report}`: public ARC task rows, task-primary statistics, provenance binding, and scoped interpretation.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, and `results/exp13_arc_formal.pdf`: script-generated data figures when applicable.",
+        "- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_arc_formal.pdf`, and `results/exp14_ibl_multisession_neural_formal.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -1892,6 +2059,10 @@ def main() -> None:
             scripts.append("exp11_ibl_behavior_plot.py")
         if (results_root / "exp13_arc_formal_conditions.csv").is_file():
             scripts.append("exp13_structured_reasoning_plot.py")
+        if (
+            results_root / "exp14_ibl_multisession_neural_formal_conditions.csv"
+        ).is_file():
+            scripts.append("exp14_ibl_multisession_neural_plot.py")
         for script in scripts:
             subprocess.run(
                 [
@@ -1908,6 +2079,7 @@ def main() -> None:
     summary = append_exp10_formal_claims(core_summary, results_root)
     summary = append_exp11_behavior_claims(summary, results_root)
     summary = append_exp13_structured_claims(summary, results_root)
+    summary = append_exp14_neural_claim(summary, results_root)
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
 

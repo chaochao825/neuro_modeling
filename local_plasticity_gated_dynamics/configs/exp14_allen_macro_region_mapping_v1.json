@@ -1,0 +1,1054 @@
+{
+  "schema_version": "exp14_allen_macro_region_mapping_v1",
+  "source_ontology": {
+    "relative_path_within_compact": "provenance/iblatlas_allen_structure_tree.csv",
+    "sha256": "63654b8d35c7c1b5665636b645da774776ee8263658192f5dca1e815095e9147",
+    "source_package": "iblatlas",
+    "source_version": "1.1.0",
+    "provenance_relative_path_within_compact": "provenance/region_mapping_provenance.json",
+    "provenance_sha256": "a01b7fa535e6de437ac46e8cf9de68a87d6a9b5587d055a3935476d956109fdc"
+  },
+  "derivation": {
+    "method": "exact_acronym_then_structure_id_path_ancestor_membership_v1",
+    "ancestor_ids": {
+      "cortex": 315,
+      "thalamus": 549,
+      "striatum": 477,
+      "hippocampus": 1089,
+      "midbrain": 313,
+      "hindbrain": 1065
+    },
+    "unknown_acronym_policy": "other",
+    "fiber_tract_policy": "other",
+    "selection_policy": "frozen_anatomy_only_no_behavior_or_model_outcomes"
+  },
+  "scope": {
+    "formal_compact_manifest_sha256": "a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09",
+    "formal_compact_acronym_count": 168,
+    "formal_compact_acronyms_sha256": "53c5a0cb3591749aad8fc2848b2627dfe93a4a747fa391e4ec68094211b8369b"
+  },
+  "regression_sentinels": {
+    "POST": "hippocampus",
+    "VPL": "thalamus",
+    "VPM": "thalamus",
+    "PAR": "hippocampus",
+    "PAA": "other",
+    "PPN": "midbrain",
+    "APN": "midbrain",
+    "MB": "midbrain",
+    "ZI": "other",
+    "fiber tracts": "other",
+    "cc": "other",
+    "fa": "other"
+  },
+  "entries": [
+    {
+      "acronym": "ACB",
+      "structure_id": 56,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "AMBv",
+      "structure_id": 143,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "AON",
+      "structure_id": 159,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "APN",
+      "structure_id": 215,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "APr",
+      "structure_id": 484682508,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "AV",
+      "structure_id": 255,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "BMAa",
+      "structure_id": 327,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "BST",
+      "structure_id": 351,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "CA1",
+      "structure_id": 382,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "CA2",
+      "structure_id": 423,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "CA3",
+      "structure_id": 463,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "CB",
+      "structure_id": 512,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "CENT3",
+      "structure_id": 984,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "COApm",
+      "structure_id": 663,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "COPY",
+      "structure_id": 1033,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "CP",
+      "structure_id": 672,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "CUL4 5",
+      "structure_id": 1091,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "DCO",
+      "structure_id": 96,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "DG-mo",
+      "structure_id": 10703,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "DG-po",
+      "structure_id": 10704,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "DG-sg",
+      "structure_id": 632,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "ENTm2",
+      "structure_id": 543,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "ENTm3",
+      "structure_id": 664,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "ENTm5",
+      "structure_id": 727,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "EPv",
+      "structure_id": 966,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "FF",
+      "structure_id": 804,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "FN",
+      "structure_id": 989,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "FRP5",
+      "structure_id": 526157192,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "FRP6a",
+      "structure_id": 526157196,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "FS",
+      "structure_id": 998,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "GRN",
+      "structure_id": 1048,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "HPF",
+      "structure_id": 1089,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "ICe",
+      "structure_id": 828,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "IP",
+      "structure_id": 91,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "IRN",
+      "structure_id": 136,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "LA",
+      "structure_id": 131,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "LD",
+      "structure_id": 155,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "LGd-co",
+      "structure_id": 496345668,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "LGd-sh",
+      "structure_id": 496345664,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "LP",
+      "structure_id": 218,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "LRNm",
+      "structure_id": 955,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "MB",
+      "structure_id": 313,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "MEA",
+      "structure_id": 403,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "MOp2/3",
+      "structure_id": 943,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOp5",
+      "structure_id": 648,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOp6a",
+      "structure_id": 844,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOp6b",
+      "structure_id": 882,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOs1",
+      "structure_id": 656,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOs2/3",
+      "structure_id": 962,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MOs5",
+      "structure_id": 767,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "MRN",
+      "structure_id": 128,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "MV",
+      "structure_id": 202,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "MY",
+      "structure_id": 354,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "NOD",
+      "structure_id": 968,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "NOT",
+      "structure_id": 628,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "NTS",
+      "structure_id": 651,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "OLF",
+      "structure_id": 698,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ORBl2/3",
+      "structure_id": 412,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "ORBl5",
+      "structure_id": 630,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "ORBvl1",
+      "structure_id": 969,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "ORBvl2/3",
+      "structure_id": 288,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "ORBvl5",
+      "structure_id": 1125,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "ORBvl6a",
+      "structure_id": 608,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "OT",
+      "structure_id": 754,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "P",
+      "structure_id": 771,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "PA",
+      "structure_id": 780,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "PAA",
+      "structure_id": 788,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "PAL",
+      "structure_id": 803,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "PAR",
+      "structure_id": 843,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "PARN",
+      "structure_id": 852,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "PB",
+      "structure_id": 867,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "PGRNl",
+      "structure_id": 978,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "PO",
+      "structure_id": 1020,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "POL",
+      "structure_id": 1029,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "POST",
+      "structure_id": 1037,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "PPN",
+      "structure_id": 1052,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "PPT",
+      "structure_id": 1061,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "PRC",
+      "structure_id": 50,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "PRE",
+      "structure_id": 1084,
+      "macro_region": "hippocampus",
+      "matched_ancestor_id": 1089
+    },
+    {
+      "acronym": "PRNr",
+      "structure_id": 146,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "RSPagl1",
+      "structure_id": 671,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPagl5",
+      "structure_id": 774,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPagl6a",
+      "structure_id": 906,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPd5",
+      "structure_id": 610,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPd6a",
+      "structure_id": 274,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPv6a",
+      "structure_id": 590,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RSPv6b",
+      "structure_id": 622,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "RT",
+      "structure_id": 262,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "SAG",
+      "structure_id": 271,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SCdg",
+      "structure_id": 26,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SCig",
+      "structure_id": 10,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SCiw",
+      "structure_id": 17,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SCop",
+      "structure_id": 851,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SCsg",
+      "structure_id": 842,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SI",
+      "structure_id": 342,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "SIM",
+      "structure_id": 1007,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "SNc",
+      "structure_id": 374,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SNr",
+      "structure_id": 381,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "SPA",
+      "structure_id": 609,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "SPFp",
+      "structure_id": 422,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "SPIV",
+      "structure_id": 225,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "SPVI",
+      "structure_id": 437,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "SSp-bfd5",
+      "structure_id": 1070,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-bfd6a",
+      "structure_id": 1038,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-bfd6b",
+      "structure_id": 1062,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-tr2/3",
+      "structure_id": 670,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-tr4",
+      "structure_id": 1086,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-tr5",
+      "structure_id": 1111,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-un4",
+      "structure_id": 182305701,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-un5",
+      "structure_id": 182305705,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "SSp-un6a",
+      "structure_id": 182305709,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "STR",
+      "structure_id": 477,
+      "macro_region": "striatum",
+      "matched_ancestor_id": 477
+    },
+    {
+      "acronym": "SUT",
+      "structure_id": 534,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "TH",
+      "structure_id": 549,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "V",
+      "structure_id": 621,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    },
+    {
+      "acronym": "VAL",
+      "structure_id": 629,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "VISa1",
+      "structure_id": 312782550,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISa2/3",
+      "structure_id": 312782554,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISa4",
+      "structure_id": 312782558,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISa5",
+      "structure_id": 312782562,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISa6a",
+      "structure_id": 312782566,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISa6b",
+      "structure_id": 312782570,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam1",
+      "structure_id": 281,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam2/3",
+      "structure_id": 1066,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam4",
+      "structure_id": 401,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam5",
+      "structure_id": 433,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam6a",
+      "structure_id": 1046,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISam6b",
+      "structure_id": 441,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISp2/3",
+      "structure_id": 821,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISp4",
+      "structure_id": 721,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISp5",
+      "structure_id": 778,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISp6a",
+      "structure_id": 33,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISpl6a",
+      "structure_id": 377,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISpm5",
+      "structure_id": 565,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISpm6a",
+      "structure_id": 257,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISrl2/3",
+      "structure_id": 312782608,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISrl4",
+      "structure_id": 312782612,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISrl5",
+      "structure_id": 312782616,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISrl6a",
+      "structure_id": 312782620,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VISrl6b",
+      "structure_id": 312782624,
+      "macro_region": "cortex",
+      "matched_ancestor_id": 315
+    },
+    {
+      "acronym": "VPL",
+      "structure_id": 718,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "VPM",
+      "structure_id": 733,
+      "macro_region": "thalamus",
+      "matched_ancestor_id": 549
+    },
+    {
+      "acronym": "VTA",
+      "structure_id": 749,
+      "macro_region": "midbrain",
+      "matched_ancestor_id": 313
+    },
+    {
+      "acronym": "VeCB",
+      "structure_id": 589508455,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ZI",
+      "structure_id": 797,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "alv",
+      "structure_id": 466,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ar",
+      "structure_id": 484682524,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "arb",
+      "structure_id": 728,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "bsc",
+      "structure_id": 916,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ccb",
+      "structure_id": 484682516,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ccs",
+      "structure_id": 986,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "cing",
+      "structure_id": 940,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "cpd",
+      "structure_id": 924,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "dhc",
+      "structure_id": 443,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ec",
+      "structure_id": 579,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "fi",
+      "structure_id": 603,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "fiber tracts",
+      "structure_id": 1009,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "fp",
+      "structure_id": 971,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "int",
+      "structure_id": 6,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "ll",
+      "structure_id": 658,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "nst",
+      "structure_id": 102,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "opt",
+      "structure_id": 125,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "or",
+      "structure_id": 484682520,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "root",
+      "structure_id": 997,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "scwm",
+      "structure_id": 484682512,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "tspc",
+      "structure_id": 1043,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "void",
+      "structure_id": 0,
+      "macro_region": "other",
+      "matched_ancestor_id": null
+    },
+    {
+      "acronym": "x",
+      "structure_id": 765,
+      "macro_region": "hindbrain",
+      "matched_ancestor_id": 1065
+    }
+  ]
+}

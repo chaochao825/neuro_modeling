@@ -91,9 +91,42 @@ committed configs and scripts regenerate that layout.
   fast/slow/trace mechanisms are narrow HRM/CTM-inspired abstractions, not
   reproductions of either model. Structured-task performance cannot replace
   neural activity evidence. The pinned ARC-AGI-1 snapshot contains one exact
-  cross-split duplicate, which the formal config excludes explicitly. Formal
-  Maze-Hard and Sudoku-Extreme acquisition remains fail-closed because the
-  upstream dataset metadata has no declared data license.
+  cross-split duplicate, which the formal config excludes explicitly. The
+  unlicensed Maze-Hard/Sudoku-Extreme placeholders have been replaced by
+  pinned MIT MazeBench and CC-BY-4.0 Sudoku V2 sources. Preparation retains
+  79/79 reachable MazeBench tasks while preserving 31 upstream-unreachable
+  mazes in the manifest. The 200 Sudoku source records collapse to 76 exact
+  puzzle contents (48 train, 28 non-OOD test) under test-precedence dedup;
+  all 124 duplicate exclusions remain auditable. The formal 30-seed runs are
+  complete. Maze's hierarchical-over-flat contrast is inconclusive (-0.37
+  percentage points, 95% CI [-2.04, 0.74]); only the distinct registered
+  selector-level 90%-of-GRU retention endpoint is supported; shared proposal/
+  search costs are not counted as an end-to-end efficiency advantage. Sudoku gives every condition
+  100% exact accuracy, so its mechanism contrasts are ceiling-limited and
+  inconclusive. Neither benchmark isolates an end-to-end neural solver because
+  all selectors receive the same deterministic proposal/search library.
+- The formal ARC-AGI-1 exp13 run is now complete, but candidate coverage is
+  only 5/399 tasks (1.253%) versus the registered 90% gate. Hierarchical local
+  accuracy equals flat local at 0.301%; trace local reaches 0.343%, GRU/BPTT
+  0.501%, and the candidate oracle 1.253%. All registered advantage claims are
+  `inconclusive`. Low coverage prevents either support or a clean mechanism
+  rejection, and the result is not a competitive ARC solution.
+- `exp14` repairs the main exp06 interface flaws in code: event-specific
+  nuisance tables, frozen complete-case masks, integer-count validation,
+  whole-block split fingerprints, past-only belief receipts, train-only unit
+  selection/PCA, paired observation maps, exact conditional Poisson scoring,
+  and animal-primary bootstrap. Its synthetic path is only a systems smoke
+  test. The formal loader is fail-closed on a reviewed 20-session compact cache.
+  Acquisition and offline good-unit binning are now complete for 20 sessions,
+  20 animals, 35 probes, and 3,183 units, but no neural support exists until
+  the registered real-data outer comparison completes. Moreover, the
+  implemented model remains a
+  teacher-forced within-trial one-step conditional model—not a full Poisson/NB
+  switching LDS with filtering, smoothing, normal-stability, or causal gate
+  perturbations. The preflight models 1,347 train-selected anchor units out of
+  3,183 recorded units. Its `full` comparator has session-specific gated
+  operators but retains the same six-region shared basis; it is not a full
+  unit-space or full latent-LDS comparator.
 - The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
   Shared dynamics retains only about 25--29% of the full-model likelihood gain,
   far below the 90% criterion; pre-stim future-covariate and true-boundary-reset

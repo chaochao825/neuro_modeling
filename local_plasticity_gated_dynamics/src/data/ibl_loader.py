@@ -170,6 +170,9 @@ def build_trial_covariates(
     stimulus = np.nan_to_num(contrast_right, nan=0.0) - np.nan_to_num(
         contrast_left, nan=0.0
     )
+    # Preserve stimulus side even at zero contrast.  Match the hidden-belief
+    # contract used throughout IBL analyses: 1 means a left-present trial.
+    stimulus_side = np.isfinite(contrast_left).astype(int)
     choice = np.asarray(_field(trials, "choice"), dtype=float)
     reward = _field(trials, "feedbackType", "rewardVolume", "reward", required=False)
     reward_array = (
@@ -219,6 +222,7 @@ def build_trial_covariates(
     return pd.DataFrame(
         {
             "stimulus": stimulus,
+            "stimulus_side": stimulus_side,
             "choice": choice,
             "wheel": wheel_movement,
             "reward": reward_array,

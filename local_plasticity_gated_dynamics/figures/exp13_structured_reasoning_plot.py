@@ -26,7 +26,7 @@ from src.analysis.structured_formal import (  # noqa: E402
 DISPLAY = {
     "support_heuristic": "Support\nheuristic",
     "flat_local": "Flat\nlocal",
-    "hierarchical_local": "Hierarchical\nlocal",
+    "hierarchical_local": "Hier.\nlocal",
     "trace_local": "Trace\nlocal",
     "gru_bptt": "GRU\nBPTT",
     "candidate_oracle": "Candidate\noracle",
@@ -73,15 +73,17 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
             max(1.0, conditions["exact_accuracy_ci_high"].max() * 100.0 + 0.25),
         ),
     )
-    ax_accuracy.text(-0.10, 1.03, "a", transform=ax_accuracy.transAxes, fontweight="bold")
+    ax_accuracy.text(
+        -0.10, 1.03, "a", transform=ax_accuracy.transAxes, fontweight="bold"
+    )
 
     comparison_labels = [
-        "Hier. − flat",
-        "Trace − flat",
-        "Hier. − heuristic",
-        "Hier. − GRU",
-        "Hier. − 0.9 GRU",
-        "Trace − hier.",
+        "Hier. - flat",
+        "Trace - flat",
+        "Hier. - heuristic",
+        "Hier. - GRU",
+        "Hier. - 0.9 GRU",
+        "Trace - hier.",
     ]
     y = np.arange(len(comparisons))[::-1]
     estimates = comparisons["estimate"].to_numpy(dtype=float) * 100.0
@@ -98,11 +100,15 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
         ax_difference.plot(
             [low[row_index], high[row_index]], [location, location], color=color, lw=1.8
         )
-        ax_difference.scatter(estimates[row_index], location, color=color, s=26, zorder=3)
+        ax_difference.scatter(
+            estimates[row_index], location, color=color, s=26, zorder=3
+        )
     ax_difference.axvline(0.0, color="black", lw=0.8, ls="--")
     ax_difference.set_yticks(y, comparison_labels)
     ax_difference.set_xlabel("Paired exact-accuracy contrast (percentage points)")
-    ax_difference.text(-0.10, 1.03, "b", transform=ax_difference.transAxes, fontweight="bold")
+    ax_difference.text(
+        -0.10, 1.03, "b", transform=ax_difference.transAxes, fontweight="bold"
+    )
 
     total = conditions["parameter_count"].to_numpy(dtype=float)
     trainable = conditions["trainable_parameter_count"].to_numpy(dtype=float)
@@ -127,11 +133,11 @@ def plot_exp13(results_root: Path, prefix: str = "exp13_arc_formal") -> plt.Figu
     ax_parameters.legend(
         loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2, columnspacing=1.0
     )
-    ax_parameters.text(-0.10, 1.03, "c", transform=ax_parameters.transAxes, fontweight="bold")
-
-    seed_condition = (
-        raw.groupby(["seed", "condition"], as_index=False)["exact"].mean()
+    ax_parameters.text(
+        -0.10, 1.03, "c", transform=ax_parameters.transAxes, fontweight="bold"
     )
+
+    seed_condition = raw.groupby(["seed", "condition"], as_index=False)["exact"].mean()
     distributions = [
         seed_condition.loc[seed_condition["condition"] == condition, "exact"].to_numpy()
         * 100.0

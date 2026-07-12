@@ -1,0 +1,32 @@
+{
+  "approval_sha256": "9e8b7b0ec1c28029c82da19211f69ad8ed0c912c55f3b6c4eb519e8d15e28ff1",
+  "checks": [
+    "all_manifest_and_bundle_artifact_sha256",
+    "exact_36_column_manifest",
+    "npz_keys_dtypes_shapes_nonnegative",
+    "csv_exact_columns_and_trial_identity",
+    "csv_npz_valid_mask_equality",
+    "audited_bwm_mask_hash_and_subset",
+    "left1_right0_stimulus_side",
+    "no_pose_or_hidden_context_columns",
+    "canonical_qc_mask_required_bundle_and_receipts",
+    "wheel_and_motion_full_dataset_provenance",
+    "external_atlas_side_effect_blocked_as_input",
+    "frozen_region_and_bwm_source_hashes"
+  ],
+  "compact_bundle_sha256": "f6cd351717986ede771a6bbbe755edeb3c30ef4bda48e86c8471bcf4364a41a4",
+  "compact_manifest_sha256": "a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09",
+  "complete_sessions": 20,
+  "created_at_utc": "2026-07-12T03:21:01.237025+00:00",
+  "failed_sessions": 0,
+  "movement_pre_valid_trials": 9780,
+  "retained_auxiliary_dataset_failures": 1,
+  "rows": 20,
+  "schema_version": "ibl_exp14_compact_contract_audit_v1",
+  "status": "passed",
+  "stimulus_pre_valid_trials": 9780,
+  "total_binned_spikes_both_views": 13324407,
+  "total_trials": 15012,
+  "total_units": 3183,
+  "unique_animals": 20
+}

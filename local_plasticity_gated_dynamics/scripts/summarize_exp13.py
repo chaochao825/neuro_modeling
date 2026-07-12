@@ -51,6 +51,32 @@ def _canonical_sha256(value: dict[str, Any]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _portable_formal_config(formal_config: dict[str, Any]) -> dict[str, Any]:
+    """Normalize the host checkout path without changing scientific fields."""
+
+    payload = dict(formal_config)
+    family = str(payload.get("family", "")).strip().lower()
+    if family not in {"arc", "maze", "sudoku"}:
+        raise ValueError("formal exp13 family must be arc, maze, or sudoku")
+    payload["config_path"] = f"configs/formal/exp13_structured_reasoning_{family}.json"
+    return payload
+
+
+def _portable_formal_config_sha256(formal_config: dict[str, Any]) -> str:
+    return _canonical_sha256(_portable_formal_config(formal_config))
+
+
+def _registered_bootstrap_count(
+    formal_config: dict[str, Any], override: int | None
+) -> int:
+    value = formal_config.get("n_bootstrap")
+    if isinstance(value, bool) or not isinstance(value, int) or value < 100:
+        raise ValueError("formal exp13 n_bootstrap must be an integer >= 100")
+    if override is not None and int(override) != value:
+        raise ValueError("--n-bootstrap cannot override the registered formal config")
+    return value
+
+
 def _expected_attempt_config(
     formal_config: dict[str, Any], *, seed: int
 ) -> dict[str, Any]:
@@ -116,7 +142,7 @@ def collect_formal_runs(
         or registered_data.get("test_split_role") != test_split_role
     ):
         raise ValueError("collector arguments disagree with the complete formal config")
-    formal_config_sha256 = _canonical_sha256(formal_config)
+    formal_config_sha256 = _portable_formal_config_sha256(formal_config)
     raw_frames: list[pd.DataFrame] = []
     run_rows: list[dict[str, Any]] = []
     for seed in expected_seeds:
@@ -235,7 +261,11 @@ def _write_report(
         f"- Dataset revision: `{revision}`",
         f"- Raw task panel SHA-256: `{raw_sha256}`",
         f"- Clean-run manifest SHA-256: `{run_manifest_sha256}`",
-        "- Statistical unit: source/augmentation dependency component; seeds are nested within task.",
+        f"- Bootstrap draws: {int(core['n_bootstrap'])} (registered config).",
+        f"- Test split role: `{core['test_split_role']}`; "
+        f"registered OOD core eligibility={bool(core['registered_ood_split'])}.",
+        "- Statistical unit: source/augmentation dependency component; seed replicates "
+        "are averaged within task before component-level inference.",
         "- Scope: matched hybrid proposal selection only; no neural or biological claim.",
         f"- Candidate coverage gate: {float(core['candidate_coverage']):.4f} "
         f"(required {float(core['minimum_candidate_coverage']):.4f}; "
@@ -284,6 +314,15 @@ def _write_report(
             "",
         ]
     )
+    if not bool(core["registered_ood_split"]):
+        lines.extend(
+            [
+                "",
+                "The test split is registered as `non_ood`. Therefore even a "
+                "statistically positive retention margin cannot be promoted to "
+                "core support; it remains an exploratory, ceiling-sensitive result.",
+            ]
+        )
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -295,11 +334,12 @@ def main() -> None:
     )
     parser.add_argument("--results-root", default=str(PROJECT_ROOT / "results"))
     parser.add_argument("--output-prefix")
-    parser.add_argument("--n-bootstrap", type=int, default=100_000)
+    parser.add_argument("--n-bootstrap", type=int)
     parser.add_argument("--bootstrap-seed", type=int, default=20260712)
     args = parser.parse_args()
 
     config = load_json_config(args.config)
+    n_bootstrap = _registered_bootstrap_count(config, args.n_bootstrap)
     data = dict(config["data"])
     expected_seeds = [int(seed) for seed in config["seeds"]]
     results_root = Path(args.results_root)
@@ -331,7 +371,7 @@ def main() -> None:
         raw,
         expected_seeds=expected_seeds,
         seed=int(args.bootstrap_seed),
-        n_bootstrap=int(args.n_bootstrap),
+        n_bootstrap=n_bootstrap,
         minimum_candidate_coverage=float(config.get("minimum_candidate_coverage", 0.9)),
         task_family=family,
         test_split_role=str(data["test_split_role"]),
@@ -342,7 +382,7 @@ def main() -> None:
         "source_revision": data["revision"],
         "source_manifest_sha256": data["manifest_sha256"],
         "test_split_role": data["test_split_role"],
-        "formal_config_sha256": _canonical_sha256(config),
+        "formal_config_sha256": _portable_formal_config_sha256(config),
         "scoped_raw_sha256": raw_sha,
         "run_manifest_sha256": run_manifest_sha,
         "run_git_commit": run_manifest["git_commit"].iloc[0],

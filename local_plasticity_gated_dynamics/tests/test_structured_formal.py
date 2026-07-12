@@ -12,7 +12,34 @@ from figures.plot_style import save_figure
 from src.analysis.structured_benchmark import STRUCTURED_CONDITIONS
 from src.analysis.structured_formal import summarize_structured_formal
 from scripts.build_report import append_exp13_structured_claims
-from scripts.summarize_exp13 import _expected_attempt_config, _latest_matching_attempt
+from scripts.summarize_exp13 import (
+    _expected_attempt_config,
+    _latest_matching_attempt,
+    _portable_formal_config_sha256,
+    _registered_bootstrap_count,
+)
+
+
+def test_exp13_formal_binding_is_portable_and_bootstrap_count_is_registered() -> None:
+    windows = {
+        "family": "maze",
+        "n_bootstrap": 10_000,
+        "config_path": r"E:\checkout\configs\formal\exp13_structured_reasoning_maze.json",
+    }
+    linux = {
+        **windows,
+        "config_path": "/home/lab/configs/formal/exp13_structured_reasoning_maze.json",
+    }
+    assert _portable_formal_config_sha256(windows) == (
+        _portable_formal_config_sha256(linux)
+    )
+    assert _portable_formal_config_sha256(windows) != (
+        _portable_formal_config_sha256({**windows, "n_bootstrap": 20_000})
+    )
+    assert _registered_bootstrap_count(windows, None) == 10_000
+    assert _registered_bootstrap_count(windows, 10_000) == 10_000
+    with pytest.raises(ValueError, match="cannot override"):
+        _registered_bootstrap_count(windows, 100_000)
 
 
 def _panel(n_seeds: int = 3) -> pd.DataFrame:

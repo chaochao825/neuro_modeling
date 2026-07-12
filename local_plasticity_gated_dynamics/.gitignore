@@ -13,6 +13,7 @@ dist/
 data/raw/
 data/ibl_cache/
 data/ibl_behavior/
+data/ibl_neural/
 data/arc/
 data/structured/
 results/runs/
@@ -32,6 +33,12 @@ results/*.pdf
 !results/exp11_ibl_behavior_real.pdf
 !results/exp13_arc_formal.png
 !results/exp13_arc_formal.pdf
+!results/exp13_maze_formal.png
+!results/exp13_maze_formal.pdf
+!results/exp13_sudoku_formal.png
+!results/exp13_sudoku_formal.pdf
+!results/exp14_ibl_multisession_neural_formal.png
+!results/exp14_ibl_multisession_neural_formal.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/
