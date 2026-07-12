@@ -704,6 +704,7 @@ def test_plot_reads_only_validated_snapshot(
     _fake_run(tmp_path, config)
     build_snapshot(tmp_path, config)
     figure = plot_exp14(tmp_path)
+    figure.canvas.draw()
     assert len(figure.axes) == 4
     assert figure.axes[1].get_ylabel() == (
         "Common - shared NLL/count (positive favors shared)"

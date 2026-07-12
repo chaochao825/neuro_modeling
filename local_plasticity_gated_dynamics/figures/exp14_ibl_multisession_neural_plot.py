@@ -82,14 +82,17 @@ def plot_exp14(results_root: Path, prefix: str = DEFAULT_PREFIX) -> plt.Figure:
     )
     colors = [primary_color, "#aaaaaa", "#aaaaaa", "#aaaaaa"]
     ax_gain.axhline(0, color="black", ls="--", lw=0.8)
-    ax_gain.errorbar(
-        x,
-        gains,
-        yerr=np.vstack([gains - low, high - gains]),
-        fmt="none",
-        ecolor=colors,
-        capsize=3,
-    )
+    for position, gain, ci_low, ci_high, color in zip(
+        x, gains, low, high, colors, strict=True
+    ):
+        ax_gain.errorbar(
+            position,
+            gain,
+            yerr=np.asarray([[gain - ci_low], [ci_high - gain]]),
+            fmt="none",
+            ecolor=color,
+            capsize=3,
+        )
     ax_gain.scatter(x, gains, c=colors, zorder=3)
     ax_gain.set_xticks(x, PANEL_LABELS)
     ax_gain.set_ylabel("Common - shared NLL/count (positive favors shared)")
