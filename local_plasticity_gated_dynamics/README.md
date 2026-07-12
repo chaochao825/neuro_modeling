@@ -6,12 +6,11 @@ of controllable/observable modes on top of a high-rank sparse E/I substrate.
 Low-dimensional gates may then modify effective dynamics without requiring the
 physical recurrent matrix or its masked update to be low rank. The repository
 also contains shared-subspace prototypes for public sequence-memory and IBL
-data. Its only *completed* neural IBL result is the legacy one-session `exp06`
-pilot and remains inconclusive; `exp11` is a distinct trials-only behavior
-benchmark. `exp14` now provides a fail-closed multi-session count-dynamics
-pipeline and a reviewed, hash-bound 20-session/20-animal compact cache. The
-registered neural model comparison is still pending, so the cache itself is
-not evidence for the shared-dynamics claim.
+data. The legacy one-session `exp06` pilot remains inconclusive; `exp11` is a
+distinct trials-only behavior benchmark. `exp14` now provides a fail-closed
+multi-session count-dynamics pipeline, a reviewed hash-bound 20-session/
+20-animal compact cache, and a completed registered comparison. The registered
+primary result is inconclusive and does not support the shared-dynamics claim.
 
 The scientific protocol is intentionally falsifiable. Every core claim is
 classified as `support`, `oppose`, or `inconclusive`; failed seeds and missing
@@ -199,9 +198,13 @@ back to synthetic data: it accepts only the reviewed compact cache derived from
 the frozen 20-session/20-animal BWM panel (35 probes, 3,183 units, sorting
 revision `2024-05-06`, good-unit threshold `>=1`). Acquisition and offline
 count binning are complete and their manifests, failures, producer snapshot,
-and compact bundle are hash-bound. The registered common/shared/full outer
-comparison has not yet run, so the neural claim remains `inconclusive`. The
-real-data preflight selected 1,347 of 3,183 units through training-fold-only
+   and compact bundle are hash-bound. The repaired formal run retained all 340
+   planned records with zero failures. The registered primary common-minus-
+   shared contrast was -0.000995 NLL/count (95% CI [-0.003061, 0.000157],
+   Holm-adjusted `p=1`) and is `inconclusive`; all three sensitivity panels are
+   also inconclusive. The first pre-repair attempt remains preserved as
+   `complete_with_failures` rather than being overwritten. The real-data
+   preflight selected 1,347 of 3,183 units through training-fold-only
 anatomical/variance criteria; formal likelihoods therefore apply to those
 selected anchor units, not every recorded unit. Here `full` means
 session-specific gated operators on the same six-region basis, not a full
