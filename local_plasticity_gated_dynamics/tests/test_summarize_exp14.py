@@ -714,6 +714,35 @@ def test_plot_reads_only_validated_snapshot(
     assert all("sensitivity" in label for label in labels[1:])
 
 
+def test_plot_labels_an_entirely_undefined_retention_panel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = _config()
+    _register(monkeypatch, config)
+    attempt = _fake_run(tmp_path, config)
+    records = _records(attempt)
+    outer = [row for row in records if row.get("stage") == "outer_test"]
+    for row in outer:
+        if row["model_family"] == "full":
+            row["nll_per_count"] = 1.3
+            row["log_likelihood"] = -130.0
+    for row in records:
+        if row.get("stage") == "animal_session_comparison":
+            row["comparison"] = _recompute_comparison(
+                pd.DataFrame(outer),
+                view=str(row["view"]),
+                panel=str(row["panel"]),
+                config=config,
+            )
+    _replace_records(attempt, records)
+    build_snapshot(tmp_path, config)
+    figure = plot_exp14(tmp_path)
+    figure.canvas.draw()
+    assert any(
+        "Retention undefined" in item.get_text() for item in figure.axes[2].texts
+    )
+
+
 def test_plot_does_not_color_panel_support_as_core_when_nested_gate_is_missing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

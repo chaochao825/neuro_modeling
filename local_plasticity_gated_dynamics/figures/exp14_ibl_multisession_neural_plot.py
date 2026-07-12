@@ -109,6 +109,16 @@ def plot_exp14(results_root: Path, prefix: str = DEFAULT_PREFIX) -> plt.Figure:
     ax_retention.bar(
         x[finite], ratios[finite], color=np.asarray(colors, dtype=object)[finite]
     )
+    if not finite.any():
+        ax_retention.text(
+            0.5,
+            0.5,
+            "Retention undefined\n(full did not improve common)",
+            transform=ax_retention.transAxes,
+            ha="center",
+            va="center",
+            color="#555555",
+        )
     ax_retention.set_xticks(x, PANEL_LABELS)
     ax_retention.set_ylabel("Shared/full gain ratio")
     ax_retention.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0))
