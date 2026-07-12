@@ -76,6 +76,75 @@ _EXP13_GLOBAL_CLAIM_IDS = {
     "hierarchical_retains_90pct_gru": "T5_arc_hierarchical_90pct_gru",
     "trace_vs_hierarchical": "T6_arc_trace_increment",
 }
+_EXP13_MAZE_CLAIM_IDS = {
+    "hierarchical_vs_flat": "M1_maze_hierarchical_vs_flat",
+    "trace_vs_flat": "M2_maze_trace_vs_flat",
+    "hierarchical_vs_support_heuristic": "M3_maze_hierarchical_vs_heuristic",
+    "hierarchical_vs_gru_bptt": "M4_maze_hierarchical_vs_gru",
+    "hierarchical_retains_90pct_gru": "M5_maze_hierarchical_90pct_gru",
+    "trace_vs_hierarchical": "M6_maze_trace_increment",
+}
+_EXP13_SUDOKU_CLAIM_IDS = {
+    "hierarchical_vs_flat": "N1_sudoku_hierarchical_vs_flat",
+    "trace_vs_flat": "N2_sudoku_trace_vs_flat",
+    "hierarchical_vs_support_heuristic": "N3_sudoku_hierarchical_vs_heuristic",
+    "hierarchical_vs_gru_bptt": "N4_sudoku_hierarchical_vs_gru",
+    "hierarchical_retains_90pct_gru": "N5_sudoku_hierarchical_90pct_gru",
+    "trace_vs_hierarchical": "N6_sudoku_trace_increment",
+}
+_EXP13_FAMILY_SPECS = {
+    "arc": {
+        "prefix": "exp13_arc_formal",
+        "claim_ids": _EXP13_GLOBAL_CLAIM_IDS,
+        "experiment": "exp13_structured_reasoning",
+        "stats_unit": "ARC dependency component (seed nested)",
+        "multiplicity_method": "Holm(exp13_ARC_registered_family)",
+        "test_split_role": "ood",
+        "report_title": "exp13 public ARC hybrid-solver audit",
+    },
+    "maze": {
+        "prefix": "exp13_maze_formal",
+        "claim_ids": _EXP13_MAZE_CLAIM_IDS,
+        "experiment": "exp13_structured_reasoning_maze",
+        "stats_unit": "maze dependency component (seed nested)",
+        "multiplicity_method": "Holm(exp13_maze_registered_family)",
+        "test_split_role": "ood",
+        "report_title": "exp13 public Maze hybrid-solver audit",
+        "published_raw_sha256": (
+            "ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2"
+        ),
+        "published_run_manifest_sha256": (
+            "44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022"
+        ),
+        "published_source_manifest_sha256": (
+            "68a19d8a545942a09ae2b22274413bd8915778650d4483506066192add80983f"
+        ),
+        "published_formal_config_sha256": (
+            "83abf49a90fca31b19038d6db0930294da5a00d12a4225e88ea838a20f8b75d3"
+        ),
+    },
+    "sudoku": {
+        "prefix": "exp13_sudoku_formal",
+        "claim_ids": _EXP13_SUDOKU_CLAIM_IDS,
+        "experiment": "exp13_structured_reasoning_sudoku",
+        "stats_unit": "Sudoku dependency component (seed nested)",
+        "multiplicity_method": "Holm(exp13_sudoku_registered_family)",
+        "test_split_role": "non_ood",
+        "report_title": "exp13 public Sudoku hybrid-solver audit",
+        "published_raw_sha256": (
+            "f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648"
+        ),
+        "published_run_manifest_sha256": (
+            "9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b"
+        ),
+        "published_source_manifest_sha256": (
+            "1b0aa95575b50012e25499ddd82c35d462979fe150d6819ea0ade7f6f80c91f2"
+        ),
+        "published_formal_config_sha256": (
+            "46fc057fc69f7f3209d3875995e45cb52250eeb664fb6e823a16f9ded5938467"
+        ),
+    },
+}
 
 
 def _csv_value(value):
@@ -729,30 +798,112 @@ def append_exp11_behavior_claims(
     )
 
 
-def append_exp13_structured_claims(
-    core_summary: pd.DataFrame,
-    results_root: Path,
-    *,
-    require_published_root: bool = True,
-) -> pd.DataFrame:
-    """Append task-primary ARC claims without promoting them to neural evidence."""
+def _exp13_binding_text(value: object, *, boolean: bool = False) -> str:
+    text = str(value).strip()
+    if not boolean:
+        return text
+    normalized = text.lower()
+    if normalized not in {"true", "false"}:
+        raise ValueError(f"invalid exp13 boolean provenance value: {value!r}")
+    return normalized
 
-    prefix = results_root / "exp13_arc_formal"
+
+def _validate_exp13_raw_manifest_bindings(
+    raw: pd.DataFrame,
+    run_manifest: pd.DataFrame,
+    *,
+    family: str,
+) -> None:
+    """Bind every raw seed row to the corresponding immutable run receipt."""
+
+    mappings = (
+        ("run_id", "run_id", False),
+        ("run_git_commit", "git_commit", False),
+        ("run_git_dirty", "git_dirty", True),
+    )
+    if family != "arc":
+        mappings += (
+            ("source_manifest_sha256", "source_manifest_sha256", False),
+            ("source_revision", "source_revision", False),
+            ("dataset_name", "dataset_name", False),
+            ("test_split_role", "test_split_role", False),
+            ("formal_config_sha256", "formal_config_sha256", False),
+        )
+    required_raw = {"seed", *(item[0] for item in mappings)}
+    required_manifest = {"seed", *(item[1] for item in mappings)}
+    missing_raw = required_raw - set(raw.columns)
+    missing_manifest = required_manifest - set(run_manifest.columns)
+    if missing_raw or missing_manifest:
+        raise ValueError(
+            "exp13 raw/run provenance binding lacks columns: "
+            f"raw={sorted(missing_raw)}, manifest={sorted(missing_manifest)}"
+        )
+    if run_manifest["seed"].astype(int).duplicated().any():
+        raise ValueError("exp13 run manifest has duplicate seed receipts")
+    if run_manifest["run_id"].astype(str).duplicated().any():
+        raise ValueError("exp13 run manifest reuses a run_id across seeds")
+    manifest_by_seed = run_manifest.set_index(run_manifest["seed"].astype(int))
+    for seed, seed_rows in raw.groupby(raw["seed"].astype(int), sort=False):
+        receipt = manifest_by_seed.loc[int(seed)]
+        for raw_column, manifest_column, is_boolean in mappings:
+            if not seed_rows[raw_column].notna().all():
+                raise ValueError(
+                    f"exp13 raw seed {seed} has missing {raw_column} provenance"
+                )
+            raw_values = {
+                _exp13_binding_text(value, boolean=is_boolean)
+                for value in seed_rows[raw_column].tolist()
+            }
+            if len(raw_values) != 1:
+                raise ValueError(
+                    f"exp13 raw seed {seed} has non-unique {raw_column} provenance"
+                )
+            if pd.isna(receipt[manifest_column]):
+                raise ValueError(
+                    f"exp13 run receipt seed {seed} has missing "
+                    f"{manifest_column} provenance"
+                )
+            manifest_value = _exp13_binding_text(
+                receipt[manifest_column], boolean=is_boolean
+            )
+            if raw_values != {manifest_value}:
+                raise ValueError(
+                    "exp13 raw/run manifest binding differs for "
+                    f"seed {seed}: {raw_column} vs {manifest_column}"
+                )
+
+
+def _load_exp13_family_snapshot(
+    results_root: Path,
+    family: str,
+    *,
+    require_published_root: bool,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str] | None:
+    """Return one independently recomputed formal family or fail closed."""
+
+    spec = _EXP13_FAMILY_SPECS[family]
+    prefix_name = str(spec["prefix"])
+    prefix = results_root / prefix_name
     condition_path = prefix.with_name(prefix.name + "_conditions.csv")
     comparison_path = prefix.with_name(prefix.name + "_comparisons.csv")
     raw_path = prefix.with_name(prefix.name + "_raw.csv.gz")
     manifest_path = prefix.with_name(prefix.name + "_run_manifest.csv")
     paths = (condition_path, comparison_path, raw_path, manifest_path)
     if not any(path.is_file() for path in paths):
-        return core_summary.copy()
+        return None
     if not all(path.is_file() for path in paths):
-        raise FileNotFoundError("exp13 formal snapshot is only partially present")
-    conditions, comparisons, _, run_manifest = load_validated_structured_snapshot(
+        raise FileNotFoundError(
+            f"exp13 {family} formal snapshot is only partially present"
+        )
+    conditions, comparisons, raw, run_manifest = load_validated_structured_snapshot(
         results_root,
-        prefix="exp13_arc_formal",
+        prefix=prefix_name,
         minimum_candidate_coverage=0.9,
-        require_published_root=require_published_root,
+        require_published_root=require_published_root and family == "arc",
+        task_family=family,
     )
+    if family != "arc" or require_published_root:
+        _validate_exp13_raw_manifest_bindings(raw, run_manifest, family=family)
     required_comparisons = {
         "comparison",
         "candidate",
@@ -773,16 +924,18 @@ def append_exp13_structured_claims(
         "run_git_commit",
         "run_git_dirty",
         "source_revision",
+        "test_split_role",
     }
     missing = required_comparisons - set(comparisons.columns)
     if missing:
-        raise ValueError(f"exp13 comparison snapshot lacks: {sorted(missing)}")
+        raise ValueError(f"exp13 {family} comparison snapshot lacks: {sorted(missing)}")
+    claim_ids = spec["claim_ids"]
     if (
-        len(comparisons) != len(_EXP13_GLOBAL_CLAIM_IDS)
-        or set(comparisons["comparison"].astype(str)) != set(_EXP13_GLOBAL_CLAIM_IDS)
+        len(comparisons) != len(claim_ids)
+        or set(comparisons["comparison"].astype(str)) != set(claim_ids)
         or comparisons["comparison"].duplicated().any()
     ):
-        raise ValueError("exp13 registered comparison family is incomplete")
+        raise ValueError(f"exp13 {family} registered comparison family is incomplete")
     if set(conditions["condition"].astype(str)) != {
         "support_heuristic",
         "flat_local",
@@ -791,16 +944,62 @@ def append_exp13_structured_claims(
         "gru_bptt",
         "candidate_oracle",
     }:
-        raise ValueError("exp13 absolute condition family is incomplete")
+        raise ValueError(f"exp13 {family} absolute condition family is incomplete")
+    required_conditions = {
+        "test_split_role",
+        "n_seeds",
+        "parameter_count",
+        "trainable_parameter_count",
+        "exact_accuracy",
+        "exact_accuracy_ci_low",
+        "exact_accuracy_ci_high",
+    }
+    missing_conditions = required_conditions - set(conditions.columns)
+    if missing_conditions:
+        raise ValueError(
+            f"exp13 {family} condition snapshot lacks: {sorted(missing_conditions)}"
+        )
+    expected_split = str(spec["test_split_role"])
+    for frame, source in ((conditions, "conditions"), (comparisons, "comparisons")):
+        if "task_family" not in frame and family != "arc":
+            raise ValueError(f"exp13 {family} {source} lacks its task family binding")
+        if "task_family" in frame and set(frame["task_family"].astype(str)) != {family}:
+            raise ValueError(f"exp13 {family} {source} has the wrong task family")
+        if set(frame["test_split_role"].astype(str)) != {expected_split}:
+            raise ValueError(f"exp13 {family} {source} has the wrong test split role")
     raw_sha = _file_sha256(raw_path)
     manifest_sha = _file_sha256(manifest_path)
+    if require_published_root and family != "arc":
+        trusted_bindings = {
+            "source_manifest_sha256": str(spec["published_source_manifest_sha256"]),
+            "formal_config_sha256": str(spec["published_formal_config_sha256"]),
+        }
+        if raw_sha != str(spec["published_raw_sha256"]) or manifest_sha != str(
+            spec["published_run_manifest_sha256"]
+        ):
+            raise ValueError(
+                f"exp13 {family} raw/run files differ from the published trusted root"
+            )
+        for column, expected in trusted_bindings.items():
+            for frame, source in (
+                (conditions, "conditions"),
+                (comparisons, "comparisons"),
+                (run_manifest, "run manifest"),
+            ):
+                if (
+                    _only_value(frame, column, source=f"exp13 {family} {source}")
+                    != expected
+                ):
+                    raise ValueError(
+                        f"exp13 {family} {column} differs from the published root"
+                    )
     if (
         _only_value(comparisons, "scoped_raw_sha256", source="exp13 comparisons")
         != raw_sha
         or _only_value(comparisons, "run_manifest_sha256", source="exp13 comparisons")
         != manifest_sha
     ):
-        raise ValueError("exp13 summary is not bound to its raw/run manifest")
+        raise ValueError(f"exp13 {family} summary is not bound to its raw/run manifest")
     if (
         len(run_manifest) != 30
         or set(run_manifest["seed"].astype(int)) != set(range(30))
@@ -810,73 +1009,218 @@ def append_exp13_structured_claims(
         or _only_value(comparisons, "run_git_commit", source="exp13 comparisons")
         != str(run_manifest["git_commit"].iloc[0])
         or comparisons["run_git_dirty"].astype(bool).any()
+        or set(conditions["n_seeds"].astype(int)) != {30}
     ):
-        raise ValueError("exp13 clean 30-seed run contract is invalid")
+        raise ValueError(f"exp13 {family} clean 30-seed run contract is invalid")
     for row in comparisons.to_dict("records"):
         conclusion = str(row["conclusion"])
+        if conclusion not in {"support", "oppose", "inconclusive"}:
+            raise ValueError(f"exp13 {family} has an invalid conclusion")
         eligible = bool(row["core_claim_eligible"])
         if conclusion in {"support", "oppose"} and not eligible:
-            raise ValueError("exp13 conclusive row failed the candidate-coverage gate")
+            raise ValueError(
+                f"exp13 {family} conclusive row is not core-claim eligible"
+            )
         if conclusion == "support" and not (
             float(row["wilcoxon_p_holm"]) < 0.05 and float(row["ci_low"]) > 0.0
         ):
-            raise ValueError("exp13 support row fails its directional criterion")
+            raise ValueError(
+                f"exp13 {family} support row fails its directional criterion"
+            )
         if conclusion == "oppose" and not (
             float(row["wilcoxon_p_holm"]) < 0.05 and float(row["ci_high"]) < 0.0
         ):
-            raise ValueError("exp13 oppose row fails its directional criterion")
+            raise ValueError(
+                f"exp13 {family} oppose row fails its directional criterion"
+            )
+    return conditions, comparisons, raw, run_manifest, raw_sha, manifest_sha
+
+
+def append_exp13_structured_claims(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+    *,
+    require_published_root: bool = True,
+) -> pd.DataFrame:
+    """Append validated ARC/Maze/Sudoku claims without promoting their scope."""
 
     rows: list[dict[str, object]] = []
-    for row in comparisons.to_dict("records"):
-        n_units = int(row["n_dependency_components"])
-        noninferiority = str(row["comparison_mode"]) == "noninferiority_90pct"
-        comparison_label = (
-            f"{row['candidate']} minus 0.9 times {row['reference']}"
-            if noninferiority
-            else f"{row['candidate']} minus {row['reference']}"
+    for family, spec in _EXP13_FAMILY_SPECS.items():
+        snapshot = _load_exp13_family_snapshot(
+            results_root,
+            family,
+            require_published_root=require_published_root,
         )
-        rows.append(
-            {
-                "claim_id": _EXP13_GLOBAL_CLAIM_IDS[str(row["comparison"])],
-                "experiment": "exp13_structured_reasoning",
-                "metric": "exact_task_accuracy",
-                "comparison": comparison_label,
-                "stats_unit": "ARC dependency component (seed nested)",
-                "n_planned": n_units,
-                "n_complete": n_units,
-                "n_failed": 0,
-                "estimate": float(row["estimate"]),
-                "ci_low": float(row["ci_low"]),
-                "ci_high": float(row["ci_high"]),
-                "effect_size": float(row["estimate"]),
-                "p_value": float(row["wilcoxon_p_holm"]),
-                "multiplicity_method": "Holm(exp13_ARC_registered_family)",
-                "conclusion": str(row["conclusion"]),
-                "criterion": (
-                    "candidate coverage gate plus Holm p<0.05 and task-component "
-                    "bootstrap CI excluding zero"
-                    + (
-                        " for the candidate - 0.9*reference non-inferiority margin"
-                        if noninferiority
-                        else ""
-                    )
-                ),
-                "note": (
-                    "Hybrid proposal selection only; no neural/biological claim; "
-                    f"coverage={float(row['candidate_coverage']):.4f} vs required "
-                    f"{float(row['minimum_candidate_coverage']):.4f}; revision="
-                    f"{row['source_revision']}; clean commit={row['run_git_commit']}; "
-                    f"raw sha256={raw_sha}"
-                ),
-            }
-        )
+        if snapshot is None:
+            continue
+        conditions, comparisons, _, _, raw_sha, manifest_sha = snapshot
+        parameter_lookup = conditions.set_index("condition")
+        claim_ids = spec["claim_ids"]
+        for row in comparisons.to_dict("records"):
+            n_units = int(row["n_dependency_components"])
+            noninferiority = str(row["comparison_mode"]) == "noninferiority_90pct"
+            comparison_label = (
+                f"{row['candidate']} minus 0.9 times {row['reference']}"
+                if noninferiority
+                else f"{row['candidate']} minus {row['reference']}"
+            )
+            candidate = parameter_lookup.loc[str(row["candidate"])]
+            reference = parameter_lookup.loc[str(row["reference"])]
+            rows.append(
+                {
+                    "claim_id": claim_ids[str(row["comparison"])],
+                    "experiment": str(spec["experiment"]),
+                    "metric": "exact_task_accuracy",
+                    "comparison": comparison_label,
+                    "stats_unit": str(spec["stats_unit"]),
+                    "n_planned": n_units,
+                    "n_complete": n_units,
+                    "n_failed": 0,
+                    "estimate": float(row["estimate"]),
+                    "ci_low": float(row["ci_low"]),
+                    "ci_high": float(row["ci_high"]),
+                    "effect_size": float(row["estimate"]),
+                    "p_value": float(row["wilcoxon_p_holm"]),
+                    "multiplicity_method": str(spec["multiplicity_method"]),
+                    "conclusion": str(row["conclusion"]),
+                    "criterion": (
+                        "registered OOD split and candidate coverage gate plus "
+                        "Holm p<0.05 and task-component bootstrap CI excluding zero"
+                        + (
+                            " for the candidate - 0.9*reference non-inferiority margin"
+                            if noninferiority
+                            else ""
+                        )
+                    ),
+                    "note": (
+                        "Hybrid selector over one shared, target-free proposal "
+                        "library only; no neural/biological claim and no end-to-end "
+                        "efficiency claim; selector-level parameters "
+                        f"{row['candidate']}="
+                        f"{int(candidate['parameter_count'])} total/"
+                        f"{int(candidate['trainable_parameter_count'])} trainable, "
+                        f"{row['reference']}="
+                        f"{int(reference['parameter_count'])} total/"
+                        f"{int(reference['trainable_parameter_count'])} trainable; "
+                        f"test_split_role={row['test_split_role']}; 30 seeds; "
+                        f"coverage={float(row['candidate_coverage']):.4f} vs required "
+                        f"{float(row['minimum_candidate_coverage']):.4f}; revision="
+                        f"{row['source_revision']}; clean commit={row['run_git_commit']}; "
+                        f"raw sha256={raw_sha}; run manifest sha256={manifest_sha}"
+                    ),
+                }
+            )
     appended = pd.DataFrame(rows)
+    if appended.empty:
+        return core_summary.copy()
     if core_summary.empty:
         return appended
     missing_core = sorted(set(appended.columns) - set(core_summary.columns))
     if missing_core:
         raise ValueError(f"core summary schema lacks columns: {missing_core}")
     return pd.concat([core_summary, appended[core_summary.columns]], ignore_index=True)
+
+
+def _exp13_structured_report_lines(
+    results_root: Path,
+    family: str,
+    *,
+    require_published_root: bool,
+) -> list[str]:
+    """Render one family only after strict raw-to-summary validation."""
+
+    spec = _EXP13_FAMILY_SPECS[family]
+    snapshot = _load_exp13_family_snapshot(
+        results_root,
+        family,
+        require_published_root=require_published_root,
+    )
+    if snapshot is None:
+        return []
+    conditions, comparisons, _, _, raw_sha, manifest_sha = snapshot
+    dataset_name = _only_value(
+        conditions, "dataset_name", source=f"exp13 {family} conditions"
+    )
+    split_role = _only_value(
+        conditions, "test_split_role", source=f"exp13 {family} conditions"
+    )
+    n_seeds = int(
+        _only_value(conditions, "n_seeds", source=f"exp13 {family} conditions")
+    )
+    coverage = float(comparisons["candidate_coverage"].iloc[0])
+    minimum_coverage = float(comparisons["minimum_candidate_coverage"].iloc[0])
+    lines = [
+        "",
+        f"## {spec['report_title']}",
+        "",
+        "All hybrid selectors receive one shared, target-free proposal library. "
+        "The candidate oracle accesses labels only after proposal generation and "
+        "defines proposal coverage. Parameter counts below describe the selector "
+        "only: they exclude proposal-library construction and solver cost, so this "
+        "panel makes no end-to-end efficiency claim and no neural or biological "
+        "claim.",
+        "",
+        f"Dataset `{dataset_name}` uses `test_split_role={split_role}` with "
+        f"{n_seeds} independent seeds. Candidate coverage is "
+        f"{_format_number(coverage)} against the registered "
+        f"{_format_number(minimum_coverage)} gate. The validated scoped raw/run "
+        f"SHA-256 values are `{raw_sha}` / `{manifest_sha}`.",
+        "",
+    ]
+    if split_role != "ood":
+        lines += [
+            "This is not a registered OOD split. Consequently, even a significant "
+            "numerical margin remains core-ineligible and is reported as "
+            "**inconclusive**; it is not upgraded to support.",
+            "",
+        ]
+    lines += [
+        "### Absolute exact accuracy",
+        "",
+        "| Selector | Exact accuracy [95% CI] | Coverage | Selector parameters (trainable) |",
+        "|---|---:|---:|---:|",
+    ]
+    for row in conditions.to_dict("records"):
+        interval = (
+            f"{_format_number(row['exact_accuracy'])} "
+            f"[{_format_number(row['exact_accuracy_ci_low'])}, "
+            f"{_format_number(row['exact_accuracy_ci_high'])}]"
+        )
+        lines.append(
+            f"| {row['condition']} | {interval} | "
+            f"{_format_number(row['candidate_coverage'])} | "
+            f"{int(row['parameter_count'])} "
+            f"({int(row['trainable_parameter_count'])}) |"
+        )
+    lines += [
+        "",
+        "### Registered selector comparisons",
+        "",
+        "The statistics unit is the source/augmentation dependency component with "
+        "seeds nested within task.",
+        "",
+        "| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |",
+        "|---|---:|---:|---:|---|",
+    ]
+    for row in comparisons.to_dict("records"):
+        interval = (
+            f"{_format_number(row['estimate'])} "
+            f"[{_format_number(row['ci_low'])}, "
+            f"{_format_number(row['ci_high'])}]"
+        )
+        lines.append(
+            f"| {row['comparison']} | {interval} | "
+            f"{_format_number(row['wilcoxon_p_holm'])} | "
+            f"{bool(row['coverage_gate_passed'])} | "
+            f"**{row['conclusion']}** |"
+        )
+    lines += [
+        "",
+        "This is a validated hybrid proposal-selection audit, not a proposal-free "
+        "HRM/CTM reproduction. It cannot establish shared neural dynamics or a "
+        "biological mechanism.",
+    ]
+    return lines
 
 
 def _exp14_claim_statistics(row: pd.Series) -> dict[str, object]:
@@ -1742,7 +2086,12 @@ def _p2_formal_diagnostics(raw: pd.DataFrame, summary: pd.DataFrame) -> list[str
 
 
 def write_report(
-    results_root: Path, raw: pd.DataFrame, runs: pd.DataFrame, summary: pd.DataFrame
+    results_root: Path,
+    raw: pd.DataFrame,
+    runs: pd.DataFrame,
+    summary: pd.DataFrame,
+    *,
+    require_exp13_published_root: bool = True,
 ) -> None:
     lines = [
         "# Local Plasticity to Gated Low-Dimensional Dynamics",
@@ -1904,34 +2253,12 @@ def write_report(
             "",
             "No animal-primary formal exp11 summary is available. The behavior-only real-data conclusion is pending/inconclusive; this absence is not neural evidence.",
         ]
-    exp13_path = results_root / "exp13_arc_formal_comparisons.csv"
-    if exp13_path.is_file():
-        exp13 = pd.read_csv(exp13_path)
-        lines += [
-            "",
-            "## exp13 public ARC hybrid-solver audit",
-            "",
-            "All selectors receive one target-free, recomputed proposal panel. The statistics unit is the source/augmentation dependency component with seeds nested within task. The candidate oracle accesses labels only after proposal generation and defines coverage; no result in this section is neural or biological evidence.",
-            "",
-            f"Candidate coverage is {_format_number(exp13['candidate_coverage'].iloc[0])} against the registered {_format_number(exp13['minimum_candidate_coverage'].iloc[0])} gate.",
-            "",
-            "| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |",
-            "|---|---:|---:|---:|---|",
-        ]
-        for row in exp13.to_dict("records"):
-            interval = (
-                f"{_format_number(row['estimate'])} "
-                f"[{_format_number(row['ci_low'])}, {_format_number(row['ci_high'])}]"
-            )
-            lines.append(
-                f"| {row['comparison']} | {interval} | "
-                f"{_format_number(row['wilcoxon_p_holm'])} | "
-                f"{bool(row['coverage_gate_passed'])} | **{row['conclusion']}** |"
-            )
-        lines += [
-            "",
-            "This is an internally reproducible hybrid proposal-selection audit, not a proposal-free HRM/CTM solver. ARC cannot fill the pending multi-session neural-activity evidence gap.",
-        ]
+    for family in ("arc", "maze", "sudoku"):
+        lines += _exp13_structured_report_lines(
+            results_root,
+            family,
+            require_published_root=require_exp13_published_root,
+        )
     exp14_path = results_root / "exp14_ibl_multisession_neural_formal_comparisons.csv"
     if exp14_path.is_file():
         from scripts.summarize_exp14 import load_validated_exp14_snapshot
@@ -1992,7 +2319,8 @@ def write_report(
         "- Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.",
         "- IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.",
         "- Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
-        "- Exp13 is a public structured-task hybrid proposal selector. Its HRM/CTM-inspired continuous mechanisms, ARC accuracy, and candidate oracle cannot establish shared neural dynamics or a biological mechanism.",
+        "- Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.",
+        "- The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.",
         "",
         "## External-data status",
         "",
@@ -2006,9 +2334,9 @@ def write_report(
         "- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.",
         "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
-        "- `results/exp13_arc_formal_{raw,conditions,comparisons,run_manifest,report}`: public ARC task rows, task-primary statistics, provenance binding, and scoped interpretation.",
+        "- `results/exp13_{arc,maze,sudoku}_formal_{raw,conditions,comparisons,run_manifest,report}`: public structured-task rows, task-primary statistics, provenance binding, and family-scoped interpretation.",
         "- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_arc_formal.pdf`, and `results/exp14_ibl_multisession_neural_formal.pdf`: script-generated data figures when applicable.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, and `results/exp14_ibl_multisession_neural_formal.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(

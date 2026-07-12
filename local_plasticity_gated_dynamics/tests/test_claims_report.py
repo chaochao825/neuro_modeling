@@ -17,6 +17,7 @@ from scripts.build_report import (
     _portable_run_path,
     append_exp10_formal_claims,
     append_exp11_behavior_claims,
+    append_exp13_structured_claims,
     collect_runs,
     merge_compact_snapshot,
     write_compact_raw,
@@ -24,6 +25,8 @@ from scripts.build_report import (
     write_report,
 )
 from src.analysis.claims import evaluate_core_claims
+from src.analysis.structured_benchmark import STRUCTURED_CONDITIONS
+from src.analysis.structured_formal import summarize_structured_formal
 from src.analysis.run_provenance import (
     EXP10_RUN_FILES,
     canonical_seed_rows_sha256,
@@ -68,6 +71,106 @@ def _phase1_formal(n_seeds: int = 20) -> pd.DataFrame:
             ]
         )
     return pd.DataFrame(rows)
+
+
+def _bound_exp13_family_fixture(
+    results_root: Path,
+    family: str,
+    *,
+    test_split_role: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Write a synthetic, hash-bound 30-seed structured snapshot."""
+
+    run_bindings = {
+        "source_manifest_sha256": "b" * 64,
+        "source_revision": f"{family}-revision",
+        "dataset_name": f"synthetic-{family}",
+        "formal_config_sha256": "d" * 64,
+        "test_split_role": test_split_role,
+    }
+    parameter_counts = {
+        "support_heuristic": (0, 0),
+        "flat_local": (1657, 8),
+        "hierarchical_local": (1673, 24),
+        "trace_local": (1681, 32),
+        "gru_bptt": (1841, 1841),
+        "candidate_oracle": (0, 0),
+    }
+    rows: list[dict[str, object]] = []
+    for seed in range(30):
+        for task_index in range(12):
+            for condition in STRUCTURED_CONDITIONS:
+                total, trainable = parameter_counts[condition]
+                rows.append(
+                    {
+                        "seed": seed,
+                        "condition": condition,
+                        "task_id": f"{family}-task-{task_index}",
+                        "source_group": f"{family}-source-{task_index}",
+                        "augmentation_group": f"{family}-augmentation-{task_index}",
+                        "exact": 1.0,
+                        "candidate_covered": 1.0,
+                        "candidate_fingerprint": f"{family}-proposal-{task_index}",
+                        "parameter_count": total,
+                        "trainable_parameter_count": trainable,
+                        "used_bptt": condition == "gru_bptt",
+                        "control_dim": (
+                            4
+                            if condition in {"hierarchical_local", "trace_local"}
+                            else 0
+                        ),
+                        "control_operator_rank": (
+                            4
+                            if condition in {"hierarchical_local", "trace_local"}
+                            else 0
+                        ),
+                        "run_id": f"{family}-run-{seed}",
+                        "run_git_commit": "c" * 40,
+                        "run_git_dirty": False,
+                        **run_bindings,
+                    }
+                )
+    raw = pd.DataFrame(rows)
+    conditions, comparisons = summarize_structured_formal(
+        raw,
+        expected_seeds=range(30),
+        seed=73,
+        n_bootstrap=100,
+        task_family=family,
+        test_split_role=test_split_role,
+    )
+    prefix = f"exp13_{family}_formal"
+    raw_path = results_root / f"{prefix}_raw.csv.gz"
+    manifest_path = results_root / f"{prefix}_run_manifest.csv"
+    raw.to_csv(
+        raw_path,
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    pd.DataFrame(
+        {
+            "seed": range(30),
+            "run_id": [f"{family}-run-{seed}" for seed in range(30)],
+            "status": "complete",
+            "git_commit": "c" * 40,
+            "git_dirty": False,
+            **run_bindings,
+        }
+    ).to_csv(manifest_path, index=False)
+    summary_bindings = {
+        **run_bindings,
+        "task_family": family,
+        "scoped_raw_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
+        "run_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+        "run_git_commit": "c" * 40,
+        "run_git_dirty": False,
+    }
+    for column, value in summary_bindings.items():
+        conditions[column] = value
+        comparisons[column] = value
+    conditions.to_csv(results_root / f"{prefix}_conditions.csv", index=False)
+    comparisons.to_csv(results_root / f"{prefix}_comparisons.csv", index=False)
+    return conditions, comparisons
 
 
 def _phase4_formal(n_seeds: int = 20) -> pd.DataFrame:
@@ -390,6 +493,150 @@ def test_report_keeps_exp10_and_exp11_evidence_scopes_self_contained(
     assert "exp11 IBL hidden-block benchmark (behavior only)" in report
     assert "no spikes, neural activity, or shared neural dynamics" in report
     assert "`" + "d" * 64 + "`" in report
+
+
+def test_exp13_maze_and_sudoku_claims_preserve_registered_scope(
+    tmp_path: Path,
+) -> None:
+    _bound_exp13_family_fixture(tmp_path, "maze", test_split_role="ood")
+    _bound_exp13_family_fixture(tmp_path, "sudoku", test_split_role="non_ood")
+
+    summary = append_exp13_structured_claims(
+        pd.DataFrame(), tmp_path, require_published_root=False
+    )
+    maze = summary.loc[summary["claim_id"].str.startswith("M")].set_index("claim_id")
+    sudoku = summary.loc[summary["claim_id"].str.startswith("N")].set_index("claim_id")
+
+    assert len(maze) == 6
+    assert maze.loc["M5_maze_hierarchical_90pct_gru", "conclusion"] == "support"
+    assert set(maze.drop(index="M5_maze_hierarchical_90pct_gru")["conclusion"]) == {
+        "inconclusive"
+    }
+    assert len(sudoku) == 6
+    assert set(sudoku["conclusion"]) == {"inconclusive"}
+    sudoku_retention = sudoku.loc["N5_sudoku_hierarchical_90pct_gru"]
+    assert float(sudoku_retention["p_value"]) < 0.05
+    assert "test_split_role=non_ood" in sudoku_retention["note"]
+    assert "30 seeds" in sudoku_retention["note"]
+    assert "selector-level parameters" in sudoku_retention["note"]
+    assert "no end-to-end efficiency claim" in sudoku_retention["note"]
+    assert "raw sha256=" in sudoku_retention["note"]
+    assert "run manifest sha256=" in sudoku_retention["note"]
+
+
+def test_exp13_maze_and_sudoku_report_sections_are_independent(
+    tmp_path: Path,
+) -> None:
+    _bound_exp13_family_fixture(tmp_path, "maze", test_split_role="ood")
+    _bound_exp13_family_fixture(tmp_path, "sudoku", test_split_role="non_ood")
+    summary = append_exp13_structured_claims(
+        pd.DataFrame(), tmp_path, require_published_root=False
+    )
+
+    write_report(
+        tmp_path,
+        pd.DataFrame(),
+        pd.DataFrame(),
+        summary,
+        require_exp13_published_root=False,
+    )
+    report = (tmp_path / "report.md").read_text(encoding="utf-8")
+
+    assert "## exp13 public Maze hybrid-solver audit" in report
+    assert "## exp13 public Sudoku hybrid-solver audit" in report
+    assert report.count("### Absolute exact accuracy") == 2
+    assert report.count("### Registered selector comparisons") == 2
+    assert "Dataset `synthetic-maze` uses `test_split_role=ood`" in report
+    assert "Dataset `synthetic-sudoku` uses `test_split_role=non_ood`" in report
+    assert "even a significant numerical margin remains core-ineligible" in report
+    assert "Parameter counts below describe the selector only" in report
+
+
+def test_exp13_family_tamper_is_rejected_before_global_summary(tmp_path: Path) -> None:
+    _, comparisons = _bound_exp13_family_fixture(
+        tmp_path, "maze", test_split_role="ood"
+    )
+    comparisons.loc[0, "estimate"] = 999.0
+    comparisons.to_csv(tmp_path / "exp13_maze_formal_comparisons.csv", index=False)
+
+    with pytest.raises(ValueError, match="differs from raw recomputation"):
+        append_exp13_structured_claims(
+            pd.DataFrame(), tmp_path, require_published_root=False
+        )
+
+
+def test_exp13_seed_run_receipt_tamper_is_rejected(tmp_path: Path) -> None:
+    conditions, comparisons = _bound_exp13_family_fixture(
+        tmp_path, "maze", test_split_role="ood"
+    )
+    manifest_path = tmp_path / "exp13_maze_formal_run_manifest.csv"
+    run_manifest = pd.read_csv(manifest_path)
+    run_manifest.loc[run_manifest["seed"].eq(0), "run_id"] = "forged-run-id"
+    run_manifest.to_csv(manifest_path, index=False)
+    forged_manifest_sha = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    conditions["run_manifest_sha256"] = forged_manifest_sha
+    comparisons["run_manifest_sha256"] = forged_manifest_sha
+    conditions.to_csv(tmp_path / "exp13_maze_formal_conditions.csv", index=False)
+    comparisons.to_csv(tmp_path / "exp13_maze_formal_comparisons.csv", index=False)
+
+    with pytest.raises(ValueError, match="raw/run manifest binding differs"):
+        append_exp13_structured_claims(
+            pd.DataFrame(), tmp_path, require_published_root=False
+        )
+
+
+def test_exp13_single_raw_provenance_null_is_rejected(tmp_path: Path) -> None:
+    conditions, comparisons = _bound_exp13_family_fixture(
+        tmp_path, "maze", test_split_role="ood"
+    )
+    raw_path = tmp_path / "exp13_maze_formal_raw.csv.gz"
+    raw = pd.read_csv(raw_path)
+    raw.loc[0, "run_id"] = np.nan
+    raw.to_csv(
+        raw_path,
+        index=False,
+        compression={"method": "gzip", "mtime": 0},
+    )
+    forged_raw_sha = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+    conditions["scoped_raw_sha256"] = forged_raw_sha
+    comparisons["scoped_raw_sha256"] = forged_raw_sha
+    conditions.to_csv(tmp_path / "exp13_maze_formal_conditions.csv", index=False)
+    comparisons.to_csv(tmp_path / "exp13_maze_formal_comparisons.csv", index=False)
+
+    with pytest.raises(ValueError, match="missing run_id provenance"):
+        append_exp13_structured_claims(
+            pd.DataFrame(), tmp_path, require_published_root=False
+        )
+
+
+def test_exp13_partial_family_snapshot_fails_closed(tmp_path: Path) -> None:
+    pd.DataFrame({"condition": ["flat_local"]}).to_csv(
+        tmp_path / "exp13_maze_formal_conditions.csv", index=False
+    )
+
+    with pytest.raises(FileNotFoundError, match="maze.*partially present"):
+        append_exp13_structured_claims(
+            pd.DataFrame(), tmp_path, require_published_root=False
+        )
+
+
+def test_exp13_arc_claim_ids_remain_backward_compatible(tmp_path: Path) -> None:
+    _bound_exp13_family_fixture(tmp_path, "arc", test_split_role="ood")
+
+    summary = append_exp13_structured_claims(
+        pd.DataFrame(), tmp_path, require_published_root=False
+    )
+
+    assert set(summary["claim_id"]) == {
+        "T1_arc_hierarchical_vs_flat",
+        "T2_arc_trace_vs_flat",
+        "T3_arc_hierarchical_vs_heuristic",
+        "T4_arc_hierarchical_vs_gru",
+        "T5_arc_hierarchical_90pct_gru",
+        "T6_arc_trace_increment",
+    }
+    assert set(summary["experiment"]) == {"exp13_structured_reasoning"}
+    assert set(summary["multiplicity_method"]) == {"Holm(exp13_ARC_registered_family)"}
 
 
 def _bound_exp11_summary_fixture(tmp_path: Path) -> pd.DataFrame:
