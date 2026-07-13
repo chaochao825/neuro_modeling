@@ -148,9 +148,12 @@ layers:
    candidate activity with local row/column/box interactions; ARC uses a slow
    operator-family belief and fast demonstration-grounded program selection.
    These are task adapters inspired by design principles, not BDH or HRM
-   reproductions. Spikes and BPTT are absent. Until a matched-compute comparator
-   is registered, Exp15 is forced to `inconclusive` even on formal public data.
-   See `docs/task_specialized_reasoning_contract_zh.md`.
+   reproductions. Spikes and BPTT are absent. The verified-source ARC panel now
+   compares slow/fast belief with a flat selector using deterministically
+   regenerated, fingerprint-identical candidate panels and an exactly matched
+   charged abstract-operation budget. Its claim
+   remains fail-closed on source, OOD, pairing, compute, and candidate-coverage
+   gates. See `docs/task_specialized_reasoning_contract_zh.md`.
 
 ### Current exp13 public ARC result
 
@@ -179,14 +182,22 @@ so neither result is an end-to-end neural reasoning claim.
 
 ### Current exp15 task-specialized results
 
-On 399 ARC-AGI-1 evaluation tasks, the slow/fast program adapter achieved
-0.2506% exact accuracy (95% source-group CI 0–0.7519%). The actual ARC tree
-manifest is not yet verified, so this run is evidence-ineligible. On 28
-de-duplicated Sudoku V2 puzzles, pure local constraint dynamics achieved 75.0%
-exact accuracy (95% CI 57.14–89.29%); the separately reported bounded-search
-condition (up to 256 branches) achieved 100%. Because branch search is a distinct mechanism, the
-Sudoku split is non-OOD, and no matched-compute advantage comparator is
-registered, all Exp15 conclusions remain `inconclusive`.
+The clean Exp15 ARC run verified all 800 ARC-AGI-1 JSON files and the license,
+then evaluated 399 de-duplicated evaluation tasks. Slow/fast belief and the flat
+matched selector each solved 1/399 tasks: 0.2506% exact (95% source-group CI
+0–0.7519%). Their paired difference is 0 percentage points (95% CI [0, 0],
+Holm `p=1`). Candidate fingerprints and charged compute match exactly, but the
+finite proposal library covers only 5/399 tasks (1.2531%), far below the
+registered 90% gate. The conclusion is therefore `inconclusive`, not evidence
+for hierarchical advantage. The compute quantity is an audited abstract proxy,
+not FLOPs, wall-clock time, energy, or end-to-end efficiency. See the
+[scoped report](results/exp15_arc_matched_formal_report.md).
+
+On 28 de-duplicated Sudoku V2 puzzles, pure local constraint dynamics achieved
+75.0% exact accuracy (95% CI 57.14–89.29%); the separately reported
+bounded-search condition (up to 256 branches) achieved 100%. Because branch
+search is a distinct mechanism and the Sudoku split is non-OOD, the Sudoku
+mechanism conclusion remains `inconclusive`.
 
 ### exp14 multi-session neural status
 

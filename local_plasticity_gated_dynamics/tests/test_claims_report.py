@@ -4,6 +4,7 @@ import gzip
 import hashlib
 import json
 import re
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,7 @@ from scripts.build_report import (
     append_exp10_formal_claims,
     append_exp11_behavior_claims,
     append_exp13_structured_claims,
+    append_exp15_arc_claim,
     collect_runs,
     merge_compact_snapshot,
     write_compact_raw,
@@ -637,6 +639,71 @@ def test_exp13_arc_claim_ids_remain_backward_compatible(tmp_path: Path) -> None:
     }
     assert set(summary["experiment"]) == {"exp13_structured_reasoning"}
     assert set(summary["multiplicity_method"]) == {"Holm(exp13_ARC_registered_family)"}
+
+
+def _copy_exp15_arc_publication(tmp_path: Path) -> None:
+    source_root = Path(__file__).resolve().parents[1] / "results"
+    for suffix in (
+        "raw.jsonl",
+        "conditions.csv",
+        "comparison.csv",
+        "run_manifest.csv",
+    ):
+        name = f"exp15_arc_matched_formal_{suffix}"
+        shutil.copyfile(source_root / name, tmp_path / name)
+
+
+def test_exp15_arc_claim_and_report_use_the_trusted_publication(
+    tmp_path: Path,
+) -> None:
+    _copy_exp15_arc_publication(tmp_path)
+
+    summary = append_exp15_arc_claim(pd.DataFrame(), tmp_path)
+
+    assert len(summary) == 1
+    row = summary.iloc[0]
+    assert row["claim_id"] == "V1_exp15_arc_slow_fast_vs_flat"
+    assert row["conclusion"] == "inconclusive"
+    assert int(row["n_complete"]) == 399
+    assert float(row["estimate"]) == pytest.approx(0.0)
+    assert "coverage=0.01253133 vs required 0.9000" in str(row["note"])
+    write_report(
+        tmp_path,
+        pd.DataFrame(),
+        pd.DataFrame(),
+        summary,
+        require_exp13_published_root=False,
+    )
+    report = (tmp_path / "report.md").read_text(encoding="utf-8")
+    assert "## exp15 verified-source ARC task-specialization audit" in report
+    assert "0.2506%" in report
+    assert "1.2531% versus the registered 90.0% gate" in report
+    assert "not evidence for hierarchical advantage" in report
+
+
+def test_exp15_arc_global_claim_rejects_derived_table_tampering(
+    tmp_path: Path,
+) -> None:
+    _copy_exp15_arc_publication(tmp_path)
+    path = tmp_path / "exp15_arc_matched_formal_conditions.csv"
+    conditions = pd.read_csv(path)
+    conditions.loc[0, "exact_accuracy"] = 0.75
+    conditions.to_csv(path, index=False, lineterminator="\n")
+
+    with pytest.raises(ValueError, match="differs from raw"):
+        append_exp15_arc_claim(pd.DataFrame(), tmp_path)
+
+
+def test_exp15_arc_partial_publication_fails_closed(tmp_path: Path) -> None:
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "results"
+        / "exp15_arc_matched_formal_conditions.csv"
+    )
+    shutil.copyfile(source, tmp_path / source.name)
+
+    with pytest.raises(FileNotFoundError, match="Exp15 ARC.*partially present"):
+        append_exp15_arc_claim(pd.DataFrame(), tmp_path)
 
 
 def _bound_exp11_summary_fixture(tmp_path: Path) -> pd.DataFrame:

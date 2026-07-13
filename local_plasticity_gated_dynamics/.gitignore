@@ -39,6 +39,8 @@ results/*.pdf
 !results/exp13_sudoku_formal.pdf
 !results/exp14_ibl_multisession_neural_formal.png
 !results/exp14_ibl_multisession_neural_formal.pdf
+!results/exp15_arc_matched_formal.png
+!results/exp15_arc_matched_formal.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

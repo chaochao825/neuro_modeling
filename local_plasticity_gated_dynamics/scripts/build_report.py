@@ -146,6 +146,26 @@ _EXP13_FAMILY_SPECS = {
     },
 }
 
+_EXP15_ARC_PUBLISHED = {
+    "prefix": "exp15_arc_matched_formal",
+    "raw_sha256": "2353bf280aa5ded0fd3c1d202fe5eedf796c0de07091afffa4db0178548c9fcf",
+    "run_manifest_sha256": (
+        "fc4c6a177d2c08a81dcac6e0075f6bff8fa60f22937f63b29c715c83d8d6a066"
+    ),
+    "formal_config_sha256": (
+        "cbf7bf6ac6bf7fd77e522bd70aac93b535370d80740b97c539e799885fbbbed2"
+    ),
+    "source_manifest_sha256": (
+        "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda"
+    ),
+    "source_license_sha256": (
+        "b3a161754ffc20840ccf92aec0fe464fbbcf42f14c22f78a3ec2e98fca3864ca"
+    ),
+    "git_commit": "cbec277503d02844729d8fea5648a9e34e2ce44b",
+    "n_tasks": 399,
+    "n_metrics_rows": 801,
+}
+
 
 def _csv_value(value):
     if isinstance(value, (dict, list, tuple)):
@@ -1361,6 +1381,334 @@ def append_exp14_neural_claim(
     return pd.concat([core_summary, appended[core_summary.columns]], ignore_index=True)
 
 
+def _strict_published_bool(value: object, *, label: str) -> bool:
+    normalized = str(value).strip().lower()
+    if normalized not in {"true", "false"}:
+        raise ValueError(f"{label} is not a strict published boolean: {value!r}")
+    return normalized == "true"
+
+
+def _load_exp15_arc_snapshot(
+    results_root: Path,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str] | None:
+    """Load the one trusted Exp15 ARC publication or fail closed."""
+
+    from scripts.summarize_exp15_arc_matched import load_published_snapshot
+
+    prefix_name = str(_EXP15_ARC_PUBLISHED["prefix"])
+    prefix = results_root / prefix_name
+    raw_path = prefix.with_name(prefix.name + "_raw.jsonl")
+    conditions_path = prefix.with_name(prefix.name + "_conditions.csv")
+    comparison_path = prefix.with_name(prefix.name + "_comparison.csv")
+    manifest_path = prefix.with_name(prefix.name + "_run_manifest.csv")
+    paths = (raw_path, conditions_path, comparison_path, manifest_path)
+    if not any(path.is_file() for path in paths):
+        return None
+    if not all(path.is_file() for path in paths):
+        raise FileNotFoundError("Exp15 ARC formal snapshot is only partially present")
+
+    raw_sha = _file_sha256(raw_path)
+    manifest_sha = _file_sha256(manifest_path)
+    if (
+        raw_sha != _EXP15_ARC_PUBLISHED["raw_sha256"]
+        or manifest_sha != (_EXP15_ARC_PUBLISHED["run_manifest_sha256"])
+    ):
+        raise ValueError("Exp15 ARC raw/run files differ from the trusted publication")
+    conditions, comparison, manifest = load_published_snapshot(results_root)
+    if len(manifest) != 1 or len(comparison) != 1 or len(conditions) != 2:
+        raise ValueError("Exp15 ARC publication has an invalid row family")
+
+    run = manifest.iloc[0]
+    expected_manifest_values = {
+        "family": "arc",
+        "status": "complete",
+        "seed": 0,
+        "git_commit": _EXP15_ARC_PUBLISHED["git_commit"],
+        "registered_formal_config_sha256": _EXP15_ARC_PUBLISHED["formal_config_sha256"],
+        "source_manifest_sha256": _EXP15_ARC_PUBLISHED["source_manifest_sha256"],
+        "source_license_sha256": _EXP15_ARC_PUBLISHED["source_license_sha256"],
+        "metrics_row_count": _EXP15_ARC_PUBLISHED["n_metrics_rows"],
+        "published_raw_sha256": raw_sha,
+    }
+    for column, expected in expected_manifest_values.items():
+        if column not in manifest or str(run[column]) != str(expected):
+            raise ValueError(f"Exp15 ARC run manifest differs at {column}")
+    if _strict_published_bool(run["git_dirty"], label="Exp15 git_dirty") or not (
+        _strict_published_bool(
+            run["source_tree_verified"], label="Exp15 source_tree_verified"
+        )
+    ):
+        raise ValueError("Exp15 ARC run is dirty or its source tree is unverified")
+
+    expected_conditions = {
+        "arc_slow_fast_program",
+        "arc_flat_program_matched",
+    }
+    if (
+        set(conditions["condition"].astype(str)) != expected_conditions
+        or conditions["condition"].astype(str).duplicated().any()
+    ):
+        raise ValueError("Exp15 ARC absolute condition family is incomplete")
+    required_condition_columns = {
+        "candidate_coverage",
+        "exact_accuracy",
+        "exact_accuracy_ci_low",
+        "exact_accuracy_ci_high",
+        "formal_data_eligible",
+        "matched_advantage_comparator_registered",
+        "n_bootstrap",
+        "n_independent_source_groups",
+        "n_tasks",
+        "source_acquisition_verified",
+        "source_manifest_verified",
+        "task_family",
+        "used_bptt",
+    }
+    missing_conditions = required_condition_columns - set(conditions.columns)
+    if missing_conditions:
+        raise ValueError(
+            f"Exp15 ARC conditions lack columns: {sorted(missing_conditions)}"
+        )
+    for row in conditions.to_dict("records"):
+        if (
+            int(row["n_bootstrap"]) != 10_000
+            or int(row["n_tasks"]) != _EXP15_ARC_PUBLISHED["n_tasks"]
+            or int(row["n_independent_source_groups"])
+            != _EXP15_ARC_PUBLISHED["n_tasks"]
+            or str(row["task_family"]) != "arc"
+            or not _strict_published_bool(
+                row["formal_data_eligible"], label="Exp15 formal_data_eligible"
+            )
+            or not _strict_published_bool(
+                row["matched_advantage_comparator_registered"],
+                label="Exp15 comparator registration",
+            )
+            or not _strict_published_bool(
+                row["source_acquisition_verified"],
+                label="Exp15 source acquisition",
+            )
+            or not _strict_published_bool(
+                row["source_manifest_verified"], label="Exp15 source manifest"
+            )
+            or _strict_published_bool(row["used_bptt"], label="Exp15 used_bptt")
+        ):
+            raise ValueError("Exp15 ARC condition provenance gate is invalid")
+
+    paired = comparison.iloc[0]
+    required_comparison_columns = {
+        "bootstrap_seed",
+        "candidate",
+        "candidate_coverage",
+        "candidate_coverage_matched",
+        "candidate_fingerprints_matched",
+        "charged_compute_matched",
+        "ci_high",
+        "ci_low",
+        "claim_conclusion",
+        "comparison",
+        "core_claim_eligible",
+        "coverage_gate_passed",
+        "estimate",
+        "formal_data_eligible",
+        "matched_advantage_comparator_registered",
+        "minimum_candidate_coverage",
+        "multiple_comparison_family",
+        "n_bootstrap",
+        "n_independent_source_groups",
+        "reference",
+        "registered_ood_split",
+        "task_family",
+        "used_bptt",
+        "wilcoxon_p_holm",
+    }
+    missing_comparison = required_comparison_columns - set(comparison.columns)
+    if missing_comparison:
+        raise ValueError(
+            f"Exp15 ARC comparison lacks columns: {sorted(missing_comparison)}"
+        )
+    if (
+        str(paired["comparison"]) != "slow_fast_vs_flat_matched"
+        or str(paired["candidate"]) != "arc_slow_fast_program"
+        or str(paired["reference"]) != "arc_flat_program_matched"
+        or str(paired["task_family"]) != "arc"
+        or int(paired["n_bootstrap"]) != 10_000
+        or int(paired["n_independent_source_groups"]) != _EXP15_ARC_PUBLISHED["n_tasks"]
+        or not np.isclose(float(paired["minimum_candidate_coverage"]), 0.9)
+        or not _strict_published_bool(
+            paired["formal_data_eligible"], label="Exp15 paired data eligibility"
+        )
+        or not _strict_published_bool(
+            paired["registered_ood_split"], label="Exp15 OOD registration"
+        )
+        or not _strict_published_bool(
+            paired["matched_advantage_comparator_registered"],
+            label="Exp15 paired comparator registration",
+        )
+        or not _strict_published_bool(
+            paired["candidate_fingerprints_matched"],
+            label="Exp15 candidate fingerprints",
+        )
+        or not _strict_published_bool(
+            paired["candidate_coverage_matched"],
+            label="Exp15 candidate coverage matching",
+        )
+        or not _strict_published_bool(
+            paired["charged_compute_matched"], label="Exp15 charged compute"
+        )
+        or _strict_published_bool(paired["used_bptt"], label="Exp15 paired BPTT")
+    ):
+        raise ValueError("Exp15 ARC paired comparison contract is invalid")
+
+    eligible = _strict_published_bool(
+        paired["core_claim_eligible"], label="Exp15 core claim eligibility"
+    )
+    coverage_passed = float(paired["candidate_coverage"]) >= float(
+        paired["minimum_candidate_coverage"]
+    )
+    if coverage_passed != _strict_published_bool(
+        paired["coverage_gate_passed"], label="Exp15 coverage gate"
+    ):
+        raise ValueError("Exp15 ARC coverage gate differs from published values")
+    if eligible != coverage_passed:
+        raise ValueError("Exp15 ARC eligibility differs from its complete gate set")
+    if (
+        eligible
+        and float(paired["wilcoxon_p_holm"]) < 0.05
+        and float(paired["ci_low"]) > 0.0
+    ):
+        expected_conclusion = "support"
+    elif (
+        eligible
+        and float(paired["wilcoxon_p_holm"]) < 0.05
+        and float(paired["ci_high"]) < 0.0
+    ):
+        expected_conclusion = "oppose"
+    else:
+        expected_conclusion = "inconclusive"
+    if str(paired["claim_conclusion"]) != expected_conclusion:
+        raise ValueError("Exp15 ARC conclusion differs from its registered gates")
+    return conditions, comparison, manifest, raw_sha, manifest_sha
+
+
+def append_exp15_arc_claim(
+    core_summary: pd.DataFrame,
+    results_root: Path,
+) -> pd.DataFrame:
+    """Append the verified-source, task-primary Exp15 ARC comparison."""
+
+    snapshot = _load_exp15_arc_snapshot(results_root)
+    if snapshot is None:
+        return core_summary.copy()
+    conditions, comparison, manifest, raw_sha, _manifest_sha = snapshot
+    paired = comparison.iloc[0]
+    indexed = conditions.set_index("condition")
+    run = manifest.iloc[0]
+    appended = pd.DataFrame(
+        [
+            {
+                "claim_id": "V1_exp15_arc_slow_fast_vs_flat",
+                "experiment": "exp15_task_specialized_reasoning",
+                "metric": "exact_task_accuracy",
+                "comparison": "slow/fast belief minus flat matched selector",
+                "stats_unit": "ARC task/source group",
+                "n_planned": int(paired["n_independent_source_groups"]),
+                "n_complete": int(paired["n_independent_source_groups"]),
+                "n_failed": 0,
+                "estimate": float(paired["estimate"]),
+                "ci_low": float(paired["ci_low"]),
+                "ci_high": float(paired["ci_high"]),
+                "effect_size": float(paired["estimate"]),
+                "p_value": float(paired["wilcoxon_p_holm"]),
+                "multiplicity_method": ("Holm(exp15_ARC_one_registered_comparison)"),
+                "conclusion": str(paired["claim_conclusion"]),
+                "criterion": (
+                    "verified OOD source, identical candidates, matched charged "
+                    "compute, >=90% candidate coverage, paired CI and Holm p<0.05"
+                ),
+                "note": (
+                    "Task-specialized finite-program selector only; no neural or "
+                    "biological claim; slow/fast and flat exact accuracy="
+                    f"{float(indexed.loc['arc_slow_fast_program', 'exact_accuracy']):.8f}/"
+                    f"{float(indexed.loc['arc_flat_program_matched', 'exact_accuracy']):.8f}; "
+                    f"coverage={float(paired['candidate_coverage']):.8f} vs required "
+                    f"{float(paired['minimum_candidate_coverage']):.4f}; compute is "
+                    "an audited abstract operation proxy, not FLOPs/time/energy; "
+                    f"source manifest={run['source_manifest_sha256']}; clean commit="
+                    f"{run['git_commit']}; raw sha256={raw_sha}"
+                ),
+            }
+        ]
+    )
+    if core_summary.empty:
+        return appended
+    missing_core = sorted(set(appended.columns) - set(core_summary.columns))
+    if missing_core:
+        raise ValueError(f"core summary schema lacks columns: {missing_core}")
+    return pd.concat([core_summary, appended[core_summary.columns]], ignore_index=True)
+
+
+def _exp15_arc_report_lines(results_root: Path) -> list[str]:
+    snapshot = _load_exp15_arc_snapshot(results_root)
+    if snapshot is None:
+        return []
+    conditions, comparison, manifest, raw_sha, manifest_sha = snapshot
+    paired = comparison.iloc[0]
+    run = manifest.iloc[0]
+    labels = {
+        "arc_slow_fast_program": "Slow/fast family belief",
+        "arc_flat_program_matched": "Flat matched selector",
+    }
+    lines = [
+        "",
+        "## exp15 verified-source ARC task-specialization audit",
+        "",
+        "All 800 ARC-AGI-1 JSON files and the Apache-2.0 license were "
+        f"verified against source manifest `{run['source_manifest_sha256']}`. "
+        "The held-out evaluation panel contains 399 source groups after the "
+        "registered cross-split duplicate exclusion. Query targets are used "
+        "only for scoring and the explicitly labeled candidate-coverage oracle.",
+        "",
+        "| Condition | Exact tasks [95% source-group CI] | Candidate coverage | "
+        "Mean measured / charged abstract proxy |",
+        "|---|---:|---:|---:|",
+    ]
+    for row in conditions.to_dict("records"):
+        interval = (
+            f"{100 * float(row['exact_accuracy']):.4f}% "
+            f"[{100 * float(row['exact_accuracy_ci_low']):.4f}%, "
+            f"{100 * float(row['exact_accuracy_ci_high']):.4f}%]"
+        )
+        compute = (
+            f"{float(row['mean_measured_compute_units']):.2f} / "
+            f"{float(row['mean_charged_compute_units']):.2f}"
+        )
+        lines.append(
+            f"| {labels[str(row['condition'])]} | {interval} | "
+            f"{100 * float(row['candidate_coverage']):.4f}% | {compute} |"
+        )
+    lines += [
+        "",
+        "The registered slow/fast-minus-flat difference is "
+        f"{100 * float(paired['estimate']):.4f} percentage points "
+        f"(95% paired source-group CI {100 * float(paired['ci_low']):.4f} to "
+        f"{100 * float(paired['ci_high']):.4f}; Holm p="
+        f"{float(paired['wilcoxon_p_holm']):.4g}). Candidate coverage is "
+        f"{100 * float(paired['candidate_coverage']):.4f}% versus the registered "
+        f"{100 * float(paired['minimum_candidate_coverage']):.1f}% gate. "
+        f"The scoped conclusion is **{paired['claim_conclusion']}**; this is not "
+        "evidence for hierarchical advantage.",
+        "",
+        "Charged compute is exactly paired by a preregistered abstract operation "
+        "proxy. It is not a FLOP, wall-clock, energy, or end-to-end efficiency "
+        "measurement. This task adapter is not a BDH/HRM reproduction and cannot "
+        "substitute for neural shared-dynamics evidence.",
+        "",
+        f"Trusted raw SHA-256: `{raw_sha}`; run-manifest SHA-256: "
+        f"`{manifest_sha}`; clean run commit: `{run['git_commit']}`.",
+    ]
+    return lines
+
+
 def _portable_run_path(value: object) -> object:
     """Remove machine-specific prefixes from a published run path.
 
@@ -2294,6 +2642,7 @@ def write_report(
             "Only `stimulus_pre / primary_past_safe` updates the core claim. "
             "Movement-pre and full-trial-covariate results remain sensitivity-only.",
         ]
+    lines += _exp15_arc_report_lines(results_root)
     lines += [
         "",
         "## Interpretation safeguards",
@@ -2321,6 +2670,7 @@ def write_report(
         "- Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.",
         "- Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.",
         "- The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.",
+        "- Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.",
         "",
         "## External-data status",
         "",
@@ -2336,7 +2686,8 @@ def write_report(
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
         "- `results/exp13_{arc,maze,sudoku}_formal_{raw,conditions,comparisons,run_manifest,report}`: public structured-task rows, task-primary statistics, provenance binding, and family-scoped interpretation.",
         "- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, and `results/exp14_ibl_multisession_neural_formal.pdf`: script-generated data figures when applicable.",
+        "- `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(
@@ -2391,6 +2742,8 @@ def main() -> None:
             results_root / "exp14_ibl_multisession_neural_formal_conditions.csv"
         ).is_file():
             scripts.append("exp14_ibl_multisession_neural_plot.py")
+        if (results_root / "exp15_arc_matched_formal_conditions.csv").is_file():
+            scripts.append("exp15_arc_matched_plot.py")
         for script in scripts:
             subprocess.run(
                 [
@@ -2408,6 +2761,7 @@ def main() -> None:
     summary = append_exp11_behavior_claims(summary, results_root)
     summary = append_exp13_structured_claims(summary, results_root)
     summary = append_exp14_neural_claim(summary, results_root)
+    summary = append_exp15_arc_claim(summary, results_root)
     summary.to_csv(results_root / "summary.csv", index=False, lineterminator="\n")
     write_report(results_root, raw, runs, summary)
 

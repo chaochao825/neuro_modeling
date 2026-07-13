@@ -515,7 +515,7 @@ def publish_snapshot(
     comp = comparison.iloc[0]
     report = f"""# Exp15 ARC verified-source matched-compute audit
 
-This additive run used clean commit `{manifest_row["git_commit"]}` and verified all 800 ARC-AGI-1 JSON files plus the Apache-2.0 license against the reviewed acquisition manifest `{manifest_row["source_manifest_sha256"]}`. Query targets were used only by the held-out scorer and candidate-coverage diagnostic.
+This additive run used clean commit `{manifest_row["git_commit"]}` and verified all 800 ARC-AGI-1 JSON files plus the Apache-2.0 license against the reviewed per-file source manifest `{manifest_row["source_manifest_sha256"]}`. The separate acquisition and validation receipts were also verified. Query targets were used only by the held-out scorer and candidate-coverage diagnostic.
 
 ## Absolute task performance
 

@@ -111,6 +111,14 @@ committed configs and scripts regenerate that layout.
   0.501%, and the candidate oracle 1.253%. All registered advantage claims are
   `inconclusive`. Low coverage prevents either support or a clean mechanism
   rejection, and the result is not a competitive ARC solution.
+- The additive Exp15 ARC run repairs the former source-manifest and comparator
+  gaps: all 800 JSON files plus the license are hash-verified, and slow/fast and
+  flat selectors receive identical candidates with exactly matched charged
+  abstract-operation budgets. Both solve 1/399 tasks (0.2506%); their paired
+  difference is exactly zero. Candidate coverage remains only 5/399 (1.2531%)
+  versus the registered 90% gate, so the scoped conclusion is `inconclusive`.
+  The charged budget is not FLOPs, wall time, energy, or an end-to-end
+  efficiency measurement, and this task adapter is not a BDH/HRM reproduction.
 - `exp14` repairs the main exp06 interface flaws in code: event-specific
   nuisance tables, frozen complete-case masks, integer-count validation,
   whole-block split fingerprints, past-only belief receipts, train-only unit
