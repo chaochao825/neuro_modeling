@@ -1,0 +1,194 @@
+{
+  "arc": [
+    {
+      "commit": "399030444e0ab0cc8b4e199870fb20b863846f34",
+      "license": "Apache-2.0",
+      "name": "ARC-AGI-1",
+      "path": "/home/spco/sow_linear/neuro_modeling_public_data_staging/data/ARC-AGI-1/399030444e0ab0cc8b4e199870fb20b863846f34",
+      "splits": {
+        "evaluation": {
+          "bytes": 2345957,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 400,
+          "tasks_with_name_metadata": 9,
+          "test_inputs": 419,
+          "test_outputs": 419,
+          "test_pairs": 419,
+          "train_inputs": 1363,
+          "train_outputs": 1363,
+          "train_pairs": 1363,
+          "unique_raw_sha256": 400,
+          "unique_semantic_sha256": 400,
+          "unique_task_ids": 400
+        },
+        "training": {
+          "bytes": 1436054,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 400,
+          "tasks_with_name_metadata": 2,
+          "test_inputs": 416,
+          "test_outputs": 416,
+          "test_pairs": 416,
+          "train_inputs": 1302,
+          "train_outputs": 1302,
+          "train_pairs": 1302,
+          "unique_raw_sha256": 400,
+          "unique_semantic_sha256": 400,
+          "unique_task_ids": 400
+        }
+      },
+      "url": "https://github.com/fchollet/ARC-AGI",
+      "within_dataset_id_overlap_train_eval_count": 0,
+      "within_dataset_raw_overlap_train_eval_count": 1,
+      "within_dataset_semantic_overlap_train_eval_count": 1
+    },
+    {
+      "commit": "f3283f727488ad98fe575ea6a5ac981e4a188e49",
+      "license": "Apache-2.0",
+      "name": "ARC-AGI-2",
+      "path": "/home/spco/sow_linear/neuro_modeling_public_data_staging/data/ARC-AGI-2/f3283f727488ad98fe575ea6a5ac981e4a188e49",
+      "splits": {
+        "evaluation": {
+          "bytes": 1364679,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 2,
+          "min_grid_width": 1,
+          "tasks": 120,
+          "tasks_with_name_metadata": 0,
+          "test_inputs": 167,
+          "test_outputs": 167,
+          "test_pairs": 167,
+          "train_inputs": 359,
+          "train_outputs": 359,
+          "train_pairs": 359,
+          "unique_raw_sha256": 120,
+          "unique_semantic_sha256": 120,
+          "unique_task_ids": 120
+        },
+        "training": {
+          "bytes": 4651553,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 1000,
+          "tasks_with_name_metadata": 0,
+          "test_inputs": 1076,
+          "test_outputs": 1076,
+          "test_pairs": 1076,
+          "train_inputs": 3232,
+          "train_outputs": 3232,
+          "train_pairs": 3232,
+          "unique_raw_sha256": 1000,
+          "unique_semantic_sha256": 1000,
+          "unique_task_ids": 1000
+        }
+      },
+      "url": "https://github.com/arcprize/ARC-AGI-2",
+      "within_dataset_id_overlap_train_eval_count": 0,
+      "within_dataset_raw_overlap_train_eval_count": 0,
+      "within_dataset_semantic_overlap_train_eval_count": 0
+    }
+  ],
+  "arc_manifest_sha256": {
+    "ARC-AGI-1": "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda",
+    "ARC-AGI-2": "3c9661f29d502299f9a4a179fa9e28a81cb4d10e5dcaba7078859bb8067895d8",
+    "overlap_details": "33b0008a0522f8cdb3fb0eda6e086f1f468d1063f6b1e205c5eb84a8d12fe47b",
+    "validation": "05eca2feea601576ce4cc8877f8a8a5af1af8bdd2644123f55ed8e2f602c4572"
+  },
+  "created_utc": "2026-07-11T23:19:26Z",
+  "hrm": {
+    "commit": "ac15626f8db096a63c775b84c9dc868776a6feda",
+    "license": "Apache-2.0",
+    "license_sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+    "path": "/home/spco/sow_linear/neuro_modeling_public_data_staging/sources/HRM",
+    "url": "https://github.com/sapientinc/HRM"
+  },
+  "not_acquired": [
+    {
+      "download_checksums": {
+        "hf://datasets/sapientinc/maze-30x30-hard-1k@549754de3d67eebe57b6b22c7d226b9412d55b07/test.csv": {
+          "checksum": null,
+          "num_bytes": 1807030
+        },
+        "hf://datasets/sapientinc/maze-30x30-hard-1k@549754de3d67eebe57b6b22c7d226b9412d55b07/train.csv": {
+          "checksum": null,
+          "num_bytes": 1807030
+        }
+      },
+      "license": "",
+      "license_status": "UNSPECIFIED",
+      "name": "Maze-Hard 30x30 1k",
+      "reason": "Hugging Face cardData is null and dataset_info.license is empty; CSV acquisition is fail-closed.",
+      "revision": "549754de3d67eebe57b6b22c7d226b9412d55b07",
+      "splits": {
+        "test": {
+          "dataset_name": "maze-30x30-hard-1k",
+          "name": "test",
+          "num_bytes": 1824125,
+          "num_examples": 1000
+        },
+        "train": {
+          "dataset_name": "maze-30x30-hard-1k",
+          "name": "train",
+          "num_bytes": 1824125,
+          "num_examples": 1000
+        }
+      },
+      "url": "https://huggingface.co/datasets/sapientinc/maze-30x30-hard-1k"
+    },
+    {
+      "download_checksums": {
+        "hf://datasets/sapientinc/sudoku-extreme@58942f96baeb572ca3127e2a9e9c70f330783d6b/test.csv": {
+          "checksum": null,
+          "num_bytes": 79360390
+        },
+        "hf://datasets/sapientinc/sudoku-extreme@58942f96baeb572ca3127e2a9e9c70f330783d6b/train.csv": {
+          "checksum": null,
+          "num_bytes": 718819925
+        }
+      },
+      "lfs_sha256": {
+        "test.csv": "a2fd52aea23d331d5b4ee723c856236e838a9fb9a70e66f4e0e0cf26c338c6a8",
+        "train.csv": "64b46674db0148e0d73a16346dadeb2b1c00824d3fca3f85b2ae7037f6b4b38e"
+      },
+      "license": "",
+      "license_status": "UNSPECIFIED",
+      "name": "Sudoku-Extreme",
+      "reason": "Dataset card lists tdoku/enjoysudoku sources but declares no aggregation/data license; CSV acquisition is fail-closed.",
+      "revision": "58942f96baeb572ca3127e2a9e9c70f330783d6b",
+      "splits": {
+        "test": {
+          "dataset_name": "sudoku-extreme",
+          "name": "test",
+          "num_bytes": 85433848,
+          "num_examples": 422786
+        },
+        "train": {
+          "dataset_name": "sudoku-extreme",
+          "name": "train",
+          "num_bytes": 773864090,
+          "num_examples": 3831994,
+          "shard_lengths": [
+            2480000,
+            1351994
+          ]
+        }
+      },
+      "url": "https://huggingface.co/datasets/sapientinc/sudoku-extreme"
+    }
+  ],
+  "protocol_warnings": [
+    "ARC-AGI-1 training/40853293.json and evaluation/070dd51e.json are exact semantic duplicates; group or exclude before evaluation.",
+    "ARC-AGI-2 reuses many ARC-AGI-1 bare task IDs with changed content; key by dataset+revision+semantic hash.",
+    "Eleven ARC-AGI-1 tasks contain optional top-level name metadata; loaders should accept train/test plus optional name only."
+  ],
+  "staging_root": "/home/spco/sow_linear/neuro_modeling_public_data_staging"
+}

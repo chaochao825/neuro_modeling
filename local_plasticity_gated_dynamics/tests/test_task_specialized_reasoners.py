@@ -5,10 +5,12 @@ import pytest
 
 from src.data.structured_protocol import PublicTask
 from src.models.task_specialized_reasoners import (
+    ARCFlatProgramReasoner,
     ARCSlowFastProgramReasoner,
     SudokuConstraintDynamics,
     TaskSpecializedReasonerError,
 )
+from src.tasks.structured_proposals import FEATURE_NAMES, ProposalBatch
 
 
 def _sudoku_solution() -> np.ndarray:
@@ -146,6 +148,57 @@ def test_arc_slow_fast_reasoner_selects_demo_consistent_program() -> None:
     assert result.receipt["spiking_required"] is False
     assert 1 <= result.receipt["reasoning_steps"] <= 5
     assert result.state_trace.shape[0] == result.receipt["reasoning_steps"]
+
+
+def test_arc_flat_reference_shares_proposals_and_charged_compute() -> None:
+    task, expected = _arc_task()
+    slow_fast = ARCSlowFastProgramReasoner(max_steps=5).solve(task)
+    flat = ARCFlatProgramReasoner(max_steps=5).solve(task)
+
+    np.testing.assert_array_equal(flat.output[0], expected)
+    assert flat.receipt["selected_candidate_id"] == "rot90"
+    assert (
+        flat.receipt["candidate_fingerprint"]
+        == slow_fast.receipt["candidate_fingerprint"]
+    )
+    assert flat.receipt["charged_compute_units"] == pytest.approx(
+        slow_fast.receipt["charged_compute_units"]
+    )
+    assert (
+        flat.receipt["measured_compute_units"] <= flat.receipt["charged_compute_units"]
+    )
+    assert flat.receipt["compute_matched_by_padding"] is True
+
+
+def test_arc_slow_family_belief_can_diverge_from_flat_local_argmax() -> None:
+    task, _ = _arc_task()
+    features = np.zeros((3, len(FEATURE_NAMES)), dtype=float)
+    exact_index = FEATURE_NAMES.index("support_exact_rate")
+    features[:, exact_index] = np.asarray([5.0, 4.9, 5.1]) / 6.0
+    proposals = ProposalBatch(
+        task_id=task.task_id,
+        family="arc",
+        candidate_ids=("rot90", "rot180", "identity"),
+        features=features,
+        outputs=tuple((np.asarray([[index]]),) for index in range(3)),
+        compute_costs=np.ones(3),
+        generator_version="adversarial_family_fixture_v1",
+    )
+
+    flat = ARCFlatProgramReasoner(max_candidates=3, max_steps=3).solve(
+        task, proposals=proposals
+    )
+    slow = ARCSlowFastProgramReasoner(
+        max_candidates=3,
+        max_steps=3,
+        halt_margin=1.0,
+        family_evidence_top_k=3,
+        family_belief_gain=1.0,
+    ).solve(task, proposals=proposals)
+
+    assert flat.receipt["selected_candidate_id"] == "identity"
+    assert slow.receipt["selected_candidate_id"] == "rot90"
+    assert slow.receipt["family_evidence_rule"] == "bounded_top_k_logsumexp_v1"
 
 
 def test_task_specific_reasoners_reject_the_wrong_family() -> None:

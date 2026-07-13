@@ -1,0 +1,122 @@
+{
+  "cross_dataset": {
+    "ARC-AGI-1:evaluation__ARC-AGI-2:evaluation": {
+      "raw_sha256_overlap_count": 0,
+      "semantic_sha256_overlap_count": 0,
+      "task_id_overlap_count": 6
+    },
+    "ARC-AGI-1:evaluation__ARC-AGI-2:training": {
+      "raw_sha256_overlap_count": 0,
+      "semantic_sha256_overlap_count": 0,
+      "task_id_overlap_count": 376
+    },
+    "ARC-AGI-1:training__ARC-AGI-2:evaluation": {
+      "raw_sha256_overlap_count": 0,
+      "semantic_sha256_overlap_count": 0,
+      "task_id_overlap_count": 0
+    },
+    "ARC-AGI-1:training__ARC-AGI-2:training": {
+      "raw_sha256_overlap_count": 0,
+      "semantic_sha256_overlap_count": 0,
+      "task_id_overlap_count": 391
+    }
+  },
+  "datasets": [
+    {
+      "commit": "399030444e0ab0cc8b4e199870fb20b863846f34",
+      "license": "Apache-2.0",
+      "name": "ARC-AGI-1",
+      "path": "/home/spco/sow_linear/neuro_modeling_public_data_staging/data/ARC-AGI-1/399030444e0ab0cc8b4e199870fb20b863846f34",
+      "splits": {
+        "evaluation": {
+          "bytes": 2345957,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 400,
+          "tasks_with_name_metadata": 9,
+          "test_inputs": 419,
+          "test_outputs": 419,
+          "test_pairs": 419,
+          "train_inputs": 1363,
+          "train_outputs": 1363,
+          "train_pairs": 1363,
+          "unique_raw_sha256": 400,
+          "unique_semantic_sha256": 400,
+          "unique_task_ids": 400
+        },
+        "training": {
+          "bytes": 1436054,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 400,
+          "tasks_with_name_metadata": 2,
+          "test_inputs": 416,
+          "test_outputs": 416,
+          "test_pairs": 416,
+          "train_inputs": 1302,
+          "train_outputs": 1302,
+          "train_pairs": 1302,
+          "unique_raw_sha256": 400,
+          "unique_semantic_sha256": 400,
+          "unique_task_ids": 400
+        }
+      },
+      "url": "https://github.com/fchollet/ARC-AGI",
+      "within_dataset_id_overlap_train_eval_count": 0,
+      "within_dataset_raw_overlap_train_eval_count": 1,
+      "within_dataset_semantic_overlap_train_eval_count": 1
+    },
+    {
+      "commit": "f3283f727488ad98fe575ea6a5ac981e4a188e49",
+      "license": "Apache-2.0",
+      "name": "ARC-AGI-2",
+      "path": "/home/spco/sow_linear/neuro_modeling_public_data_staging/data/ARC-AGI-2/f3283f727488ad98fe575ea6a5ac981e4a188e49",
+      "splits": {
+        "evaluation": {
+          "bytes": 1364679,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 2,
+          "min_grid_width": 1,
+          "tasks": 120,
+          "tasks_with_name_metadata": 0,
+          "test_inputs": 167,
+          "test_outputs": 167,
+          "test_pairs": 167,
+          "train_inputs": 359,
+          "train_outputs": 359,
+          "train_pairs": 359,
+          "unique_raw_sha256": 120,
+          "unique_semantic_sha256": 120,
+          "unique_task_ids": 120
+        },
+        "training": {
+          "bytes": 4651553,
+          "max_grid_height": 30,
+          "max_grid_width": 30,
+          "min_grid_height": 1,
+          "min_grid_width": 1,
+          "tasks": 1000,
+          "tasks_with_name_metadata": 0,
+          "test_inputs": 1076,
+          "test_outputs": 1076,
+          "test_pairs": 1076,
+          "train_inputs": 3232,
+          "train_outputs": 3232,
+          "train_pairs": 3232,
+          "unique_raw_sha256": 1000,
+          "unique_semantic_sha256": 1000,
+          "unique_task_ids": 1000
+        }
+      },
+      "url": "https://github.com/arcprize/ARC-AGI-2",
+      "within_dataset_id_overlap_train_eval_count": 0,
+      "within_dataset_raw_overlap_train_eval_count": 0,
+      "within_dataset_semantic_overlap_train_eval_count": 0
+    }
+  ]
+}

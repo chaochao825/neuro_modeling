@@ -306,6 +306,157 @@ def _arc_operator_family(candidate_id: str) -> str:
     return "identity"
 
 
+def _arc_local_evidence(proposals: ProposalBatch) -> np.ndarray:
+    feature = {name: index for index, name in enumerate(FEATURE_NAMES)}
+    return np.asarray(
+        6.0 * proposals.features[:, feature["support_exact_rate"]]
+        + 2.0 * proposals.features[:, feature["support_cell_accuracy"]]
+        + proposals.features[:, feature["support_shape_rate"]]
+        + 0.5 * proposals.features[:, feature["support_color_jaccard"]]
+        - 0.1 * proposals.features[:, feature["normalized_complexity"]],
+        dtype=float,
+    )
+
+
+def _arc_family_evidence(
+    local_evidence: np.ndarray,
+    families: tuple[str, ...],
+    family_names: tuple[str, ...],
+    *,
+    top_k: int,
+) -> np.ndarray:
+    """Accumulate bounded distributed evidence instead of only the best program."""
+
+    if top_k < 1 or len(local_evidence) != len(families):
+        raise TaskSpecializedReasonerError("invalid ARC family evidence inputs")
+    result = []
+    family_array = np.asarray(families)
+    for family in family_names:
+        values = np.sort(local_evidence[family_array == family])[-top_k:]
+        maximum = float(values[-1])
+        result.append(maximum + float(np.log(np.exp(values - maximum).sum())))
+    return np.asarray(result, dtype=float)
+
+
+def _arc_compute_receipt(
+    proposals: ProposalBatch,
+    *,
+    max_candidates: int,
+    max_steps: int,
+    measured_steps: int,
+    operator_family_count: int,
+    uses_family_dynamics: bool,
+) -> dict[str, object]:
+    candidate_count = len(proposals.candidate_ids)
+    measured_candidate_evaluations = candidate_count
+    measured_belief_update_units = (
+        measured_steps * (candidate_count + operator_family_count)
+        if uses_family_dynamics
+        else 0
+    )
+    measured_selector_units = (
+        measured_candidate_evaluations + measured_belief_update_units
+    )
+    charged_selector_units = max_candidates + max_steps * (max_candidates + 4)
+    candidate_generation_compute = proposals.matched_compute_budget
+    return {
+        "candidate_generation_compute": candidate_generation_compute,
+        "measured_candidate_evaluations": measured_candidate_evaluations,
+        "measured_belief_update_units": measured_belief_update_units,
+        "measured_selector_units": measured_selector_units,
+        "charged_selector_units": charged_selector_units,
+        "measured_compute_units": candidate_generation_compute
+        + measured_selector_units,
+        "charged_compute_units": candidate_generation_compute + charged_selector_units,
+        "compute_matched_by_padding": True,
+        "compute_charge_contract": (
+            "proposal_proxy_plus_candidate_evidence_plus_"
+            "max_steps_times_candidate_and_four_family_updates_v2"
+        ),
+        "compute_unit_scope": (
+            "audited_abstract_operation_proxy_not_wall_time_or_flops"
+        ),
+    }
+
+
+def _arc_proposal_batch(
+    task: PublicTask,
+    *,
+    max_candidates: int,
+    proposals: ProposalBatch | None,
+) -> ProposalBatch:
+    batch = (
+        generate_arc_proposals(task, max_candidates=max_candidates)
+        if proposals is None
+        else proposals
+    )
+    if batch.task_id != task.task_id or batch.family != "arc":
+        raise TaskSpecializedReasonerError("ARC proposal batch identity mismatch")
+    if len(batch.candidate_ids) > max_candidates:
+        raise TaskSpecializedReasonerError("ARC proposal batch exceeds model budget")
+    return batch
+
+
+class ARCFlatProgramReasoner:
+    """Flat demonstration-fit selector under the same charged ARC budget."""
+
+    used_bptt = False
+
+    def __init__(self, *, max_candidates: int = 96, max_steps: int = 8) -> None:
+        if max_candidates < 1 or max_steps < 1:
+            raise TaskSpecializedReasonerError("ARC budgets must be positive")
+        self.max_candidates = int(max_candidates)
+        self.max_steps = int(max_steps)
+
+    def solve(
+        self, task: PublicTask, *, proposals: ProposalBatch | None = None
+    ) -> TaskSpecializedResult:
+        if not isinstance(task, PublicTask) or task.family != "arc":
+            raise TaskSpecializedReasonerError("ARC reasoner requires an ARC task")
+        proposals = _arc_proposal_batch(
+            task, max_candidates=self.max_candidates, proposals=proposals
+        )
+        local_evidence = _arc_local_evidence(proposals)
+        families = tuple(
+            _arc_operator_family(value) for value in proposals.candidate_ids
+        )
+        selected = int(np.argmax(local_evidence))
+        ordered = np.sort(local_evidence)
+        margin = float(ordered[-1] - ordered[-2]) if len(ordered) > 1 else 1.0
+        trace = np.asarray(
+            [[margin, float(selected), float(len(proposals.candidate_ids))]]
+        )
+        return TaskSpecializedResult(
+            task_id=task.task_id,
+            family="arc",
+            output=proposals.outputs[selected],
+            state_trace=trace,
+            receipt={
+                "architecture": "arc_flat_program_selector_v1",
+                "comparison_role": "matched_compute_flat_reference",
+                "used_bptt": False,
+                "spiking_required": False,
+                "candidate_generator_version": proposals.generator_version,
+                "candidate_fingerprint": proposals.candidate_fingerprint,
+                "candidate_count": len(proposals.candidate_ids),
+                "reasoning_steps": 1,
+                "selected_candidate_id": proposals.candidate_ids[selected],
+                "selected_operator_family": _arc_operator_family(
+                    proposals.candidate_ids[selected]
+                ),
+                "halted_early": True,
+                **_arc_compute_receipt(
+                    proposals,
+                    max_candidates=self.max_candidates,
+                    max_steps=self.max_steps,
+                    measured_steps=1,
+                    operator_family_count=len(set(families)),
+                    uses_family_dynamics=False,
+                ),
+            },
+        )
+
+
 class ARCSlowFastProgramReasoner:
     """Slow operator-family belief with fast demonstration-grounded selection."""
 
@@ -318,39 +469,43 @@ class ARCSlowFastProgramReasoner:
         max_steps: int = 8,
         belief_decay: float = 0.5,
         halt_margin: float = 0.98,
+        family_evidence_top_k: int = 3,
+        family_belief_gain: float = 1.0,
     ) -> None:
         if max_candidates < 1 or max_steps < 1:
             raise TaskSpecializedReasonerError("ARC budgets must be positive")
-        if not 0.0 <= belief_decay < 1.0 or not 0.0 < halt_margin <= 1.0:
+        if (
+            not 0.0 <= belief_decay < 1.0
+            or not 0.0 < halt_margin <= 1.0
+            or family_evidence_top_k < 1
+            or family_belief_gain <= 0.0
+        ):
             raise TaskSpecializedReasonerError("invalid ARC belief dynamics")
         self.max_candidates = int(max_candidates)
         self.max_steps = int(max_steps)
         self.belief_decay = float(belief_decay)
         self.halt_margin = float(halt_margin)
+        self.family_evidence_top_k = int(family_evidence_top_k)
+        self.family_belief_gain = float(family_belief_gain)
 
-    def solve(self, task: PublicTask) -> TaskSpecializedResult:
+    def solve(
+        self, task: PublicTask, *, proposals: ProposalBatch | None = None
+    ) -> TaskSpecializedResult:
         if not isinstance(task, PublicTask) or task.family != "arc":
             raise TaskSpecializedReasonerError("ARC reasoner requires an ARC task")
-        proposals: ProposalBatch = generate_arc_proposals(
-            task, max_candidates=self.max_candidates
+        proposals = _arc_proposal_batch(
+            task, max_candidates=self.max_candidates, proposals=proposals
         )
-        feature = {name: index for index, name in enumerate(FEATURE_NAMES)}
-        local_evidence = (
-            6.0 * proposals.features[:, feature["support_exact_rate"]]
-            + 2.0 * proposals.features[:, feature["support_cell_accuracy"]]
-            + proposals.features[:, feature["support_shape_rate"]]
-            + 0.5 * proposals.features[:, feature["support_color_jaccard"]]
-            - 0.1 * proposals.features[:, feature["normalized_complexity"]]
-        )
+        local_evidence = _arc_local_evidence(proposals)
         families = tuple(
             _arc_operator_family(value) for value in proposals.candidate_ids
         )
         family_names = tuple(sorted(set(families)))
-        family_evidence = np.asarray(
-            [
-                float(np.max(local_evidence[np.asarray(families) == family]))
-                for family in family_names
-            ]
+        family_evidence = _arc_family_evidence(
+            local_evidence,
+            families,
+            family_names,
+            top_k=self.family_evidence_top_k,
         )
         slow_state = np.zeros(len(family_names), dtype=float)
         trace = []
@@ -366,7 +521,7 @@ class ARCSlowFastProgramReasoner:
                     for family in families
                 ]
             )
-            scores = local_evidence + family_bonus
+            scores = local_evidence + self.family_belief_gain * family_bonus
             new_selected = int(np.argmax(scores))
             stable_steps = stable_steps + 1 if new_selected == selected else 0
             selected = new_selected
@@ -393,15 +548,27 @@ class ARCSlowFastProgramReasoner:
                 "candidate_fingerprint": proposals.candidate_fingerprint,
                 "candidate_count": len(proposals.candidate_ids),
                 "operator_family_count": len(family_names),
+                "family_evidence_rule": "bounded_top_k_logsumexp_v1",
+                "family_evidence_top_k": self.family_evidence_top_k,
+                "family_belief_gain": self.family_belief_gain,
                 "reasoning_steps": len(trace),
                 "selected_candidate_id": proposals.candidate_ids[selected],
                 "selected_operator_family": families[selected],
                 "halted_early": len(trace) < self.max_steps,
+                **_arc_compute_receipt(
+                    proposals,
+                    max_candidates=self.max_candidates,
+                    max_steps=self.max_steps,
+                    measured_steps=len(trace),
+                    operator_family_count=len(family_names),
+                    uses_family_dynamics=True,
+                ),
             },
         )
 
 
 __all__ = [
+    "ARCFlatProgramReasoner",
     "ARCSlowFastProgramReasoner",
     "SudokuConstraintDynamics",
     "TaskSpecializedReasonerError",

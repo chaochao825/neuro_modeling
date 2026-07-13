@@ -36,6 +36,10 @@ from src.analysis.structured_benchmark import (
     fit_receipt_dict,
     run_structured_condition,
 )
+from src.data.arc_manifest import (
+    validate_arc_acquisition_receipts,
+    validate_arc_source_manifest,
+)
 from src.data.arc_tasks import load_arc_directory
 from src.data.maze_tasks import load_maze_tasks
 from src.data.structured_protocol import StructuredDataset
@@ -325,6 +329,10 @@ def _load_dataset(
                 "source": "synthetic_smoke_fixture",
                 "license_status": "not_applicable",
                 "source_revision": "not_scientific",
+                "source_manifest_verified": False,
+                "source_acquisition_verified": False,
+                "source_manifest_receipt": None,
+                "source_acquisition_receipt": None,
             },
         )
 
@@ -344,11 +352,54 @@ def _load_dataset(
         raise FileNotFoundError(str(reason))
     path = _resolve_data_path(raw_path)
     preparation_manifest: Mapping[str, Any] | None = None
+    arc_manifest_receipt: Mapping[str, Any] | None = None
+    arc_acquisition_receipt: Mapping[str, Any] | None = None
     actual_manifest_sha256 = data.get("manifest_sha256")
-    if formal_profile and family in {"maze", "sudoku"}:
-        _, preparation_manifest, actual_manifest_sha256 = (
-            _validated_preparation_manifest(data, family=family, dataset_path=path)
-        )
+    if formal_profile:
+        if family == "arc":
+            raw_manifest_path = data.get("manifest_path")
+            if not isinstance(raw_manifest_path, str) or not raw_manifest_path:
+                raise ValueError("formal ARC data require manifest_path")
+            expected_split_counts = data.get("expected_split_counts")
+            if not isinstance(expected_split_counts, Mapping):
+                raise ValueError("formal ARC data require expected_split_counts")
+            receipt = validate_arc_source_manifest(
+                path,
+                _resolve_data_path(raw_manifest_path),
+                expected_manifest_sha256=str(data.get("manifest_sha256", "")),
+                expected_license_sha256=str(data.get("license_sha256", "")),
+                expected_split_counts=expected_split_counts,
+            )
+            arc_manifest_receipt = receipt.to_dict()
+            actual_manifest_sha256 = receipt.manifest_sha256
+            raw_acquisition_path = data.get("acquisition_manifest_path")
+            raw_validation_path = data.get("validation_receipt_path")
+            if not isinstance(raw_acquisition_path, str) or not isinstance(
+                raw_validation_path, str
+            ):
+                raise ValueError(
+                    "formal ARC data require acquisition and validation receipt paths"
+                )
+            arc_acquisition_receipt = validate_arc_acquisition_receipts(
+                _resolve_data_path(raw_acquisition_path),
+                _resolve_data_path(raw_validation_path),
+                expected_acquisition_manifest_sha256=str(
+                    data.get("acquisition_manifest_sha256", "")
+                ),
+                expected_validation_sha256=str(
+                    data.get("validation_receipt_sha256", "")
+                ),
+                dataset_name=str(data.get("dataset_name", "")),
+                revision=str(data.get("revision", "")),
+                source_url=str(data.get("source_url", "")),
+                license_name=str(data.get("license", "")),
+                source_manifest_sha256=receipt.manifest_sha256,
+                expected_split_counts=expected_split_counts,
+            )
+        elif family in {"maze", "sudoku"}:
+            _, preparation_manifest, actual_manifest_sha256 = (
+                _validated_preparation_manifest(data, family=family, dataset_path=path)
+            )
     if family == "arc":
         dataset = load_arc_directory(
             path,
@@ -370,6 +421,10 @@ def _load_dataset(
         "license": data.get("license"),
         "license_status": data.get("license_status"),
         "manifest_sha256": actual_manifest_sha256,
+        "source_manifest_verified": arc_manifest_receipt is not None,
+        "source_acquisition_verified": arc_acquisition_receipt is not None,
+        "source_manifest_receipt": arc_manifest_receipt,
+        "source_acquisition_receipt": arc_acquisition_receipt,
         "test_split_role": test_split_role,
         "preparation_manifest_status": (
             preparation_manifest.get("status")

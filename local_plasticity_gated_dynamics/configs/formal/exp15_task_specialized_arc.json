@@ -1,10 +1,10 @@
 {
   "profile": "formal",
-  "claim_scope": "exploratory_only_no_matched_advantage_comparator",
-  "formal_manifest_verification": "unavailable_fail_closed",
+  "claim_scope": "registered_matched_compute_selector_comparison_fail_closed",
+  "formal_manifest_verification": "per_file_sha256_and_license",
   "family": "arc",
   "seeds": [0],
-  "conditions": ["arc_slow_fast_program"],
+  "conditions": ["arc_slow_fast_program", "arc_flat_program_matched"],
   "n_bootstrap": 10000,
   "minimum_test_tasks": 100,
   "data": {
@@ -13,7 +13,18 @@
     "revision": "399030444e0ab0cc8b4e199870fb20b863846f34",
     "license": "Apache-2.0",
     "license_status": "verified",
+    "source_url": "https://github.com/fchollet/ARC-AGI",
+    "acquisition_manifest_path": "provenance/arc/acquisition_manifest.json",
+    "acquisition_manifest_sha256": "145c72ac5ec34ec938d28dcba90b2bc89e3bb40a3b472e84be7092f760b4df48",
+    "validation_receipt_path": "provenance/arc/arc_validation.json",
+    "validation_receipt_sha256": "05eca2feea601576ce4cc8877f8a8a5af1af8bdd2644123f55ed8e2f602c4572",
+    "manifest_path": "provenance/arc/ARC-AGI-1_399030444e0ab0cc8b4e199870fb20b863846f34.sha256",
     "manifest_sha256": "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda",
+    "license_sha256": "b3a161754ffc20840ccf92aec0fe464fbbcf42f14c22f78a3ec2e98fca3864ca",
+    "expected_split_counts": {
+      "training": 400,
+      "evaluation": 400
+    },
     "test_split_role": "ood",
     "exclude_relative_paths": ["evaluation/070dd51e.json"]
   },
@@ -21,6 +32,15 @@
     "max_arc_candidates": 96,
     "max_reasoning_steps": 8,
     "belief_decay": 0.5,
-    "halt_margin": 0.98
+    "halt_margin": 0.98,
+    "family_evidence_top_k": 3,
+    "family_belief_gain": 1.0
+  },
+  "registered_comparison": {
+    "name": "slow_fast_vs_flat_matched",
+    "candidate": "arc_slow_fast_program",
+    "reference": "arc_flat_program_matched",
+    "minimum_candidate_coverage": 0.9,
+    "alpha": 0.05
   }
 }

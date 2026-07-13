@@ -2,7 +2,7 @@
   "profile": "smoke",
   "family": "arc",
   "seeds": [0],
-  "conditions": ["arc_slow_fast_program"],
+  "conditions": ["arc_slow_fast_program", "arc_flat_program_matched"],
   "n_bootstrap": 200,
   "minimum_test_tasks": 4,
   "synthetic_fixture": {
@@ -14,6 +14,15 @@
     "max_arc_candidates": 96,
     "max_reasoning_steps": 8,
     "belief_decay": 0.5,
-    "halt_margin": 0.98
+    "halt_margin": 0.98,
+    "family_evidence_top_k": 3,
+    "family_belief_gain": 1.0
+  },
+  "registered_comparison": {
+    "name": "slow_fast_vs_flat_matched",
+    "candidate": "arc_slow_fast_program",
+    "reference": "arc_flat_program_matched",
+    "minimum_candidate_coverage": 0.9,
+    "alpha": 0.05
   }
 }

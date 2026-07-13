@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -68,6 +69,48 @@ def test_formal_evidence_requires_frozen_hyperparameters(tmp_path: Path) -> None
             "test": [{"input": [[offset + 2]], "output": [[offset + 3]]}],
         }
         (directory / f"{split}.json").write_text(json.dumps(payload), encoding="utf-8")
+    license_path = arc_root / "LICENSE"
+    license_path.write_text("Apache fixture\n", encoding="utf-8")
+    manifest_path = tmp_path / "arc.sha256"
+    source_paths = sorted(arc_root.rglob("*.json"))
+    manifest_path.write_text(
+        "".join(
+            f"{hashlib.sha256(path.read_bytes()).hexdigest()}  "
+            f"{path.relative_to(arc_root).as_posix()}\n"
+            for path in source_paths
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    source_receipt = {
+        "commit": "fixture-revision",
+        "license": "Apache-2.0",
+        "name": "ARC-fixture",
+        "url": "https://example.test/ARC",
+        "splits": {"training": {"tasks": 1}, "evaluation": {"tasks": 1}},
+    }
+    validation_path = tmp_path / "arc_validation.json"
+    validation_path.write_text(
+        json.dumps({"datasets": [source_receipt]}, sort_keys=True), encoding="utf-8"
+    )
+    acquisition_path = tmp_path / "arc_acquisition.json"
+    acquisition_path.write_text(
+        json.dumps(
+            {
+                "arc": [source_receipt],
+                "arc_manifest_sha256": {
+                    "ARC-fixture": hashlib.sha256(
+                        manifest_path.read_bytes()
+                    ).hexdigest(),
+                    "validation": hashlib.sha256(
+                        validation_path.read_bytes()
+                    ).hexdigest(),
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     config = load_json_config("configs/smoke/exp13_structured_reasoning.json")
     config.update(
         profile="formal",
@@ -79,7 +122,19 @@ def test_formal_evidence_requires_frozen_hyperparameters(tmp_path: Path) -> None
             "revision": "fixture-revision",
             "license": "Apache-2.0",
             "license_status": "verified",
-            "manifest_sha256": "a" * 64,
+            "source_url": "https://example.test/ARC",
+            "acquisition_manifest_path": str(acquisition_path),
+            "acquisition_manifest_sha256": hashlib.sha256(
+                acquisition_path.read_bytes()
+            ).hexdigest(),
+            "validation_receipt_path": str(validation_path),
+            "validation_receipt_sha256": hashlib.sha256(
+                validation_path.read_bytes()
+            ).hexdigest(),
+            "manifest_path": str(manifest_path),
+            "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+            "license_sha256": hashlib.sha256(license_path.read_bytes()).hexdigest(),
+            "expected_split_counts": {"training": 1, "evaluation": 1},
             "test_split_role": "ood",
         },
     )
