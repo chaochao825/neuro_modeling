@@ -78,12 +78,26 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | R2_ibl_history_context_inference | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.5649 [-0.7772, -0.3784] | **oppose** |
 | R3_ibl_hmm_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.001087 [-0.003275, 0.0007699] | **inconclusive** |
 | R4_ibl_history_behavior_prediction | complete planned cohort plus Holm p<0.05 and animal-primary hierarchical CI excluding zero | 30/30 | -0.003753 [-0.00724, -0.000773] | **inconclusive** |
-| T1_arc_hierarchical_vs_flat | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 1.739e-20 [-0.0002506, 0.0002506] | **inconclusive** |
-| T2_arc_trace_vs_flat | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
-| T3_arc_hierarchical_vs_heuristic | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
-| T4_arc_hierarchical_vs_gru | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
-| T5_arc_hierarchical_90pct_gru | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero for the candidate - 0.9*reference non-inferiority margin | 399/399 | -0.001504 [-0.006266, 0.001253] | **inconclusive** |
-| T6_arc_trace_increment | candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
+| T1_arc_hierarchical_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 1.739e-20 [-0.0002506, 0.0002506] | **inconclusive** |
+| T2_arc_trace_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
+| T3_arc_hierarchical_vs_heuristic | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
+| T4_arc_hierarchical_vs_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | -0.002005 [-0.007018, 0.001003] | **inconclusive** |
+| T5_arc_hierarchical_90pct_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero for the candidate - 0.9*reference non-inferiority margin | 399/399 | -0.001504 [-0.006266, 0.001253] | **inconclusive** |
+| T6_arc_trace_increment | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 399/399 | 0.0004177 [0, 0.001086] | **inconclusive** |
+| M1_maze_hierarchical_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 18/18 | -0.003704 [-0.02037, 0.007407] | **inconclusive** |
+| M2_maze_trace_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 18/18 | -0.005556 [-0.02222, 0.005556] | **inconclusive** |
+| M3_maze_hierarchical_vs_heuristic | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 18/18 | 0.1019 [0, 0.2574] | **inconclusive** |
+| M4_maze_hierarchical_vs_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 18/18 | -0.009259 [-0.02593, 0] | **inconclusive** |
+| M5_maze_hierarchical_90pct_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero for the candidate - 0.9*reference non-inferiority margin | 18/18 | 0.09074 [0.07407, 0.1] | **support** |
+| M6_maze_trace_increment | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 18/18 | -0.001852 [-0.005556, 0] | **inconclusive** |
+| N1_sudoku_hierarchical_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 28/28 | 0 [0, 0] | **inconclusive** |
+| N2_sudoku_trace_vs_flat | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 28/28 | 0 [0, 0] | **inconclusive** |
+| N3_sudoku_hierarchical_vs_heuristic | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 28/28 | 0 [0, 0] | **inconclusive** |
+| N4_sudoku_hierarchical_vs_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 28/28 | 0 [0, 0] | **inconclusive** |
+| N5_sudoku_hierarchical_90pct_gru | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero for the candidate - 0.9*reference non-inferiority margin | 28/28 | 0.1 [0.1, 0.1] | **inconclusive** |
+| N6_sudoku_trace_increment | registered OOD split and candidate coverage gate plus Holm p<0.05 and task-component bootstrap CI excluding zero | 28/28 | 0 [0, 0] | **inconclusive** |
+| U1_ibl_shared_neural_dynamics | registered stimulus-pre/past-safe panel; >=20 complete sessions and >=5 animals; Holm-significant shared>common; shared retains >=90% of significant full gain; fewer parameters | 20/20 | -0.0009953 [-0.003061, 0.0001569] | **inconclusive** |
+| V1_exp15_arc_slow_fast_vs_flat | verified OOD source, identical candidates, matched charged compute, >=90% candidate coverage, paired CI and Holm p<0.05 | 399/399 | 0 [0, 0] | **inconclusive** |
 
 ### Evidence details
 
@@ -117,7 +131,7 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 - `P0c_aligned_adds_value_over_matched_homeostasis` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.0024354150219953246, CI=[0.001248913662966034, 0.004012353270735189], raw_p=3.997236490249634e-06; l2: conclusion=support, n=30, estimate=0.004104866967973079, CI=[0.002230666236489589, 0.0065737887957078266], raw_p=2.9867514967918396e-06; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=3.99723649025e-06); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P0d_local_absolute_accuracy` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.056666666666666685, CI=[0.02997916666666677, 0.08166666666666669], raw_p=0.00028261244544550504; l2: conclusion=support, n=30, estimate=0.05666666666666667, CI=[0.02916666666666669, 0.08166666666666669], raw_p=0.000305714097041996; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.000305714097042); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P0e_local_noninferior_tuned_bptt` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.07491666666666666, CI=[0.034581249999999994, 0.11733958333333325], raw_p=0.00047877202703846004; l2: conclusion=support, n=30, estimate=0.07491666666666666, CI=[0.03491250000000002, 0.11742291666666656], raw_p=0.00047895487883489285; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.000478954878835); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
-- `P0f_local_noninferior_tuned_gru` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.021916666666666685, 0.09916874999999999], raw_p=0.003719669399051919; l2: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.022831250000000032, 0.09733541666666666], raw_p=0.0032446118059762; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.00371966939905); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
+- `P0f_local_noninferior_tuned_gru` (failed=0): intersection-union across separately matched L1/L2 panels; raw joint p=max(panel p) awaits full-family Holm adjustment; panel audit: l1: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.021916666666666685, 0.09916874999999999], raw_p=0.003719669399051919; l2: conclusion=support, n=30, estimate=0.05841666666666667, CI=[0.022831250000000032, 0.09733541666666666], raw_p=0.003244611805976201; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=0.00371966939905); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1a_masked_outer_product_identity` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1b_credit_tangent_respects_feedback_bound` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
 - `P1c_highrank_physical_update_coexists_with_lowdim_credit` (failed=0): paired 95% bootstrap CI at the declared independent-unit level; one-sided support-margin test awaits full-family Holm adjustment; p_value is Holm-adjusted across all 34 registered claims (raw Wilcoxon p=2.16023152891e-08); a directional bootstrap criterion can support/oppose only when Holm p<=0.05
@@ -135,12 +149,26 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 - `R2_ibl_history_context_inference` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
 - `R3_ibl_hmm_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
 - `R4_ibl_history_behavior_prediction` (failed=0): IBL trial-table behavior only; no neural activity or shared neural dynamics; planned/paired sessions=30/30; invalid HMM fits=0; latest run status=complete; source run id=c9ed2f4f-52bb-4f84-abb0-df5321d10e07; cohort manifest sha256=112c84ad93eee49186ab117343ebebb4921d2f1bcea57a9c9326ca38d337a0e6; scoped raw sha256=49b9ac6b8a48a7824cdf7288d878e6353fbb0e574b065b9bf46aad828730e67a
-- `T1_arc_hierarchical_vs_flat` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
-- `T2_arc_trace_vs_flat` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
-- `T3_arc_hierarchical_vs_heuristic` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
-- `T4_arc_hierarchical_vs_gru` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
-- `T5_arc_hierarchical_90pct_gru` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
-- `T6_arc_trace_increment` (failed=0): Hybrid proposal selection only; no neural/biological claim; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d
+- `T1_arc_hierarchical_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, flat_local=1657 total/25 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `T2_arc_trace_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, flat_local=1657 total/25 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `T3_arc_hierarchical_vs_heuristic` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, support_heuristic=0 total/0 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `T4_arc_hierarchical_vs_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `T5_arc_hierarchical_90pct_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `T6_arc_trace_increment` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, hierarchical_local=1673 total/41 trainable; test_split_role=ood; 30 seeds; coverage=0.0125 vs required 0.9000; revision=399030444e0ab0cc8b4e199870fb20b863846f34; clean commit=4f77d1abee9f6213638a65c1e4c4525fcee83f1a; raw sha256=0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d; run manifest sha256=7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead
+- `M1_maze_hierarchical_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, flat_local=1657 total/25 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `M2_maze_trace_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, flat_local=1657 total/25 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `M3_maze_hierarchical_vs_heuristic` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, support_heuristic=0 total/0 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `M4_maze_hierarchical_vs_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `M5_maze_hierarchical_90pct_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `M6_maze_trace_increment` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, hierarchical_local=1673 total/41 trainable; test_split_role=ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=a71a2d1e0931c79f74cd91c5accd13f164d34c73; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2; run manifest sha256=44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022
+- `N1_sudoku_hierarchical_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, flat_local=1657 total/25 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `N2_sudoku_trace_vs_flat` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, flat_local=1657 total/25 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `N3_sudoku_hierarchical_vs_heuristic` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, support_heuristic=0 total/0 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `N4_sudoku_hierarchical_vs_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `N5_sudoku_hierarchical_90pct_gru` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters hierarchical_local=1673 total/41 trainable, gru_bptt=1841 total/1841 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `N6_sudoku_trace_increment` (failed=0): Hybrid selector over one shared, target-free proposal library only; no neural/biological claim and no end-to-end efficiency claim; selector-level parameters trace_local=1681 total/49 trainable, hierarchical_local=1673 total/41 trainable; test_split_role=non_ood; 30 seeds; coverage=1.0000 vs required 0.9000; revision=0db6de036b80b4e8e4574abe6e15026331bd5c2c; clean commit=8fba6178e8de0a3a11d3e3dee985d7d3efd6a83d; raw sha256=f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648; run manifest sha256=9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b
+- `U1_ibl_shared_neural_dynamics` (failed=0): One-step conditional Poisson likelihood, not a full latent LDS; sessions nested within animals; sensitivity views cannot update this claim; compact manifest sha256=a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09; compact bundle sha256=f6cd351717986ede771a6bbbe755edeb3c30ef4bda48e86c8471bcf4364a41a4; registered formal JSON sha256=7717227beca59f6a39286a5bfc6ded10ed7b0896ce6f49409542f1743bf79680; portable formal-config sha256=106b99b861b0de82bfd020c23881e14a861b09ddc50f70752badb56b7a104913; macro mapping exp14_allen_macro_region_mapping_v1 sha256=3bac702ed6b3ee5c21acbbfd929b077baa63226369ca8e1bef0b6faeb487fc23; ontology/provenance sha256=63654b8d35c7c1b5665636b645da774776ee8263658192f5dca1e815095e9147/a01b7fa535e6de437ac46e8cf9de68a87d6a9b5587d055a3935476d956109fdc; mapping compact scope=a5acb134ae4b34f47db150948a7f7ab58e8eb85e204fb981e0ca744eba328a09; acronym count/hash=168/53c5a0cb3591749aad8fc2848b2627dfe93a4a747fa391e4ec68094211b8369b; shared/full/retention Holm p=1/1/1; classification trigger=none; raw sha256=8c14068e5855dc16fe3039ac86465fe9588ccda697b86bfce4340364f6de0ccd; clean commit=b68a1e7638636811116bb352330fb4a1fe2d5a75
+- `V1_exp15_arc_slow_fast_vs_flat` (failed=0): Task-specialized finite-program selector only; no neural or biological claim; slow/fast and flat exact accuracy=0.00250627/0.00250627; coverage=0.01253133 vs required 0.9000; compute is an audited abstract operation proxy, not FLOPs/time/energy; source manifest=76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda; clean commit=cbec277503d02844729d8fea5648a9e34e2ce44b; raw sha256=2353bf280aa5ded0fd3c1d202fe5eedf796c0de07091afffa4db0178548c9fcf
 
 ## P2 formal diagnostics
 
@@ -236,9 +264,24 @@ Difference is reference minus candidate, so positive values favor the candidate.
 
 ## exp13 public ARC hybrid-solver audit
 
-All selectors receive one target-free, recomputed proposal panel. The statistics unit is the source/augmentation dependency component with seeds nested within task. The candidate oracle accesses labels only after proposal generation and defines coverage; no result in this section is neural or biological evidence.
+All hybrid selectors receive one shared, target-free proposal library. The candidate oracle accesses labels only after proposal generation and defines proposal coverage. Parameter counts below describe the selector only: they exclude proposal-library construction and solver cost, so this panel makes no end-to-end efficiency claim and no neural or biological claim.
 
-Candidate coverage is 0.01253 against the registered 0.9 gate.
+Dataset `ARC-AGI-1` uses `test_split_role=ood` with 30 independent seeds. Candidate coverage is 0.01253 against the registered 0.9 gate. The validated scoped raw/run SHA-256 values are `0865d15177be359194b454ca8c94620df34e3ddf449b096b5e796847e0533b4d` / `7e46d4e0b62106e20b047f89ea25903619806f738683fc1be38d6ae4a87e8ead`.
+
+### Absolute exact accuracy
+
+| Selector | Exact accuracy [95% CI] | Coverage | Selector parameters (trainable) |
+|---|---:|---:|---:|
+| support_heuristic | 0.005013 [0, 0.01253] | 0.01253 | 0 (0) |
+| flat_local | 0.003008 [0, 0.008521] | 0.01253 | 1657 (25) |
+| hierarchical_local | 0.003008 [0, 0.008521] | 0.01253 | 1673 (41) |
+| trace_local | 0.003425 [0, 0.009357] | 0.01253 | 1681 (49) |
+| gru_bptt | 0.005013 [0, 0.01253] | 0.01253 | 1841 (1841) |
+| candidate_oracle | 0.01253 [0.002506, 0.02506] | 0.01253 | 0 (0) |
+
+### Registered selector comparisons
+
+The statistics unit is the source/augmentation dependency component with seeds nested within task.
 
 | Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |
 |---|---:|---:|---:|---|
@@ -249,7 +292,101 @@ Candidate coverage is 0.01253 against the registered 0.9 gate.
 | hierarchical_retains_90pct_gru | -0.001504 [-0.006266, 0.001253] | 1 | False | **inconclusive** |
 | trace_vs_hierarchical | 0.0004177 [0, 0.001086] | 1 | False | **inconclusive** |
 
-This is an internally reproducible hybrid proposal-selection audit, not a proposal-free HRM/CTM solver. ARC cannot fill the pending multi-session neural-activity evidence gap.
+This is a validated hybrid proposal-selection audit, not a proposal-free HRM/CTM reproduction. It cannot establish shared neural dynamics or a biological mechanism.
+
+## exp13 public Maze hybrid-solver audit
+
+All hybrid selectors receive one shared, target-free proposal library. The candidate oracle accesses labels only after proposal generation and defines proposal coverage. Parameter counts below describe the selector only: they exclude proposal-library construction and solver cost, so this panel makes no end-to-end efficiency claim and no neural or biological claim.
+
+Dataset `albertoRodriguez97/MazeBench` uses `test_split_role=ood` with 30 independent seeds. Candidate coverage is 1 against the registered 0.9 gate. The validated scoped raw/run SHA-256 values are `ce270abdeff30be94f152d575ec05d26d46c49dc8755c3bdea3cb85bb46875f2` / `44dedd8c58237d7624e4a7c34ac22260d20fdca88454b75ded8bd42f30a56022`.
+
+### Absolute exact accuracy
+
+| Selector | Exact accuracy [95% CI] | Coverage | Selector parameters (trainable) |
+|---|---:|---:|---:|
+| support_heuristic | 0.8889 [0.7222, 1] | 1 | 0 (0) |
+| flat_local | 0.9944 [0.9852, 1] | 1 | 1657 (25) |
+| hierarchical_local | 0.9907 [0.9741, 1] | 1 | 1673 (41) |
+| trace_local | 0.9889 [0.9704, 1] | 1 | 1681 (49) |
+| gru_bptt | 1 [1, 1] | 1 | 1841 (1841) |
+| candidate_oracle | 1 [1, 1] | 1 | 0 (0) |
+
+### Registered selector comparisons
+
+The statistics unit is the source/augmentation dependency component with seeds nested within task.
+
+| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |
+|---|---:|---:|---:|---|
+| hierarchical_vs_flat | -0.003704 [-0.02037, 0.007407] | 1 | True | **inconclusive** |
+| trace_vs_flat | -0.005556 [-0.02222, 0.005556] | 1 | True | **inconclusive** |
+| hierarchical_vs_support_heuristic | 0.1019 [0, 0.2574] | 0.8986 | True | **inconclusive** |
+| hierarchical_vs_gru_bptt | -0.009259 [-0.02593, 0] | 0.8986 | True | **inconclusive** |
+| hierarchical_retains_90pct_gru | 0.09074 [0.07407, 0.1] | 0.000352 | True | **support** |
+| trace_vs_hierarchical | -0.001852 [-0.005556, 0] | 0.9519 | True | **inconclusive** |
+
+This is a validated hybrid proposal-selection audit, not a proposal-free HRM/CTM reproduction. It cannot establish shared neural dynamics or a biological mechanism.
+
+## exp13 public Sudoku hybrid-solver audit
+
+All hybrid selectors receive one shared, target-free proposal library. The candidate oracle accesses labels only after proposal generation and defines proposal coverage. Parameter counts below describe the selector only: they exclude proposal-library construction and solver cost, so this panel makes no end-to-end efficiency claim and no neural or biological claim.
+
+Dataset `wichtounet/sudoku_dataset-v2` uses `test_split_role=non_ood` with 30 independent seeds. Candidate coverage is 1 against the registered 0.9 gate. The validated scoped raw/run SHA-256 values are `f37abb5bf569b28a9d715d1b3eb935c069d95739d04819ff49e198755ef0c648` / `9535115f78f30f400502f1b6827ba6b96225d3cbcfb0bcdd39338ef0b0c94b3b`.
+
+This is not a registered OOD split. Consequently, even a significant numerical margin remains core-ineligible and is reported as **inconclusive**; it is not upgraded to support.
+
+### Absolute exact accuracy
+
+| Selector | Exact accuracy [95% CI] | Coverage | Selector parameters (trainable) |
+|---|---:|---:|---:|
+| support_heuristic | 1 [1, 1] | 1 | 0 (0) |
+| flat_local | 1 [1, 1] | 1 | 1657 (25) |
+| hierarchical_local | 1 [1, 1] | 1 | 1673 (41) |
+| trace_local | 1 [1, 1] | 1 | 1681 (49) |
+| gru_bptt | 1 [1, 1] | 1 | 1841 (1841) |
+| candidate_oracle | 1 [1, 1] | 1 | 0 (0) |
+
+### Registered selector comparisons
+
+The statistics unit is the source/augmentation dependency component with seeds nested within task.
+
+| Comparison | Task-component contrast [95% CI] | Holm p | Coverage gate | Conclusion |
+|---|---:|---:|---:|---|
+| hierarchical_vs_flat | 0 [0, 0] | 1 | True | **inconclusive** |
+| trace_vs_flat | 0 [0, 0] | 1 | True | **inconclusive** |
+| hierarchical_vs_support_heuristic | 0 [0, 0] | 1 | True | **inconclusive** |
+| hierarchical_vs_gru_bptt | 0 [0, 0] | 1 | True | **inconclusive** |
+| hierarchical_retains_90pct_gru | 0.1 [0.1, 0.1] | 7.279e-07 | True | **inconclusive** |
+| trace_vs_hierarchical | 0 [0, 0] | 1 | True | **inconclusive** |
+
+This is a validated hybrid proposal-selection audit, not a proposal-free HRM/CTM reproduction. It cannot establish shared neural dynamics or a biological mechanism.
+
+## exp14 IBL multi-session neural audit
+
+The registered endpoint is held-out one-step conditional Poisson likelihood. Inference is animal-primary with sessions nested within animal; this is not a full latent-LDS marginal likelihood.
+
+| View | Panel | Scope | Common - shared NLL/count (positive favors shared) [95% CI] | Retained full gain | Scoped conclusion |
+|---|---|---|---:|---:|---|
+| stimulus_pre | primary_past_safe | registered_primary | -0.0009953 [-0.003061, 0.0001569] | — | **inconclusive** |
+| stimulus_pre | full_trial_sensitivity | sensitivity_only | -0.0006052 [-0.001943, 0.0001545] | — | **inconclusive** |
+| movement_pre | primary_past_safe | sensitivity_only | 6.898e-05 [-0.0001002, 0.0002695] | — | **inconclusive** |
+| movement_pre | full_trial_sensitivity | sensitivity_only | 1.618e-05 [-6.146e-05, 0.0001114] | — | **inconclusive** |
+
+Only `stimulus_pre / primary_past_safe` updates the core claim. Movement-pre and full-trial-covariate results remain sensitivity-only.
+
+## exp15 verified-source ARC task-specialization audit
+
+All 800 ARC-AGI-1 JSON files and the Apache-2.0 license were verified against source manifest `76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda`. The held-out evaluation panel contains 399 source groups after the registered cross-split duplicate exclusion. Query targets are used only for scoring and the explicitly labeled candidate-coverage oracle.
+
+| Condition | Exact tasks [95% source-group CI] | Candidate coverage | Mean measured / charged abstract proxy |
+|---|---:|---:|---:|
+| Slow/fast family belief | 0.2506% [0.0000%, 0.7519%] | 1.2531% | 132616.40 / 133187.06 |
+| Flat matched selector | 0.2506% [0.0000%, 0.7519%] | 1.2531% | 132324.23 / 133187.06 |
+
+The registered slow/fast-minus-flat difference is 0.0000 percentage points (95% paired source-group CI 0.0000 to 0.0000; Holm p=1). Candidate coverage is 1.2531% versus the registered 90.0% gate. The scoped conclusion is **inconclusive**; this is not evidence for hierarchical advantage.
+
+Charged compute is exactly paired by a preregistered abstract operation proxy. It is not a FLOP, wall-clock, energy, or end-to-end efficiency measurement. This task adapter is not a BDH/HRM reproduction and cannot substitute for neural shared-dynamics evidence.
+
+Trusted raw SHA-256: `2353bf280aa5ded0fd3c1d202fe5eedf796c0de07091afffa4db0178548c9fcf`; run-manifest SHA-256: `fc4c6a177d2c08a81dcac6e0075f6bff8fa60f22937f63b29c715c83d8d6a066`; clean run commit: `cbec277503d02844729d8fea5648a9e34e2ce44b`.
 
 ## Interpretation safeguards
 
@@ -274,7 +411,9 @@ This is an internally reproducible hybrid proposal-selection audit, not a propos
 - Inference units are seeds, sessions, or animals. Neurons are never treated as independent replicates.
 - IBL latent/behavior lead–lag is descriptive system-level evidence and is not interpreted as biological causal gating.
 - Strict IBL neural/shared-dynamics P6 support (distinct from exp11 behavior-only inference) requires a stimulus-pre primary panel with at least 5 animals/20 sessions, explicit unit-QC/context-coverage/nested-CV provenance, hierarchical observations, and parameter counts that include preprocessing.
-- Exp13 is a public structured-task hybrid proposal selector. Its HRM/CTM-inspired continuous mechanisms, ARC accuracy, and candidate oracle cannot establish shared neural dynamics or a biological mechanism.
+- Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.
+- The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.
+- Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.
 
 ## External-data status
 
@@ -288,5 +427,7 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.
 - `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.
 - `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.
-- `results/exp13_arc_formal_{raw,conditions,comparisons,run_manifest,report}`: public ARC task rows, task-primary statistics, provenance binding, and scoped interpretation.
-- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, and `results/exp13_arc_formal.pdf`: script-generated data figures when applicable.
+- `results/exp13_{arc,maze,sudoku}_formal_{raw,conditions,comparisons,run_manifest,report}`: public structured-task rows, task-primary statistics, provenance binding, and family-scoped interpretation.
+- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.
+- `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.
