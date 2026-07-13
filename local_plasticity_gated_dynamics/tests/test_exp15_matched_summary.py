@@ -113,6 +113,11 @@ def test_exp15_matched_snapshot_recomputes_raw_and_plots(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     config = _formal_fixture(tmp_path)
+    registered_path = tmp_path / "registered_exp15_arc.json"
+    registered_path.write_text(
+        json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    run_config = {**config, "config_path": str(registered_path.resolve())}
     monkeypatch.setattr(
         artifacts,
         "_software_provenance",
@@ -121,14 +126,10 @@ def test_exp15_matched_snapshot_recomputes_raw_and_plots(
             "git": {"commit": "a" * 40, "dirty": False},
         },
     )
-    run_dir = run_seed(config, 0, tmp_path / "runs")
+    run_dir = run_seed(run_config, 0, tmp_path / "runs")
     with pytest.raises(ValueError, match="run config differs from the registered"):
         validate_formal_run(run_dir)
 
-    registered_path = tmp_path / "registered_exp15_arc.json"
-    registered_path.write_text(
-        json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
     monkeypatch.setattr(summary, "REGISTERED_FORMAL_CONFIG_PATH", registered_path)
     monkeypatch.setattr(
         summary, "REGISTERED_FORMAL_CONFIG_SHA256", _sha(registered_path)

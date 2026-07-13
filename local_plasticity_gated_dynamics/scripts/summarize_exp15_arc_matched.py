@@ -86,6 +86,7 @@ def _registered_run_config(seed: int) -> dict[str, object]:
         "experiment": "exp15_task_specialized_reasoning",
         "seed": seed,
         **registered,
+        "config_path": str(REGISTERED_FORMAL_CONFIG_PATH.resolve()),
         "training_algorithm": "target_free_task_specialized_dynamics",
         "used_autograd": False,
         "used_bptt": False,
