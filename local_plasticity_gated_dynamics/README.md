@@ -178,7 +178,9 @@ layers:
    initialization, examples/order, optimizer steps, and core-call budget. It
    uses global autograd/BPTT only within the final outer cycle, detaches carry
    between fixed supervision segments, and makes its checkpoints ineligible
-   for local-model initialization. ACT, StableMax, puzzle embeddings, EMA,
+   for local-model initialization. CUDA runs force strict deterministic
+   algorithms and math-SDP rather than silently accepting a nondeterministic
+   attention kernel. ACT, StableMax, puzzle embeddings, EMA,
    official RMSNorm/SwiGLU/RoPE blocks, the official 5M/7M scale, and the
    official transductive ARC protocol are absent. The loss is blank-cell-only,
    and reported exact Sudoku predictions clamp public clues. It is therefore a

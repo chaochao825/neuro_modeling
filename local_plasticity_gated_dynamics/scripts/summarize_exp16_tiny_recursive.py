@@ -184,8 +184,18 @@ def publish_snapshot(
         )
     all_metrics: list[dict[str, object]] = []
     manifests: list[dict[str, object]] = []
+    seen_paths: set[Path] = set()
+    seen_run_ids: set[str] = set()
     for value in run_dirs:
-        metrics, receipt = _load_run(Path(value))
+        run_dir = Path(value).resolve()
+        if run_dir in seen_paths:
+            raise ValueError(f"duplicate Exp16 run directory: {run_dir}")
+        seen_paths.add(run_dir)
+        metrics, receipt = _load_run(run_dir)
+        run_id = str(receipt["run_id"])
+        if run_id in seen_run_ids:
+            raise ValueError(f"duplicate Exp16 run_id: {run_id}")
+        seen_run_ids.add(run_id)
         all_metrics.extend(metrics)
         manifests.append(receipt)
     manifest = pd.DataFrame(manifests).sort_values("seed").reset_index(drop=True)

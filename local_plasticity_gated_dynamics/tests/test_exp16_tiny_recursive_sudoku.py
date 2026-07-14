@@ -76,6 +76,8 @@ def test_exp16_smoke_retains_matched_baseline_receipts_and_test_safety(
     assert recursive["used_bptt"] is True
     assert recursive["eligible_for_local_initialization"] is False
     assert recursive["claim_conclusion"] == "inconclusive"
+    assert recursive["strict_deterministic_algorithms"] is True
+    assert recursive["attention_backend"] == "cpu_default"
 
     comparison = next(row for row in rows if row.get("stage") == "comparison")
     assert comparison["all_matching_gates_passed"] is True
@@ -109,6 +111,8 @@ def test_exp16_smoke_retains_matched_baseline_receipts_and_test_safety(
         publish_snapshot([run_path], tmp_path, prefix="exp16_test")
     with pytest.raises(FileExistsError, match="figures are immutable"):
         plot_exp16(tmp_path, prefix="exp16_test")
+    with pytest.raises(ValueError, match="duplicate Exp16 run directory"):
+        publish_snapshot([run_path, run_path], tmp_path, prefix="exp16_duplicate_run")
 
     conditions = pd.read_csv(outputs["conditions"])
     conditions.loc[0, "scoped_raw_sha256"] = "0" * 64

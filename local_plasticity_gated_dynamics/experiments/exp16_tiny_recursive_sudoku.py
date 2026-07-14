@@ -146,6 +146,26 @@ def _device(value: object) -> str:
     return requested
 
 
+def _configure_strict_torch_determinism(device: str) -> dict[str, object]:
+    """Use a deterministic attention backend instead of warning and continuing."""
+
+    torch.use_deterministic_algorithms(True, warn_only=False)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    attention_backend = "cpu_default"
+    if device.startswith("cuda"):
+        torch.backends.cuda.enable_flash_sdp(False)
+        torch.backends.cuda.enable_mem_efficient_sdp(False)
+        torch.backends.cuda.enable_math_sdp(True)
+        if hasattr(torch.backends.cuda, "enable_cudnn_sdp"):
+            torch.backends.cuda.enable_cudnn_sdp(False)
+        attention_backend = "cuda_math_sdp"
+    return {
+        "strict_deterministic_algorithms": True,
+        "attention_backend": attention_backend,
+    }
+
+
 def _architecture(config: Mapping[str, Any], *, mode: str) -> TinyRecursiveConfig:
     model = dict(config.get("model", {}))
     return TinyRecursiveConfig(
@@ -213,6 +233,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
         "claim_scope": "computational_baseline_only",
         "official_hrm_reproduction": False,
         "official_trm_reproduction": False,
+        "strict_deterministic_algorithms_requested": True,
         "registered_config_sha256": registered_config_sha256(config),
     }
     with ExperimentRun(
@@ -318,6 +339,9 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
         fit_receipts: dict[str, object] = {}
         try:
             training_options = _training_config(config)
+            determinism_receipt = _configure_strict_torch_determinism(
+                training_options.device
+            )
             checkpoint_root = run.path / "checkpoints"
             checkpoint_root.mkdir(parents=True, exist_ok=True)
         except Exception as error:
@@ -463,6 +487,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "eligible_for_local_initialization": False,
                     "official_hrm_reproduction": False,
                     "official_trm_reproduction": False,
+                    **determinism_receipt,
                 }
                 aggregate_by_condition[condition] = aggregate
                 fit_receipts[condition] = {
@@ -470,6 +495,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "initialization_sha256": initial_fingerprint,
                     "checkpoint_path": str(checkpoint_path.relative_to(run.path)),
                     "checkpoint_file_sha256": _file_sha256(checkpoint_path),
+                    "determinism": determinism_receipt,
                     **receipt.to_dict(),
                 }
                 run.record(

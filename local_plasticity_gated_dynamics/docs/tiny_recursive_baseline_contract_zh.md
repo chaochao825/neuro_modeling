@@ -20,6 +20,8 @@ y <- core(y, z)
 
 每个 supervision segment 的前 `H_cycles - 1` 个 outer cycles 在 `no_grad` 下运行，最后一个 outer cycle 内的全部 `L_cycles` 进入 BPTT；segment 之间的 `y/z` carry 显式 detach。评估固定运行配置的全部 supervision steps，不实现论文式或自定义 early halt。
 
+CUDA 执行启用 strict deterministic algorithms，并关闭 flash/memory-efficient/cuDNN SDP，只保留 math-SDP；若算子无法确定性执行则失败并保留该 attempt，而不是仅发出 warning 后继续。
+
 对照 `single_state_core_call_matched` 使用相同模块、初始 state dict、训练/验证数组、epoch permutation、优化步数和名义 core-call 次数，只让一个答案状态动态更新。这里的 matched 不代表 backward FLOPs、显存、GPU 时间、墙钟时间或物理能耗相等。
 
 ## 有意保留的差异
