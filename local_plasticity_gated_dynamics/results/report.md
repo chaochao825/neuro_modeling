@@ -4,7 +4,7 @@ This report combines the compact immutable core-run snapshot with separately has
 
 ## Compact core run coverage
 
-This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--15 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.
+This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--16 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.
 
 | Experiment | Profile | Attempts | Clean complete | Complete with failures | Failed/partial | Planned attempt-cells |
 |---|---:|---:|---:|---:|---:|---:|
@@ -399,6 +399,19 @@ This non-OOD, unmatched-mechanism panel is retained for engineering visibility a
 
 Both rows remain **inconclusive** for the repository's mechanism claims despite the engineering utility of bounded search.
 
+## exp16 micro-TRM-like Sudoku smoke (pilot only)
+
+This is a strict-deterministic, clean-commit engineering smoke on an auditable synthetic fixture. It is not an official HRM/TRM reproduction, public-task validation, local-learning result, or formal claim.
+
+| Condition | Exact accuracy [95% seed-bootstrap CI] | Parameters | Nominal core calls | Conclusion |
+|---|---:|---:|---:|---|
+| micro-TRM-like two-state | 0.00% [0.00%, 0.00%] | 11776 | 16 | **inconclusive** |
+| single-state core-call matched | 0.00% [0.00%, 0.00%] | 11776 | 16 | **inconclusive** |
+
+The paired exact-accuracy difference was 0.0000 [0.0000, 0.0000] (Wilcoxon p=1). Both models solved 0/8 held-out fixture puzzles exactly in every seed, so this run provides no evidence for a recursive-state advantage.
+
+Trusted scoped raw SHA-256: `fd72d108ee2bba5a0dff94c0fd3dbd64de43b56293b5b5d4b06bf2676e409c5e`; run-manifest SHA-256: `9db321bb555fc61f7fac27121de695cca3d97793c5f64d6708dd180155d7131a`; clean run commit: `e1f80c74e3a29e4fec7f0cdca9e9c725e784d63c`.
+
 ## Interpretation safeguards
 
 - Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.
@@ -425,6 +438,7 @@ Both rows remain **inconclusive** for the repository's mechanism claims despite 
 - Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.
 - The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.
 - Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.
+- Exp16 is an isolated global-BPTT micro-TRM-like smoke baseline. Its synthetic fixture, three seeds, zero exact accuracy, and pilot-only publisher cannot support an HRM/TRM reproduction, computational advantage, local-learning mechanism, or biological claim.
 
 ## External-data status
 
@@ -442,4 +456,5 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.
 - `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.
 - `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.
-- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.
+- `results/exp16_tiny_recursive_smoke_3seed_{raw,conditions,comparison,run_manifest,report}`: strict-deterministic, clean-commit, synthetic-fixture smoke snapshot; formal promotion is disabled.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_smoke_3seed.pdf`: script-generated data figures when applicable.

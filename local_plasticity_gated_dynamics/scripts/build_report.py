@@ -1808,8 +1808,27 @@ def _exp16_pilot_report_lines(results_root: Path) -> list[str]:
     """Render the fixed clean Exp16 smoke snapshot without adding a claim row."""
 
     prefix = "exp16_tiny_recursive_smoke_3seed"
-    if not (results_root / f"{prefix}_conditions.csv").is_file():
+    conditions_path = results_root / f"{prefix}_conditions.csv"
+    if not conditions_path.is_file():
         return []
+    expected_hashes = {
+        f"{prefix}_conditions.csv": (
+            "e58d8709e7dd07401426783e5e0350752ee30aaaf0c402ba1288931c4472c54f"
+        ),
+        f"{prefix}_comparison.csv": (
+            "cc1e502fe26b7b08950951c8438935f1cb3c6b2f6df6a71ce3c5914b94a2d25b"
+        ),
+        f"{prefix}_raw.csv.gz": (
+            "fd72d108ee2bba5a0dff94c0fd3dbd64de43b56293b5b5d4b06bf2676e409c5e"
+        ),
+        f"{prefix}_run_manifest.csv": (
+            "9db321bb555fc61f7fac27121de695cca3d97793c5f64d6708dd180155d7131a"
+        ),
+    }
+    for name, expected in expected_hashes.items():
+        path = results_root / name
+        if not path.is_file() or _file_sha256(path) != expected:
+            raise ValueError(f"Exp16 pilot artifact differs from snapshot: {name}")
     from scripts.summarize_exp16_tiny_recursive import load_published_snapshot
 
     _raw, conditions, comparison, manifest = load_published_snapshot(
