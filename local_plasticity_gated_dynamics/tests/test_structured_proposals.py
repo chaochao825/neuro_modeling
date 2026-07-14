@@ -97,4 +97,3 @@ def test_sudoku_proposals_solve_without_target_access() -> None:
     solution = complete[-1]
     assert np.all(solution[puzzle > 0] == puzzle[puzzle > 0])
     assert all(set(row) == set(range(1, 10)) for row in solution)
-

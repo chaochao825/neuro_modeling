@@ -1709,6 +1709,67 @@ def _exp15_arc_report_lines(results_root: Path) -> list[str]:
     return lines
 
 
+def _exp15_sudoku_report_lines(results_root: Path) -> list[str]:
+    """Render the legacy Sudoku engineering audit without adding a claim row."""
+
+    path = results_root / "exp15_formal_summary.csv"
+    if not path.is_file():
+        return []
+    summary = pd.read_csv(path)
+    required = {
+        "family",
+        "condition",
+        "n_tasks",
+        "exact_accuracy",
+        "exact_accuracy_ci_low",
+        "exact_accuracy_ci_high",
+        "mean_state_steps",
+        "formal_data_eligible",
+        "core_claim_eligible",
+        "conclusion",
+    }
+    missing = sorted(required - set(summary.columns))
+    if missing:
+        raise ValueError(f"exp15 formal summary lacks columns: {missing}")
+    sudoku = summary.loc[summary["family"].eq("sudoku")].copy()
+    expected = {"sudoku_local_no_branch", "sudoku_local_bounded_branch"}
+    if set(sudoku["condition"]) != expected or len(sudoku) != 2:
+        raise ValueError("exp15 Sudoku report requires its two frozen conditions")
+    labels = {
+        "sudoku_local_no_branch": "Local constraints only",
+        "sudoku_local_bounded_branch": "Local constraints + bounded search",
+    }
+    lines = [
+        "",
+        "## exp15 Sudoku engineering audit (report-only)",
+        "",
+        "This non-OOD, unmatched-mechanism panel is retained for engineering "
+        "visibility and does not append a global claim. The bounded-search "
+        "condition adds a distinct search mechanism and cannot be attributed "
+        "to local dynamics alone.",
+        "",
+        "| Condition | Exact accuracy [95% source-group CI] | Mean state evaluations | Conclusion |",
+        "|---|---:|---:|---|",
+    ]
+    for row in sudoku.sort_values("condition").to_dict("records"):
+        interval = (
+            f"{100 * float(row['exact_accuracy']):.2f}% "
+            f"[{100 * float(row['exact_accuracy_ci_low']):.2f}%, "
+            f"{100 * float(row['exact_accuracy_ci_high']):.2f}%]"
+        )
+        lines.append(
+            f"| {labels[str(row['condition'])]} | {interval} | "
+            f"{float(row['mean_state_steps']):.2f} | "
+            f"**{row['conclusion']}** |"
+        )
+    lines += [
+        "",
+        "Both rows remain **inconclusive** for the repository's mechanism "
+        "claims despite the engineering utility of bounded search.",
+    ]
+    return lines
+
+
 def _portable_run_path(value: object) -> object:
     """Remove machine-specific prefixes from a published run path.
 
@@ -2444,11 +2505,11 @@ def write_report(
     lines = [
         "# Local Plasticity to Gated Low-Dimensional Dynamics",
         "",
-        "This report is generated from immutable run artifacts. Failed and invalid conditions are included; only formal-profile independent units can support or oppose a core claim.",
+        "This report combines the compact immutable core-run snapshot with separately hash-bound scoped publications. Failed and invalid conditions are retained in their owning track; only formal-profile independent units can support or oppose a registered claim.",
         "",
-        "## Run coverage (all immutable attempts)",
+        "## Compact core run coverage",
         "",
-        "Retries and interrupted attempts remain listed here. These are attempt counts, not unique-seed coverage; core-claim sample sizes use only the latest formal attempt for each experiment and seed.",
+        "This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--15 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.",
         "",
         "| Experiment | Profile | Attempts | Clean complete | Complete with failures | Failed/partial | Planned attempt-cells |",
         "|---|---:|---:|---:|---:|---:|---:|",
@@ -2469,7 +2530,7 @@ def write_report(
             )
     lines += [
         "",
-        "## Core proposition audit",
+        "## Registered core and scoped proposition audit",
         "",
         "| Claim | Criterion | n complete/planned | Estimate [95% CI] | Conclusion |",
         "|---|---|---:|---:|---|",
@@ -2643,6 +2704,7 @@ def write_report(
             "Movement-pre and full-trial-covariate results remain sensitivity-only.",
         ]
     lines += _exp15_arc_report_lines(results_root)
+    lines += _exp15_sudoku_report_lines(results_root)
     lines += [
         "",
         "## Interpretation safeguards",
@@ -2678,7 +2740,7 @@ def write_report(
         "",
         "## Generated artifacts",
         "",
-        "- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.",
+        "- `results/raw_metrics.csv.gz`: lossless compact Exp00--11 raw metric snapshot, including failed and invalid conditions; later scoped tracks retain separate hash-bound raw tables and run manifests. The uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
         "- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.",
         "- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.",

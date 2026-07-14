@@ -36,7 +36,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp15_*.py` are executable entry points as implementation advances. `exp07`
+`exp16_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -93,6 +93,17 @@ override, and a results root. For example:
   --results-root results --prefix exp13_maze_formal
 .\.venv\Scripts\python.exe experiments\exp14_ibl_multisession_neural.py `
   --config configs\formal\exp14_ibl_multisession_neural.json --results-root results
+.\.venv\Scripts\python.exe scripts\summarize_exp14.py `
+  --config configs\formal\exp14_ibl_multisession_neural.json --results-root results
+# Exp15 publication takes the exact immutable run directory rather than
+# silently selecting a retry:
+.\.venv\Scripts\python.exe experiments\exp15_task_specialized_reasoning.py `
+  --config configs\formal\exp15_task_specialized_arc.json --results-root results
+.\.venv\Scripts\python.exe scripts\summarize_exp15_arc_matched.py `
+  --run-dir <exact-exp15-run-directory> --results-root results
+# The small recursive model is an isolated BPTT baseline, not local learning:
+.\.venv\Scripts\python.exe experiments\exp16_tiny_recursive_sudoku.py `
+  --config configs\smoke\exp16_tiny_recursive_sudoku.json --results-root results
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -154,6 +165,14 @@ layers:
    charged abstract-operation budget. Its claim
    remains fail-closed on source, OOD, pairing, compute, and candidate-coverage
    gates. See `docs/task_specialized_reasoning_contract_zh.md`.
+7. `exp16` is a baseline-only micro-TRM-like track. It alternates a latent
+   reasoning state and an answer state through one shared Transformer core and
+   compares against a single-state condition with the same parameters,
+   initialization, examples/order, optimizer steps, and core-call budget. It
+   uses global autograd/BPTT and its checkpoints are ineligible for local-model
+   initialization. ACT, StableMax, puzzle embeddings, the official 5M/7M
+   scale, and the official transductive ARC protocol are intentionally absent;
+   therefore it is not an official HRM/TRM reproduction or biological evidence.
 
 ### Current exp13 public ARC result
 
@@ -344,10 +363,13 @@ stimulus-pre and movement-pre windows; its current one-session result is not
 leakage-safe enough for support. Behavior-only `exp11` instead consumes a
 frozen cohort of at least 20 sessions/5 animals and never loads neural activity.
 
-`results/raw_metrics.csv.gz` losslessly retains every complete, invalid, and
-failed condition. The ignored uncompressed CSV is regenerated as a local
-plotting cache.
-`results/summary.csv` uses only the latest formal run attempt per experiment and
-seed for inference while preserving all earlier attempts in the raw table and
-run-coverage report. Figures compute uncertainty across seeds or sessions, never
-across neurons or folds.
+`results/raw_metrics.csv.gz` is the lossless compact Exp00--11 snapshot and
+retains every complete, invalid, and failed condition in those tracks. Exp13--15
+retain their later attempts in separate hash-bound raw tables and run manifests;
+Exp16 writes immutable per-seed run folders until a scoped publisher is frozen.
+The ignored uncompressed CSV is regenerated as a local plotting cache.
+`results/summary.csv` combines registered core claims with explicitly scoped
+claims. Its compact core inference uses the eligible formal attempt per
+experiment and seed, while later scoped publications apply their own frozen run
+manifests. Figures compute uncertainty across seeds or sessions, never across
+neurons or folds.

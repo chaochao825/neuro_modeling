@@ -1,0 +1,48 @@
+{
+  "profile": "formal",
+  "family": "sudoku",
+  "claim_scope": "computational_baseline_only",
+  "seeds": [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+  ],
+  "conditions": [
+    "micro_trm_bptt",
+    "flat_shared_compute_matched"
+  ],
+  "validation_fraction": 0.2,
+  "augmentations_per_task": 16,
+  "n_bootstrap": 10000,
+  "minimum_test_tasks": 28,
+  "minimum_training_seeds": 30,
+  "data": {
+    "path": "data/structured/sudoku_wichtounet_v2.jsonl",
+    "manifest_path": "data/structured/sudoku_wichtounet_v2.manifest.json",
+    "manifest_sha256": "1b0aa95575b50012e25499ddd82c35d462979fe150d6819ea0ade7f6f80c91f2",
+    "dataset_name": "wichtounet/sudoku_dataset-v2",
+    "revision": "0db6de036b80b4e8e4574abe6e15026331bd5c2c",
+    "license": "CC-BY-4.0",
+    "license_status": "verified",
+    "test_split_role": "non_ood",
+    "default_split": null,
+    "unavailable_reason": null
+  },
+  "model": {
+    "hidden_size": 64,
+    "num_heads": 4,
+    "layers": 2,
+    "expansion": 2.0,
+    "high_cycles": 3,
+    "low_cycles": 4
+  },
+  "training": {
+    "epochs": 100,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.01,
+    "grad_clip": 1.0,
+    "auxiliary_loss_weight": 0.25,
+    "device": "auto"
+  }
+}

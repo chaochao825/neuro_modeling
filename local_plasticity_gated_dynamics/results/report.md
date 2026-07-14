@@ -1,10 +1,10 @@
 # Local Plasticity to Gated Low-Dimensional Dynamics
 
-This report is generated from immutable run artifacts. Failed and invalid conditions are included; only formal-profile independent units can support or oppose a core claim.
+This report combines the compact immutable core-run snapshot with separately hash-bound scoped publications. Failed and invalid conditions are retained in their owning track; only formal-profile independent units can support or oppose a registered claim.
 
-## Run coverage (all immutable attempts)
+## Compact core run coverage
 
-Retries and interrupted attempts remain listed here. These are attempt counts, not unique-seed coverage; core-claim sample sizes use only the latest formal attempt for each experiment and seed.
+This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--15 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.
 
 | Experiment | Profile | Attempts | Clean complete | Complete with failures | Failed/partial | Planned attempt-cells |
 |---|---:|---:|---:|---:|---:|---:|
@@ -26,7 +26,7 @@ Retries and interrupted attempts remain listed here. These are attempt counts, n
 | exp10_hidden_context_ei_bridge | smoke | 60 | 60 | 0 | 0 | 420 |
 | exp11_ibl_behavior_belief | formal | 1 | 1 | 0 | 0 | 120 |
 
-## Core proposition audit
+## Registered core and scoped proposition audit
 
 | Claim | Criterion | n complete/planned | Estimate [95% CI] | Conclusion |
 |---|---|---:|---:|---|
@@ -388,6 +388,17 @@ Charged compute is exactly paired by a preregistered abstract operation proxy. I
 
 Trusted raw SHA-256: `2353bf280aa5ded0fd3c1d202fe5eedf796c0de07091afffa4db0178548c9fcf`; run-manifest SHA-256: `fc4c6a177d2c08a81dcac6e0075f6bff8fa60f22937f63b29c715c83d8d6a066`; clean run commit: `cbec277503d02844729d8fea5648a9e34e2ce44b`.
 
+## exp15 Sudoku engineering audit (report-only)
+
+This non-OOD, unmatched-mechanism panel is retained for engineering visibility and does not append a global claim. The bounded-search condition adds a distinct search mechanism and cannot be attributed to local dynamics alone.
+
+| Condition | Exact accuracy [95% source-group CI] | Mean state evaluations | Conclusion |
+|---|---:|---:|---|
+| Local constraints + bounded search | 100.00% [100.00%, 100.00%] | 11.43 | **inconclusive** |
+| Local constraints only | 75.00% [57.14%, 89.29%] | 7.32 | **inconclusive** |
+
+Both rows remain **inconclusive** for the repository's mechanism claims despite the engineering utility of bounded search.
+
 ## Interpretation safeguards
 
 - Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.
@@ -421,7 +432,7 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 
 ## Generated artifacts
 
-- `results/raw_metrics.csv.gz`: lossless raw metric snapshot, including failed and invalid conditions; the uncompressed CSV is a reproducible local plotting cache.
+- `results/raw_metrics.csv.gz`: lossless compact Exp00--11 raw metric snapshot, including failed and invalid conditions; later scoped tracks retain separate hash-bound raw tables and run manifests. The uncompressed CSV is a reproducible local plotting cache.
 - `results/runs.csv`: run status and planned-cell coverage.
 - `results/summary.csv`: registered core claims plus scoped incremental real-data claims.
 - `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.

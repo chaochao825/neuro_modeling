@@ -10,7 +10,7 @@ committed configs and scripts regenerate that layout.
 
 - Phase 1 is the clean constructive test: the aligned rank-4 update is rank matched and non-inferior to full feedback on the synthetic latent task.
 - In Phase 2, derivative modulation, sparse masks, Dale projection, and fan-in normalization do not preserve the algebraic rank bound of the raw outer-product rule. The final E/I update is therefore not low rank even when activity remains low dimensional.
-- Local, full-feedback, and shuffled-feedback task accuracies are indistinguishable in the completed conditions. These runs do not identify feedback alignment as the cause of behavior.
+- In the legacy `exp02`/`exp03` conditions, local, full-feedback, and shuffled-feedback task accuracies are indistinguishable. The later strictly paired `exp07` audit finds a small aligned advantage under its matched controls, but still does not establish the complete recurrent E/I mechanism.
 - Homeostatic updates dominate task-plastic updates in cumulative L1 budget. The existing homeostasis ablation is not budget matched and its stability result opposes the preregistered direction.
 - The learned MD gate is a supervised Hebbian context classifier because its fit and modulatory features use true context information.
 - The historical B1 snapshot passed only a relative branch against an untuned
@@ -125,9 +125,11 @@ committed configs and scripts regenerate that layout.
   selection/PCA, paired observation maps, exact conditional Poisson scoring,
   and animal-primary bootstrap. Its synthetic path is only a systems smoke
   test. The formal loader is fail-closed on a reviewed 20-session compact cache.
-  Acquisition and offline good-unit binning are now complete for 20 sessions,
-  20 animals, 35 probes, and 3,183 units, but no neural support exists until
-  the registered real-data outer comparison completes. Moreover, the
+  Acquisition and offline good-unit binning are complete for 20 sessions,
+  20 animals, 35 probes, and 3,183 units. The registered real-data outer
+  comparison has also completed, but its common-minus-shared primary result is
+  `inconclusive`; it therefore provides no support for shared neural dynamics.
+  Moreover, the
   implemented model remains a
   teacher-forced within-trial one-step conditional model—not a full Poisson/NB
   switching LDS with filtering, smoothing, normal-stability, or causal gate
@@ -135,6 +137,13 @@ committed configs and scripts regenerate that layout.
   3,183 recorded units. Its `full` comparator has session-specific gated
   operators but retains the same six-region shared basis; it is not a full
   unit-space or full latent-LDS comparator.
+- `exp16` is an isolated global-autograd/BPTT computational baseline. Its
+  micro-TRM-like and single-state conditions can test an alternating-state
+  recursion schedule under matched parameters and core calls, but they omit
+  official ACT, StableMax, puzzle identifiers, model scale, augmentation, and
+  ARC transductive evaluation. Neither a smoke result nor a future Sudoku
+  advantage can initialize a local-learning model or count as evidence for a
+  biological hierarchy, three-factor plasticity, or shared neural dynamics.
 - The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
   Shared dynamics retains only about 25--29% of the full-model likelihood gain,
   far below the 90% criterion; pre-stim future-covariate and true-boundary-reset
