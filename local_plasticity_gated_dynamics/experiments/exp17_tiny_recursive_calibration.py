@@ -1,4 +1,4 @@
-"""Test-free calibration for the micro tiny-recursive Sudoku baseline.
+"""Test-score-blind calibration for the micro tiny-recursive Sudoku baseline.
 
 This experiment may inspect supervised train and inner-validation targets. The
 dataset adapter constructs its normal opaque capability store, including test
@@ -34,6 +34,7 @@ from experiments.exp16_tiny_recursive_sudoku import (  # noqa: E402
     _training_config,
     calibration_candidate_sha256,
     calibration_code_sha256,
+    calibration_environment_sha256,
 )
 from src.baselines.tiny_recursive import (  # noqa: E402
     TinyRecursiveBaseline,
@@ -48,6 +49,14 @@ from src.data.tiny_reasoning_data import (  # noqa: E402
 )
 from src.utils.artifacts import ExperimentRun  # noqa: E402
 from src.utils.reproducibility import derive_seed  # noqa: E402
+
+
+NO_TEST_ACCESS_EVIDENCE = {
+    "test_data_used_for_fit_or_selection": False,
+    "test_prediction_array_requested": False,
+    "public_test_prediction_adapter_called": False,
+    "hidden_target_scorer_called": False,
+}
 
 
 def _semantic_sha256(value: object) -> str:
@@ -74,7 +83,7 @@ def _candidate_configs(config: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
             not isinstance(name, str)
             or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", name) is None
             or name in {".", ".."}
-            or name.upper() in windows_reserved
+            or name.split(".", 1)[0].upper() in windows_reserved
             or name.casefold() in casefold_names
             or not isinstance(value, Mapping)
         ):
@@ -127,14 +136,14 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
         **dict(config),
         "claim_scope": "calibration_only",
         "test_access_forbidden": True,
-        "test_data_used_for_fit_or_selection": False,
-        "hidden_target_scorer_called": False,
+        **NO_TEST_ACCESS_EVIDENCE,
         "used_bptt": True,
         "eligible_for_local_initialization": False,
         "semantic_config_sha256": _semantic_sha256(
             {key: value for key, value in dict(config).items() if key != "config_path"}
         ),
         "calibration_code_sha256": calibration_code_sha256(),
+        "calibration_environment_sha256": calibration_environment_sha256(),
     }
     with ExperimentRun(
         "exp17_tiny_recursive_calibration", seed, run_config, results_root=results_root
@@ -183,11 +192,8 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                 "dataset_adapter_loaded_test_records": any(
                     task.split == "test" for task in dataset.tasks
                 ),
-                "test_prediction_array_requested": False,
-                "public_test_prediction_adapter_called": False,
-                "hidden_target_scorer_called": False,
+                **NO_TEST_ACCESS_EVIDENCE,
                 "test_targets_remained_opaque_in_target_store": True,
-                "test_data_used_for_fit_or_selection": False,
             }
             (run.path / "source_provenance.json").write_text(
                 json.dumps(provenance_payload, indent=2, sort_keys=True),
@@ -202,11 +208,8 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                         "status": "failed",
                         "failure_type": type(error).__name__,
                         "dataset_adapter_loaded_test_records": None,
-                        "test_prediction_array_requested": False,
-                        "public_test_prediction_adapter_called": False,
-                        "hidden_target_scorer_called": False,
+                        **NO_TEST_ACCESS_EVIDENCE,
                         "test_targets_remained_opaque_in_target_store": True,
-                        "test_data_used_for_fit_or_selection": False,
                     },
                     indent=2,
                     sort_keys=True,
@@ -219,6 +222,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     condition=name,
                     task_family="sudoku",
                     stage="calibration_dataset",
+                    **NO_TEST_ACCESS_EVIDENCE,
                 )
             return run.path
 
@@ -325,10 +329,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "epoch_permutation_sha256": receipt.epoch_permutation_sha256,
                     "checkpoint_sha256": receipt.checkpoint_sha256,
                     "checkpoint_path": str(checkpoint_path.relative_to(run.path)),
-                    "test_data_used_for_fit_or_selection": False,
-                    "test_prediction_array_requested": False,
-                    "public_test_prediction_adapter_called": False,
-                    "hidden_target_scorer_called": False,
+                    **NO_TEST_ACCESS_EVIDENCE,
                     "claim_scope": "calibration_only",
                     "claim_conclusion": "inconclusive",
                     "used_bptt": True,
@@ -359,6 +360,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     condition=name,
                     task_family="sudoku",
                     stage="calibration_fit",
+                    **NO_TEST_ACCESS_EVIDENCE,
                 )
 
         if successful_rows:
@@ -380,7 +382,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "n_candidates_complete": len(successful_rows),
                     "seed_local_selection_only": True,
                     "requires_cross_seed_freeze": True,
-                    "test_data_used_for_fit_or_selection": False,
+                    **NO_TEST_ACCESS_EVIDENCE,
                     "claim_scope": "calibration_only",
                     "claim_conclusion": "inconclusive",
                 },

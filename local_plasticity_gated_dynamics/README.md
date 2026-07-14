@@ -111,7 +111,7 @@ $exp16Runs = & .\.venv\Scripts\python.exe `
 $exp16RunArgs = foreach ($run in $exp16Runs) { "--run-dir"; $run.Trim() }
 .\.venv\Scripts\python.exe scripts\summarize_exp16_tiny_recursive.py `
   @exp16RunArgs --results-root results --prefix exp16_tiny_recursive_smoke
-# Exp17 is a separate test-free calibration stage.  It must be completed and
+# Exp17 is a separate test-score-blind calibration stage. It must be completed and
 # frozen before a new confirmation panel is scored:
 $exp17Runs = & .\.venv\Scripts\python.exe `
   experiments\exp17_tiny_recursive_calibration.py `
@@ -199,12 +199,15 @@ layers:
    blank-only and official-like all-token supervision, training-data diversity,
    and detached refinement depth using only supervised train and inner-
    validation partitions. Candidate selection uses task-macro validation blank-
-   cell accuracy. The dataset adapter constructs an opaque capability store for
-   the full source file, but the runner never requests a test prediction array,
-   invokes the hidden-target scorer, or exposes a test target to fitting or
-   selection. Its cross-seed publisher certifies this narrower boundary and
-   leaves the claim `inconclusive`. A frozen candidate still requires a separate
-   one-shot confirmation panel.
+   cell accuracy. The dataset adapter parses the full source file and constructs
+   its normal capability store, including test records; this is therefore
+   test-score-blind rather than literal test non-materialization. The runner
+   never requests a test prediction array, invokes the hidden-target scorer, or
+   exposes a test target to fitting or selection. Its cross-seed publisher
+   verifies those claims independently in config, provenance, and every metric
+   row, and leaves the claim `inconclusive`. A frozen candidate still requires a
+   separate one-shot confirmation panel with matching source, software, and
+   candidate hashes.
 
 ### Current exp13 public ARC result
 

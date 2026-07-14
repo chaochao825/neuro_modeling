@@ -13,6 +13,7 @@ import json
 import subprocess
 import sys
 from dataclasses import asdict
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -53,6 +54,16 @@ CONDITIONS = {
     "single_state_core_call_matched": "single_state_core_call_matched",
 }
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CALIBRATION_DISTRIBUTIONS = (
+    "numpy",
+    "scipy",
+    "pandas",
+    "scikit-learn",
+    "torch",
+    "matplotlib",
+    "statsmodels",
+)
+FREEZE_REQUIRED_EVIDENCE_STAGES = frozenset({"frozen_confirmation", "retry_pilot"})
 
 
 def _group_bootstrap(
@@ -259,6 +270,7 @@ def calibration_code_sha256() -> str:
     """Bind calibration, fitting, data-capability, and freeze implementations."""
 
     relative_paths = (
+        "experiments/common.py",
         "experiments/exp13_structured_reasoning.py",
         "experiments/exp16_tiny_recursive_sudoku.py",
         "experiments/exp17_tiny_recursive_calibration.py",
@@ -278,6 +290,20 @@ def calibration_code_sha256() -> str:
         digest.update(relative.encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()
+
+
+def calibration_environment_sha256() -> str:
+    """Bind the software environment used for calibration and confirmation."""
+
+    packages: dict[str, str | None] = {}
+    for distribution in CALIBRATION_DISTRIBUTIONS:
+        try:
+            packages[distribution] = version(distribution)
+        except PackageNotFoundError:
+            packages[distribution] = None
+    payload = {"python": sys.version, "packages": packages}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def _git_state() -> tuple[str | None, bool | None]:
@@ -307,6 +333,12 @@ def _git_state() -> tuple[str | None, bool | None]:
 def _validate_calibration_freeze(
     config: Mapping[str, Any], *, confirmation_seed: int
 ) -> dict[str, object]:
+    evidence_stage = str(config.get("evidence_stage", ""))
+    if (
+        evidence_stage in FREEZE_REQUIRED_EVIDENCE_STAGES
+        and config.get("require_calibration_freeze") is not True
+    ):
+        raise ValueError(f"{evidence_stage} requires a calibration freeze")
     if config.get("require_calibration_freeze") is not True:
         return {"required": False, "validated": False}
     real_dataset = config.get("synthetic_fixture") is None
@@ -332,7 +364,12 @@ def _validate_calibration_freeze(
     required_flags = {
         "status": "frozen_validation_only",
         "all_freeze_gates_passed": True,
+        "enough_seeds": True,
+        "all_runs_clean": True,
+        "all_candidates_complete": True,
+        "test_data_used_for_fit_or_selection": False,
         "test_prediction_array_requested": False,
+        "public_test_prediction_adapter_called": False,
         "hidden_target_scorer_called": False,
         "confirmation_test_still_required": True,
     }
@@ -340,6 +377,11 @@ def _validate_calibration_freeze(
         raise ValueError("calibration freeze decision gates are not satisfied")
     if real_dataset and decision.get("formal_data_validation_required") is not True:
         raise ValueError("calibration did not require formal data validation")
+    if (
+        decision.get("require_clean_git") is True
+        and decision.get("all_git_clean") is not True
+    ):
+        raise ValueError("calibration freeze decision is not git-clean")
     selected_candidate = freeze.get("selected_candidate")
     if selected_candidate != decision.get("selected_candidate"):
         raise ValueError("calibration selected candidate mismatch")
@@ -356,8 +398,15 @@ def _validate_calibration_freeze(
         raise ValueError("confirmation seed must be disjoint from calibration seeds")
     current_commit, current_dirty = _git_state()
     current_code_sha256 = calibration_code_sha256()
+    current_environment_sha256 = calibration_environment_sha256()
     if current_code_sha256 != decision.get("calibration_code_sha256"):
         raise ValueError("confirmation code differs from frozen calibration code")
+    if current_environment_sha256 != decision.get(
+        "calibration_environment_sha256"
+    ):
+        raise ValueError(
+            "confirmation software environment differs from frozen calibration"
+        )
     if decision.get("require_clean_git") is True and current_dirty is not False:
         raise ValueError("confirmation requires a clean git worktree")
     return {
@@ -373,6 +422,7 @@ def _validate_calibration_freeze(
         "git_dirty": current_dirty,
         "calibration_git_commit": decision.get("git_commit"),
         "calibration_code_sha256": current_code_sha256,
+        "calibration_environment_sha256": current_environment_sha256,
         "test_prediction_array_requested_during_selection": False,
         "hidden_target_scorer_called_during_selection": False,
     }

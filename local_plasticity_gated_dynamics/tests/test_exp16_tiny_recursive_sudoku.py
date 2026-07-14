@@ -11,6 +11,7 @@ from experiments.exp16_tiny_recursive_sudoku import (
     CONDITIONS,
     _validate_calibration_freeze,
     calibration_candidate_sha256,
+    calibration_environment_sha256,
     run_seed,
 )
 from figures.exp16_tiny_recursive_plot import plot_exp16
@@ -180,15 +181,22 @@ def test_exp16_confirmation_freeze_is_executable_and_hash_bound(
     decision = {
         "status": "frozen_validation_only",
         "all_freeze_gates_passed": True,
+        "enough_seeds": True,
+        "all_runs_clean": True,
+        "all_candidates_complete": True,
+        "all_git_clean": True,
         "selected_candidate": "blank_reference",
         "selected_candidate_config_sha256": candidate_sha256,
         "submitted_seeds": [10, 11, 12],
+        "test_data_used_for_fit_or_selection": False,
         "test_prediction_array_requested": False,
+        "public_test_prediction_adapter_called": False,
         "hidden_target_scorer_called": False,
         "confirmation_test_still_required": True,
         "git_commit": "calibration-commit",
         "require_clean_git": True,
         "calibration_code_sha256": "c" * 64,
+        "calibration_environment_sha256": calibration_environment_sha256(),
     }
     decision_path = tmp_path / "freeze.json"
     decision_path.write_text(json.dumps(decision), encoding="utf-8")
@@ -216,6 +224,47 @@ def test_exp16_confirmation_freeze_is_executable_and_hash_bound(
     assert receipt["calibration_git_commit"] == "calibration-commit"
     assert receipt["git_commit"] == "confirmation-commit"
 
+    for gate in (
+        "enough_seeds",
+        "all_runs_clean",
+        "all_candidates_complete",
+        "test_data_used_for_fit_or_selection",
+        "test_prediction_array_requested",
+        "public_test_prediction_adapter_called",
+        "hidden_target_scorer_called",
+    ):
+        mutated = dict(decision)
+        mutated[gate] = not decision[gate]
+        decision_path.write_text(json.dumps(mutated), encoding="utf-8")
+        config["calibration_freeze"]["freeze_decision_sha256"] = hashlib.sha256(
+            decision_path.read_bytes()
+        ).hexdigest()
+        with pytest.raises(ValueError, match="gates are not satisfied"):
+            _validate_calibration_freeze(config, confirmation_seed=20)
+
+    mutated = dict(decision)
+    mutated["all_git_clean"] = False
+    decision_path.write_text(json.dumps(mutated), encoding="utf-8")
+    config["calibration_freeze"]["freeze_decision_sha256"] = hashlib.sha256(
+        decision_path.read_bytes()
+    ).hexdigest()
+    with pytest.raises(ValueError, match="not git-clean"):
+        _validate_calibration_freeze(config, confirmation_seed=20)
+
+    mutated = dict(decision)
+    mutated["calibration_environment_sha256"] = "0" * 64
+    decision_path.write_text(json.dumps(mutated), encoding="utf-8")
+    config["calibration_freeze"]["freeze_decision_sha256"] = hashlib.sha256(
+        decision_path.read_bytes()
+    ).hexdigest()
+    with pytest.raises(ValueError, match="software environment"):
+        _validate_calibration_freeze(config, confirmation_seed=20)
+
+    decision_path.write_text(json.dumps(decision), encoding="utf-8")
+    config["calibration_freeze"]["freeze_decision_sha256"] = hashlib.sha256(
+        decision_path.read_bytes()
+    ).hexdigest()
+
     config["training"]["epochs"] += 1
     with pytest.raises(ValueError, match="frozen candidate"):
         _validate_calibration_freeze(config, confirmation_seed=20)
@@ -238,6 +287,17 @@ def test_exp16_invalid_freeze_fails_before_dataset_or_test_access(tmp_path) -> N
     assert not (run_path / "source_provenance.json").exists()
     status = json.loads((run_path / "status.json").read_text(encoding="utf-8"))
     assert status["status"] == "complete_with_failures"
+
+
+@pytest.mark.parametrize("evidence_stage", ["frozen_confirmation", "retry_pilot"])
+def test_exp16_confirmation_stage_cannot_disable_freeze_gate(
+    evidence_stage,
+) -> None:
+    config = load_json_config("configs/smoke/exp16_tiny_recursive_sudoku.json")
+    config["evidence_stage"] = evidence_stage
+    config["require_calibration_freeze"] = False
+    with pytest.raises(ValueError, match="requires a calibration freeze"):
+        _validate_calibration_freeze(config, confirmation_seed=20)
 
 
 def test_real_confirmation_cannot_bypass_formal_data_validation(tmp_path) -> None:

@@ -8,6 +8,7 @@ from experiments.common import load_json_config
 from experiments.exp16_tiny_recursive_sudoku import calibration_candidate_sha256
 from experiments.exp17_tiny_recursive_calibration import run_seed
 from scripts.summarize_exp17_tiny_recursive_calibration import (
+    NO_TEST_ACCESS_FIELDS,
     publish_summary,
     summarize_runs,
 )
@@ -93,7 +94,7 @@ def test_exp17_rejects_path_unsafe_candidate_names(tmp_path) -> None:
         run_seed(config, 0, tmp_path)
 
 
-@pytest.mark.parametrize("reserved", ["CON", "nul", "COM1"])
+@pytest.mark.parametrize("reserved", ["CON", "nul", "COM1", "CON.checkpoint"])
 def test_exp17_rejects_windows_reserved_candidate_names(tmp_path, reserved) -> None:
     config = load_json_config("configs/smoke/exp17_tiny_recursive_calibration.json")
     config["candidates"][reserved] = config["candidates"].pop(
@@ -121,7 +122,9 @@ def test_exp17_cross_seed_summary_is_validation_only_and_immutable(tmp_path) -> 
     )
     decision = json.loads(outputs["decision"].read_text(encoding="utf-8"))
     assert decision["status"] == "frozen_validation_only"
+    assert decision["test_data_used_for_fit_or_selection"] is False
     assert decision["test_prediction_array_requested"] is False
+    assert decision["public_test_prediction_adapter_called"] is False
     assert decision["hidden_target_scorer_called"] is False
     assert decision["confirmation_test_still_required"] is True
     assert decision["calibration_code_sha256"]
@@ -137,6 +140,88 @@ def test_exp17_cross_seed_summary_is_validation_only_and_immutable(tmp_path) -> 
     )
     with pytest.raises(ValueError, match="semantic Exp17 configs differ"):
         summarize_runs([first, second])
+
+
+def test_exp17_summary_requires_no_test_access_at_every_evidence_layer(
+    tmp_path,
+) -> None:
+    config = load_json_config("configs/smoke/exp17_tiny_recursive_calibration.json")
+    run_path = run_seed(config, 0, tmp_path / "runs")
+
+    config_path = run_path / "config.json"
+    original_config = json.loads(config_path.read_text(encoding="utf-8"))
+    for field in NO_TEST_ACCESS_FIELDS:
+        mutated = dict(original_config)
+        mutated.pop(field)
+        config_path.write_text(json.dumps(mutated), encoding="utf-8")
+        with pytest.raises(ValueError, match=field):
+            summarize_runs([run_path])
+    config_path.write_text(json.dumps(original_config), encoding="utf-8")
+
+    provenance_path = run_path / "source_provenance.json"
+    original_provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    for field in NO_TEST_ACCESS_FIELDS:
+        mutated = dict(original_provenance)
+        mutated[field] = True
+        provenance_path.write_text(json.dumps(mutated), encoding="utf-8")
+        with pytest.raises(ValueError, match=field):
+            summarize_runs([run_path])
+    provenance_path.write_text(json.dumps(original_provenance), encoding="utf-8")
+
+    metrics_path = run_path / "metrics.jsonl"
+    original_rows = _rows(run_path)
+    for field in NO_TEST_ACCESS_FIELDS:
+        mutated_rows = [dict(row) for row in original_rows]
+        mutated_rows[0].pop(field)
+        metrics_path.write_text(
+            "\n".join(json.dumps(row) for row in mutated_rows) + "\n",
+            encoding="utf-8",
+        )
+        with pytest.raises(ValueError, match=field):
+            summarize_runs([run_path])
+    metrics_path.write_text(
+        "\n".join(json.dumps(row) for row in original_rows) + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_exp17_summary_rejects_environment_mismatch_duplicate_and_nonfinite_rows(
+    tmp_path,
+) -> None:
+    config = load_json_config("configs/smoke/exp17_tiny_recursive_calibration.json")
+    run_path = run_seed(config, 0, tmp_path / "runs")
+
+    config_path = run_path / "config.json"
+    original_config = json.loads(config_path.read_text(encoding="utf-8"))
+    mutated_config = dict(original_config)
+    mutated_config["calibration_environment_sha256"] = "0" * 64
+    config_path.write_text(json.dumps(mutated_config), encoding="utf-8")
+    with pytest.raises(ValueError, match="environment hash"):
+        summarize_runs([run_path])
+    config_path.write_text(json.dumps(original_config), encoding="utf-8")
+
+    metrics_path = run_path / "metrics.jsonl"
+    original_rows = _rows(run_path)
+    candidate = next(
+        row for row in original_rows if row["stage"] == "calibration_candidate"
+    )
+    metrics_path.write_text(
+        "\n".join(json.dumps(row) for row in [*original_rows, candidate]) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="duplicate candidate"):
+        summarize_runs([run_path])
+
+    mutated_rows = [dict(row) for row in original_rows]
+    next(
+        row for row in mutated_rows if row["stage"] == "calibration_candidate"
+    )["selected_validation_blank_cell_accuracy"] = float("nan")
+    metrics_path.write_text(
+        "\n".join(json.dumps(row) for row in mutated_rows) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="non-finite"):
+        summarize_runs([run_path])
 
 
 def test_exp17_all_candidate_failures_are_publishable_but_not_frozen(
