@@ -47,6 +47,58 @@ def _bootstrap_mean(
     return float(values.mean()), float(low), float(high)
 
 
+def _holm_adjust(p_values: Sequence[float]) -> np.ndarray:
+    values = np.asarray(p_values, dtype=float)
+    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
+        raise ValueError("Holm p-values must be a finite non-empty vector")
+    if ((values < 0.0) | (values > 1.0)).any():
+        raise ValueError("Holm p-values must lie in [0, 1]")
+    order = np.argsort(values, kind="stable")
+    adjusted = np.empty_like(values)
+    running = 0.0
+    count = len(values)
+    for rank, index in enumerate(order):
+        running = max(running, min(1.0, (count - rank) * values[index]))
+        adjusted[index] = running
+    return adjusted
+
+
+def _paired_blank_values(
+    aggregates: pd.DataFrame, comparisons: pd.DataFrame
+) -> np.ndarray:
+    """Return blank-accuracy differences for exactly the compared seed set."""
+
+    required_aggregate = {"seed", "condition", "blank_cell_accuracy"}
+    required_comparison = {"seed"}
+    if not required_aggregate.issubset(aggregates) or not required_comparison.issubset(
+        comparisons
+    ):
+        raise ValueError("paired blank summary is missing required columns")
+    if comparisons["seed"].duplicated().any():
+        raise ValueError("paired comparison contains duplicate seed rows")
+    comparison_seeds = comparisons["seed"].tolist()
+    paired = aggregates.loc[aggregates["seed"].isin(comparison_seeds)].copy()
+    counts = paired.groupby(["seed", "condition"], sort=False).size()
+    expected = {
+        (seed, condition)
+        for seed in comparison_seeds
+        for condition in CONDITIONS
+    }
+    if set(counts.index.tolist()) != expected or not counts.eq(1).all():
+        raise ValueError(
+            "blank summary requires exactly one aggregate per compared seed/condition"
+        )
+    pivot = paired.pivot(
+        index="seed", columns="condition", values="blank_cell_accuracy"
+    ).reindex(comparison_seeds)
+    values = (
+        pivot["micro_trm_bptt"] - pivot["single_state_core_call_matched"]
+    ).to_numpy(float)
+    if len(values) != len(comparisons) or not np.isfinite(values).all():
+        raise ValueError("blank paired differences do not match comparison seeds")
+    return values
+
+
 def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]]:
     config = _read_json(run_dir / "config.json")
     status = _read_json(run_dir / "status.json")
@@ -242,6 +294,9 @@ def publish_snapshot(
                     "mean_exact_accuracy": np.nan,
                     "seed_bootstrap_ci_low": np.nan,
                     "seed_bootstrap_ci_high": np.nan,
+                    "mean_blank_cell_accuracy": np.nan,
+                    "blank_seed_bootstrap_ci_low": np.nan,
+                    "blank_seed_bootstrap_ci_high": np.nan,
                     "mean_parameter_count": np.nan,
                     "mean_nominal_core_calls": np.nan,
                     "conclusion": "inconclusive",
@@ -249,6 +304,9 @@ def publish_snapshot(
             )
             continue
         mean, low, high = _bootstrap_mean(rows["exact_accuracy"].to_numpy(float))
+        blank_mean, blank_low, blank_high = _bootstrap_mean(
+            rows["blank_cell_accuracy"].to_numpy(float)
+        )
         condition_rows.append(
             {
                 "condition": condition,
@@ -258,6 +316,9 @@ def publish_snapshot(
                 "mean_exact_accuracy": mean,
                 "seed_bootstrap_ci_low": low,
                 "seed_bootstrap_ci_high": high,
+                "mean_blank_cell_accuracy": blank_mean,
+                "blank_seed_bootstrap_ci_low": blank_low,
+                "blank_seed_bootstrap_ci_high": blank_high,
                 "mean_parameter_count": float(rows["parameter_count"].mean()),
                 "mean_nominal_core_calls": float(
                     rows["nominal_core_calls_per_evaluation"].mean()
@@ -283,6 +344,24 @@ def publish_snapshot(
                     method="auto",
                 ).pvalue
             )
+        )
+        blank_values = _paired_blank_values(aggregates, comparisons)
+        blank_estimate, blank_low, blank_high = _bootstrap_mean(blank_values)
+        blank_nonzero = int(np.count_nonzero(blank_values))
+        blank_p_value = (
+            1.0
+            if blank_nonzero == 0
+            else float(
+                wilcoxon(
+                    blank_values,
+                    alternative="two-sided",
+                    zero_method="wilcox",
+                    method="auto",
+                ).pvalue
+            )
+        )
+        p_value_holm, blank_p_value_holm = _holm_adjust(
+            [p_value, blank_p_value]
         )
         matching = all(
             bool(comparisons[column].all())
@@ -312,8 +391,16 @@ def publish_snapshot(
                 "seed_bootstrap_ci_low": low,
                 "seed_bootstrap_ci_high": high,
                 "wilcoxon_p": p_value,
-                "wilcoxon_p_holm": p_value,
+                "wilcoxon_p_holm": p_value_holm,
                 "n_nonzero_seeds": nonzero,
+                "blank_accuracy_estimate": blank_estimate,
+                "blank_seed_bootstrap_ci_low": blank_low,
+                "blank_seed_bootstrap_ci_high": blank_high,
+                "blank_wilcoxon_p": blank_p_value,
+                "blank_wilcoxon_p_holm": blank_p_value_holm,
+                "blank_n_nonzero_seeds": blank_nonzero,
+                "blank_n_complete_seeds": len(blank_values),
+                "holm_family": "exact_and_blank_accuracy_endpoints",
                 "all_matching_gates_passed": matching,
                 "formal_claim_eligible": formal,
                 "formal_ineligibility_reason": (
@@ -333,6 +420,14 @@ def publish_snapshot(
         "wilcoxon_p",
         "wilcoxon_p_holm",
         "n_nonzero_seeds",
+        "blank_accuracy_estimate",
+        "blank_seed_bootstrap_ci_low",
+        "blank_seed_bootstrap_ci_high",
+        "blank_wilcoxon_p",
+        "blank_wilcoxon_p_holm",
+        "blank_n_nonzero_seeds",
+        "blank_n_complete_seeds",
+        "holm_family",
         "all_matching_gates_passed",
         "formal_claim_eligible",
         "formal_ineligibility_reason",
@@ -369,6 +464,10 @@ def publish_snapshot(
             f"{float(comparison_summary.iloc[0]['estimate']):.4f} "
             f"[{float(comparison_summary.iloc[0]['seed_bootstrap_ci_low']):.4f}, "
             f"{float(comparison_summary.iloc[0]['seed_bootstrap_ci_high']):.4f}]. "
+            f"The paired blank-cell difference was "
+            f"{float(comparison_summary.iloc[0]['blank_accuracy_estimate']):.4f} "
+            f"[{float(comparison_summary.iloc[0]['blank_seed_bootstrap_ci_low']):.4f}, "
+            f"{float(comparison_summary.iloc[0]['blank_seed_bootstrap_ci_high']):.4f}]. "
             f"Conclusion: **{comparison_summary.iloc[0]['conclusion']}**."
         )
     )

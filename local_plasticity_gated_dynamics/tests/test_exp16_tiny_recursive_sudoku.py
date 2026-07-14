@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -18,6 +19,8 @@ from experiments.exp16_tiny_recursive_sudoku import (
 from figures.exp16_tiny_recursive_plot import plot_exp16
 from scripts.summarize_exp16_tiny_recursive import (
     EXPERIMENT,
+    _holm_adjust,
+    _paired_blank_values,
     latest_attempt_metrics,
     load_published_snapshot,
     publish_snapshot,
@@ -119,6 +122,19 @@ def test_exp16_smoke_retains_matched_baseline_receipts_and_test_safety(
     assert "Conclusion: **inconclusive**" in report
     assert "formal promotion is disabled" in report
     assert "synthetic Sudoku fixture" in report
+    condition_summary = pd.read_csv(outputs["conditions"])
+    comparison_summary = pd.read_csv(outputs["comparison"])
+    assert condition_summary["mean_blank_cell_accuracy"].between(0.0, 1.0).all()
+    assert {
+        "blank_accuracy_estimate",
+        "blank_seed_bootstrap_ci_low",
+        "blank_seed_bootstrap_ci_high",
+    }.issubset(comparison_summary.columns)
+    assert comparison_summary.loc[0, "blank_n_complete_seeds"] == 1
+    assert comparison_summary.loc[0, "holm_family"] == (
+        "exact_and_blank_accuracy_endpoints"
+    )
+    assert "paired blank-cell difference" in report
     with pytest.raises(FileExistsError, match="publication is immutable"):
         publish_snapshot([run_path], tmp_path, prefix="exp16_test")
     with pytest.raises(FileExistsError, match="figures are immutable"):
@@ -152,6 +168,58 @@ def test_exp16_failed_run_is_publishable_but_never_promoted(tmp_path) -> None:
     assert int(manifest.loc[0, "condition_failures"]) == 2
     report = outputs["report"].read_text(encoding="utf-8")
     assert "No complete paired comparison" in report
+    figures = plot_exp16(
+        tmp_path / "publication", prefix="exp16_failed"
+    )
+    assert all(path.is_file() for path in figures.values())
+
+
+def test_exp16_plot_reads_legacy_snapshot_without_blank_columns(tmp_path) -> None:
+    source_root = Path(__file__).resolve().parents[1] / "results"
+    source_prefix = "exp16_tiny_recursive_smoke_3seed"
+    target_prefix = "exp16_legacy_compatibility"
+    for suffix in (
+        "raw.csv.gz",
+        "conditions.csv",
+        "comparison.csv",
+        "run_manifest.csv",
+        "report.md",
+    ):
+        shutil.copy2(
+            source_root / f"{source_prefix}_{suffix}",
+            tmp_path / f"{target_prefix}_{suffix}",
+        )
+    figures = plot_exp16(tmp_path, prefix=target_prefix)
+    assert all(path.is_file() for path in figures.values())
+
+
+def test_exp16_blank_pairing_uses_only_complete_comparison_seeds() -> None:
+    aggregates = pd.DataFrame(
+        [
+            {"seed": 0, "condition": "micro_trm_bptt", "blank_cell_accuracy": 0.2},
+            {
+                "seed": 0,
+                "condition": "single_state_core_call_matched",
+                "blank_cell_accuracy": 0.1,
+            },
+            {"seed": 1, "condition": "micro_trm_bptt", "blank_cell_accuracy": 0.9},
+            {
+                "seed": 1,
+                "condition": "single_state_core_call_matched",
+                "blank_cell_accuracy": 0.1,
+            },
+        ]
+    )
+    comparisons = pd.DataFrame([{"seed": 0, "estimate": 0.0}])
+    assert _paired_blank_values(aggregates, comparisons) == pytest.approx([0.1])
+
+    duplicate = pd.concat([aggregates, aggregates.iloc[[0]]], ignore_index=True)
+    with pytest.raises(ValueError, match="exactly one aggregate"):
+        _paired_blank_values(duplicate, comparisons)
+
+
+def test_exp16_exact_and_blank_pvalues_receive_joint_holm_adjustment() -> None:
+    assert _holm_adjust([0.01, 0.04]) == pytest.approx([0.02, 0.04])
 
 
 def test_exp16_training_setup_failure_is_recorded_for_both_conditions(
