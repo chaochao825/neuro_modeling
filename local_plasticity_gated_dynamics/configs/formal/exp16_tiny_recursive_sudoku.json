@@ -9,8 +9,17 @@
   ],
   "conditions": [
     "micro_trm_bptt",
-    "flat_shared_compute_matched"
+    "single_state_core_call_matched"
   ],
+  "registered_comparison": {
+    "name": "micro_trm_minus_single_state_core_call_matched",
+    "candidate": "micro_trm_bptt",
+    "reference": "single_state_core_call_matched",
+    "alpha": 0.05,
+    "minimum_training_seeds": 30,
+    "test_scope": "within_distribution_non_ood_sudoku_v2",
+    "formal_claim_promotion_enabled": false
+  },
   "validation_fraction": 0.2,
   "augmentations_per_task": 16,
   "n_bootstrap": 10000,
@@ -34,7 +43,8 @@
     "layers": 2,
     "expansion": 2.0,
     "high_cycles": 3,
-    "low_cycles": 4
+    "low_cycles": 4,
+    "supervision_steps": 4
   },
   "training": {
     "epochs": 100,
@@ -42,7 +52,6 @@
     "learning_rate": 0.0003,
     "weight_decay": 0.01,
     "grad_clip": 1.0,
-    "auxiliary_loss_weight": 0.25,
-    "device": "auto"
+    "device": "cuda:0"
   }
 }

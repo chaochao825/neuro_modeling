@@ -434,11 +434,12 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 
 - `results/raw_metrics.csv.gz`: lossless compact Exp00--11 raw metric snapshot, including failed and invalid conditions; later scoped tracks retain separate hash-bound raw tables and run manifests. The uncompressed CSV is a reproducible local plotting cache.
 - `results/runs.csv`: run status and planned-cell coverage.
-- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.
+- `results/summary.csv`: registered core claims plus explicitly scoped incremental claims.
 - `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.
 - `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.
 - `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.
 - `results/exp13_{arc,maze,sudoku}_formal_{raw,conditions,comparisons,run_manifest,report}`: public structured-task rows, task-primary statistics, provenance binding, and family-scoped interpretation.
 - `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.
 - `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.
+- `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.
 - `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.

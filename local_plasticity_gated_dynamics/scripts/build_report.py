@@ -1715,7 +1715,24 @@ def _exp15_sudoku_report_lines(results_root: Path) -> list[str]:
     path = results_root / "exp15_formal_summary.csv"
     if not path.is_file():
         return []
+    manifest_path = results_root / "exp15_formal_run_manifest.csv"
+    if not manifest_path.is_file():
+        raise ValueError("exp15 Sudoku report requires its run manifest")
+    expected_summary_sha256 = (
+        "dba9e5ecb47957386d9581fa8a47db9b21df3dbd080d18ef1d8ce6ed6dd9db8d"
+    )
+    expected_manifest_sha256 = (
+        "36cb688d7d065e01ef36015f1d257bf6eee57eafe0fcc445dd32ed6b21e9be12"
+    )
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected_summary_sha256:
+        raise ValueError("exp15 Sudoku summary differs from the reviewed snapshot")
+    if (
+        hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+        != expected_manifest_sha256
+    ):
+        raise ValueError("exp15 Sudoku manifest differs from the reviewed snapshot")
     summary = pd.read_csv(path)
+    manifest = pd.read_csv(manifest_path)
     required = {
         "family",
         "condition",
@@ -1735,6 +1752,24 @@ def _exp15_sudoku_report_lines(results_root: Path) -> list[str]:
     expected = {"sudoku_local_no_branch", "sudoku_local_bounded_branch"}
     if set(sudoku["condition"]) != expected or len(sudoku) != 2:
         raise ValueError("exp15 Sudoku report requires its two frozen conditions")
+    if (
+        not sudoku["n_tasks"].eq(28).all()
+        or not sudoku["formal_data_eligible"].eq(True).all()  # noqa: E712
+        or not sudoku["core_claim_eligible"].eq(False).all()  # noqa: E712
+        or not sudoku["conclusion"].eq("inconclusive").all()
+    ):
+        raise ValueError("exp15 Sudoku eligibility/conclusion gates are invalid")
+    sudoku_manifest = manifest.loc[manifest["family"].eq("sudoku")]
+    if (
+        len(sudoku_manifest) != 1
+        or not sudoku_manifest["status"].eq("complete").all()
+        or not sudoku_manifest["git_dirty"].eq(False).all()  # noqa: E712
+        or not (
+            sudoku_manifest["published_raw_sha256"]
+            == sudoku_manifest["metrics_sha256"]
+        ).all()
+    ):
+        raise ValueError("exp15 Sudoku run-manifest gates are invalid")
     labels = {
         "sudoku_local_no_branch": "Local constraints only",
         "sudoku_local_bounded_branch": "Local constraints + bounded search",
@@ -2742,13 +2777,14 @@ def write_report(
         "",
         "- `results/raw_metrics.csv.gz`: lossless compact Exp00--11 raw metric snapshot, including failed and invalid conditions; later scoped tracks retain separate hash-bound raw tables and run manifests. The uncompressed CSV is a reproducible local plotting cache.",
         "- `results/runs.csv`: run status and planned-cell coverage.",
-        "- `results/summary.csv`: registered core claims plus scoped incremental real-data claims.",
+        "- `results/summary.csv`: registered core claims plus explicitly scoped incremental claims.",
         "- `results/exp10_bridge_formal_raw.csv.gz`, `results/exp10_bridge_formal_summary.csv`, and `results/exp10_bridge_formal_run_manifest.csv`: 30-seed N=256 formal bridge rows, seed-macro conclusions, and the clean per-run provenance/hash inventory.",
         "- `results/exp11_ibl_behavior_real_raw.csv.gz` and `results/exp11_ibl_behavior_real_summary.csv`: behavior-only session rows and animal-primary conclusions.",
         "- `results/exp11_ibl_behavior_cohort_{config,manifest,summary}`: frozen public-session selection, exclusions, and dataset provenance; raw trial tables are not published.",
         "- `results/exp13_{arc,maze,sudoku}_formal_{raw,conditions,comparisons,run_manifest,report}`: public structured-task rows, task-primary statistics, provenance binding, and family-scoped interpretation.",
         "- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.",
         "- `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.",
+        "- `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.",
         "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.",
         "",
     ]

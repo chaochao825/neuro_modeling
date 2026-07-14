@@ -18,6 +18,8 @@ class SupervisedSudokuArrays:
     targets: np.ndarray
     task_ids: tuple[str, ...]
     source_groups: tuple[str, ...]
+    augmentation_groups: tuple[str, ...]
+    content_groups: tuple[str, ...]
     name: str
 
     def __post_init__(self) -> None:
@@ -33,8 +35,15 @@ class SupervisedSudokuArrays:
             raise ValueError("Sudoku arrays must be integer [task, 81] matrices")
         if len(inputs) < 1:
             raise ValueError("Sudoku split must not be empty")
-        if len(self.task_ids) != len(inputs) or len(self.source_groups) != len(inputs):
-            raise ValueError("task IDs and source groups must align with arrays")
+        group_fields = (
+            self.source_groups,
+            self.augmentation_groups,
+            self.content_groups,
+        )
+        if len(self.task_ids) != len(inputs) or any(
+            len(values) != len(inputs) for values in group_fields
+        ):
+            raise ValueError("task IDs and independence groups must align with arrays")
         if len(set(self.task_ids)) != len(self.task_ids):
             raise ValueError("task IDs must be unique within a split")
         if not isinstance(self.name, str) or not self.name:
@@ -54,9 +63,19 @@ class SupervisedSudokuArrays:
         targets.setflags(write=False)
         object.__setattr__(self, "inputs", inputs)
         object.__setattr__(self, "targets", targets)
-        object.__setattr__(self, "task_ids", tuple(str(value) for value in self.task_ids))
+        object.__setattr__(
+            self, "task_ids", tuple(str(value) for value in self.task_ids)
+        )
         object.__setattr__(
             self, "source_groups", tuple(str(value) for value in self.source_groups)
+        )
+        object.__setattr__(
+            self,
+            "augmentation_groups",
+            tuple(str(value) for value in self.augmentation_groups),
+        )
+        object.__setattr__(
+            self, "content_groups", tuple(str(value) for value in self.content_groups)
         )
 
 
@@ -70,6 +89,8 @@ def _arrays_from_tasks(
     targets: list[np.ndarray] = []
     task_ids: list[str] = []
     source_groups: list[str] = []
+    augmentation_groups: list[str] = []
+    content_groups: list[str] = []
     for task in tasks:
         if task.family != "sudoku" or task.split == "test":
             raise ValueError("supervised arrays require non-test Sudoku tasks")
@@ -78,11 +99,15 @@ def _arrays_from_tasks(
         targets.append(np.asarray(view.query_targets, dtype=np.int64).reshape(-1))
         task_ids.append(task.task_id)
         source_groups.append(task.source_group)
+        augmentation_groups.append(task.augmentation_group)
+        content_groups.append(task.content_group)
     return SupervisedSudokuArrays(
         np.stack(inputs),
         np.stack(targets),
         tuple(task_ids),
         tuple(source_groups),
+        tuple(augmentation_groups),
+        tuple(content_groups),
         name,
     )
 
@@ -109,28 +134,54 @@ def split_sudoku_training_tasks(
     tasks = dataset.for_split("train")
     if len(tasks) < 2 or any(task.family != "sudoku" for task in tasks):
         raise ValueError("at least two training Sudoku tasks are required")
-    groups = tuple(dict.fromkeys(task.source_group for task in tasks))
+    parent = list(range(len(tasks)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(left: int, right: int) -> None:
+        left_root, right_root = find(left), find(right)
+        if left_root != right_root:
+            parent[right_root] = left_root
+
+    seen: dict[tuple[str, str], int] = {}
+    for index, task in enumerate(tasks):
+        for key in (
+            ("source", task.source_group),
+            ("augmentation", task.augmentation_group),
+            ("content", task.content_group),
+        ):
+            previous = seen.setdefault(key, index)
+            union(index, previous)
+    components: dict[int, list[int]] = {}
+    for index in range(len(tasks)):
+        components.setdefault(find(index), []).append(index)
+    groups = tuple(sorted(components.values(), key=lambda values: tuple(values)))
     if len(groups) < 2:
-        raise ValueError("at least two independent source groups are required")
+        raise ValueError("at least two independent task components are required")
     n_validation = min(
         max(1, int(round(validation_fraction * len(groups)))), len(groups) - 1
     )
     rng = np.random.default_rng(int(seed))
-    validation_groups = {
-        groups[index] for index in rng.permutation(len(groups))[:n_validation]
+    validation_indices = {
+        task_index
+        for group_index in rng.permutation(len(groups))[:n_validation]
+        for task_index in groups[group_index]
     }
     training_tasks = tuple(
-        task for task in tasks if task.source_group not in validation_groups
+        task for index, task in enumerate(tasks) if index not in validation_indices
     )
     validation_tasks = tuple(
-        task for task in tasks if task.source_group in validation_groups
+        task for index, task in enumerate(tasks) if index in validation_indices
     )
     training = _arrays_from_tasks(dataset, training_tasks, name="inner_train")
-    validation = _arrays_from_tasks(
-        dataset, validation_tasks, name="inner_validation"
-    )
-    if set(training.source_groups) & set(validation.source_groups):
-        raise AssertionError("source-group split unexpectedly overlaps")
+    validation = _arrays_from_tasks(dataset, validation_tasks, name="inner_validation")
+    for field in ("source_groups", "augmentation_groups", "content_groups"):
+        if set(getattr(training, field)) & set(getattr(validation, field)):
+            raise AssertionError(f"{field} split unexpectedly overlaps")
     return training, validation
 
 
@@ -142,12 +193,8 @@ def _sudoku_permutation(
     base = 3
     bands = rng.permutation(base)
     stacks = rng.permutation(base)
-    rows = np.concatenate(
-        [band * base + rng.permutation(base) for band in bands]
-    )
-    columns = np.concatenate(
-        [stack * base + rng.permutation(base) for stack in stacks]
-    )
+    rows = np.concatenate([band * base + rng.permutation(base) for band in bands])
+    columns = np.concatenate([stack * base + rng.permutation(base) for stack in stacks])
     transformed_puzzle = puzzle[np.ix_(rows, columns)]
     transformed_solution = solution[np.ix_(rows, columns)]
     if bool(rng.integers(0, 2)):
@@ -185,19 +232,23 @@ def augment_sudoku_training(
     targets: list[np.ndarray] = []
     task_ids: list[str] = []
     groups: list[str] = []
-    for index, (puzzle, solution, task_id, group) in enumerate(
-        zip(
-            split.inputs,
-            split.targets,
-            split.task_ids,
-            split.source_groups,
-            strict=True,
-        )
+    augmentation_groups: list[str] = []
+    content_groups: list[str] = []
+    for puzzle, solution, task_id, group, augmentation_group, content_group in zip(
+        split.inputs,
+        split.targets,
+        split.task_ids,
+        split.source_groups,
+        split.augmentation_groups,
+        split.content_groups,
+        strict=True,
     ):
         inputs.append(puzzle)
         targets.append(solution)
         task_ids.append(f"{task_id}::augmentation=000")
         groups.append(group)
+        augmentation_groups.append(augmentation_group)
+        content_groups.append(content_group)
         puzzle_grid = puzzle.reshape(9, 9)
         solution_grid = solution.reshape(9, 9)
         for augmentation in range(1, int(augmentations_per_task) + 1):
@@ -208,6 +259,8 @@ def augment_sudoku_training(
             targets.append(augmented_solution.reshape(-1))
             task_ids.append(f"{task_id}::augmentation={augmentation:03d}")
             groups.append(group)
+            augmentation_groups.append(augmentation_group)
+            content_groups.append(content_group)
     # Augmented IDs are intentionally unique while source groups remain tied
     # to the original independent puzzle.
     return SupervisedSudokuArrays(
@@ -215,6 +268,8 @@ def augment_sudoku_training(
         np.stack(targets),
         tuple(task_ids),
         tuple(groups),
+        tuple(augmentation_groups),
+        tuple(content_groups),
         "inner_train_augmented",
     )
 

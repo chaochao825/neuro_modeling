@@ -95,15 +95,22 @@ override, and a results root. For example:
   --config configs\formal\exp14_ibl_multisession_neural.json --results-root results
 .\.venv\Scripts\python.exe scripts\summarize_exp14.py `
   --config configs\formal\exp14_ibl_multisession_neural.json --results-root results
-# Exp15 publication takes the exact immutable run directory rather than
+# Exp15 prints the exact immutable run directory; capture it rather than
 # silently selecting a retry:
-.\.venv\Scripts\python.exe experiments\exp15_task_specialized_reasoning.py `
-  --config configs\formal\exp15_task_specialized_arc.json --results-root results
+$exp15Run = (& .\.venv\Scripts\python.exe `
+  experiments\exp15_task_specialized_reasoning.py `
+  --config configs\formal\exp15_task_specialized_arc.json `
+  --results-root results | Select-Object -Last 1).Trim()
 .\.venv\Scripts\python.exe scripts\summarize_exp15_arc_matched.py `
-  --run-dir <exact-exp15-run-directory> --results-root results
+  --run-dir $exp15Run --results-root results
 # The small recursive model is an isolated BPTT baseline, not local learning:
-.\.venv\Scripts\python.exe experiments\exp16_tiny_recursive_sudoku.py `
-  --config configs\smoke\exp16_tiny_recursive_sudoku.json --results-root results
+$exp16Runs = & .\.venv\Scripts\python.exe `
+  experiments\exp16_tiny_recursive_sudoku.py `
+  --config configs\smoke\exp16_tiny_recursive_sudoku.json `
+  --results-root results
+$exp16RunArgs = foreach ($run in $exp16Runs) { "--run-dir"; $run.Trim() }
+.\.venv\Scripts\python.exe scripts\summarize_exp16_tiny_recursive.py `
+  @exp16RunArgs --results-root results --prefix exp16_tiny_recursive_smoke
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -169,10 +176,14 @@ layers:
    reasoning state and an answer state through one shared Transformer core and
    compares against a single-state condition with the same parameters,
    initialization, examples/order, optimizer steps, and core-call budget. It
-   uses global autograd/BPTT and its checkpoints are ineligible for local-model
-   initialization. ACT, StableMax, puzzle embeddings, the official 5M/7M
-   scale, and the official transductive ARC protocol are intentionally absent;
-   therefore it is not an official HRM/TRM reproduction or biological evidence.
+   uses global autograd/BPTT only within the final outer cycle, detaches carry
+   between fixed supervision segments, and makes its checkpoints ineligible
+   for local-model initialization. ACT, StableMax, puzzle embeddings, EMA,
+   official RMSNorm/SwiGLU/RoPE blocks, the official 5M/7M scale, and the
+   official transductive ARC protocol are absent. The loss is blank-cell-only,
+   and reported exact Sudoku predictions clamp public clues. It is therefore a
+   micro-TRM-like mechanism baseline, not an official reproduction or
+   biological evidence. See `docs/tiny_recursive_baseline_contract_zh.md`.
 
 ### Current exp13 public ARC result
 
@@ -366,7 +377,10 @@ frozen cohort of at least 20 sessions/5 animals and never loads neural activity.
 `results/raw_metrics.csv.gz` is the lossless compact Exp00--11 snapshot and
 retains every complete, invalid, and failed condition in those tracks. Exp13--15
 retain their later attempts in separate hash-bound raw tables and run manifests;
-Exp16 writes immutable per-seed run folders until a scoped publisher is frozen.
+Exp16 writes immutable per-seed run folders and has a pilot-only scoped
+publisher that preserves explicit attempts and refuses overwrite. Formal claim
+promotion remains disabled until canonical all-attempt inventory binding and
+raw task-level recomputation are implemented.
 The ignored uncompressed CSV is regenerated as a local plotting cache.
 `results/summary.csv` combines registered core claims with explicitly scoped
 claims. Its compact core inference uses the eligible formal attempt per

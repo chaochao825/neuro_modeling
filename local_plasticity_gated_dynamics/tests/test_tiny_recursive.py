@@ -77,14 +77,13 @@ def test_tiny_recursive_and_flat_are_parameter_and_core_call_matched() -> None:
         layers=1,
         high_cycles=2,
         low_cycles=2,
+        supervision_steps=3,
     )
     torch.manual_seed(17)
-    recursive = TinyRecursiveBaseline(
-        TinyRecursiveConfig(**shared, mode="trm_like")
-    )
+    recursive = TinyRecursiveBaseline(TinyRecursiveConfig(**shared, mode="trm_like"))
     torch.manual_seed(17)
     flat = TinyRecursiveBaseline(
-        TinyRecursiveConfig(**shared, mode="flat_compute_matched")
+        TinyRecursiveConfig(**shared, mode="single_state_core_call_matched")
     )
     assert parameter_count(recursive) == parameter_count(flat)
     assert state_dict_sha256(recursive) == state_dict_sha256(flat)
@@ -93,14 +92,16 @@ def test_tiny_recursive_and_flat_are_parameter_and_core_call_matched() -> None:
     recursive_output = recursive(tokens)
     flat_output = flat(tokens)
     assert recursive_output.logits.shape == (3, 9, 5)
-    assert recursive_output.core_calls == flat_output.core_calls == 8
-    assert len(recursive_output.intermediate_logits) == 2
-    assert len(flat_output.intermediate_logits) == 2
+    assert recursive_output.core_calls_per_segment == 8
+    assert flat_output.core_calls_per_segment == 8
+    assert recursive.config.core_calls == flat.config.core_calls == 24
+    assert len(recursive_output.cycle_logits) == 2
+    assert len(flat_output.cycle_logits) == 2
     assert recursive.checkpoint_metadata()["eligible_for_local_initialization"] is False
     assert recursive.checkpoint_metadata()["uses_bptt"] is True
 
 
-def test_final_recursive_loss_backpropagates_through_earlier_cycle() -> None:
+def test_trm_gradient_prefix_is_stopped_and_segment_carry_is_detached() -> None:
     torch.manual_seed(3)
     model = TinyRecursiveBaseline(
         TinyRecursiveConfig(
@@ -116,14 +117,17 @@ def test_final_recursive_loss_backpropagates_through_earlier_cycle() -> None:
     inputs = torch.randint(0, 5, (2, 9))
     targets = torch.randint(1, 5, (2, 9))
     output = model(inputs)
-    output.answer_states[0].retain_grad()
+    assert output.answer_states[0].requires_grad is False
+    assert output.answer_states[-1].requires_grad is True
+    assert output.carry.answer.requires_grad is False
+    assert output.carry.latent.requires_grad is False
     loss = torch.nn.functional.cross_entropy(
         output.logits.reshape(-1, 5), targets.reshape(-1)
     )
     loss.backward()
-    assert output.answer_states[0].grad is not None
-    assert torch.count_nonzero(output.answer_states[0].grad) > 0
     assert model.core.blocks[0].mlp[0].weight.grad is not None
+    next_output = model(inputs, output.carry)
+    assert next_output.answer_states[0].requires_grad is False
 
 
 def test_sudoku_inner_split_and_augmentation_are_group_safe_and_deterministic() -> None:
@@ -132,12 +136,10 @@ def test_sudoku_inner_split_and_augmentation_are_group_safe_and_deterministic() 
         dataset, validation_fraction=0.34, seed=11
     )
     assert set(training.source_groups).isdisjoint(validation.source_groups)
-    first = augment_sudoku_training(
-        training, augmentations_per_task=2, seed=13
-    )
-    second = augment_sudoku_training(
-        training, augmentations_per_task=2, seed=13
-    )
+    assert set(training.augmentation_groups).isdisjoint(validation.augmentation_groups)
+    assert set(training.content_groups).isdisjoint(validation.content_groups)
+    first = augment_sudoku_training(training, augmentations_per_task=2, seed=13)
+    second = augment_sudoku_training(training, augmentations_per_task=2, seed=13)
     np.testing.assert_array_equal(first.inputs, second.inputs)
     np.testing.assert_array_equal(first.targets, second.targets)
     assert len(first.inputs) == 3 * len(training.inputs)
@@ -169,12 +171,12 @@ def test_tiny_recursive_fit_is_deterministic_and_has_no_test_argument() -> None:
         layers=1,
         high_cycles=1,
         low_cycles=1,
+        supervision_steps=2,
     )
     training_config = TinyRecursiveTrainingConfig(
         epochs=2,
         batch_size=2,
         learning_rate=1e-3,
-        auxiliary_loss_weight=0.0,
     )
 
     def fitted():
@@ -194,7 +196,7 @@ def test_tiny_recursive_fit_is_deterministic_and_has_no_test_argument() -> None:
     first_model, first_receipt = fitted()
     second_model, second_receipt = fitted()
     assert first_receipt == second_receipt
-    assert first_receipt.optimizer_steps == 4
+    assert first_receipt.optimizer_steps == 8
     np.testing.assert_array_equal(
         predict_tiny_recursive(first_model, validation.inputs, batch_size=2),
         predict_tiny_recursive(second_model, validation.inputs, batch_size=2),

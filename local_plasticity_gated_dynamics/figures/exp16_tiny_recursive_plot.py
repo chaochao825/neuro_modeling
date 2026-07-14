@@ -7,7 +7,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 
 def plot_exp16(
@@ -15,20 +14,28 @@ def plot_exp16(
     *,
     prefix: str = "exp16_tiny_recursive_smoke",
 ) -> dict[str, Path]:
-    conditions = pd.read_csv(results_root / f"{prefix}_conditions.csv")
-    comparison = pd.read_csv(results_root / f"{prefix}_comparison.csv")
-    raw = pd.read_csv(results_root / f"{prefix}_raw.csv.gz")
-    aggregates = raw.loc[raw["stage"].eq("aggregate")].copy()
+    from scripts.summarize_exp16_tiny_recursive import (
+        latest_attempt_metrics,
+        load_published_snapshot,
+    )
+
+    raw, conditions, comparison, manifest = load_published_snapshot(
+        results_root, prefix=prefix
+    )
+    selected_raw = latest_attempt_metrics(raw, manifest)
+    aggregates = selected_raw.loc[selected_raw["stage"].eq("aggregate")].copy()
     labels = {
         "micro_trm_bptt": "micro-TRM-like",
-        "flat_shared_compute_matched": "single-state matched",
+        "single_state_core_call_matched": "single-state matched",
     }
     ordered = [name for name in labels if name in set(conditions["condition"])]
     figure, axes = plt.subplots(1, 2, figsize=(8.2, 3.5))
     x = np.arange(len(ordered))
     means = [
         float(
-            conditions.loc[conditions["condition"].eq(name), "mean_exact_accuracy"].iloc[0]
+            conditions.loc[
+                conditions["condition"].eq(name), "mean_exact_accuracy"
+            ].iloc[0]
         )
         for name in ordered
     ]
@@ -63,13 +70,19 @@ def plot_exp16(
             capsize=4,
         )
         axes[1].set_xlim(-0.7, 0.7)
-        axes[1].set_xticks([0], ["micro-TRM − matched"])
+        axes[1].set_xticks([0], ["micro two-state - single-state"])
         axes[1].set_ylabel("Paired exact-accuracy difference")
         axes[1].set_title(f"{row['conclusion']} ({int(row['n_complete_seeds'])} seeds)")
     figure.suptitle("Exp16 baseline-only recursive reasoning audit")
     figure.tight_layout()
     png = results_root / f"{prefix}.png"
     pdf = results_root / f"{prefix}.pdf"
+    existing = [path for path in (png, pdf) if path.exists()]
+    if existing:
+        raise FileExistsError(
+            "Exp16 figures are immutable; choose a new prefix: "
+            + ", ".join(str(path) for path in existing)
+        )
     figure.savefig(png, dpi=220, bbox_inches="tight")
     figure.savefig(pdf, bbox_inches="tight")
     plt.close(figure)

@@ -19,13 +19,11 @@ import torch.nn.functional as F
 from torch import nn
 
 
-ReasoningMode = Literal["trm_like", "flat_compute_matched"]
+ReasoningMode = Literal["trm_like", "single_state_core_call_matched"]
 
 
 def _positive_integer(value: object, name: str) -> int:
-    if isinstance(value, (bool, np.bool_)) or not isinstance(
-        value, (int, np.integer)
-    ):
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
         raise TypeError(f"{name} must be an integer")
     result = int(value)
     if result < 1:
@@ -34,9 +32,7 @@ def _positive_integer(value: object, name: str) -> int:
 
 
 def _nonnegative_integer(value: object, name: str) -> int:
-    if isinstance(value, (bool, np.bool_)) or not isinstance(
-        value, (int, np.integer)
-    ):
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
         raise TypeError(f"{name} must be an integer")
     result = int(value)
     if result < 0:
@@ -67,6 +63,7 @@ class TinyRecursiveConfig:
     expansion: float = 2.0
     high_cycles: int = 2
     low_cycles: int = 2
+    supervision_steps: int = 2
     mode: ReasoningMode = "trm_like"
 
     def __post_init__(self) -> None:
@@ -78,6 +75,7 @@ class TinyRecursiveConfig:
             "layers",
             "high_cycles",
             "low_cycles",
+            "supervision_steps",
         ):
             object.__setattr__(self, name, _positive_integer(getattr(self, name), name))
         expansion = _finite_float(self.expansion, "expansion")
@@ -85,15 +83,21 @@ class TinyRecursiveConfig:
             raise ValueError("expansion must be positive")
         if self.hidden_size % self.num_heads:
             raise ValueError("hidden_size must be divisible by num_heads")
-        if self.mode not in {"trm_like", "flat_compute_matched"}:
+        if self.mode not in {"trm_like", "single_state_core_call_matched"}:
             raise ValueError("unknown tiny-recursive mode")
         object.__setattr__(self, "expansion", expansion)
 
     @property
-    def core_calls(self) -> int:
-        """Number of shared reasoning-block calls in one forward pass."""
+    def core_calls_per_segment(self) -> int:
+        """Shared-core calls in one detached-carry supervision segment."""
 
         return 2 * self.high_cycles * self.low_cycles
+
+    @property
+    def core_calls(self) -> int:
+        """Shared-core calls in one fixed-step evaluation trajectory."""
+
+        return self.supervision_steps * self.core_calls_per_segment
 
 
 class _ReasoningBlock(nn.Module):
@@ -144,24 +148,35 @@ class _SharedReasoningCore(nn.Module):
 
 
 @dataclass(frozen=True)
+class TinyRecursiveCarry:
+    """Detached answer/reasoning state passed between supervision segments."""
+
+    answer: torch.Tensor
+    latent: torch.Tensor
+
+
+@dataclass(frozen=True)
 class TinyRecursiveOutput:
     """Final and deep-supervision outputs from one fixed-compute pass."""
 
     logits: torch.Tensor
-    intermediate_logits: tuple[torch.Tensor, ...]
+    cycle_logits: tuple[torch.Tensor, ...]
     answer_states: tuple[torch.Tensor, ...]
     latent_state: torch.Tensor
-    core_calls: int
+    carry: TinyRecursiveCarry
+    core_calls_per_segment: int
 
 
 class TinyRecursiveBaseline(nn.Module):
     """Micro-TRM-like baseline and its matched single-state comparator.
 
     ``trm_like`` alternates updates of a latent reasoning state ``z`` and an
-    answer state ``y`` through one shared core. ``flat_compute_matched`` runs
-    the identical core for the identical number of calls while keeping only a
-    single evolving answer state.  Both modes therefore have exactly the same
-    trainable parameterization and nominal recurrent-block call budget.
+    answer state ``y`` through one shared core. The
+    ``single_state_core_call_matched`` mode runs the identical core for the
+    identical nominal number of calls while keeping only one evolving answer
+    state. Both modes have the same trainable parameterization and nominal
+    recurrent-block call budget; this is not a claim of matched backward FLOPs,
+    memory, wall time, or physical energy.
     """
 
     training_algorithm = "bptt_tiny_recursive_baseline"
@@ -177,11 +192,11 @@ class TinyRecursiveBaseline(nn.Module):
         self.position_embedding = nn.Parameter(
             torch.empty(1, config.seq_len, config.hidden_size)
         )
-        self.answer_initial = nn.Parameter(
-            torch.empty(1, config.seq_len, config.hidden_size)
+        self.register_buffer(
+            "answer_initial", torch.empty(1, config.seq_len, config.hidden_size)
         )
-        self.latent_initial = nn.Parameter(
-            torch.empty(1, config.seq_len, config.hidden_size)
+        self.register_buffer(
+            "latent_initial", torch.empty(1, config.seq_len, config.hidden_size)
         )
         self.core = _SharedReasoningCore(config)
         self.output_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
@@ -196,9 +211,7 @@ class TinyRecursiveBaseline(nn.Module):
         if not isinstance(tokens, torch.Tensor):
             raise TypeError("tokens must be a torch.Tensor")
         if tokens.ndim != 2 or tokens.shape[1] != self.config.seq_len:
-            raise ValueError(
-                f"tokens must have shape [batch, {self.config.seq_len}]"
-            )
+            raise ValueError(f"tokens must have shape [batch, {self.config.seq_len}]")
         if tokens.dtype == torch.bool or tokens.dtype.is_floating_point:
             raise TypeError("tokens must use an integer dtype")
         tokens = tokens.to(dtype=torch.long)
@@ -208,32 +221,68 @@ class TinyRecursiveBaseline(nn.Module):
             raise ValueError("tokens contain an out-of-vocabulary value")
         return tokens
 
-    def forward(self, tokens: torch.Tensor) -> TinyRecursiveOutput:
+    def initial_carry(self, batch_size: int) -> TinyRecursiveCarry:
+        batch_size = _positive_integer(batch_size, "batch_size")
+        return TinyRecursiveCarry(
+            answer=self.answer_initial.expand(batch_size, -1, -1),
+            latent=self.latent_initial.expand(batch_size, -1, -1),
+        )
+
+    def _cycle(
+        self,
+        answer: torch.Tensor,
+        latent: torch.Tensor,
+        encoded: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if self.config.mode == "trm_like":
+            for _low_step in range(self.config.low_cycles):
+                latent = self.core(latent, answer + encoded)
+                answer = self.core(answer, latent)
+        else:
+            for _call in range(2 * self.config.low_cycles):
+                answer = self.core(answer, encoded + latent)
+        return answer, latent
+
+    def forward(
+        self,
+        tokens: torch.Tensor,
+        carry: TinyRecursiveCarry | None = None,
+    ) -> TinyRecursiveOutput:
         tokens = self._validate_tokens(tokens)
         batch_size = tokens.shape[0]
         encoded = self.token_embedding(tokens) + self.position_embedding
-        answer = self.answer_initial.expand(batch_size, -1, -1)
-        latent = self.latent_initial.expand(batch_size, -1, -1)
-        intermediate_logits: list[torch.Tensor] = []
+        if carry is None:
+            carry = self.initial_carry(batch_size)
+        elif (
+            carry.answer.shape
+            != (batch_size, self.config.seq_len, self.config.hidden_size)
+            or carry.latent.shape != carry.answer.shape
+        ):
+            raise ValueError("carry shape does not match the token batch")
+        answer, latent = carry.answer, carry.latent
+        cycle_logits: list[torch.Tensor] = []
         answer_states: list[torch.Tensor] = []
 
-        for _high_step in range(self.config.high_cycles):
-            if self.config.mode == "trm_like":
-                for _low_step in range(self.config.low_cycles):
-                    latent = self.core(latent, answer + encoded)
-                    answer = self.core(answer, latent)
-            else:
-                for _call in range(2 * self.config.low_cycles):
-                    answer = self.core(answer, encoded + latent)
-            answer_states.append(answer)
-            intermediate_logits.append(self.output_head(answer))
+        # Match the official TRM gradient boundary: the prefix outer cycles
+        # update the carry without a graph, while every low-cycle update in the
+        # final outer cycle participates in BPTT.
+        with torch.no_grad():
+            for _high_step in range(self.config.high_cycles - 1):
+                answer, latent = self._cycle(answer, latent, encoded)
+                answer_states.append(answer)
+                cycle_logits.append(self.output_head(answer))
+        answer, latent = self._cycle(answer, latent, encoded)
+        answer_states.append(answer)
+        cycle_logits.append(self.output_head(answer))
+        new_carry = TinyRecursiveCarry(answer=answer.detach(), latent=latent.detach())
 
         return TinyRecursiveOutput(
-            logits=intermediate_logits[-1],
-            intermediate_logits=tuple(intermediate_logits),
+            logits=cycle_logits[-1],
+            cycle_logits=tuple(cycle_logits),
             answer_states=tuple(answer_states),
             latent_state=latent,
-            core_calls=self.config.core_calls,
+            carry=new_carry,
+            core_calls_per_segment=self.config.core_calls_per_segment,
         )
 
     def checkpoint_metadata(self) -> dict[str, object]:
@@ -244,7 +293,11 @@ class TinyRecursiveBaseline(nn.Module):
             "eligible_for_local_initialization": False,
             "architecture_family": "micro_trm_like_independent_reimplementation",
             "reasoning_mode": self.config.mode,
-            "core_calls_per_forward": self.config.core_calls,
+            "core_calls_per_segment": self.config.core_calls_per_segment,
+            "supervision_steps": self.config.supervision_steps,
+            "core_calls_per_evaluation": self.config.core_calls,
+            "gradient_schedule": "no_grad_prefix_last_outer_cycle_bptt",
+            "carry_detached_between_supervision_steps": True,
             "official_checkpoint_compatible": False,
             "official_arc_protocol": False,
             "act_enabled": False,
@@ -263,7 +316,6 @@ class TinyRecursiveTrainingConfig:
     learning_rate: float = 3e-4
     weight_decay: float = 0.0
     grad_clip: float = 1.0
-    auxiliary_loss_weight: float = 0.25
     device: str = "cpu"
 
     def __post_init__(self) -> None:
@@ -273,13 +325,12 @@ class TinyRecursiveTrainingConfig:
             "learning_rate",
             "weight_decay",
             "grad_clip",
-            "auxiliary_loss_weight",
         ):
             object.__setattr__(self, name, _finite_float(getattr(self, name), name))
         if self.learning_rate <= 0.0 or self.grad_clip <= 0.0:
             raise ValueError("learning_rate and grad_clip must be positive")
-        if self.weight_decay < 0.0 or self.auxiliary_loss_weight < 0.0:
-            raise ValueError("weight_decay and auxiliary_loss_weight must be non-negative")
+        if self.weight_decay < 0.0:
+            raise ValueError("weight_decay must be non-negative")
         if not isinstance(self.device, str) or not self.device:
             raise ValueError("device must be a non-empty string")
 
@@ -296,6 +347,9 @@ class TinyRecursiveFitReceipt:
     training_seed: int
     train_examples: int
     validation_examples: int
+    training_data_sha256: str
+    validation_data_sha256: str
+    epoch_permutation_sha256: str
     blank_only_loss: bool = True
     test_data_used_for_fit: bool = False
     fixed_training_budget: bool = True
@@ -319,6 +373,16 @@ def state_dict_sha256(model: nn.Module) -> str:
         digest.update(str(value.dtype).encode("ascii"))
         digest.update(repr(tuple(value.shape)).encode("ascii"))
         digest.update(value.numpy().tobytes())
+    return digest.hexdigest()
+
+
+def _array_pair_sha256(inputs: np.ndarray, targets: np.ndarray) -> str:
+    digest = hashlib.sha256()
+    for value in (inputs, targets):
+        contiguous = np.ascontiguousarray(value)
+        digest.update(str(contiguous.dtype).encode("ascii"))
+        digest.update(repr(contiguous.shape).encode("ascii"))
+        digest.update(contiguous.tobytes())
     return digest.hexdigest()
 
 
@@ -357,7 +421,6 @@ def _masked_reasoning_loss(
     output: TinyRecursiveOutput,
     inputs: torch.Tensor,
     targets: torch.Tensor,
-    auxiliary_weight: float,
 ) -> torch.Tensor:
     blank = inputs.eq(0)
 
@@ -373,13 +436,7 @@ def _masked_reasoning_loss(
         ).reshape_as(targets)
         return losses[blank].mean()
 
-    final = one(output.logits)
-    if len(output.intermediate_logits) == 1 or auxiliary_weight == 0.0:
-        return final
-    auxiliaries = torch.stack(
-        [one(logits) for logits in output.intermediate_logits[:-1]]
-    ).mean()
-    return final + auxiliary_weight * auxiliaries
+    return one(output.logits)
 
 
 @torch.no_grad()
@@ -389,10 +446,13 @@ def predict_tiny_recursive(
     *,
     batch_size: int = 128,
     device: str | torch.device | None = None,
+    clamp_visible_tokens: bool = True,
 ) -> np.ndarray:
     """Predict full boards and deterministically clamp the visible clues."""
 
     batch_size = _positive_integer(batch_size, "batch_size")
+    if not isinstance(clamp_visible_tokens, (bool, np.bool_)):
+        raise TypeError("clamp_visible_tokens must be boolean")
     values = np.asarray(inputs)
     if values.ndim != 2 or values.shape[1] != model.config.seq_len:
         raise ValueError("inputs have the wrong sequence shape")
@@ -408,12 +468,22 @@ def predict_tiny_recursive(
     for start in range(0, len(values), batch_size):
         batch_array = values[start : start + batch_size]
         batch = torch.as_tensor(batch_array, dtype=torch.long, device=target_device)
-        logits = model(batch).logits
+        carry = None
+        output = None
+        for _step in range(model.config.supervision_steps):
+            output = model(batch, carry)
+            carry = output.carry
+        if output is None:
+            raise AssertionError(
+                "validated supervision_steps unexpectedly produced no output"
+            )
+        logits = output.logits
         adjusted = torch.cat(
             (torch.full_like(logits[..., :1], -1e4), logits[..., 1:]), dim=-1
         )
         predicted = adjusted.argmax(dim=-1).cpu().numpy()
-        predicted[batch_array > 0] = batch_array[batch_array > 0]
+        if clamp_visible_tokens:
+            predicted[batch_array > 0] = batch_array[batch_array > 0]
         predictions.append(predicted)
     model.train(was_training)
     return np.concatenate(predictions, axis=0)
@@ -470,29 +540,30 @@ def fit_tiny_recursive(
     best_validation = float("inf")
     best_epoch = 0
     optimizer_steps = 0
+    permutation_digest = hashlib.sha256()
 
     for epoch in range(1, config.epochs + 1):
         model.train()
         permutation = torch.randperm(len(train_x), generator=generator).numpy()
+        permutation_digest.update(np.ascontiguousarray(permutation).tobytes())
         epoch_losses: list[float] = []
         for start in range(0, len(permutation), config.batch_size):
             indices = permutation[start : start + config.batch_size]
             inputs = torch.as_tensor(train_x[indices], dtype=torch.long, device=device)
             targets = torch.as_tensor(train_y[indices], dtype=torch.long, device=device)
-            optimizer.zero_grad(set_to_none=True)
-            loss = _masked_reasoning_loss(
-                model(inputs),
-                inputs,
-                targets,
-                config.auxiliary_loss_weight,
-            )
-            if not torch.isfinite(loss):
-                raise FloatingPointError("non-finite tiny-recursive training loss")
-            loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
-            optimizer.step()
-            optimizer_steps += 1
-            epoch_losses.append(float(loss.detach().cpu()))
+            carry = None
+            for _step in range(model.config.supervision_steps):
+                optimizer.zero_grad(set_to_none=True)
+                output = model(inputs, carry)
+                carry = output.carry
+                loss = _masked_reasoning_loss(output, inputs, targets)
+                if not torch.isfinite(loss):
+                    raise FloatingPointError("non-finite tiny-recursive training loss")
+                loss.backward()
+                nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
+                optimizer.step()
+                optimizer_steps += 1
+                epoch_losses.append(float(loss.detach().cpu()))
         train_loss_history.append(float(np.mean(epoch_losses)))
 
         model.eval()
@@ -503,11 +574,17 @@ def fit_tiny_recursive(
             validation_targets_tensor = torch.as_tensor(
                 validation_y, dtype=torch.long, device=device
             )
+            validation_carry = None
+            validation_output = None
+            for _step in range(model.config.supervision_steps):
+                validation_output = model(validation_inputs_tensor, validation_carry)
+                validation_carry = validation_output.carry
+            if validation_output is None:
+                raise AssertionError("validated supervision_steps produced no output")
             validation_loss = _masked_reasoning_loss(
-                model(validation_inputs_tensor),
+                validation_output,
                 validation_inputs_tensor,
                 validation_targets_tensor,
-                config.auxiliary_loss_weight,
             )
         validation_value = float(validation_loss.cpu())
         validation_loss_history.append(validation_value)
@@ -541,4 +618,7 @@ def fit_tiny_recursive(
         training_seed=seed,
         train_examples=len(train_x),
         validation_examples=len(validation_x),
+        training_data_sha256=_array_pair_sha256(train_x, train_y),
+        validation_data_sha256=_array_pair_sha256(validation_x, validation_y),
+        epoch_permutation_sha256=permutation_digest.hexdigest(),
     )

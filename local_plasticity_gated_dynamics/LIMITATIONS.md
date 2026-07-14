@@ -139,11 +139,16 @@ committed configs and scripts regenerate that layout.
   unit-space or full latent-LDS comparator.
 - `exp16` is an isolated global-autograd/BPTT computational baseline. Its
   micro-TRM-like and single-state conditions can test an alternating-state
-  recursion schedule under matched parameters and core calls, but they omit
-  official ACT, StableMax, puzzle identifiers, model scale, augmentation, and
-  ARC transductive evaluation. Neither a smoke result nor a future Sudoku
-  advantage can initialize a local-learning model or count as evidence for a
-  biological hierarchy, three-factor plasticity, or shared neural dynamics.
+  recursion schedule under matched parameters and nominal shared-core calls.
+  The TRM-like path follows the official no-gradient outer-cycle prefix and
+  detached segment carry, but omits ACT, StableMax, puzzle identifiers, EMA,
+  the official block details and model scale. It uses modest train-only Sudoku
+  symmetry augmentation rather than the official Extreme-1K/1000-augmentation
+  protocol, blank-only loss, and clue-clamped exact evaluation on a 28-task
+  non-OOD panel. The pilot publisher cannot promote a formal claim. Neither a
+  smoke result nor a future Sudoku advantage can initialize a local-learning
+  model or count as evidence for a biological hierarchy, three-factor
+  plasticity, or shared neural dynamics.
 - The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
   Shared dynamics retains only about 25--29% of the full-model likelihood gain,
   far below the 90% criterion; pre-stim future-covariate and true-boundary-reset

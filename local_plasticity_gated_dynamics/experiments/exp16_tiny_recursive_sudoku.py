@@ -3,7 +3,7 @@
 This additive experiment never modifies or initializes the local-learning
 models.  It tests a much narrower computational question: whether alternating
 updates of answer and latent states help when parameters, initialization,
-training examples/order, optimizer budget, and shared-core calls are matched.
+training arrays/order, optimizer budget, and nominal shared-core calls match.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ from src.utils.reproducibility import derive_seed  # noqa: E402
 
 CONDITIONS = {
     "micro_trm_bptt": "trm_like",
-    "flat_shared_compute_matched": "flat_compute_matched",
+    "single_state_core_call_matched": "single_state_core_call_matched",
 }
 
 
@@ -89,12 +89,16 @@ def _paired_comparison(
     if not candidate_by_task or set(candidate_by_task) != set(reference_by_task):
         raise ValueError("paired conditions must contain the identical test tasks")
     group_differences: dict[str, list[float]] = {}
+    public_fingerprints_matched = True
     for task_id in sorted(candidate_by_task):
         left = candidate_by_task[task_id]
         right = reference_by_task[task_id]
         group = str(left["source_group"])
         if group != str(right["source_group"]):
             raise ValueError("source groups differ across paired conditions")
+        public_fingerprints_matched &= str(left["public_fingerprint"]) == str(
+            right["public_fingerprint"]
+        )
         group_differences.setdefault(group, []).append(
             float(bool(left["exact"])) - float(bool(right["exact"]))
         )
@@ -129,6 +133,7 @@ def _paired_comparison(
         "wilcoxon_p_holm": p_value,
         "n_independent_source_groups": len(groups),
         "n_nonzero_source_groups": nonzero,
+        "test_panel_fingerprints_matched": public_fingerprints_matched,
     }
 
 
@@ -152,6 +157,7 @@ def _architecture(config: Mapping[str, Any], *, mode: str) -> TinyRecursiveConfi
         expansion=float(model.get("expansion", 2.0)),
         high_cycles=int(model.get("high_cycles", 2)),
         low_cycles=int(model.get("low_cycles", 2)),
+        supervision_steps=int(model.get("supervision_steps", 2)),
         mode=mode,  # type: ignore[arg-type]
     )
 
@@ -164,13 +170,22 @@ def _training_config(config: Mapping[str, Any]) -> TinyRecursiveTrainingConfig:
         learning_rate=float(training.get("learning_rate", 3e-4)),
         weight_decay=float(training.get("weight_decay", 0.0)),
         grad_clip=float(training.get("grad_clip", 1.0)),
-        auxiliary_loss_weight=float(training.get("auxiliary_loss_weight", 0.25)),
         device=_device(training.get("device", "auto")),
     )
 
 
 def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def registered_config_sha256(config: Mapping[str, Any]) -> str:
+    """Hash the semantic input config while excluding its machine-local path."""
+
+    payload = {
+        key: value for key, value in dict(config).items() if key != "config_path"
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> Path:
@@ -180,6 +195,15 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
     conditions = tuple(config.get("conditions", CONDITIONS))
     if not conditions or not set(conditions).issubset(CONDITIONS):
         raise ValueError("unknown Exp16 condition")
+    registered = config.get("registered_comparison")
+    if (
+        not isinstance(registered, Mapping)
+        or registered.get("name") != "micro_trm_minus_single_state_core_call_matched"
+        or registered.get("candidate") != "micro_trm_bptt"
+        or registered.get("reference") != "single_state_core_call_matched"
+        or not set(CONDITIONS).issubset(conditions)
+    ):
+        raise ValueError("Exp16 requires its frozen paired comparison contract")
     run_config = {
         **dict(config),
         "training_algorithm": "bptt_tiny_recursive_baseline",
@@ -189,10 +213,12 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
         "claim_scope": "computational_baseline_only",
         "official_hrm_reproduction": False,
         "official_trm_reproduction": False,
+        "registered_config_sha256": registered_config_sha256(config),
     }
     with ExperimentRun(
         "exp16_tiny_recursive_sudoku", seed, run_config, results_root=results_root
     ) as run:
+        (run.path / "fit_receipts.json").write_text("{}\n", encoding="utf-8")
         run.register_conditions(
             [
                 {
@@ -232,13 +258,24 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                 "inner_validation_task_ids": list(validation.task_ids),
                 "inner_training_source_groups": list(training.source_groups),
                 "inner_validation_source_groups": list(validation.source_groups),
-                "inner_groups_disjoint": set(training.source_groups).isdisjoint(
-                    validation.source_groups
+                "inner_training_augmentation_groups": list(
+                    training.augmentation_groups
+                ),
+                "inner_validation_augmentation_groups": list(
+                    validation.augmentation_groups
+                ),
+                "inner_training_content_groups": list(training.content_groups),
+                "inner_validation_content_groups": list(validation.content_groups),
+                "inner_groups_disjoint": all(
+                    set(getattr(training, field)).isdisjoint(getattr(validation, field))
+                    for field in (
+                        "source_groups",
+                        "augmentation_groups",
+                        "content_groups",
+                    )
                 ),
                 "augmentation_seed": augmentation_seed,
-                "augmentations_per_task": int(
-                    config.get("augmentations_per_task", 0)
-                ),
+                "augmentations_per_task": int(config.get("augmentations_per_task", 0)),
                 "test_tasks": [
                     {
                         "task_id": task.task_id,
@@ -274,14 +311,24 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
             and source_manifest_verified
             and len(test_tasks) >= int(config.get("minimum_test_tasks", 1))
         )
-        training_options = _training_config(config)
         model_seed = derive_seed(seed, "exp16", "shared_model_initialization")
         optimizer_seed = derive_seed(seed, "exp16", "shared_optimizer_order")
         task_rows_by_condition: dict[str, list[dict[str, object]]] = {}
         aggregate_by_condition: dict[str, dict[str, object]] = {}
         fit_receipts: dict[str, object] = {}
-        checkpoint_root = run.path / "checkpoints"
-        checkpoint_root.mkdir(parents=True, exist_ok=True)
+        try:
+            training_options = _training_config(config)
+            checkpoint_root = run.path / "checkpoints"
+            checkpoint_root.mkdir(parents=True, exist_ok=True)
+        except Exception as error:
+            for condition in conditions:
+                run.mark_condition_failure(
+                    error,
+                    condition=condition,
+                    task_family="sudoku",
+                    stage="training_setup",
+                )
+            return run.path
 
         for condition in conditions:
             try:
@@ -313,14 +360,24 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     },
                     checkpoint_path,
                 )
-                predictions = predict_tiny_recursive(
+                raw_predictions = predict_tiny_recursive(
                     model,
                     test_inputs,
                     batch_size=training_options.batch_size,
                     device=training_options.device,
+                    clamp_visible_tokens=False,
                 )
+                predictions = raw_predictions.copy()
+                visible_tokens = test_inputs > 0
+                predictions[visible_tokens] = test_inputs[visible_tokens]
                 task_rows: list[dict[str, object]] = []
-                for task, prediction in zip(test_tasks, predictions, strict=True):
+                for task, prediction, raw_prediction, puzzle in zip(
+                    test_tasks,
+                    predictions,
+                    raw_predictions,
+                    test_inputs,
+                    strict=True,
+                ):
                     score = dict(
                         dataset.target_store.score(task, prediction.reshape(9, 9))
                     )
@@ -333,6 +390,9 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                         "clues_preserved": bool(score.get("clues_preserved", False)),
                         "prediction_provided": bool(
                             score.get("prediction_provided", True)
+                        ),
+                        "raw_unclamped_clue_accuracy": float(
+                            np.mean(raw_prediction[puzzle > 0] == puzzle[puzzle > 0])
                         ),
                     }
                     task_rows.append(row)
@@ -374,13 +434,20 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "valid_solution_ci_low": valid_low,
                     "valid_solution_ci_high": valid_high,
                     "parameter_count": count,
-                    "core_calls_per_forward": architecture.core_calls,
+                    "nominal_core_calls_per_evaluation": architecture.core_calls,
+                    "core_calls_per_segment": architecture.core_calls_per_segment,
+                    "supervision_steps": architecture.supervision_steps,
                     "optimizer_steps": receipt.optimizer_steps,
                     "fixed_training_budget": receipt.fixed_training_budget,
                     "best_epoch": receipt.best_epoch,
                     "best_validation_loss": receipt.best_validation_loss,
                     "best_validation_exact_accuracy": max(
                         receipt.validation_exact_accuracy
+                    ),
+                    "mean_raw_unclamped_clue_accuracy": float(
+                        np.mean(
+                            [row["raw_unclamped_clue_accuracy"] for row in task_rows]
+                        )
                     ),
                     "initialization_sha256": initial_fingerprint,
                     "checkpoint_sha256": receipt.checkpoint_sha256,
@@ -420,17 +487,17 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     stage="fit_or_test",
                 )
 
-        comparison_name = "micro_trm_minus_flat_compute_matched"
+        comparison_name = "micro_trm_minus_single_state_core_call_matched"
         if set(CONDITIONS).issubset(task_rows_by_condition):
             comparison_seed = derive_seed(seed, "exp16", comparison_name, "bootstrap")
             comparison = _paired_comparison(
                 task_rows_by_condition["micro_trm_bptt"],
-                task_rows_by_condition["flat_shared_compute_matched"],
+                task_rows_by_condition["single_state_core_call_matched"],
                 n_bootstrap=int(config.get("n_bootstrap", 1000)),
                 seed=comparison_seed,
             )
             left = aggregate_by_condition["micro_trm_bptt"]
-            right = aggregate_by_condition["flat_shared_compute_matched"]
+            right = aggregate_by_condition["single_state_core_call_matched"]
             matching = {
                 "parameter_count_matched": left["parameter_count"]
                 == right["parameter_count"],
@@ -438,16 +505,35 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                 == right["initialization_sha256"],
                 "optimizer_steps_matched": left["optimizer_steps"]
                 == right["optimizer_steps"],
-                "core_calls_matched": left["core_calls_per_forward"]
-                == right["core_calls_per_forward"],
-                "training_examples_and_order_matched": True,
-                "validation_and_test_panels_matched": True,
+                "nominal_core_calls_matched": left["nominal_core_calls_per_evaluation"]
+                == right["nominal_core_calls_per_evaluation"],
+                "training_data_matched": fit_receipts["micro_trm_bptt"][
+                    "training_data_sha256"
+                ]
+                == fit_receipts["single_state_core_call_matched"][
+                    "training_data_sha256"
+                ],
+                "validation_data_matched": fit_receipts["micro_trm_bptt"][
+                    "validation_data_sha256"
+                ]
+                == fit_receipts["single_state_core_call_matched"][
+                    "validation_data_sha256"
+                ],
+                "epoch_permutations_matched": fit_receipts["micro_trm_bptt"][
+                    "epoch_permutation_sha256"
+                ]
+                == fit_receipts["single_state_core_call_matched"][
+                    "epoch_permutation_sha256"
+                ],
+                "test_panel_fingerprints_matched": comparison[
+                    "test_panel_fingerprints_matched"
+                ],
             }
             run.record(
                 {
                     "status": "complete",
                     "candidate": "micro_trm_bptt",
-                    "reference": "flat_shared_compute_matched",
+                    "reference": "single_state_core_call_matched",
                     "estimand": "paired_exact_accuracy_difference",
                     **comparison,
                     **matching,
@@ -477,7 +563,7 @@ def main() -> None:
     ).parse_args()
     config = load_json_config(args.config)
     for seed in seed_list(args.seeds or config["seeds"]):
-        run_seed(config, seed, args.results_root)
+        print(run_seed(config, seed, args.results_root))
 
 
 if __name__ == "__main__":

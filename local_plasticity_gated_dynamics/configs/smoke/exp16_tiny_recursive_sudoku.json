@@ -4,8 +4,14 @@
   "seeds": [0, 1, 2],
   "conditions": [
     "micro_trm_bptt",
-    "flat_shared_compute_matched"
+    "single_state_core_call_matched"
   ],
+  "registered_comparison": {
+    "name": "micro_trm_minus_single_state_core_call_matched",
+    "candidate": "micro_trm_bptt",
+    "reference": "single_state_core_call_matched",
+    "formal_claim_promotion_enabled": false
+  },
   "validation_fraction": 0.25,
   "augmentations_per_task": 2,
   "n_bootstrap": 500,
@@ -21,7 +27,8 @@
     "layers": 1,
     "expansion": 2.0,
     "high_cycles": 2,
-    "low_cycles": 2
+    "low_cycles": 2,
+    "supervision_steps": 2
   },
   "training": {
     "epochs": 20,
@@ -29,7 +36,6 @@
     "learning_rate": 0.001,
     "weight_decay": 0.0001,
     "grad_clip": 1.0,
-    "auxiliary_loss_weight": 0.25,
     "device": "auto"
   }
 }

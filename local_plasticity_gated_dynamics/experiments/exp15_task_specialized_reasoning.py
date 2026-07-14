@@ -535,7 +535,7 @@ def main() -> None:
     ).parse_args()
     config = load_json_config(args.config)
     for seed in seed_list(args.seeds or config["seeds"]):
-        run_seed(config, seed, args.results_root)
+        print(run_seed(config, seed, args.results_root))
 
 
 if __name__ == "__main__":
