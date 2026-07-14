@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import sys
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -50,6 +52,7 @@ CONDITIONS = {
     "micro_trm_bptt": "trm_like",
     "single_state_core_call_matched": "single_state_core_call_matched",
 }
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _group_bootstrap(
@@ -182,15 +185,22 @@ def _architecture(config: Mapping[str, Any], *, mode: str) -> TinyRecursiveConfi
     )
 
 
-def _training_config(config: Mapping[str, Any]) -> TinyRecursiveTrainingConfig:
+def _training_config(
+    config: Mapping[str, Any], *, resolve_device: bool = True
+) -> TinyRecursiveTrainingConfig:
     training = dict(config.get("training", {}))
+    requested_device = str(training.get("device", "auto"))
     return TinyRecursiveTrainingConfig(
         epochs=int(training.get("epochs", 20)),
         batch_size=int(training.get("batch_size", 16)),
         learning_rate=float(training.get("learning_rate", 3e-4)),
         weight_decay=float(training.get("weight_decay", 0.0)),
         grad_clip=float(training.get("grad_clip", 1.0)),
-        device=_device(training.get("device", "auto")),
+        device=_device(requested_device) if resolve_device else requested_device,
+        loss_scope=str(training.get("loss_scope", "blank_only")),  # type: ignore[arg-type]
+        checkpoint_metric=str(  # type: ignore[arg-type]
+            training.get("checkpoint_metric", "validation_loss")
+        ),
     )
 
 
@@ -206,6 +216,166 @@ def registered_config_sha256(config: Mapping[str, Any]) -> str:
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def calibration_candidate_sha256(config: Mapping[str, Any]) -> str:
+    """Hash the effective candidate and its train/validation/data contract."""
+
+    data = dict(config.get("data", {}))
+    if config.get("synthetic_fixture") is not None:
+        dataset_contract: dict[str, object] = {
+            "profile": str(config.get("profile", "unspecified")),
+            "synthetic_fixture": dict(config["synthetic_fixture"]),
+        }
+    else:
+        dataset_contract = {
+            "profile": str(config.get("profile", "unspecified")),
+        }
+        dataset_contract.update(
+            {
+                key: data.get(key)
+                for key in (
+                    "dataset_name",
+                    "revision",
+                    "manifest_sha256",
+                    "license",
+                    "license_status",
+                    "test_split_role",
+                )
+            }
+        )
+    payload = {
+        "architecture": asdict(_architecture(config, mode="trm_like")),
+        "training": asdict(_training_config(config, resolve_device=False)),
+        "augmentations_per_task": int(config.get("augmentations_per_task", 0)),
+        "validation_fraction": float(config.get("validation_fraction", 0.2)),
+        "dataset_contract": dataset_contract,
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def calibration_code_sha256() -> str:
+    """Bind calibration, fitting, data-capability, and freeze implementations."""
+
+    relative_paths = (
+        "experiments/exp13_structured_reasoning.py",
+        "experiments/exp16_tiny_recursive_sudoku.py",
+        "experiments/exp17_tiny_recursive_calibration.py",
+        "scripts/summarize_exp17_tiny_recursive_calibration.py",
+        "scripts/prepare_exp13_public_benchmarks.py",
+        "src/baselines/tiny_recursive.py",
+        "src/data/structured_protocol.py",
+        "src/data/sudoku_tasks.py",
+        "src/data/tiny_reasoning_data.py",
+        "src/utils/artifacts.py",
+        "src/utils/reproducibility.py",
+    )
+    digest = hashlib.sha256()
+    for relative in relative_paths:
+        path = PROJECT_ROOT / relative
+        digest.update(len(relative).to_bytes(8, "little"))
+        digest.update(relative.encode("utf-8"))
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _git_state() -> tuple[str | None, bool | None]:
+    repository = PROJECT_ROOT.parent
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None, None
+    return commit or None, bool(status.strip())
+
+
+def _validate_calibration_freeze(
+    config: Mapping[str, Any], *, confirmation_seed: int
+) -> dict[str, object]:
+    if config.get("require_calibration_freeze") is not True:
+        return {"required": False, "validated": False}
+    real_dataset = config.get("synthetic_fixture") is None
+    if real_dataset and str(config.get("profile")) != "formal":
+        raise ValueError("real-data confirmation requires formal data validation")
+    freeze = config.get("calibration_freeze")
+    if not isinstance(freeze, Mapping):
+        raise ValueError("confirmation requires a calibration_freeze mapping")
+    raw_path = freeze.get("freeze_decision_path")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError("calibration freeze_decision_path is required")
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    actual_decision_sha256 = _file_sha256(path)
+    if actual_decision_sha256 != freeze.get("freeze_decision_sha256"):
+        raise ValueError("calibration freeze decision SHA-256 mismatch")
+    decision = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(decision, Mapping):
+        raise ValueError("calibration freeze decision must be a JSON object")
+    required_flags = {
+        "status": "frozen_validation_only",
+        "all_freeze_gates_passed": True,
+        "test_prediction_array_requested": False,
+        "hidden_target_scorer_called": False,
+        "confirmation_test_still_required": True,
+    }
+    if any(decision.get(key) != value for key, value in required_flags.items()):
+        raise ValueError("calibration freeze decision gates are not satisfied")
+    if real_dataset and decision.get("formal_data_validation_required") is not True:
+        raise ValueError("calibration did not require formal data validation")
+    selected_candidate = freeze.get("selected_candidate")
+    if selected_candidate != decision.get("selected_candidate"):
+        raise ValueError("calibration selected candidate mismatch")
+    effective_sha256 = calibration_candidate_sha256(config)
+    if (
+        effective_sha256 != freeze.get("selected_candidate_config_sha256")
+        or effective_sha256 != decision.get("selected_candidate_config_sha256")
+    ):
+        raise ValueError("confirmation config does not match the frozen candidate")
+    selection_seeds = tuple(int(value) for value in freeze.get("selection_seeds", ()))
+    if list(selection_seeds) != decision.get("submitted_seeds"):
+        raise ValueError("calibration selection seed receipt mismatch")
+    if confirmation_seed in selection_seeds:
+        raise ValueError("confirmation seed must be disjoint from calibration seeds")
+    current_commit, current_dirty = _git_state()
+    current_code_sha256 = calibration_code_sha256()
+    if current_code_sha256 != decision.get("calibration_code_sha256"):
+        raise ValueError("confirmation code differs from frozen calibration code")
+    if decision.get("require_clean_git") is True and current_dirty is not False:
+        raise ValueError("confirmation requires a clean git worktree")
+    return {
+        "required": True,
+        "validated": True,
+        "freeze_decision_path": str(path),
+        "freeze_decision_sha256": actual_decision_sha256,
+        "selected_candidate": selected_candidate,
+        "selected_candidate_config_sha256": effective_sha256,
+        "selection_seeds": list(selection_seeds),
+        "confirmation_seed": confirmation_seed,
+        "git_commit": current_commit,
+        "git_dirty": current_dirty,
+        "calibration_git_commit": decision.get("git_commit"),
+        "calibration_code_sha256": current_code_sha256,
+        "test_prediction_array_requested_during_selection": False,
+        "hidden_target_scorer_called_during_selection": False,
+    }
 
 
 def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> Path:
@@ -251,6 +421,23 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
             ]
         )
         try:
+            freeze_receipt = _validate_calibration_freeze(
+                config, confirmation_seed=seed
+            )
+            (run.path / "calibration_freeze_receipt.json").write_text(
+                json.dumps(freeze_receipt, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+        except Exception as error:
+            for condition in conditions:
+                run.mark_condition_failure(
+                    error,
+                    condition=condition,
+                    task_family="sudoku",
+                    stage="calibration_freeze",
+                )
+            return run.path
+        try:
             dataset, fixture_only, provenance = _load_dataset(dict(config), run.path)
             split_counts = {
                 split: len(dataset.for_split(split))
@@ -273,6 +460,7 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
             test_inputs, test_tasks = public_sudoku_test_inputs(dataset)
             provenance_payload = {
                 **provenance,
+                "calibration_freeze": freeze_receipt,
                 "fixture_only": fixture_only,
                 "split_counts": split_counts,
                 "inner_training_task_ids": list(training.task_ids),
@@ -411,6 +599,12 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                         "public_fingerprint": task.fingerprint,
                         "exact": bool(score.get("exact", False)),
                         "valid_solution": bool(score.get("valid_solution", False)),
+                        "blank_cell_accuracy": float(
+                            score.get("blank_cell_accuracy", 0.0)
+                        ),
+                        "full_cell_accuracy": float(
+                            score.get("full_cell_accuracy", 0.0)
+                        ),
                         "clues_preserved": bool(score.get("clues_preserved", False)),
                         "prediction_provided": bool(
                             score.get("prediction_provided", True)
@@ -432,6 +626,9 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                 valid = np.asarray(
                     [row["valid_solution"] for row in task_rows], dtype=float
                 )
+                blank_accuracy = np.asarray(
+                    [row["blank_cell_accuracy"] for row in task_rows], dtype=float
+                )
                 groups = tuple(str(row["source_group"]) for row in task_rows)
                 n_bootstrap = int(config.get("n_bootstrap", 1000))
                 accuracy_seed = derive_seed(seed, "exp16", condition, "bootstrap")
@@ -447,6 +644,12 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     n_bootstrap=n_bootstrap,
                     seed=derive_seed(seed, "exp16", condition, "valid_bootstrap"),
                 )
+                blank_estimate, blank_low, blank_high = _group_bootstrap(
+                    blank_accuracy,
+                    groups,
+                    n_bootstrap=n_bootstrap,
+                    seed=derive_seed(seed, "exp16", condition, "blank_bootstrap"),
+                )
                 aggregate = {
                     "status": "complete",
                     "n_test_tasks": len(task_rows),
@@ -457,6 +660,9 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "valid_solution_rate": valid_estimate,
                     "valid_solution_ci_low": valid_low,
                     "valid_solution_ci_high": valid_high,
+                    "blank_cell_accuracy": blank_estimate,
+                    "blank_cell_accuracy_ci_low": blank_low,
+                    "blank_cell_accuracy_ci_high": blank_high,
                     "parameter_count": count,
                     "nominal_core_calls_per_evaluation": architecture.core_calls,
                     "core_calls_per_segment": architecture.core_calls_per_segment,
@@ -465,9 +671,21 @@ def run_seed(config: Mapping[str, Any], seed: int, results_root: str | Path) -> 
                     "fixed_training_budget": receipt.fixed_training_budget,
                     "best_epoch": receipt.best_epoch,
                     "best_validation_loss": receipt.best_validation_loss,
+                    "selected_validation_loss": receipt.selected_validation_loss,
                     "best_validation_exact_accuracy": max(
                         receipt.validation_exact_accuracy
                     ),
+                    "best_validation_blank_cell_accuracy": max(
+                        receipt.validation_blank_cell_accuracy
+                    ),
+                    "selected_train_blank_cell_accuracy": (
+                        receipt.selected_train_blank_cell_accuracy
+                    ),
+                    "selected_validation_blank_cell_accuracy": (
+                        receipt.selected_validation_blank_cell_accuracy
+                    ),
+                    "loss_scope": receipt.loss_scope,
+                    "checkpoint_metric": receipt.checkpoint_metric,
                     "mean_raw_unclamped_clue_accuracy": float(
                         np.mean(
                             [row["raw_unclamped_clue_accuracy"] for row in task_rows]

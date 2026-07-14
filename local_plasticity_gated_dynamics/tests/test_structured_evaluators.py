@@ -161,12 +161,16 @@ def test_sudoku_csv_checks_constraints_clues_exact_and_missing_denominator(
     assert evaluation.summary["clues_preserved_rate"] == 0.5
     assert evaluation.summary["valid_solution_rate"] == 0.5
     assert evaluation.summary["exact_rate"] == 0.5
+    assert evaluation.summary["blank_cell_accuracy_rate"] == 0.5
+    assert evaluation.summary["full_cell_accuracy_rate"] == 0.5
 
     bad = "1" * 81
     score = dataset.target_store.score(dataset.tasks[0], bad)
     assert not score["clues_preserved"]
     assert not score["rows_valid"]
     assert not score["exact"]
+    assert 0.0 <= score["blank_cell_accuracy"] < 1.0
+    assert 0.0 <= score["full_cell_accuracy"] < 1.0
 
 
 def test_sudoku_jsonl_loader(tmp_path: Path) -> None:

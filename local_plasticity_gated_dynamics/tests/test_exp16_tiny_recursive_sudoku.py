@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pandas as pd
 import pytest
 
 from experiments.common import load_json_config
-from experiments.exp16_tiny_recursive_sudoku import CONDITIONS, run_seed
+from experiments.exp16_tiny_recursive_sudoku import (
+    CONDITIONS,
+    _validate_calibration_freeze,
+    calibration_candidate_sha256,
+    run_seed,
+)
 from figures.exp16_tiny_recursive_plot import plot_exp16
 from scripts.summarize_exp16_tiny_recursive import (
     EXPERIMENT,
@@ -78,6 +84,9 @@ def test_exp16_smoke_retains_matched_baseline_receipts_and_test_safety(
     assert recursive["claim_conclusion"] == "inconclusive"
     assert recursive["strict_deterministic_algorithms"] is True
     assert recursive["attention_backend"] == "cpu_default"
+    assert recursive["loss_scope"] == "blank_only"
+    assert 0.0 <= recursive["blank_cell_accuracy"] <= 1.0
+    assert 0.0 <= recursive["selected_validation_blank_cell_accuracy"] <= 1.0
 
     comparison = next(row for row in rows if row.get("stage") == "comparison")
     assert comparison["all_matching_gates_passed"] is True
@@ -161,6 +170,87 @@ def test_exp16_training_setup_failure_is_recorded_for_both_conditions(
     assert status["status"] == "complete_with_failures"
     assert {row["condition"] for row in failures} == set(CONDITIONS)
     assert json.loads((run_path / "fit_receipts.json").read_text("utf-8")) == {}
+
+
+def test_exp16_confirmation_freeze_is_executable_and_hash_bound(
+    tmp_path, monkeypatch
+) -> None:
+    config = load_json_config("configs/smoke/exp16_tiny_recursive_sudoku.json")
+    candidate_sha256 = calibration_candidate_sha256(config)
+    decision = {
+        "status": "frozen_validation_only",
+        "all_freeze_gates_passed": True,
+        "selected_candidate": "blank_reference",
+        "selected_candidate_config_sha256": candidate_sha256,
+        "submitted_seeds": [10, 11, 12],
+        "test_prediction_array_requested": False,
+        "hidden_target_scorer_called": False,
+        "confirmation_test_still_required": True,
+        "git_commit": "calibration-commit",
+        "require_clean_git": True,
+        "calibration_code_sha256": "c" * 64,
+    }
+    decision_path = tmp_path / "freeze.json"
+    decision_path.write_text(json.dumps(decision), encoding="utf-8")
+    decision_sha256 = hashlib.sha256(decision_path.read_bytes()).hexdigest()
+    config.update(
+        require_calibration_freeze=True,
+        calibration_freeze={
+            "freeze_decision_path": str(decision_path),
+            "freeze_decision_sha256": decision_sha256,
+            "selected_candidate": "blank_reference",
+            "selected_candidate_config_sha256": candidate_sha256,
+            "selection_seeds": [10, 11, 12],
+        },
+    )
+    monkeypatch.setattr(
+        "experiments.exp16_tiny_recursive_sudoku.calibration_code_sha256",
+        lambda: "c" * 64,
+    )
+    monkeypatch.setattr(
+        "experiments.exp16_tiny_recursive_sudoku._git_state",
+        lambda: ("confirmation-commit", False),
+    )
+    receipt = _validate_calibration_freeze(config, confirmation_seed=20)
+    assert receipt["validated"] is True
+    assert receipt["calibration_git_commit"] == "calibration-commit"
+    assert receipt["git_commit"] == "confirmation-commit"
+
+    config["training"]["epochs"] += 1
+    with pytest.raises(ValueError, match="frozen candidate"):
+        _validate_calibration_freeze(config, confirmation_seed=20)
+
+    config["training"]["epochs"] -= 1
+    config["validation_fraction"] = 0.49
+    with pytest.raises(ValueError, match="frozen candidate"):
+        _validate_calibration_freeze(config, confirmation_seed=20)
+
+
+def test_exp16_invalid_freeze_fails_before_dataset_or_test_access(tmp_path) -> None:
+    config = load_json_config("configs/smoke/exp16_tiny_recursive_sudoku.json")
+    config.update(
+        require_calibration_freeze=True,
+        calibration_freeze={"freeze_decision_path": str(tmp_path / "missing.json")},
+    )
+    run_path = run_seed(config, 20, tmp_path / "runs")
+    rows = _rows(run_path)
+    assert {row["stage"] for row in rows} == {"calibration_freeze"}
+    assert not (run_path / "source_provenance.json").exists()
+    status = json.loads((run_path / "status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "complete_with_failures"
+
+
+def test_real_confirmation_cannot_bypass_formal_data_validation(tmp_path) -> None:
+    config = load_json_config("configs/formal/exp17_tiny_recursive_calibration.json")
+    formal_sha256 = calibration_candidate_sha256(config)
+    config.update(
+        profile="retry_pilot",
+        require_calibration_freeze=True,
+        calibration_freeze={"freeze_decision_path": str(tmp_path / "unused.json")},
+    )
+    assert calibration_candidate_sha256(config) != formal_sha256
+    with pytest.raises(ValueError, match="formal data validation"):
+        _validate_calibration_freeze(config, confirmation_seed=2000)
 
 
 def test_exp16_empty_failed_attempt_and_latest_retry_selection_are_fail_closed(

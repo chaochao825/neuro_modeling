@@ -94,8 +94,12 @@ def score_sudoku_prediction(
     )
     if board is None:
         rows_valid = columns_valid = boxes_valid = False
+        blank_cell_accuracy = full_cell_accuracy = 0.0
     else:
         rows_valid, columns_valid, boxes_valid = _constraint_metrics(board)
+        blank_mask = puzzle == 0
+        blank_cell_accuracy = float(np.mean(board[blank_mask] == expected[blank_mask]))
+        full_cell_accuracy = float(np.mean(board == expected))
     valid = bool(
         parseable and clues_preserved and rows_valid and columns_valid and boxes_valid
     )
@@ -107,6 +111,8 @@ def score_sudoku_prediction(
         "rows_valid": bool(rows_valid),
         "columns_valid": bool(columns_valid),
         "boxes_valid": bool(boxes_valid),
+        "blank_cell_accuracy": blank_cell_accuracy,
+        "full_cell_accuracy": full_cell_accuracy,
         "valid_solution": valid,
         "exact": exact,
     }

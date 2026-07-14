@@ -20,6 +20,8 @@ from torch import nn
 
 
 ReasoningMode = Literal["trm_like", "single_state_core_call_matched"]
+TrainingLossScope = Literal["blank_only", "all_tokens"]
+CheckpointMetric = Literal["validation_loss", "blank_cell_accuracy"]
 
 
 def _positive_integer(value: object, name: str) -> int:
@@ -317,6 +319,8 @@ class TinyRecursiveTrainingConfig:
     weight_decay: float = 0.0
     grad_clip: float = 1.0
     device: str = "cpu"
+    loss_scope: TrainingLossScope = "blank_only"
+    checkpoint_metric: CheckpointMetric = "validation_loss"
 
     def __post_init__(self) -> None:
         for name in ("epochs", "batch_size"):
@@ -333,6 +337,16 @@ class TinyRecursiveTrainingConfig:
             raise ValueError("weight_decay must be non-negative")
         if not isinstance(self.device, str) or not self.device:
             raise ValueError("device must be a non-empty string")
+        if self.loss_scope not in {"blank_only", "all_tokens"}:
+            raise ValueError("loss_scope must be 'blank_only' or 'all_tokens'")
+        if self.checkpoint_metric not in {
+            "validation_loss",
+            "blank_cell_accuracy",
+        }:
+            raise ValueError(
+                "checkpoint_metric must be 'validation_loss' or "
+                "'blank_cell_accuracy'"
+            )
 
 
 @dataclass(frozen=True)
@@ -340,8 +354,11 @@ class TinyRecursiveFitReceipt:
     train_loss: tuple[float, ...]
     validation_loss: tuple[float, ...]
     validation_exact_accuracy: tuple[float, ...]
+    validation_blank_cell_accuracy: tuple[float, ...]
     best_epoch: int
     best_validation_loss: float
+    best_validation_blank_cell_accuracy: float
+    selected_validation_loss: float
     optimizer_steps: int
     checkpoint_sha256: str
     training_seed: int
@@ -350,7 +367,17 @@ class TinyRecursiveFitReceipt:
     training_data_sha256: str
     validation_data_sha256: str
     epoch_permutation_sha256: str
-    blank_only_loss: bool = True
+    loss_scope: TrainingLossScope
+    checkpoint_metric: CheckpointMetric
+    selected_train_blank_cell_accuracy: float
+    selected_train_full_cell_accuracy: float
+    selected_train_raw_clue_accuracy: float
+    selected_train_exact_accuracy: float
+    selected_validation_blank_cell_accuracy: float
+    selected_validation_full_cell_accuracy: float
+    selected_validation_raw_clue_accuracy: float
+    selected_validation_exact_accuracy: float
+    blank_only_loss: bool
     test_data_used_for_fit: bool = False
     fixed_training_budget: bool = True
 
@@ -417,10 +444,12 @@ def _validated_arrays(
     return input_array.copy(), target_array.copy()
 
 
-def _masked_reasoning_loss(
+def _reasoning_loss(
     output: TinyRecursiveOutput,
     inputs: torch.Tensor,
     targets: torch.Tensor,
+    *,
+    scope: TrainingLossScope,
 ) -> torch.Tensor:
     blank = inputs.eq(0)
 
@@ -434,7 +463,7 @@ def _masked_reasoning_loss(
             targets.reshape(-1),
             reduction="none",
         ).reshape_as(targets)
-        return losses[blank].mean()
+        return losses[blank].mean() if scope == "blank_only" else losses.mean()
 
     return one(output.logits)
 
@@ -493,6 +522,48 @@ def _exact_accuracy(predictions: np.ndarray, targets: np.ndarray) -> float:
     return float(np.mean(np.all(predictions == targets, axis=1)))
 
 
+def _sudoku_prediction_metrics(
+    model: TinyRecursiveBaseline,
+    inputs: np.ndarray,
+    targets: np.ndarray,
+    *,
+    batch_size: int,
+    device: torch.device,
+) -> dict[str, float]:
+    """Return task-macro diagnostics without treating cells as replicates."""
+
+    raw = predict_tiny_recursive(
+        model,
+        inputs,
+        batch_size=batch_size,
+        device=device,
+        clamp_visible_tokens=False,
+    )
+    blank = inputs == 0
+    visible = ~blank
+    blank_accuracy = np.mean(
+        [
+            float(np.mean(prediction[mask] == target[mask]))
+            for prediction, target, mask in zip(raw, targets, blank, strict=True)
+        ]
+    )
+    clue_accuracy = np.mean(
+        [
+            float(np.mean(prediction[mask] == target[mask]))
+            for prediction, target, mask in zip(raw, targets, visible, strict=True)
+        ]
+    )
+    full_accuracy = float(np.mean(np.mean(raw == targets, axis=1)))
+    clamped = raw.copy()
+    clamped[visible] = inputs[visible]
+    return {
+        "blank_cell_accuracy": float(blank_accuracy),
+        "full_cell_accuracy": full_accuracy,
+        "raw_clue_accuracy": float(clue_accuracy),
+        "exact_accuracy": _exact_accuracy(clamped, targets),
+    }
+
+
 def fit_tiny_recursive(
     model: TinyRecursiveBaseline,
     training_inputs: object,
@@ -536,8 +607,10 @@ def fit_tiny_recursive(
     train_loss_history: list[float] = []
     validation_loss_history: list[float] = []
     validation_accuracy_history: list[float] = []
+    validation_blank_accuracy_history: list[float] = []
     best_state: dict[str, torch.Tensor] | None = None
-    best_validation = float("inf")
+    best_checkpoint_score = -float("inf")
+    selected_validation_loss = float("inf")
     best_epoch = 0
     optimizer_steps = 0
     permutation_digest = hashlib.sha256()
@@ -556,7 +629,12 @@ def fit_tiny_recursive(
                 optimizer.zero_grad(set_to_none=True)
                 output = model(inputs, carry)
                 carry = output.carry
-                loss = _masked_reasoning_loss(output, inputs, targets)
+                loss = _reasoning_loss(
+                    output,
+                    inputs,
+                    targets,
+                    scope=config.loss_scope,
+                )
                 if not torch.isfinite(loss):
                     raise FloatingPointError("non-finite tiny-recursive training loss")
                 loss.backward()
@@ -581,22 +659,36 @@ def fit_tiny_recursive(
                 validation_carry = validation_output.carry
             if validation_output is None:
                 raise AssertionError("validated supervision_steps produced no output")
-            validation_loss = _masked_reasoning_loss(
+            validation_loss = _reasoning_loss(
                 validation_output,
                 validation_inputs_tensor,
                 validation_targets_tensor,
+                scope=config.loss_scope,
             )
         validation_value = float(validation_loss.cpu())
         validation_loss_history.append(validation_value)
-        predictions = predict_tiny_recursive(
+        validation_metrics = _sudoku_prediction_metrics(
             model,
             validation_x,
+            validation_y,
             batch_size=config.batch_size,
             device=device,
         )
-        validation_accuracy_history.append(_exact_accuracy(predictions, validation_y))
-        if validation_value < best_validation:
-            best_validation = validation_value
+        validation_accuracy_history.append(validation_metrics["exact_accuracy"])
+        validation_blank_accuracy_history.append(
+            validation_metrics["blank_cell_accuracy"]
+        )
+        checkpoint_score = (
+            -validation_value
+            if config.checkpoint_metric == "validation_loss"
+            else validation_metrics["blank_cell_accuracy"]
+        )
+        if checkpoint_score > best_checkpoint_score or (
+            checkpoint_score == best_checkpoint_score
+            and validation_value < selected_validation_loss
+        ):
+            best_checkpoint_score = checkpoint_score
+            selected_validation_loss = validation_value
             best_epoch = epoch
             best_state = {
                 name: value.detach().cpu().clone()
@@ -607,12 +699,31 @@ def fit_tiny_recursive(
         raise RuntimeError("training did not produce a checkpoint")
     model.load_state_dict(best_state)
     model.to(device)
+    selected_train_metrics = _sudoku_prediction_metrics(
+        model,
+        train_x,
+        train_y,
+        batch_size=config.batch_size,
+        device=device,
+    )
+    selected_validation_metrics = _sudoku_prediction_metrics(
+        model,
+        validation_x,
+        validation_y,
+        batch_size=config.batch_size,
+        device=device,
+    )
     return TinyRecursiveFitReceipt(
         train_loss=tuple(train_loss_history),
         validation_loss=tuple(validation_loss_history),
         validation_exact_accuracy=tuple(validation_accuracy_history),
+        validation_blank_cell_accuracy=tuple(validation_blank_accuracy_history),
         best_epoch=best_epoch,
-        best_validation_loss=best_validation,
+        best_validation_loss=float(min(validation_loss_history)),
+        best_validation_blank_cell_accuracy=float(
+            max(validation_blank_accuracy_history)
+        ),
+        selected_validation_loss=selected_validation_loss,
         optimizer_steps=optimizer_steps,
         checkpoint_sha256=state_dict_sha256(model),
         training_seed=seed,
@@ -621,4 +732,29 @@ def fit_tiny_recursive(
         training_data_sha256=_array_pair_sha256(train_x, train_y),
         validation_data_sha256=_array_pair_sha256(validation_x, validation_y),
         epoch_permutation_sha256=permutation_digest.hexdigest(),
+        loss_scope=config.loss_scope,
+        checkpoint_metric=config.checkpoint_metric,
+        selected_train_blank_cell_accuracy=selected_train_metrics[
+            "blank_cell_accuracy"
+        ],
+        selected_train_full_cell_accuracy=selected_train_metrics[
+            "full_cell_accuracy"
+        ],
+        selected_train_raw_clue_accuracy=selected_train_metrics[
+            "raw_clue_accuracy"
+        ],
+        selected_train_exact_accuracy=selected_train_metrics["exact_accuracy"],
+        selected_validation_blank_cell_accuracy=selected_validation_metrics[
+            "blank_cell_accuracy"
+        ],
+        selected_validation_full_cell_accuracy=selected_validation_metrics[
+            "full_cell_accuracy"
+        ],
+        selected_validation_raw_clue_accuracy=selected_validation_metrics[
+            "raw_clue_accuracy"
+        ],
+        selected_validation_exact_accuracy=selected_validation_metrics[
+            "exact_accuracy"
+        ],
+        blank_only_loss=config.loss_scope == "blank_only",
     )

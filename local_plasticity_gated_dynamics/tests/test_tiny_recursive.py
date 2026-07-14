@@ -15,6 +15,7 @@ from src.baselines.tiny_recursive import (
     predict_tiny_recursive,
     state_dict_sha256,
 )
+from src.baselines.tiny_recursive import _reasoning_loss
 from src.data.structured_protocol import (
     CapabilityError,
     PublicTask,
@@ -202,4 +203,73 @@ def test_tiny_recursive_fit_is_deterministic_and_has_no_test_argument() -> None:
         predict_tiny_recursive(second_model, validation.inputs, batch_size=2),
     )
     assert first_receipt.test_data_used_for_fit is False
+    assert first_receipt.loss_scope == "blank_only"
+    assert first_receipt.checkpoint_metric == "validation_loss"
+    assert first_receipt.selected_validation_loss == min(
+        first_receipt.validation_loss
+    )
+    assert first_receipt.blank_only_loss is True
+    assert len(first_receipt.validation_blank_cell_accuracy) == 2
+    assert 0.0 <= first_receipt.selected_train_blank_cell_accuracy <= 1.0
+    assert 0.0 <= first_receipt.selected_validation_blank_cell_accuracy <= 1.0
     assert "test" not in inspect.signature(fit_tiny_recursive).parameters
+
+
+def test_tiny_recursive_all_token_loss_is_explicit_and_auditable() -> None:
+    dataset = _dataset(n_train=4, n_test=1)
+    training, validation = split_sudoku_training_tasks(
+        dataset, validation_fraction=0.25, seed=31
+    )
+    torch.manual_seed(37)
+    model = TinyRecursiveBaseline(
+        TinyRecursiveConfig(
+            hidden_size=8,
+            num_heads=2,
+            layers=1,
+            high_cycles=1,
+            low_cycles=1,
+            supervision_steps=1,
+        )
+    )
+    receipt = fit_tiny_recursive(
+        model,
+        training.inputs,
+        training.targets,
+        validation.inputs,
+        validation.targets,
+        TinyRecursiveTrainingConfig(
+            epochs=1,
+            batch_size=2,
+            learning_rate=1e-3,
+            loss_scope="all_tokens",
+            checkpoint_metric="blank_cell_accuracy",
+        ),
+        seed=41,
+    )
+    assert receipt.loss_scope == "all_tokens"
+    assert receipt.blank_only_loss is False
+    assert receipt.checkpoint_metric == "blank_cell_accuracy"
+    assert receipt.selected_validation_blank_cell_accuracy == max(
+        receipt.validation_blank_cell_accuracy
+    )
+    assert 0.0 <= receipt.selected_validation_raw_clue_accuracy <= 1.0
+    with pytest.raises(ValueError, match="loss_scope"):
+        TinyRecursiveTrainingConfig(loss_scope="unsupported")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="checkpoint_metric"):
+        TinyRecursiveTrainingConfig(  # type: ignore[arg-type]
+            checkpoint_metric="unsupported"
+        )
+
+
+def test_all_token_loss_includes_visible_clues_while_blank_loss_excludes_them() -> None:
+    logits = torch.tensor(
+        [[[0.0, -5.0, 5.0], [0.0, -5.0, 5.0]]], requires_grad=True
+    )
+    output = type("Output", (), {"logits": logits})()
+    inputs = torch.tensor([[1, 0]])
+    targets = torch.tensor([[1, 2]])
+    blank_only = _reasoning_loss(output, inputs, targets, scope="blank_only")
+    all_tokens = _reasoning_loss(output, inputs, targets, scope="all_tokens")
+    assert blank_only.item() < 1e-3
+    assert all_tokens.item() > 4.0
+    assert all_tokens.item() > blank_only.item()

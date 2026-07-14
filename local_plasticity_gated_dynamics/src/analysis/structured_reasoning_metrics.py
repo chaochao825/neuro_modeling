@@ -22,6 +22,8 @@ _ENDPOINTS = {
     "arc": ("all_query_exact", "exact"),
     "maze": ("path_valid", "path_optimal", "exact"),
     "sudoku": (
+        "blank_cell_accuracy",
+        "full_cell_accuracy",
         "clues_preserved",
         "rows_valid",
         "columns_valid",

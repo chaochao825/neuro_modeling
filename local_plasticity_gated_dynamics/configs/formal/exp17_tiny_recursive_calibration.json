@@ -1,0 +1,62 @@
+{
+  "profile": "formal",
+  "evidence_stage": "validation_only_calibration",
+  "family": "sudoku",
+  "seeds": [1000, 1001, 1002],
+  "selection_contract": {
+    "primary_metric": "selected_validation_blank_cell_accuracy",
+    "test_access_forbidden": true,
+    "minimum_confirmation_seeds": 3,
+    "require_clean_git": true,
+    "formal_claim_promotion_enabled": false
+  },
+  "validation_fraction": 0.2,
+  "data": {
+    "path": "data/structured/sudoku_wichtounet_v2.jsonl",
+    "manifest_path": "data/structured/sudoku_wichtounet_v2.manifest.json",
+    "manifest_sha256": "1b0aa95575b50012e25499ddd82c35d462979fe150d6819ea0ade7f6f80c91f2",
+    "dataset_name": "wichtounet/sudoku_dataset-v2",
+    "revision": "0db6de036b80b4e8e4574abe6e15026331bd5c2c",
+    "license": "CC-BY-4.0",
+    "license_status": "verified",
+    "test_split_role": "non_ood",
+    "default_split": null,
+    "unavailable_reason": null
+  },
+  "model": {
+    "hidden_size": 32,
+    "num_heads": 4,
+    "layers": 1,
+    "expansion": 2.0,
+    "high_cycles": 2,
+    "low_cycles": 2,
+    "supervision_steps": 2
+  },
+  "training": {
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "grad_clip": 1.0,
+    "device": "cuda:0",
+    "checkpoint_metric": "blank_cell_accuracy"
+  },
+  "candidates": {
+    "blank_low_diversity": {
+      "augmentations_per_task": 2,
+      "training": {"epochs": 200, "loss_scope": "blank_only"}
+    },
+    "blank_high_diversity": {
+      "augmentations_per_task": 16,
+      "training": {"epochs": 36, "loss_scope": "blank_only"}
+    },
+    "all_tokens_high_diversity": {
+      "augmentations_per_task": 16,
+      "training": {"epochs": 36, "loss_scope": "all_tokens"}
+    },
+    "all_tokens_deeper_refinement": {
+      "augmentations_per_task": 16,
+      "model": {"supervision_steps": 8},
+      "training": {"epochs": 9, "loss_scope": "all_tokens"}
+    }
+  }
+}

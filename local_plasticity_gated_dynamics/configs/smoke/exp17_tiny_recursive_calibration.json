@@ -1,0 +1,45 @@
+{
+  "profile": "smoke",
+  "family": "sudoku",
+  "seeds": [0],
+  "selection_contract": {
+    "primary_metric": "selected_validation_blank_cell_accuracy",
+    "test_access_forbidden": true,
+    "formal_claim_promotion_enabled": false
+  },
+  "validation_fraction": 0.25,
+  "synthetic_fixture": {
+    "seed": 1729,
+    "n_train_tasks": 12,
+    "n_test_tasks": 2,
+    "clue_fraction": 0.75
+  },
+  "model": {
+    "hidden_size": 8,
+    "num_heads": 2,
+    "layers": 1,
+    "expansion": 2.0,
+    "high_cycles": 1,
+    "low_cycles": 1,
+    "supervision_steps": 1
+  },
+  "training": {
+    "epochs": 2,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "grad_clip": 1.0,
+    "device": "cpu",
+    "checkpoint_metric": "blank_cell_accuracy"
+  },
+  "candidates": {
+    "blank_only_reference": {
+      "augmentations_per_task": 0,
+      "training": {"loss_scope": "blank_only"}
+    },
+    "all_tokens_candidate": {
+      "augmentations_per_task": 0,
+      "training": {"loss_scope": "all_tokens"}
+    }
+  }
+}

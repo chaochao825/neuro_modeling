@@ -111,6 +111,15 @@ $exp16Runs = & .\.venv\Scripts\python.exe `
 $exp16RunArgs = foreach ($run in $exp16Runs) { "--run-dir"; $run.Trim() }
 .\.venv\Scripts\python.exe scripts\summarize_exp16_tiny_recursive.py `
   @exp16RunArgs --results-root results --prefix exp16_tiny_recursive_smoke
+# Exp17 is a separate test-free calibration stage.  It must be completed and
+# frozen before a new confirmation panel is scored:
+$exp17Runs = & .\.venv\Scripts\python.exe `
+  experiments\exp17_tiny_recursive_calibration.py `
+  --config configs\formal\exp17_tiny_recursive_calibration.json `
+  --results-root results
+$exp17RunArgs = foreach ($run in $exp17Runs) { "--run-dir"; $run.Trim() }
+.\.venv\Scripts\python.exe scripts\summarize_exp17_tiny_recursive_calibration.py `
+  @exp17RunArgs --output-dir results --prefix exp17_tiny_recursive_calibration
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -186,6 +195,16 @@ layers:
    and reported exact Sudoku predictions clamp public clues. It is therefore a
    micro-TRM-like mechanism baseline, not an official reproduction or
    biological evidence. See `docs/tiny_recursive_baseline_contract_zh.md`.
+8. `exp17` is the fail-closed calibration companion to `exp16`. It compares
+   blank-only and official-like all-token supervision, training-data diversity,
+   and detached refinement depth using only supervised train and inner-
+   validation partitions. Candidate selection uses task-macro validation blank-
+   cell accuracy. The dataset adapter constructs an opaque capability store for
+   the full source file, but the runner never requests a test prediction array,
+   invokes the hidden-target scorer, or exposes a test target to fitting or
+   selection. Its cross-seed publisher certifies this narrower boundary and
+   leaves the claim `inconclusive`. A frozen candidate still requires a separate
+   one-shot confirmation panel.
 
 ### Current exp13 public ARC result
 
@@ -242,6 +261,11 @@ evidence for a recursive-state advantage. The publisher is pilot-only, the
 fixture is not public/real-task evidence, and the result cannot support an
 official HRM/TRM reproduction or any local-learning/biological claim. See the
 [scoped report](results/exp16_tiny_recursive_smoke_3seed_report.md).
+
+The follow-up `exp17` path records continuous blank/full-cell diagnostics and
+checkpoint-selection receipts because exact-board accuracy alone has a severe
+floor. It is additive: the immutable 3-seed `exp16` snapshot and its default
+blank-only training behavior remain unchanged.
 
 ### exp14 multi-session neural status
 
