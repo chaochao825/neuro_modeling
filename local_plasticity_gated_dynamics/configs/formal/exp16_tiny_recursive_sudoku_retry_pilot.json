@@ -1,0 +1,64 @@
+{
+  "profile": "formal",
+  "evidence_stage": "retry_pilot",
+  "family": "sudoku",
+  "claim_scope": "computational_baseline_only",
+  "seeds": [3000, 3001, 3002],
+  "conditions": [
+    "micro_trm_bptt",
+    "single_state_core_call_matched"
+  ],
+  "registered_comparison": {
+    "name": "micro_trm_minus_single_state_core_call_matched",
+    "candidate": "micro_trm_bptt",
+    "reference": "single_state_core_call_matched",
+    "alpha": 0.05,
+    "minimum_training_seeds": 3,
+    "test_scope": "within_distribution_non_ood_sudoku_v2",
+    "formal_claim_promotion_enabled": false
+  },
+  "validation_fraction": 0.2,
+  "augmentations_per_task": 2,
+  "n_bootstrap": 2000,
+  "minimum_test_tasks": 28,
+  "minimum_training_seeds": 3,
+  "require_calibration_freeze": true,
+  "calibration_freeze": {
+    "freeze_decision_path": "results/exp17_wichtounet_3seed_freeze_decision.json",
+    "freeze_decision_sha256": "fd90953c0f656ce0509832c79e804cc13dba92e1a6ba8ad9b3ac16c1547f5dfc",
+    "selected_candidate": "blank_low_diversity",
+    "selected_candidate_config_sha256": "5c666020f9525cdc385da1047cca8b9cabf69f90f84bf76b3ab3d990fac4cdba",
+    "selection_seeds": [1000, 1001, 1002]
+  },
+  "data": {
+    "path": "data/structured/sudoku_wichtounet_v2.jsonl",
+    "manifest_path": "data/structured/sudoku_wichtounet_v2.manifest.json",
+    "manifest_sha256": "1b0aa95575b50012e25499ddd82c35d462979fe150d6819ea0ade7f6f80c91f2",
+    "dataset_name": "wichtounet/sudoku_dataset-v2",
+    "revision": "0db6de036b80b4e8e4574abe6e15026331bd5c2c",
+    "license": "CC-BY-4.0",
+    "license_status": "verified",
+    "test_split_role": "non_ood",
+    "default_split": null,
+    "unavailable_reason": null
+  },
+  "model": {
+    "hidden_size": 32,
+    "num_heads": 4,
+    "layers": 1,
+    "expansion": 2.0,
+    "high_cycles": 2,
+    "low_cycles": 2,
+    "supervision_steps": 2
+  },
+  "training": {
+    "epochs": 200,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "grad_clip": 1.0,
+    "device": "cuda:0",
+    "loss_scope": "blank_only",
+    "checkpoint_metric": "blank_cell_accuracy"
+  }
+}

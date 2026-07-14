@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -298,6 +299,32 @@ def test_exp16_confirmation_stage_cannot_disable_freeze_gate(
     config["require_calibration_freeze"] = False
     with pytest.raises(ValueError, match="requires a calibration freeze"):
         _validate_calibration_freeze(config, confirmation_seed=20)
+
+
+def test_exp16_retry_pilot_config_matches_published_freeze() -> None:
+    config = load_json_config(
+        "configs/formal/exp16_tiny_recursive_sudoku_retry_pilot.json"
+    )
+    freeze = config["calibration_freeze"]
+    decision_path = Path(freeze["freeze_decision_path"])
+    if not decision_path.is_absolute():
+        decision_path = Path(__file__).resolve().parents[1] / decision_path
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    assert hashlib.sha256(decision_path.read_bytes()).hexdigest() == freeze[
+        "freeze_decision_sha256"
+    ]
+    assert config["evidence_stage"] == "retry_pilot"
+    assert config["require_calibration_freeze"] is True
+    assert decision["all_freeze_gates_passed"] is True
+    assert decision["selected_candidate"] == freeze["selected_candidate"]
+    assert decision["selected_candidate_config_sha256"] == freeze[
+        "selected_candidate_config_sha256"
+    ]
+    assert calibration_candidate_sha256(config) == freeze[
+        "selected_candidate_config_sha256"
+    ]
+    assert decision["submitted_seeds"] == freeze["selection_seeds"]
+    assert set(config["seeds"]).isdisjoint(freeze["selection_seeds"])
 
 
 def test_real_confirmation_cannot_bypass_formal_data_validation(tmp_path) -> None:

@@ -1,0 +1,31 @@
+{
+  "all_candidates_complete": true,
+  "all_freeze_gates_passed": true,
+  "all_git_clean": true,
+  "all_runs_clean": true,
+  "calibration_code_sha256": "7b235277c9b9361f5ba26205b0688635052f9c2446cf9d06440f704fc9035d36",
+  "calibration_environment_sha256": "ad98282e0633bd9f3a70bf24f1baa7cb3a9219736fc9e1f144c3a59e5226071b",
+  "claim_conclusion": "inconclusive",
+  "confirmation_test_still_required": true,
+  "dataset_adapter_loaded_test_records": true,
+  "enough_seeds": true,
+  "formal_claim_promotion_enabled": false,
+  "formal_data_validation_required": true,
+  "git_commit": "17c8e4bdcfecd5a21506f1da02c8a377294ce398",
+  "hidden_target_scorer_called": false,
+  "minimum_confirmation_seeds": 3,
+  "primary_metric": "mean_validation_blank_cell_accuracy",
+  "primary_metric_value": 0.15208428755540823,
+  "public_test_prediction_adapter_called": false,
+  "require_clean_git": true,
+  "selected_candidate": "blank_low_diversity",
+  "selected_candidate_config_sha256": "5c666020f9525cdc385da1047cca8b9cabf69f90f84bf76b3ab3d990fac4cdba",
+  "status": "frozen_validation_only",
+  "submitted_seeds": [
+    1000,
+    1001,
+    1002
+  ],
+  "test_data_used_for_fit_or_selection": false,
+  "test_prediction_array_requested": false
+}
