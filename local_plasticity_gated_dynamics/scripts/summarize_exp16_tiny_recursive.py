@@ -211,6 +211,19 @@ def publish_snapshot(
     comparisons = selected_raw.loc[selected_raw["stage"].eq("comparison")].copy()
     if not comparisons.empty:
         comparisons = comparisons.sort_values("seed")
+    if aggregates.empty or "fixture_only" not in aggregates:
+        data_scope = "no_complete_scored_attempts"
+    else:
+        fixture_flags = aggregates["fixture_only"].astype(str).str.lower().eq("true")
+        if bool(fixture_flags.all()):
+            data_scope = "synthetic_fixture_not_scientific"
+        elif bool((~fixture_flags).all()):
+            data_scope = "public_non_ood_sudoku_v2"
+        else:
+            data_scope = "mixed_fixture_and_public_ineligible"
+    selected_runs_clean = bool(
+        selected_manifest["git_dirty"].astype(str).str.lower().eq("false").all()
+    )
 
     condition_rows: list[dict[str, object]] = []
     for condition in CONDITIONS:
@@ -344,6 +357,8 @@ def publish_snapshot(
         frame["run_manifest_sha256"] = manifest_sha256
         frame["registered_config_sha256_values"] = config_hashes
         frame["publisher_scope"] = "pilot_only_formal_promotion_disabled"
+        frame["data_scope"] = data_scope
+        frame["all_selected_runs_clean"] = selected_runs_clean
     condition_summary.to_csv(paths["conditions"], index=False, lineterminator="\n")
     comparison_summary.to_csv(paths["comparison"], index=False, lineterminator="\n")
     comparison_text = (
@@ -357,6 +372,23 @@ def publish_snapshot(
             f"Conclusion: **{comparison_summary.iloc[0]['conclusion']}**."
         )
     )
+    if data_scope == "synthetic_fixture_not_scientific":
+        data_scope_text = (
+            "Selected runs use the auditable synthetic Sudoku fixture; this is "
+            "a smoke check, not public/real-task evidence."
+        )
+    elif data_scope == "public_non_ood_sudoku_v2":
+        data_scope_text = (
+            "Selected runs use the public Sudoku V2 non-OOD panel; this is not "
+            "Sudoku-Extreme or an OOD generalization test."
+        )
+    elif data_scope == "mixed_fixture_and_public_ineligible":
+        data_scope_text = (
+            "Selected runs mix synthetic and public panels, so the snapshot is "
+            "descriptive-only and ineligible for comparison claims."
+        )
+    else:
+        data_scope_text = "No complete scored attempt was available."
     paths["report"].write_text(
         "\n".join(
             [
@@ -370,7 +402,9 @@ def publish_snapshot(
                 "",
                 "This publisher is intentionally pilot-only: formal promotion is disabled "
                 "until a canonical all-attempt inventory and raw task-level recomputation "
-                "are implemented. The public Sudoku V2 test panel is non-OOD.",
+                f"are implemented. {data_scope_text}",
+                "",
+                f"All selected runs clean: `{selected_runs_clean}`.",
                 "",
                 f"Raw SHA-256: `{raw_sha256}`; run-manifest SHA-256: "
                 f"`{manifest_sha256}`.",
@@ -410,6 +444,15 @@ def load_published_snapshot(
             "pilot_only_formal_promotion_disabled"
         }:
             raise ValueError(f"Exp16 {name} publisher scope is invalid")
+        if not set(frame["data_scope"].astype(str)).issubset(
+            {
+                "synthetic_fixture_not_scientific",
+                "public_non_ood_sudoku_v2",
+                "mixed_fixture_and_public_ineligible",
+                "no_complete_scored_attempts",
+            }
+        ):
+            raise ValueError(f"Exp16 {name} data scope is invalid")
     return raw, conditions, comparison, manifest
 
 

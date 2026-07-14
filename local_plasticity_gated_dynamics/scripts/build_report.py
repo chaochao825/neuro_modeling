@@ -1765,8 +1765,7 @@ def _exp15_sudoku_report_lines(results_root: Path) -> list[str]:
         or not sudoku_manifest["status"].eq("complete").all()
         or not sudoku_manifest["git_dirty"].eq(False).all()  # noqa: E712
         or not (
-            sudoku_manifest["published_raw_sha256"]
-            == sudoku_manifest["metrics_sha256"]
+            sudoku_manifest["published_raw_sha256"] == sudoku_manifest["metrics_sha256"]
         ).all()
     ):
         raise ValueError("exp15 Sudoku run-manifest gates are invalid")
@@ -1801,6 +1800,114 @@ def _exp15_sudoku_report_lines(results_root: Path) -> list[str]:
         "",
         "Both rows remain **inconclusive** for the repository's mechanism "
         "claims despite the engineering utility of bounded search.",
+    ]
+    return lines
+
+
+def _exp16_pilot_report_lines(results_root: Path) -> list[str]:
+    """Render the fixed clean Exp16 smoke snapshot without adding a claim row."""
+
+    prefix = "exp16_tiny_recursive_smoke_3seed"
+    if not (results_root / f"{prefix}_conditions.csv").is_file():
+        return []
+    from scripts.summarize_exp16_tiny_recursive import load_published_snapshot
+
+    _raw, conditions, comparison, manifest = load_published_snapshot(
+        results_root, prefix=prefix
+    )
+    if (
+        set(manifest["seed"].astype(int)) != {0, 1, 2}
+        or set(manifest["profile"].astype(str)) != {"smoke"}
+        or not manifest["run_status"].eq("complete").all()
+        or manifest["condition_failures"].astype(int).ne(0).any()
+        or manifest["condition_invalid"].astype(int).ne(0).any()
+        or set(manifest["git_commit"].astype(str))
+        != {"e1f80c74e3a29e4fec7f0cdca9e9c725e784d63c"}
+        or manifest["git_dirty"]
+        .map(lambda value: _strict_published_bool(value, label="Exp16 git_dirty"))
+        .any()
+        or not manifest["selected_for_descriptive_summary"]
+        .map(
+            lambda value: _strict_published_bool(value, label="Exp16 selected attempt")
+        )
+        .all()
+    ):
+        raise ValueError("Exp16 pilot run inventory is not the reviewed clean snapshot")
+    expected_conditions = {
+        "micro_trm_bptt",
+        "single_state_core_call_matched",
+    }
+    if (
+        set(conditions["condition"].astype(str)) != expected_conditions
+        or set(conditions["n_complete_seeds"].astype(int)) != {3}
+        or set(conditions["n_planned_seeds"].astype(int)) != {3}
+        or set(conditions["n_published_attempts"].astype(int)) != {3}
+        or set(conditions["conclusion"].astype(str)) != {"inconclusive"}
+        or set(conditions["data_scope"].astype(str))
+        != {"synthetic_fixture_not_scientific"}
+        or not conditions["all_selected_runs_clean"]
+        .map(lambda value: _strict_published_bool(value, label="Exp16 clean-run gate"))
+        .all()
+    ):
+        raise ValueError("Exp16 pilot condition table fails its scoped gates")
+    if len(comparison) != 1:
+        raise ValueError("Exp16 pilot requires one paired comparison")
+    paired = comparison.iloc[0]
+    if (
+        str(paired["comparison"]) != "micro_trm_minus_single_state_core_call_matched"
+        or int(paired["n_complete_seeds"]) != 3
+        or not _strict_published_bool(
+            paired["all_matching_gates_passed"], label="Exp16 matching gate"
+        )
+        or _strict_published_bool(
+            paired["formal_claim_eligible"], label="Exp16 formal eligibility"
+        )
+        or str(paired["conclusion"]) != "inconclusive"
+        or str(paired["data_scope"]) != "synthetic_fixture_not_scientific"
+    ):
+        raise ValueError("Exp16 pilot comparison fails its scoped gates")
+    labels = {
+        "micro_trm_bptt": "micro-TRM-like two-state",
+        "single_state_core_call_matched": "single-state core-call matched",
+    }
+    lines = [
+        "",
+        "## exp16 micro-TRM-like Sudoku smoke (pilot only)",
+        "",
+        "This is a strict-deterministic, clean-commit engineering smoke on an "
+        "auditable synthetic fixture. It is not an official HRM/TRM "
+        "reproduction, public-task validation, local-learning result, or "
+        "formal claim.",
+        "",
+        "| Condition | Exact accuracy [95% seed-bootstrap CI] | Parameters | Nominal core calls | Conclusion |",
+        "|---|---:|---:|---:|---|",
+    ]
+    for row in conditions.sort_values("condition").to_dict("records"):
+        interval = (
+            f"{100 * float(row['mean_exact_accuracy']):.2f}% "
+            f"[{100 * float(row['seed_bootstrap_ci_low']):.2f}%, "
+            f"{100 * float(row['seed_bootstrap_ci_high']):.2f}%]"
+        )
+        lines.append(
+            f"| {labels[str(row['condition'])]} | {interval} | "
+            f"{int(row['mean_parameter_count'])} | "
+            f"{int(row['mean_nominal_core_calls'])} | "
+            f"**{row['conclusion']}** |"
+        )
+    lines += [
+        "",
+        f"The paired exact-accuracy difference was {float(paired['estimate']):.4f} "
+        f"[{float(paired['seed_bootstrap_ci_low']):.4f}, "
+        f"{float(paired['seed_bootstrap_ci_high']):.4f}] "
+        f"(Wilcoxon p={float(paired['wilcoxon_p']):.4g}). Both models solved "
+        "0/8 held-out fixture puzzles exactly in every seed, so this run "
+        "provides no evidence for a recursive-state advantage.",
+        "",
+        "Trusted scoped raw SHA-256: `"
+        + str(paired["scoped_raw_sha256"])
+        + "`; run-manifest SHA-256: `"
+        + str(paired["run_manifest_sha256"])
+        + "`; clean run commit: `e1f80c74e3a29e4fec7f0cdca9e9c725e784d63c`.",
     ]
     return lines
 
@@ -2544,7 +2651,7 @@ def write_report(
         "",
         "## Compact core run coverage",
         "",
-        "This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--15 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.",
+        "This table covers the compact Exp00--11 run snapshot. Retries and interrupted attempts remain listed here. Exp13--16 use separately validated raw tables and run manifests in their scoped sections below. These are attempt counts, not unique-seed coverage; claim sample sizes use only the eligible formal attempt for each experiment and independent unit.",
         "",
         "| Experiment | Profile | Attempts | Clean complete | Complete with failures | Failed/partial | Planned attempt-cells |",
         "|---|---:|---:|---:|---:|---:|---:|",
@@ -2740,6 +2847,7 @@ def write_report(
         ]
     lines += _exp15_arc_report_lines(results_root)
     lines += _exp15_sudoku_report_lines(results_root)
+    lines += _exp16_pilot_report_lines(results_root)
     lines += [
         "",
         "## Interpretation safeguards",
@@ -2768,6 +2876,7 @@ def write_report(
         "- Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.",
         "- The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.",
         "- Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.",
+        "- Exp16 is an isolated global-BPTT micro-TRM-like smoke baseline. Its synthetic fixture, three seeds, zero exact accuracy, and pilot-only publisher cannot support an HRM/TRM reproduction, computational advantage, local-learning mechanism, or biological claim.",
         "",
         "## External-data status",
         "",
@@ -2785,7 +2894,8 @@ def write_report(
         "- `results/exp14_ibl_multisession_neural_formal_{raw,conditions,comparisons,run_manifest,report}`: hash-bound multi-session neural snapshot and animal-primary inference.",
         "- `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.",
         "- `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, and `results/exp15_arc_matched_formal.pdf`: script-generated data figures when applicable.",
+        "- `results/exp16_tiny_recursive_smoke_3seed_{raw,conditions,comparison,run_manifest,report}`: strict-deterministic, clean-commit, synthetic-fixture smoke snapshot; formal promotion is disabled.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_smoke_3seed.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(

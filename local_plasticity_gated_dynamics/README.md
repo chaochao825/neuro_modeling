@@ -231,6 +231,18 @@ bounded-search condition (up to 256 branches) achieved 100%. Because branch
 search is a distinct mechanism and the Sudoku split is non-OOD, the Sudoku
 mechanism conclusion remains `inconclusive`.
 
+### Current exp16 micro-TRM-like smoke result
+
+On the strict-deterministic synthetic Sudoku smoke (3 clean seeds, 8 held-out
+puzzles per seed), the 11,776-parameter alternating two-state model and its
+single-state nominal-core-call-matched comparator both achieved 0% exact
+accuracy. The paired difference is 0 points (95% seed-bootstrap CI [0, 0],
+Wilcoxon `p=1`). This is a useful execution/provenance check but provides no
+evidence for a recursive-state advantage. The publisher is pilot-only, the
+fixture is not public/real-task evidence, and the result cannot support an
+official HRM/TRM reproduction or any local-learning/biological claim. See the
+[scoped report](results/exp16_tiny_recursive_smoke_3seed_report.md).
+
 ### exp14 multi-session neural status
 
 The exp14 synthetic smoke path is complete and tests nested latent-dimension

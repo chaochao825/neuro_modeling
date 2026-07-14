@@ -107,6 +107,7 @@ def test_exp16_smoke_retains_matched_baseline_receipts_and_test_safety(
     assert "not an official HRM/TRM reproduction" in report
     assert "Conclusion: **inconclusive**" in report
     assert "formal promotion is disabled" in report
+    assert "synthetic Sudoku fixture" in report
     with pytest.raises(FileExistsError, match="publication is immutable"):
         publish_snapshot([run_path], tmp_path, prefix="exp16_test")
     with pytest.raises(FileExistsError, match="figures are immutable"):
