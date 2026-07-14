@@ -1931,6 +1931,292 @@ def _exp16_pilot_report_lines(results_root: Path) -> list[str]:
     return lines
 
 
+def _exp16_retry_report_lines(results_root: Path) -> list[str]:
+    """Render the frozen public-Sudoku retry without promoting a global claim."""
+
+    prefix = "exp16_tiny_recursive_retry_3seed"
+    expected_hashes = {
+        f"{prefix}_conditions.csv": (
+            "15d231d4c9688bb2b0326d609f4b5114f67088c7363c74702a40713c2ba8f65d"
+        ),
+        f"{prefix}_comparison.csv": (
+            "3260696e60bf851f433ab136079217e20c2ce9f3446ab7c6f625e49b53b9fc1c"
+        ),
+        f"{prefix}_raw.csv.gz": (
+            "3271d1710a5d4f8b2fc6597c5fc4c41056fb10e84cb3d136442911fd7fbe0f02"
+        ),
+        f"{prefix}_run_manifest.csv": (
+            "382c8517590ec29aa057468a1ad88faf3661766a5e47370b02d15c15fa6e261f"
+        ),
+        "exp17_wichtounet_3seed_candidates.csv": (
+            "5d30f1cd5b7360536ebf8bf1ad66050461a09e73bb38751b14f01a951d366cc3"
+        ),
+        "exp17_wichtounet_3seed_freeze_decision.json": (
+            "fd90953c0f656ce0509832c79e804cc13dba92e1a6ba8ad9b3ac16c1547f5dfc"
+        ),
+        "exp17_wichtounet_3seed_run_manifest.csv": (
+            "5962627d0c513906d663eadc882b04fd86d28bf436c01c9708328bd94d299696"
+        ),
+    }
+    present = {name for name in expected_hashes if (results_root / name).is_file()}
+    if not present:
+        return []
+    if present != set(expected_hashes):
+        missing = sorted(set(expected_hashes) - present)
+        raise ValueError(f"Exp16 retry artifact set is incomplete: {missing}")
+    for name, expected in expected_hashes.items():
+        path = results_root / name
+        if not path.is_file() or _file_sha256(path) != expected:
+            raise ValueError(f"Exp16 retry artifact differs from snapshot: {name}")
+
+    project_root = results_root.resolve().parent
+    config_path = (
+        project_root
+        / "configs"
+        / "formal"
+        / "exp16_tiny_recursive_sudoku_retry_pilot.json"
+    )
+    expected_config_sha256 = (
+        "9a388149ff253cad844853e11262ff33c3a194e4667a86d171930b79817bce0a"
+    )
+    if (
+        not config_path.is_file()
+        or _file_sha256(config_path) != expected_config_sha256
+    ):
+        raise ValueError("Exp16 retry config differs from reviewed snapshot")
+    retry_config = json.loads(config_path.read_text(encoding="utf-8"))
+
+    from experiments.exp16_tiny_recursive_sudoku import (
+        calibration_candidate_sha256,
+        registered_config_sha256,
+    )
+    from scripts.summarize_exp16_tiny_recursive import load_published_snapshot
+
+    raw, conditions, comparison, manifest = load_published_snapshot(
+        results_root, prefix=prefix
+    )
+    decision_path = results_root / "exp17_wichtounet_3seed_freeze_decision.json"
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    freeze = retry_config.get("calibration_freeze")
+    semantic_config_sha256 = registered_config_sha256(retry_config)
+    if (
+        not isinstance(freeze, dict)
+        or retry_config.get("evidence_stage") != "retry_pilot"
+        or retry_config.get("require_calibration_freeze") is not True
+        or retry_config.get("seeds") != [3000, 3001, 3002]
+        or freeze.get("freeze_decision_path")
+        != "results/exp17_wichtounet_3seed_freeze_decision.json"
+        or freeze.get("freeze_decision_sha256") != _file_sha256(decision_path)
+        or freeze.get("selected_candidate") != decision.get("selected_candidate")
+        or freeze.get("selected_candidate_config_sha256")
+        != decision.get("selected_candidate_config_sha256")
+        or calibration_candidate_sha256(retry_config)
+        != freeze.get("selected_candidate_config_sha256")
+        or freeze.get("selection_seeds") != decision.get("submitted_seeds")
+        or not set(retry_config["seeds"]).isdisjoint(freeze["selection_seeds"])
+    ):
+        raise ValueError("Exp16 retry config is not bound to the Exp17 freeze")
+    published_config_hashes = {
+        *manifest["registered_config_sha256"].dropna().astype(str),
+        *conditions["registered_config_sha256_values"].dropna().astype(str),
+        *comparison["registered_config_sha256_values"].dropna().astype(str),
+    }
+    if published_config_hashes != {semantic_config_sha256}:
+        raise ValueError("Exp16 retry runs do not match the tracked confirmation config")
+    if (
+        set(manifest["seed"].astype(int)) != {3000, 3001, 3002}
+        or set(manifest["profile"].astype(str)) != {"formal"}
+        or not manifest["run_status"].eq("complete").all()
+        or manifest["condition_failures"].astype(int).ne(0).any()
+        or manifest["condition_invalid"].astype(int).ne(0).any()
+        or set(manifest["git_commit"].astype(str))
+        != {"88bced82346ff53c3b35b77512e757acead7f34e"}
+        or manifest["git_dirty"]
+        .map(lambda value: _strict_published_bool(value, label="Exp16 retry git"))
+        .any()
+        or not manifest["selected_for_descriptive_summary"]
+        .map(
+            lambda value: _strict_published_bool(
+                value, label="Exp16 retry selected attempt"
+            )
+        )
+        .all()
+    ):
+        raise ValueError("Exp16 retry inventory is not the reviewed clean snapshot")
+    freeze_columns = {
+        "calibration_freeze_receipt_sha256",
+        "calibration_freeze_required",
+        "calibration_freeze_validated",
+        "calibration_freeze_decision_sha256",
+        "calibration_freeze_selected_candidate",
+        "calibration_freeze_candidate_config_sha256",
+        "calibration_freeze_selection_seeds",
+        "calibration_freeze_code_sha256",
+        "calibration_freeze_environment_sha256",
+    }
+    if not freeze_columns.issubset(manifest):
+        raise ValueError("Exp16 retry manifest omits per-seed freeze receipts")
+    receipt_shas = manifest["calibration_freeze_receipt_sha256"].astype(str)
+    receipt_selection_seeds = manifest["calibration_freeze_selection_seeds"].map(
+        json.loads
+    )
+    if (
+        not receipt_shas.str.fullmatch(r"[0-9a-f]{64}").all()
+        or not manifest["calibration_freeze_required"]
+        .map(
+            lambda value: _strict_published_bool(
+                value, label="Exp16 retry freeze-required receipt"
+            )
+        )
+        .all()
+        or not manifest["calibration_freeze_validated"]
+        .map(
+            lambda value: _strict_published_bool(
+                value, label="Exp16 retry freeze-validated receipt"
+            )
+        )
+        .all()
+        or set(manifest["calibration_freeze_decision_sha256"].astype(str))
+        != {str(freeze["freeze_decision_sha256"])}
+        or set(manifest["calibration_freeze_selected_candidate"].astype(str))
+        != {str(freeze["selected_candidate"])}
+        or set(manifest["calibration_freeze_candidate_config_sha256"].astype(str))
+        != {str(freeze["selected_candidate_config_sha256"])}
+        or not receipt_selection_seeds.map(
+            lambda values: values == freeze["selection_seeds"]
+        ).all()
+        or set(manifest["calibration_freeze_code_sha256"].astype(str))
+        != {str(decision["calibration_code_sha256"])}
+        or set(manifest["calibration_freeze_environment_sha256"].astype(str))
+        != {str(decision["calibration_environment_sha256"])}
+    ):
+        raise ValueError("Exp16 retry per-seed freeze receipts fail their binding")
+    if (
+        set(conditions["condition"].astype(str))
+        != {"micro_trm_bptt", "single_state_core_call_matched"}
+        or set(conditions["n_complete_seeds"].astype(int)) != {3}
+        or set(conditions["data_scope"].astype(str))
+        != {"public_non_ood_sudoku_v2"}
+        or set(conditions["conclusion"].astype(str)) != {"inconclusive"}
+        or not conditions["all_selected_runs_clean"]
+        .map(
+            lambda value: _strict_published_bool(
+                value, label="Exp16 retry clean-run gate"
+            )
+        )
+        .all()
+    ):
+        raise ValueError("Exp16 retry condition table fails its scoped gates")
+    if len(comparison) != 1:
+        raise ValueError("Exp16 retry requires one paired comparison")
+    paired = comparison.iloc[0]
+    if (
+        str(paired["comparison"])
+        != "micro_trm_minus_single_state_core_call_matched"
+        or int(paired["n_complete_seeds"]) != 3
+        or int(paired["blank_n_complete_seeds"]) != 3
+        or not _strict_published_bool(
+            paired["all_matching_gates_passed"], label="Exp16 retry matching gate"
+        )
+        or _strict_published_bool(
+            paired["formal_claim_eligible"], label="Exp16 retry formal eligibility"
+        )
+        or str(paired["conclusion"]) != "inconclusive"
+        or str(paired["holm_family"]) != "exact_and_blank_accuracy_endpoints"
+    ):
+        raise ValueError("Exp16 retry comparison fails its scoped gates")
+
+    aggregates = raw.loc[raw["stage"].eq("aggregate")]
+    blank_by_seed = aggregates.pivot(
+        index="seed", columns="condition", values="blank_cell_accuracy"
+    )
+    seed_differences = (
+        blank_by_seed["micro_trm_bptt"]
+        - blank_by_seed["single_state_core_call_matched"]
+    )
+    if len(seed_differences) != 3 or not seed_differences.lt(0.0).all():
+        raise ValueError("Exp16 retry directional seed receipt differs from snapshot")
+
+    candidates = pd.read_csv(results_root / "exp17_wichtounet_3seed_candidates.csv")
+    selected = candidates.loc[candidates["candidate"].eq("blank_low_diversity")]
+    if (
+        decision.get("status") != "frozen_validation_only"
+        or decision.get("selected_candidate") != "blank_low_diversity"
+        or decision.get("submitted_seeds") != [1000, 1001, 1002]
+        or decision.get("all_freeze_gates_passed") is not True
+        or decision.get("confirmation_test_still_required") is not True
+        or decision.get("test_data_used_for_fit_or_selection") is not False
+        or decision.get("test_prediction_array_requested") is not False
+        or decision.get("public_test_prediction_adapter_called") is not False
+        or decision.get("hidden_target_scorer_called") is not False
+        or len(selected) != 1
+        or str(selected.iloc[0]["candidate_config_sha256"])
+        != str(decision.get("selected_candidate_config_sha256"))
+        or not _strict_published_bool(
+            selected.iloc[0]["complete_on_all_submitted_seeds"],
+            label="Exp17 selected-candidate completeness",
+        )
+        or not np.isclose(
+            float(selected.iloc[0]["mean_validation_blank_cell_accuracy"]),
+            0.15208428755540823,
+        )
+    ):
+        raise ValueError("Exp17 calibration freeze differs from reviewed snapshot")
+
+    labels = {
+        "micro_trm_bptt": "micro-TRM-like two-state",
+        "single_state_core_call_matched": "single-state core-call matched",
+    }
+    lines = [
+        "",
+        "## exp16 frozen public-Sudoku retry (3-seed pilot)",
+        "",
+        "Exp17 selected `blank_low_diversity` using train/inner-validation only "
+        "on seeds 1000--1002 (mean validation blank-cell accuracy 15.21%). "
+        "The candidate was then frozen before the independent 28-task public "
+        "Sudoku V2 test confirmation on seeds 3000--3002.",
+        "",
+        "| Condition | Exact accuracy | Blank-cell accuracy [95% seed-bootstrap CI] | Conclusion |",
+        "|---|---:|---:|---|",
+    ]
+    for row in conditions.sort_values("condition").to_dict("records"):
+        blank_interval = (
+            f"{100 * float(row['mean_blank_cell_accuracy']):.2f}% "
+            f"[{100 * float(row['blank_seed_bootstrap_ci_low']):.2f}%, "
+            f"{100 * float(row['blank_seed_bootstrap_ci_high']):.2f}%]"
+        )
+        lines.append(
+            f"| {labels[str(row['condition'])]} | "
+            f"{100 * float(row['mean_exact_accuracy']):.2f}% | "
+            f"{blank_interval} | **{row['conclusion']}** |"
+        )
+    lines += [
+        "",
+        f"The paired micro-minus-single blank-cell difference was "
+        f"{100 * float(paired['blank_accuracy_estimate']):.2f} percentage points "
+        f"[{100 * float(paired['blank_seed_bootstrap_ci_low']):.2f}, "
+        f"{100 * float(paired['blank_seed_bootstrap_ci_high']):.2f}]; raw "
+        f"Wilcoxon p={float(paired['blank_wilcoxon_p']):.3g}, joint-Holm "
+        f"p={float(paired['blank_wilcoxon_p_holm']):.3g}. All three seed "
+        "differences were negative and both conditions had 0% exact and valid "
+        "solution rates. The observed direction therefore opposes a tiny "
+        "recursive-state advantage, but the registered conclusion remains "
+        "**inconclusive** because this is a three-seed, non-OOD, pilot-only "
+        "publisher with formal promotion disabled.",
+        "",
+        "This independently written BPTT baseline is not an official HRM/TRM "
+        "reproduction and cannot support the local-learning or biological claims.",
+        "",
+        "Trusted confirmation raw SHA-256: `"
+        + str(paired["scoped_raw_sha256"])
+        + "`; run-manifest SHA-256: `"
+        + str(paired["run_manifest_sha256"])
+        + "`; freeze-decision SHA-256: "
+        "`fd90953c0f656ce0509832c79e804cc13dba92e1a6ba8ad9b3ac16c1547f5dfc`.",
+    ]
+    return lines
+
+
 def _portable_run_path(value: object) -> object:
     """Remove machine-specific prefixes from a published run path.
 
@@ -2867,6 +3153,7 @@ def write_report(
     lines += _exp15_arc_report_lines(results_root)
     lines += _exp15_sudoku_report_lines(results_root)
     lines += _exp16_pilot_report_lines(results_root)
+    lines += _exp16_retry_report_lines(results_root)
     lines += [
         "",
         "## Interpretation safeguards",
@@ -2895,7 +3182,7 @@ def write_report(
         "- Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.",
         "- The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.",
         "- Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.",
-        "- Exp16 is an isolated global-BPTT micro-TRM-like smoke baseline. Its synthetic fixture, three seeds, zero exact accuracy, and pilot-only publisher cannot support an HRM/TRM reproduction, computational advantage, local-learning mechanism, or biological claim.",
+        "- Exp16 is an isolated global-BPTT micro-TRM-like baseline. Its frozen public-Sudoku retry has only three independent confirmation seeds, zero exact accuracy, and a pilot-only publisher; the negative blank-cell direction opposes an advantage descriptively but remains formally inconclusive and cannot support an HRM/TRM reproduction, local-learning mechanism, or biological claim.",
         "",
         "## External-data status",
         "",
@@ -2914,7 +3201,8 @@ def write_report(
         "- `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.",
         "- `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.",
         "- `results/exp16_tiny_recursive_smoke_3seed_{raw,conditions,comparison,run_manifest,report}`: strict-deterministic, clean-commit, synthetic-fixture smoke snapshot; formal promotion is disabled.",
-        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_smoke_3seed.pdf`: script-generated data figures when applicable.",
+        "- `results/exp17_wichtounet_3seed_{candidates,freeze_decision,run_manifest,report}` and `results/exp16_tiny_recursive_retry_3seed_{raw,conditions,comparison,run_manifest,report}`: validation-only freeze receipts and the independent three-seed public-Sudoku confirmation snapshot.",
+        "- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_{smoke,retry}_3seed.pdf`: script-generated data figures when applicable.",
         "",
     ]
     (results_root / "report.md").write_text(

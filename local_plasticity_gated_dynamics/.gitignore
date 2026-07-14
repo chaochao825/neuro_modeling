@@ -41,6 +41,8 @@ results/*.pdf
 !results/exp14_ibl_multisession_neural_formal.pdf
 !results/exp15_arc_matched_formal.png
 !results/exp15_arc_matched_formal.pdf
+!results/exp16_tiny_recursive_retry_3seed.png
+!results/exp16_tiny_recursive_retry_3seed.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

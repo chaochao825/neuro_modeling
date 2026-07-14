@@ -140,6 +140,11 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
     environment = _read_json(run_dir / "environment.json")
     git = environment.get("git") if isinstance(environment.get("git"), dict) else {}
     fit_receipts_path = run_dir / "fit_receipts.json"
+    freeze_receipt_path = run_dir / "calibration_freeze_receipt.json"
+    freeze_receipt = (
+        _read_json(freeze_receipt_path) if freeze_receipt_path.is_file() else {}
+    )
+    selection_seeds = freeze_receipt.get("selection_seeds")
     receipt = {
         "run_id": run_id,
         "seed": int(config["seed"]),
@@ -154,6 +159,31 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
         "registered_config_sha256": config.get("registered_config_sha256"),
         "fit_receipts_sha256": (
             _sha256(fit_receipts_path) if fit_receipts_path.is_file() else None
+        ),
+        "calibration_freeze_receipt_sha256": (
+            _sha256(freeze_receipt_path) if freeze_receipt_path.is_file() else None
+        ),
+        "calibration_freeze_required": freeze_receipt.get("required"),
+        "calibration_freeze_validated": freeze_receipt.get("validated"),
+        "calibration_freeze_decision_sha256": freeze_receipt.get(
+            "freeze_decision_sha256"
+        ),
+        "calibration_freeze_selected_candidate": freeze_receipt.get(
+            "selected_candidate"
+        ),
+        "calibration_freeze_candidate_config_sha256": freeze_receipt.get(
+            "selected_candidate_config_sha256"
+        ),
+        "calibration_freeze_selection_seeds": (
+            json.dumps(selection_seeds, separators=(",", ":"))
+            if isinstance(selection_seeds, list)
+            else None
+        ),
+        "calibration_freeze_code_sha256": freeze_receipt.get(
+            "calibration_code_sha256"
+        ),
+        "calibration_freeze_environment_sha256": freeze_receipt.get(
+            "calibration_environment_sha256"
         ),
         "git_commit": git.get("commit"),
         "git_dirty": git.get("dirty"),

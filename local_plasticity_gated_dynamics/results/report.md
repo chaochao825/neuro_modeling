@@ -412,6 +412,21 @@ The paired exact-accuracy difference was 0.0000 [0.0000, 0.0000] (Wilcoxon p=1).
 
 Trusted scoped raw SHA-256: `fd72d108ee2bba5a0dff94c0fd3dbd64de43b56293b5b5d4b06bf2676e409c5e`; run-manifest SHA-256: `9db321bb555fc61f7fac27121de695cca3d97793c5f64d6708dd180155d7131a`; clean run commit: `e1f80c74e3a29e4fec7f0cdca9e9c725e784d63c`.
 
+## exp16 frozen public-Sudoku retry (3-seed pilot)
+
+Exp17 selected `blank_low_diversity` using train/inner-validation only on seeds 1000--1002 (mean validation blank-cell accuracy 15.21%). The candidate was then frozen before the independent 28-task public Sudoku V2 test confirmation on seeds 3000--3002.
+
+| Condition | Exact accuracy | Blank-cell accuracy [95% seed-bootstrap CI] | Conclusion |
+|---|---:|---:|---|
+| micro-TRM-like two-state | 0.00% | 12.32% [11.52%, 13.29%] | **inconclusive** |
+| single-state core-call matched | 0.00% | 13.25% [12.49%, 13.69%] | **inconclusive** |
+
+The paired micro-minus-single blank-cell difference was -0.93 percentage points [-2.17, -0.28]; raw Wilcoxon p=0.25, joint-Holm p=0.5. All three seed differences were negative and both conditions had 0% exact and valid solution rates. The observed direction therefore opposes a tiny recursive-state advantage, but the registered conclusion remains **inconclusive** because this is a three-seed, non-OOD, pilot-only publisher with formal promotion disabled.
+
+This independently written BPTT baseline is not an official HRM/TRM reproduction and cannot support the local-learning or biological claims.
+
+Trusted confirmation raw SHA-256: `3271d1710a5d4f8b2fc6597c5fc4c41056fb10e84cb3d136442911fd7fbe0f02`; run-manifest SHA-256: `382c8517590ec29aa057468a1ad88faf3661766a5e47370b02d15c15fa6e261f`; freeze-decision SHA-256: `fd90953c0f656ce0509832c79e804cc13dba92e1a6ba8ad9b3ac16c1547f5dfc`.
+
 ## Interpretation safeguards
 
 - Tuned BPTT rate-RNN and GRU baselines are isolated; local-learning models do not import autograd/optimizers and cannot load baseline checkpoints.
@@ -438,7 +453,7 @@ Trusted scoped raw SHA-256: `fd72d108ee2bba5a0dff94c0fd3dbd64de43b56293b5b5d4b06
 - Exp13 ARC, Maze, and Sudoku panels are public structured-task hybrid proposal selectors over shared proposal libraries. Their HRM/CTM-inspired mechanisms, selector accuracy, and candidate oracle cannot establish shared neural dynamics, a biological mechanism, or end-to-end computational efficiency.
 - The exp13 Sudoku test split is `non_ood`; every Sudoku comparison therefore remains core-ineligible/inconclusive even when its numerical non-inferiority margin is significant.
 - Exp15 ARC compares slow/fast family belief with a flat selector on identical candidates and matched charged abstract compute. The proxy is not FLOPs/time/energy, and the 1.2531% candidate coverage fails the 90% claim gate; the zero paired gain is inconclusive rather than support.
-- Exp16 is an isolated global-BPTT micro-TRM-like smoke baseline. Its synthetic fixture, three seeds, zero exact accuracy, and pilot-only publisher cannot support an HRM/TRM reproduction, computational advantage, local-learning mechanism, or biological claim.
+- Exp16 is an isolated global-BPTT micro-TRM-like baseline. Its frozen public-Sudoku retry has only three independent confirmation seeds, zero exact accuracy, and a pilot-only publisher; the negative blank-cell direction opposes an advantage descriptively but remains formally inconclusive and cannot support an HRM/TRM reproduction, local-learning mechanism, or biological claim.
 
 ## External-data status
 
@@ -457,4 +472,5 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/exp15_arc_matched_formal_{raw,conditions,comparison,run_manifest,report}`: verified-source ARC task rows, registered paired task-primary comparison, and immutable publication bindings.
 - `results/exp15_formal_{summary,run_manifest,report}`: reviewed legacy task-specialization snapshot containing the report-only Sudoku engineering audit.
 - `results/exp16_tiny_recursive_smoke_3seed_{raw,conditions,comparison,run_manifest,report}`: strict-deterministic, clean-commit, synthetic-fixture smoke snapshot; formal promotion is disabled.
-- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_smoke_3seed.pdf`: script-generated data figures when applicable.
+- `results/exp17_wichtounet_3seed_{candidates,freeze_decision,run_manifest,report}` and `results/exp16_tiny_recursive_retry_3seed_{raw,conditions,comparison,run_manifest,report}`: validation-only freeze receipts and the independent three-seed public-Sudoku confirmation snapshot.
+- `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_{smoke,retry}_3seed.pdf`: script-generated data figures when applicable.

@@ -270,6 +270,21 @@ checkpoint-selection receipts because exact-board accuracy alone has a severe
 floor. It is additive: the immutable 3-seed `exp16` snapshot and its default
 blank-only training behavior remain unchanged.
 
+The leakage-audited public Sudoku V2 retry first calibrated four candidates on
+train/inner-validation only (seeds 1000--1002), then froze
+`blank_low_diversity` before opening the 28-task test capability. On independent
+confirmation seeds 3000--3002, micro-TRM-like and matched single-state exact
+accuracy were both 0%. Their blank-cell accuracies were 12.32% and 13.25%,
+respectively; the paired micro-minus-single difference was -0.93 percentage
+points (95% seed-bootstrap CI -2.17 to -0.28; raw Wilcoxon `p=0.25`, joint-Holm
+`p=0.50`). All three seed differences were negative. This direction opposes a
+tiny recursive-state advantage, while the registered conclusion remains
+`inconclusive` because this is a three-seed, non-OOD, pilot-only publisher with
+formal promotion disabled. See the
+[calibration report](results/exp17_wichtounet_3seed_report.md),
+[confirmation report](results/exp16_tiny_recursive_retry_3seed_report.md), and
+[continuous-endpoint figure](results/exp16_tiny_recursive_retry_3seed.png).
+
 ### exp14 multi-session neural status
 
 The exp14 synthetic smoke path is complete and tests nested latent-dimension
