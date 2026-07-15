@@ -305,6 +305,24 @@ formal promotion disabled. See the
 [confirmation report](results/exp16_tiny_recursive_retry_3seed_report.md), and
 [continuous-endpoint figure](results/exp16_tiny_recursive_retry_3seed.png).
 
+### Current exp18 real ARC canaries
+
+The frozen seed-3000 canary was run separately on 20 ARC-AGI-1 and 20
+ARC-AGI-2 public-evaluation tasks after 40-task pretraining and 10-task public-
+demo validation. Every planned task completed; query targets were available
+only to the attempt-aware scorer. On both datasets, recursive demo-TTA,
+recursive no-TTA, and the matched single-state baseline achieved 0% pass@1 and
+0% pass@2. ARC-AGI-1 shape exact was 5% for all three conditions. On
+ARC-AGI-2, recursive and no-TTA shape exact was 5% (best-cell diagnostic 2.9%)
+while single-state shape exact was 0%. The registered recursive-minus-single
+pass@2 difference is therefore exactly zero and `inconclusive`; the identical
+recursive TTA/no-TTA endpoint also shows that this one-epoch TTA budget did not
+produce a behavioral gain. These are real-data scale/protocol canaries, not an
+official 7M TRM reproduction or a competitive ARC result. See the separate
+[ARC-AGI-1 report](results/exp18_arc1_canary_seed3000_20task_report.md),
+[ARC-AGI-2 report](results/exp18_arc2_canary_seed3000_20task_report.md), and
+[ARC-AGI-2 figure](results/exp18_arc2_canary_seed3000_20task.png).
+
 ### exp14 multi-session neural status
 
 The exp14 synthetic smoke path is complete and tests nested latent-dimension
