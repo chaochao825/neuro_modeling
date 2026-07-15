@@ -36,7 +36,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp16_*.py` are executable entry points as implementation advances. `exp07`
+`exp18_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -120,6 +120,15 @@ $exp17Runs = & .\.venv\Scripts\python.exe `
 $exp17RunArgs = foreach ($run in $exp17Runs) { "--run-dir"; $run.Trim() }
 .\.venv\Scripts\python.exe scripts\summarize_exp17_tiny_recursive_calibration.py `
   @exp17RunArgs --output-dir results --prefix exp17_tiny_recursive_calibration
+# Exp18 directly generates ARC grids. It is a demo-only-TTA BPTT baseline,
+# not an official 7M TRM reproduction and not a local-learning model:
+$exp18Runs = & .\.venv\Scripts\python.exe `
+  experiments\exp18_arc_recursive_baseline.py `
+  --config configs\smoke\exp18_arc_recursive_arc.json --results-root results
+.\.venv\Scripts\python.exe scripts\summarize_exp18_arc_recursive.py `
+  --runs $exp18Runs --results-root results --prefix exp18_arc_recursive_smoke
+.\.venv\Scripts\python.exe figures\exp18_arc_recursive_plot.py `
+  --results-root results --prefix exp18_arc_recursive_smoke
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 
@@ -208,6 +217,17 @@ layers:
    row, and leaves the claim `inconclusive`. A frozen candidate still requires a
    separate one-shot confirmation panel with matching source, software, and
    candidate hashes.
+9. `exp18` removes the Exp13/15 candidate-library ceiling by decoding ARC grids
+   and output shape directly. It implements reversible D4/color augmentation,
+   the public TRM latent-then-answer update order, detached outer refinement,
+   demonstration-only task adaptation, inverse-augmentation voting, and the
+   official two-attempt task scorer. Its recursive and single-state conditions
+   share initialization, training order, parameters, optimizer budget, and
+   nominal core calls. It remains an independent micro-TRM-like BPTT baseline:
+   it omits official EOS/StableMax/RoPE/EMA/halt details and the 7M, 4xH100
+   training scale. The real-data canary and unexecuted full configuration must
+   not be mixed with official TRM or private-leaderboard scores. See
+   `docs/arc_recursive_baseline_contract_zh.md`.
 
 ### Current exp13 public ARC result
 
