@@ -149,6 +149,16 @@ committed configs and scripts regenerate that layout.
   smoke result nor a future Sudoku advantage can initialize a local-learning
   model or count as evidence for a biological hierarchy, three-factor
   plasticity, or shared neural dynamics.
+- `exp18` is the first proposal-free ARC grid decoder in this repository, but
+  it is still a reduced BPTT baseline. The smoke run only checks execution;
+  the 20-task ARC-AGI-1 canary is underpowered and cannot promote a claim, and
+  the registered 3-seed/full-panel configuration is not evidence until it has
+  actually completed. The implementation lacks official TRM EOS cropping,
+  RoPE, StableMax, EMA, halt/Q supervision, random translations, 1000 task
+  augmentations, and official-scale training. Its honest `demo_tta` score must
+  remain separate from transductive TRM results, API ensembles, and private
+  ARC leaderboard scores. ARC accuracy cannot substitute for neural recording
+  evidence or establish local three-factor plasticity.
 - The legacy `exp06` neural result remains a one-session Gaussian-LDS pilot.
   Shared dynamics retains only about 25--29% of the full-model likelihood gain,
   far below the 90% criterion; pre-stim future-covariate and true-boundary-reset

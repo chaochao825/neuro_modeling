@@ -1,0 +1,64 @@
+{
+  "profile": "smoke",
+  "family": "arc",
+  "seeds": [0],
+  "conditions": [
+    "trm_demo_tta_aug_vote",
+    "trm_no_tta_aug_vote",
+    "trm_demo_tta_no_aug",
+    "single_state_demo_tta_aug_vote"
+  ],
+  "protocol": "demo_tta",
+  "formal_claim_promotion_enabled": false,
+  "validation_fraction": 0.25,
+  "inner_split_seed": 1729,
+  "train_panel_seed": 2718,
+  "validation_panel_seed": 3141,
+  "test_panel_seed": 1618,
+  "train_augmentations_per_pair": 1,
+  "validation_augmentations_per_pair": 0,
+  "n_bootstrap": 200,
+  "save_checkpoints": true,
+  "synthetic_fixture": {
+    "seed": 1729,
+    "n_train_tasks": 8,
+    "n_test_tasks": 3
+  },
+  "data": {
+    "attempt_aware_scoring": true
+  },
+  "model": {
+    "max_grid_size": 8,
+    "hidden_size": 16,
+    "num_heads": 2,
+    "layers": 1,
+    "expansion": 2.0,
+    "high_cycles": 1,
+    "low_cycles": 1,
+    "supervision_steps": 2
+  },
+  "training": {
+    "epochs": 2,
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "puzzle_learning_rate": 0.002,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "device": "cpu"
+  },
+  "test_time": {
+    "adaptation_epochs": 1,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 8,
+    "support_augmentations": 1,
+    "inference_augmentations": 2,
+    "scope": "full"
+  },
+  "registered_comparison": {
+    "name": "recursive_minus_single_state_demo_tta",
+    "candidate": "trm_demo_tta_aug_vote",
+    "reference": "single_state_demo_tta_aug_vote"
+  }
+}

@@ -313,6 +313,11 @@ def _load_dataset(
                 dataset_name="synthetic_arc_fixture",
                 dataset_revision="not_scientific",
                 namespace_task_ids=True,
+                attempt_aware_scoring=bool(
+                    dict(config.get("data", {})).get(
+                        "attempt_aware_scoring", False
+                    )
+                ),
             )
         elif family == "maze":
             path = _write_maze_fixture(fixture_root, fixture)
@@ -407,6 +412,7 @@ def _load_dataset(
             dataset_revision=str(data.get("revision", "unspecified")),
             exclude_relative_paths=tuple(data.get("exclude_relative_paths", ())),
             namespace_task_ids=True,
+            attempt_aware_scoring=bool(data.get("attempt_aware_scoring", False)),
         )
     elif family == "maze":
         dataset = load_maze_tasks(path, split=data.get("default_split"))
@@ -440,6 +446,7 @@ def _load_dataset(
         # generated data/structured directory is intentionally git-ignored.
         "preparation_manifest": preparation_manifest,
         "exclude_relative_paths": data.get("exclude_relative_paths", []),
+        "attempt_aware_scoring": bool(data.get("attempt_aware_scoring", False)),
     }
     return dataset, False, provenance
 

@@ -96,6 +96,26 @@ def _prediction_outputs(prediction: object, *, n_queries: int) -> tuple[object, 
     return tuple(prediction)
 
 
+def _grid_comparison(candidate: object, expected: np.ndarray) -> tuple[bool, bool, float]:
+    """Validate one submitted ARC grid before computing diagnostics."""
+
+    try:
+        values = np.asarray(candidate)
+    except (TypeError, ValueError):
+        return False, False, 0.0
+    valid = (
+        values.ndim == 2
+        and values.dtype.kind in {"i", "u"}
+        and not np.any((values < 0) | (values > 9))
+    )
+    if not valid:
+        return False, False, 0.0
+    shape_exact = values.shape == expected.shape
+    exact = shape_exact and np.array_equal(values, expected)
+    cell_accuracy = float(np.mean(values == expected)) if shape_exact else 0.0
+    return bool(exact), bool(shape_exact), cell_accuracy
+
+
 def score_arc_prediction(
     task: PublicTask, prediction: object, target: object
 ) -> Mapping[str, object]:
@@ -109,13 +129,9 @@ def score_arc_prediction(
         if index >= len(outputs):
             query_exact.append(False)
             continue
-        try:
-            candidate = np.asarray(outputs[index])
-            exact = candidate.shape == expected.shape and np.array_equal(
-                candidate, expected
-            )
-        except (TypeError, ValueError):
-            exact = False
+        exact, _shape_exact, _cell_accuracy = _grid_comparison(
+            outputs[index], expected
+        )
         query_exact.append(bool(exact))
     complete = len(outputs) == len(targets) and bool(targets)
     all_exact = complete and all(query_exact)
@@ -130,6 +146,111 @@ def score_arc_prediction(
     }
 
 
+def score_arc_attempts(
+    task: PublicTask,
+    prediction: object,
+    target: object,
+    *,
+    max_attempts: int = 2,
+) -> Mapping[str, object]:
+    """Score the official ARC protocol of at most two attempts per query.
+
+    The preferred prediction representation is ``{"attempts": [a1, a2]}``,
+    where each attempt has the same complete-task representation accepted by
+    :func:`score_arc_prediction`.  A legacy single prediction is treated as
+    one attempt.  A task is correct only when every query is solved by at
+    least one registered attempt; failed or malformed attempts remain in the
+    denominator.
+    """
+
+    del task
+    if isinstance(max_attempts, bool) or not isinstance(max_attempts, int):
+        raise TypeError("max_attempts must be an integer")
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be positive")
+    targets = tuple(target) if isinstance(target, (tuple, list)) else ()
+    raw_attempts: object
+    if isinstance(prediction, Mapping) and "attempts" in prediction:
+        raw_attempts = prediction["attempts"]
+    else:
+        raw_attempts = (prediction,) if prediction is not None else ()
+    if not isinstance(raw_attempts, Sequence) or isinstance(
+        raw_attempts, (str, bytes, np.ndarray)
+    ):
+        attempts: tuple[object, ...] = ()
+    else:
+        attempts = tuple(raw_attempts)
+    too_many_attempts = len(attempts) > max_attempts
+    accepted_attempts = attempts[:max_attempts]
+    parsed = tuple(
+        _prediction_outputs(attempt, n_queries=len(targets))
+        for attempt in accepted_attempts
+    )
+    malformed_attempts = tuple(len(outputs) != len(targets) for outputs in parsed)
+    query_exact: list[bool] = []
+    query_winning_attempt: list[int | None] = []
+    query_shape_exact: list[bool] = []
+    query_best_cell_accuracy: list[float] = []
+    attempt_exact: list[list[bool]] = [list() for _ in parsed]
+    for query_index, expected in enumerate(targets):
+        solved = False
+        winner: int | None = None
+        shape_solved = False
+        best_cell_accuracy = 0.0
+        for attempt_index, outputs in enumerate(parsed):
+            if query_index >= len(outputs):
+                attempt_exact[attempt_index].append(False)
+                continue
+            exact, shape_exact, cell_accuracy = _grid_comparison(
+                outputs[query_index], expected
+            )
+            attempt_exact[attempt_index].append(bool(exact))
+            shape_solved |= bool(shape_exact)
+            best_cell_accuracy = max(best_cell_accuracy, cell_accuracy)
+            if exact and winner is None:
+                solved = True
+                winner = attempt_index + 1
+        for attempt_index in range(len(parsed)):
+            if len(attempt_exact[attempt_index]) <= query_index:
+                attempt_exact[attempt_index].append(False)
+        query_exact.append(solved)
+        query_winning_attempt.append(winner)
+        query_shape_exact.append(shape_solved)
+        query_best_cell_accuracy.append(best_cell_accuracy)
+    all_exact = (
+        bool(targets)
+        and all(query_exact)
+        and not too_many_attempts
+        and not any(malformed_attempts)
+    )
+    return {
+        "prediction_provided": prediction is not None,
+        "n_queries": len(targets),
+        "n_attempts_received": len(attempts),
+        "n_attempts_scored": len(accepted_attempts),
+        "max_attempts": max_attempts,
+        "too_many_attempts": too_many_attempts,
+        "malformed_attempts": malformed_attempts,
+        "query_exact_count": int(sum(query_exact)),
+        "query_exact_fraction": (float(np.mean(query_exact)) if query_exact else 0.0),
+        "query_exact": tuple(query_exact),
+        "query_winning_attempt": tuple(query_winning_attempt),
+        "query_shape_exact": tuple(query_shape_exact),
+        "query_best_cell_accuracy": tuple(query_best_cell_accuracy),
+        "shape_exact_fraction": (
+            float(np.mean(query_shape_exact)) if query_shape_exact else 0.0
+        ),
+        "best_cell_accuracy": (
+            float(np.mean(query_best_cell_accuracy))
+            if query_best_cell_accuracy
+            else 0.0
+        ),
+        "attempt_query_exact": tuple(tuple(row) for row in attempt_exact),
+        "all_query_exact": all_exact,
+        "exact": all_exact,
+    }
+
+
 def load_arc_directory(
     directory: str | Path,
     *,
@@ -138,6 +259,7 @@ def load_arc_directory(
     dataset_revision: str = "unspecified",
     exclude_relative_paths: Sequence[str] = (),
     namespace_task_ids: bool = False,
+    attempt_aware_scoring: bool = False,
 ) -> StructuredDataset:
     """Load official ARC JSON files while stripping every query output.
 
@@ -268,7 +390,10 @@ def load_arc_directory(
             )
         )
         targets.append(tuple(query_targets))
-    return build_structured_dataset(tasks, targets, scorer=score_arc_prediction)
+    if not isinstance(attempt_aware_scoring, (bool, np.bool_)):
+        raise StructuredProtocolError("attempt_aware_scoring must be boolean")
+    scorer = score_arc_attempts if attempt_aware_scoring else score_arc_prediction
+    return build_structured_dataset(tasks, targets, scorer=scorer)
 
 
 # Explicit alias used by callers that name the official benchmark family.

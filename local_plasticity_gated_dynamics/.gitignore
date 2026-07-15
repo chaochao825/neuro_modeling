@@ -43,6 +43,10 @@ results/*.pdf
 !results/exp15_arc_matched_formal.pdf
 !results/exp16_tiny_recursive_retry_3seed.png
 !results/exp16_tiny_recursive_retry_3seed.pdf
+!results/exp18_arc1_canary_seed3000_20task.png
+!results/exp18_arc1_canary_seed3000_20task.pdf
+!results/exp18_arc2_canary_seed3000_20task.png
+!results/exp18_arc2_canary_seed3000_20task.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

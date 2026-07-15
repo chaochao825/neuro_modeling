@@ -1,0 +1,80 @@
+{
+  "profile": "formal",
+  "evidence_stage": "pre_registered_full_scale_not_yet_executed",
+  "family": "arc",
+  "seeds": [3000, 3001, 3002],
+  "conditions": [
+    "trm_demo_tta_aug_vote",
+    "trm_no_tta_aug_vote",
+    "trm_demo_tta_no_aug",
+    "single_state_demo_tta_aug_vote"
+  ],
+  "protocol": "demo_tta",
+  "formal_claim_promotion_enabled": false,
+  "hyperparameters_frozen_before_test": true,
+  "validation_fraction": 0.2,
+  "inner_split_seed": 1729,
+  "train_panel_seed": 2718,
+  "validation_panel_seed": 3141,
+  "test_panel_seed": 1618,
+  "train_augmentations_per_pair": 30,
+  "validation_augmentations_per_pair": 0,
+  "n_bootstrap": 10000,
+  "save_checkpoints": true,
+  "data": {
+    "path": "data/arc/ARC-AGI-1/399030444e0ab0cc8b4e199870fb20b863846f34",
+    "dataset_name": "ARC-AGI-1",
+    "revision": "399030444e0ab0cc8b4e199870fb20b863846f34",
+    "license": "Apache-2.0",
+    "license_status": "verified",
+    "source_url": "https://github.com/fchollet/ARC-AGI",
+    "acquisition_manifest_path": "provenance/arc/acquisition_manifest.json",
+    "acquisition_manifest_sha256": "145c72ac5ec34ec938d28dcba90b2bc89e3bb40a3b472e84be7092f760b4df48",
+    "validation_receipt_path": "provenance/arc/arc_validation.json",
+    "validation_receipt_sha256": "05eca2feea601576ce4cc8877f8a8a5af1af8bdd2644123f55ed8e2f602c4572",
+    "manifest_path": "provenance/arc/ARC-AGI-1_399030444e0ab0cc8b4e199870fb20b863846f34.sha256",
+    "manifest_sha256": "76e2360f6673093730676345fd3db8bf289be3f58179c002980a4e91ae0d9cda",
+    "license_sha256": "b3a161754ffc20840ccf92aec0fe464fbbcf42f14c22f78a3ec2e98fca3864ca",
+    "expected_split_counts": {
+      "training": 400,
+      "evaluation": 400
+    },
+    "test_split_role": "ood",
+    "exclude_relative_paths": ["evaluation/070dd51e.json"],
+    "attempt_aware_scoring": true
+  },
+  "model": {
+    "max_grid_size": 30,
+    "hidden_size": 128,
+    "num_heads": 4,
+    "layers": 2,
+    "expansion": 4.0,
+    "high_cycles": 3,
+    "low_cycles": 4,
+    "supervision_steps": 16
+  },
+  "training": {
+    "epochs": 50,
+    "batch_size": 8,
+    "learning_rate": 0.0001,
+    "puzzle_learning_rate": 0.01,
+    "weight_decay": 0.1,
+    "grad_clip": 1.0,
+    "device": "cuda"
+  },
+  "test_time": {
+    "adaptation_epochs": 16,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 8,
+    "support_augmentations": 30,
+    "inference_augmentations": 32,
+    "scope": "full"
+  },
+  "registered_comparison": {
+    "name": "recursive_minus_single_state_demo_tta",
+    "candidate": "trm_demo_tta_aug_vote",
+    "reference": "single_state_demo_tta_aug_vote"
+  }
+}
