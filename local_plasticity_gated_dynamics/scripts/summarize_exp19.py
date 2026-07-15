@@ -843,7 +843,11 @@ def publish_snapshot(
         "png": target / f"{prefix}.png",
         "pdf": target / f"{prefix}.pdf",
     }
-    _csv_safe(raw).to_csv(paths["raw"], index=False, compression="gzip")
+    _csv_safe(raw).to_csv(
+        paths["raw"],
+        index=False,
+        compression={"method": "gzip", "compresslevel": 9, "mtime": 0},
+    )
     _csv_safe(summary).to_csv(paths["summary"], index=False)
     receipts.to_csv(paths["receipts"], index=False)
     failures = int((raw["status"] != "complete").sum())

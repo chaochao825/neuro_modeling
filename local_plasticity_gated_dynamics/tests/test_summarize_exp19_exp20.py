@@ -398,6 +398,7 @@ def test_exp20_snapshot_separates_results_input_from_output(
     published = pd.read_csv(paths["summary"])
     assert published["raw_run_git_commit"].iloc[0] == "a" * 40
     assert published["analysis_git_commit"].iloc[0] == "b" * 40
+    assert paths["raw"].read_bytes()[4:8] == b"\x00\x00\x00\x00"
     report = paths["report"].read_text(encoding="utf-8")
     assert "a" * 40 in report and "b" * 40 in report
 

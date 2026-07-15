@@ -690,7 +690,11 @@ def publish_snapshot(
         "pdf": target / f"{prefix}.pdf",
     }
     target.mkdir(parents=True, exist_ok=True)
-    _csv_safe(raw).to_csv(paths["raw"], index=False, compression="gzip")
+    _csv_safe(raw).to_csv(
+        paths["raw"],
+        index=False,
+        compression={"method": "gzip", "compresslevel": 9, "mtime": 0},
+    )
     _csv_safe(summary).to_csv(paths["summary"], index=False)
     receipts.to_csv(paths["receipts"], index=False)
     _plot(raw, summary, png=paths["png"], pdf=paths["pdf"])
