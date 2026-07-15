@@ -47,6 +47,10 @@ results/*.pdf
 !results/exp18_arc1_canary_seed3000_20task.pdf
 !results/exp18_arc2_canary_seed3000_20task.png
 !results/exp18_arc2_canary_seed3000_20task.pdf
+!results/exp19_belief_ei_effective_dynamics_formal.png
+!results/exp19_belief_ei_effective_dynamics_formal.pdf
+!results/exp20_ibl_md_belief_dynamics_formal.png
+!results/exp20_ibl_md_belief_dynamics_formal.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

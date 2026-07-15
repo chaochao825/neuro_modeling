@@ -189,6 +189,79 @@ def test_md_recurrent_gate_uses_local_cue_only_fit_and_freezes_for_prediction() 
     )
 
 
+def test_md_predictive_prior_excludes_current_and_future_cues() -> None:
+    train, _ = _simulate_hmm(
+        seed=41,
+        n_episodes=8,
+        episode_length=30,
+        hazard=0.1,
+        reliability=0.8,
+    )
+    gate = MDRecurrentBeliefGate(
+        learning_rate=0.03,
+        inverse_temperature=1.2,
+        pseudocount=0.05,
+        n_passes=2,
+        seed=12,
+    ).fit(train)
+    cues = np.array([1, 1, 0, 1, 0, 0], dtype=int)
+    changed = cues.copy()
+    changed[2:] = 1 - changed[2:]
+    intact = gate.predict_prior(_observations(cues, episode_length=6))
+    counterfactual = gate.predict_prior(
+        _observations(changed, episode_length=6)
+    )
+
+    # Trial 2 is frozen before cue 2, so altering cue 2 and every later cue
+    # cannot change any predictive prior through trial 2.
+    np.testing.assert_array_equal(intact.beliefs[:3], counterfactual.beliefs[:3])
+    assert not np.array_equal(intact.beliefs[3], counterfactual.beliefs[3])
+
+    current_cue_posterior = gate.predict(_observations(cues, episode_length=6))
+    assert not np.array_equal(
+        intact.beliefs[0], current_cue_posterior.beliefs[0]
+    )
+    np.testing.assert_array_equal(intact.beliefs[0], np.array([0.5, 0.5]))
+
+
+def test_md_predictive_prior_resets_each_episode_and_preserves_provenance() -> None:
+    train, _ = _simulate_hmm(
+        seed=42,
+        n_episodes=8,
+        episode_length=30,
+        hazard=0.1,
+        reliability=0.8,
+    )
+    gate = MDRecurrentBeliefGate(
+        learning_rate=0.03,
+        inverse_temperature=1.2,
+        pseudocount=0.05,
+        n_passes=2,
+        seed=13,
+    ).fit(train)
+    observations = _observations(
+        np.array([1, 1, 1, 0, 0, 0], dtype=int), episode_length=3
+    )
+    prediction = gate.predict_prior(observations)
+    metadata = prediction.audit_metadata()
+
+    np.testing.assert_array_equal(
+        prediction.beliefs[[0, 3]], np.full((2, 2), 0.5)
+    )
+    assert prediction.gate_name == "md_recurrent_belief_predictive_prior"
+    np.testing.assert_array_equal(prediction.fit_trial_ids, gate.fit_trial_ids_)
+    np.testing.assert_array_equal(prediction.fit_episode_ids, gate.fit_episode_ids_)
+    assert prediction.fit_accessed_true_context is False
+    assert prediction.test_accessed_true_context is False
+    assert metadata["belief_timing"] == "predictive_prior_before_current_cue"
+    assert metadata["observation_window"] == "strictly_before_current_trial"
+    assert metadata["current_cue_accessed_for_same_trial"] is False
+    assert metadata["future_cues_accessed"] is False
+    assert metadata["fit_observation_fingerprint"] == gate.fit_observation_fingerprint_
+    assert metadata["prediction_fingerprint"] == prediction.fingerprint
+    assert gate.predictive_prior(observations).fingerprint == prediction.fingerprint
+
+
 def test_md_local_learning_does_not_collapse_on_long_training_sequences() -> None:
     short, _ = _simulate_hmm(
         seed=40,
@@ -399,6 +472,8 @@ def test_observation_validation_rejects_reappearing_episode_and_nonbinary_cue() 
         LearnedSymmetricHMM().predict(observations)
     with pytest.raises(RuntimeError, match="fit before"):
         MDRecurrentBeliefGate().predict(observations)
+    with pytest.raises(RuntimeError, match="fit before"):
+        MDRecurrentBeliefGate().predict_prior(observations)
     with pytest.raises(RuntimeError, match="fit before"):
         SupervisedCueGate().predict(observations)
 

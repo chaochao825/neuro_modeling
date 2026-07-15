@@ -432,6 +432,49 @@ def _causal_filter(
     return beliefs
 
 
+def _causal_predictive_prior(
+    view: _ObservationView,
+    *,
+    transition: Array,
+    emission: Array,
+    inverse_temperature: float = 1.0,
+) -> Array:
+    """Return the predictive prior ``p(z_t | y_{<t})``.
+
+    The value emitted
+    for trial ``t`` is frozen before that trial's cue is incorporated.  The
+    current cue updates a private posterior used only to form trial ``t+1``'s
+    predictive prior.  Every episode therefore starts from exactly ``[.5,
+    .5]`` and cannot inherit evidence from the preceding episode.
+    """
+
+    transition = _row_normalize(transition)
+    emission = _row_normalize(emission)
+    temperature = _validated_real(
+        inverse_temperature,
+        name="inverse_temperature",
+        minimum=0.0,
+        minimum_inclusive=False,
+    )
+    beliefs = np.empty((view.cues.size, 2), dtype=float)
+    for episode in view.episode_slices:
+        posterior = np.full(2, 0.5)
+        for local_index, index in enumerate(range(episode.start, episode.stop)):
+            prior = (
+                np.full(2, 0.5)
+                if local_index == 0
+                else transition.T @ posterior
+            )
+            beliefs[index] = prior
+            posterior = _posterior(
+                prior,
+                emission,
+                int(view.cues[index]),
+                temperature,
+            )
+    return beliefs
+
+
 def _prediction(
     view: _ObservationView,
     beliefs: Array,
@@ -1003,6 +1046,35 @@ class MDRecurrentBeliefGate:
         self._fitted = True
         return self
 
+    def _prediction_parameters(self) -> tuple[tuple[str, Any], ...]:
+        """Return immutable fit provenance shared by both timing interfaces."""
+
+        return (
+            ("learning_rate", self.learning_rate),
+            ("inverse_temperature", self.inverse_temperature),
+            ("pseudocount", self.pseudocount),
+            ("recurrent_smoothing", self.recurrent_smoothing),
+            ("n_passes", self.n_passes),
+            ("local_update_l1", self.local_update_l1_),
+            ("estimated_context_hazard", float(self.transition_[0, 1])),
+            ("estimated_cue_reliability", float(self.emission_[0, 0])),
+            (
+                "local_update_rule",
+                "causal_two_slice_with_hebbian_moment_shrinkage",
+            ),
+            ("cue_lag1_correlation", self.cue_lag1_correlation_),
+            ("cue_lag2_correlation", self.cue_lag2_correlation_),
+            ("cue_signal_z_score", self.cue_signal_z_score_),
+            ("moment_anchor_identifiable", self.moment_anchor_identifiable_),
+            ("moment_anchor_weight", self.moment_anchor_weight_),
+            ("two_slice_hazard", self.two_slice_hazard_),
+            ("two_slice_reliability", self.two_slice_reliability_),
+            ("moment_hazard", self.moment_hazard_),
+            ("moment_reliability", self.moment_reliability_),
+            ("fit_observation_fingerprint", self.fit_observation_fingerprint_),
+            ("seed", self.seed),
+        )
+
     def predict(self, observations: object) -> GatePrediction:
         if not self._fitted:
             raise RuntimeError("MDRecurrentBeliefGate must be fit before prediction")
@@ -1019,32 +1091,47 @@ class MDRecurrentBeliefGate:
             gate_name="md_recurrent_belief",
             fit_trial_ids=self.fit_trial_ids_,
             fit_episode_ids=self.fit_episode_ids_,
-            parameters=(
-                ("learning_rate", self.learning_rate),
-                ("inverse_temperature", self.inverse_temperature),
-                ("pseudocount", self.pseudocount),
-                ("recurrent_smoothing", self.recurrent_smoothing),
-                ("n_passes", self.n_passes),
-                ("local_update_l1", self.local_update_l1_),
-                ("estimated_context_hazard", float(self.transition_[0, 1])),
-                ("estimated_cue_reliability", float(self.emission_[0, 0])),
-                (
-                    "local_update_rule",
-                    "causal_two_slice_with_hebbian_moment_shrinkage",
-                ),
-                ("cue_lag1_correlation", self.cue_lag1_correlation_),
-                ("cue_lag2_correlation", self.cue_lag2_correlation_),
-                ("cue_signal_z_score", self.cue_signal_z_score_),
-                ("moment_anchor_identifiable", self.moment_anchor_identifiable_),
-                ("moment_anchor_weight", self.moment_anchor_weight_),
-                ("two_slice_hazard", self.two_slice_hazard_),
-                ("two_slice_reliability", self.two_slice_reliability_),
-                ("moment_hazard", self.moment_hazard_),
-                ("moment_reliability", self.moment_reliability_),
-                ("fit_observation_fingerprint", self.fit_observation_fingerprint_),
-                ("seed", self.seed),
+            parameters=self._prediction_parameters(),
+        )
+
+    def predict_prior(self, observations: object) -> GatePrediction:
+        """Predict context before the current trial's cue is available.
+
+        The returned row for trial ``t`` is ``p(z_t | y_{<t})``.  Cue ``y_t``
+        is consumed only after that row is frozen and can first affect trial
+        ``t+1``.  This is the timing-safe interface for pre-stimulus analyses;
+        :meth:`predict` intentionally retains its existing current-cue
+        posterior semantics.
+        """
+
+        if not self._fitted:
+            raise RuntimeError("MDRecurrentBeliefGate must be fit before prediction")
+        view = _observation_view(observations)
+        beliefs = _causal_predictive_prior(
+            view,
+            transition=self.transition_,
+            emission=self.emission_,
+            inverse_temperature=self.inverse_temperature,
+        )
+        return _prediction(
+            view,
+            beliefs,
+            gate_name="md_recurrent_belief_predictive_prior",
+            fit_trial_ids=self.fit_trial_ids_,
+            fit_episode_ids=self.fit_episode_ids_,
+            parameters=self._prediction_parameters()
+            + (
+                ("belief_timing", "predictive_prior_before_current_cue"),
+                ("observation_window", "strictly_before_current_trial"),
+                ("current_cue_accessed_for_same_trial", False),
+                ("future_cues_accessed", False),
             ),
         )
+
+    def predictive_prior(self, observations: object) -> GatePrediction:
+        """Compatibility alias for :meth:`predict_prior`."""
+
+        return self.predict_prior(observations)
 
     def audit_metadata(self) -> dict[str, Any]:
         if not self._fitted:

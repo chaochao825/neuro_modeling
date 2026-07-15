@@ -905,12 +905,42 @@ class HierarchicalCountDynamics:
             beliefs[:, state, None] * (base @ matrices[state].T) for state in range(2)
         )
 
+    @staticmethod
+    def _heldout_belief_override(value: Array, *, n_trials: int) -> Array:
+        beliefs = np.asarray(value, dtype=float)
+        if beliefs.shape != (n_trials, 2) or not np.isfinite(beliefs).all():
+            raise ValueError(
+                "held-out belief override must be finite with shape [heldout_trial, 2]"
+            )
+        if np.any((beliefs <= 0.0) | (beliefs >= 1.0)):
+            raise ValueError("held-out belief override must remain strictly soft")
+        if not np.allclose(beliefs.sum(axis=1), 1.0, atol=1e-8, rtol=0.0):
+            raise ValueError("held-out belief override rows must sum to one")
+        return beliefs
+
     def _predict_one(
-        self, session: NeuralCountSession, identifiers: Sequence[object]
+        self,
+        session: NeuralCountSession,
+        identifiers: Sequence[object],
+        *,
+        heldout_beliefs: Array | None = None,
     ) -> tuple[SessionCountPrediction, _Transitions, Array]:
         self._validate_scoring_session(session)
         indices = self._indices(session, identifiers, name="test_trial_ids")
         item = self._transitions(session, indices)
+        if heldout_beliefs is not None:
+            override = self._heldout_belief_override(
+                heldout_beliefs, n_trials=len(indices)
+            )
+            item = _Transitions(
+                region_current=item.region_current,
+                region_following=item.region_following,
+                following_counts=item.following_counts,
+                beliefs=np.repeat(override, item.n_steps, axis=0),
+                controls=item.controls,
+                n_trials=item.n_trials,
+                n_steps=item.n_steps,
+            )
         current = self._latent(item.region_current)
         following = self._latent(item.region_following)
         latent_prediction = self._predict_latent(
@@ -958,15 +988,24 @@ class HierarchicalCountDynamics:
             return float("nan")
         return float(1.0 - (saturated_ll - model_ll) / denominator)
 
-    def score(
+    def _score(
         self,
         sessions: Sequence[NeuralCountSession],
         splits: Mapping[str, TrialBlockSplit],
+        *,
+        heldout_beliefs: Mapping[str, Array] | None,
     ) -> HierarchicalCountScore:
-        """Score exact teacher-forced held-out one-step Poisson likelihoods."""
-
         by_id = self._session_map(sessions)
         self._validate_split_map(by_id, splits)
+        if heldout_beliefs is not None:
+            if self.family == "common":
+                raise ValueError(
+                    "common dynamics do not consume beliefs and cannot be belief-intervened"
+                )
+            if set(heldout_beliefs) != set(by_id):
+                raise ValueError(
+                    "held-out belief overrides must cover exactly the scored sessions"
+                )
         metrics: list[SessionCountMetrics] = []
         total_model = total_null = total_saturated = 0.0
         total_count_observations = 0
@@ -976,7 +1015,13 @@ class HierarchicalCountDynamics:
             session = by_id[session_id]
             self._validate_scoring_split(session_id, splits[session_id])
             prediction, item, following_latent = self._predict_one(
-                session, splits[session_id].test_trial_ids
+                session,
+                splits[session_id].test_trial_ids,
+                heldout_beliefs=(
+                    None
+                    if heldout_beliefs is None
+                    else heldout_beliefs[session_id]
+                ),
             )
             observed = item.following_counts.reshape(prediction.rates.shape)
             model_ll = poisson_log_likelihood(observed, prediction.rates)
@@ -1015,4 +1060,36 @@ class HierarchicalCountDynamics:
             nll_per_count=-total_model / total_count_observations,
             pseudo_r2=self._pseudo_r2(total_model, total_null, total_saturated),
             closure_mse=total_closure_squared / total_latent_values,
+        )
+
+    def score(
+        self,
+        sessions: Sequence[NeuralCountSession],
+        splits: Mapping[str, TrialBlockSplit],
+    ) -> HierarchicalCountScore:
+        """Score exact teacher-forced held-out one-step Poisson likelihoods."""
+
+        return self._score(sessions, splits, heldout_beliefs=None)
+
+    def score_heldout_belief_counterfactual(
+        self,
+        sessions: Sequence[NeuralCountSession],
+        splits: Mapping[str, TrialBlockSplit],
+        heldout_beliefs: Mapping[str, Array],
+    ) -> HierarchicalCountScore:
+        """Score a post-fit belief intervention with every parameter frozen.
+
+        Each override must align exactly with that session's chronological test
+        trials.  Training beliefs, preprocessing, latent basis, dynamics,
+        observation maps, and count targets are never refit.  This API is for
+        fixed-checkpoint clamp/delay/shuffle audits and deliberately has no
+        route for replacing train-fold beliefs or privileged context labels.
+        """
+
+        if not isinstance(heldout_beliefs, Mapping):
+            raise TypeError("heldout_beliefs must be a session-to-array mapping")
+        return self._score(
+            sessions,
+            splits,
+            heldout_beliefs=heldout_beliefs,
         )

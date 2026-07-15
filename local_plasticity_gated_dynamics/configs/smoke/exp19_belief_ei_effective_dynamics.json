@@ -1,0 +1,68 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "cue_reliability": 0.85,
+  "context_hazard": 0.10,
+  "gate_timing": "current_cue_filtered_after_cue_epoch_before_sensory",
+  "task": {
+    "n_episodes": 9,
+    "trials_per_episode": 20,
+    "dt_ms": 100,
+    "cue_ms": 100,
+    "sensory_ms": 400,
+    "delay_ms": 100,
+    "response_ms": 100,
+    "coherence_values": [-0.5, -0.25, 0.25, 0.5],
+    "sensory_noise_std": 1.0,
+    "input_scale": 1.0,
+    "response_target": "choice"
+  },
+  "outer_test_fraction": 0.3333333333333333,
+  "validation_fraction": 0.3333333333333333,
+  "network": {
+    "n_units": 32,
+    "excitatory_fraction": 0.8,
+    "connection_probability": 0.25,
+    "tau_e": 100.0,
+    "tau_i": 50.0,
+    "dt": 50.0,
+    "bulk_gain": 0.7,
+    "inhibitory_gain": 1.2,
+    "input_scale": 0.8,
+    "activation": "rectified_tanh",
+    "normalize_fan_in_after_update": true
+  },
+  "integration_substeps": 2,
+  "trial_batch_size": 128,
+  "gain_strength": 0.60,
+  "readout_alpha": 1.0,
+  "linear_mix_alpha": 1.0,
+  "effective_dynamics": {
+    "latent_dim": 4,
+    "ridge": 0.01,
+    "normal_horizon_ms": 100.0
+  },
+  "md_gate": {
+    "learning_rate": 0.03,
+    "inverse_temperature": 1.2,
+    "pseudocount": 0.05,
+    "n_passes": 2
+  },
+  "interventions": {
+    "delay_trials": 1
+  },
+  "gate_compute": {
+    "operations": 12.0,
+    "states": 2.0
+  },
+  "registered_claim_thresholds": {
+    "minimum_gate_identifiable_fraction": 0.9,
+    "minimum_physical_rank_fraction": 0.9,
+    "minimum_operator_delta_frobenius_norm": 1e-8,
+    "maximum_normalized_closure_mse": 1.0,
+    "maximum_basis_residual_fraction": 0.5,
+    "minimum_normal_stability_eligible_fraction": 0.9,
+    "maximum_normal_local_decay_ratio": 1.0,
+    "maximum_normal_local_max_real_part": 0.0
+  }
+}

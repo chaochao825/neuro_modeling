@@ -99,6 +99,26 @@ def _fit_family(
     ).fit(sessions, splits)
 
 
+def _heldout_beliefs(
+    sessions: tuple[NeuralCountSession, ...],
+    splits: dict[str, TrialBlockSplit],
+) -> dict[str, np.ndarray]:
+    result: dict[str, np.ndarray] = {}
+    for session in sessions:
+        positions = {
+            trial_id: index for index, trial_id in enumerate(session.trial_ids)
+        }
+        test = np.asarray(
+            [
+                positions[trial_id]
+                for trial_id in splits[session.session_id].test_trial_ids
+            ],
+            dtype=int,
+        )
+        result[session.session_id] = session.beliefs[test].copy()
+    return result
+
+
 def _disjoint_region_sessions(
     seed: int = 4,
 ) -> tuple[tuple[NeuralCountSession, ...], dict[str, TrialBlockSplit]]:
@@ -245,6 +265,80 @@ def test_train_only_fit_is_invariant_to_heldout_targets_inputs_and_controls() ->
         control_refit.predict(control_sessions, splits)[first.session_id].rates,
         baseline_predictions[first.session_id].rates,
     )
+
+
+def test_heldout_belief_counterfactual_freezes_the_fitted_checkpoint() -> None:
+    sessions, splits = _synthetic_sessions(23)
+    shared = _fit_family("shared", sessions, splits)
+    intact = _heldout_beliefs(sessions, splits)
+    fingerprint = shared.fit_fingerprint_
+    parameter_count = shared.parameter_count()
+    parameter_copies = tuple(array.copy() for array in shared._parameter_arrays())
+
+    ordinary = shared.score(sessions, splits)
+    intact_score = shared.score_heldout_belief_counterfactual(
+        sessions, splits, intact
+    )
+    assert intact_score == ordinary
+
+    clamped = {
+        session_id: np.full_like(beliefs, 0.5)
+        for session_id, beliefs in intact.items()
+    }
+    clamp_score = shared.score_heldout_belief_counterfactual(
+        sessions, splits, clamped
+    )
+    assert clamp_score.nll_per_count != ordinary.nll_per_count
+
+    delayed = {}
+    by_id = {session.session_id: session for session in sessions}
+    for session_id, beliefs in intact.items():
+        session = by_id[session_id]
+        split = splits[session_id]
+        positions = {
+            trial_id: index for index, trial_id in enumerate(session.trial_ids)
+        }
+        last_train = session.beliefs[positions[split.train_trial_ids[-1]]]
+        delayed[session_id] = np.vstack((last_train, beliefs[:-1]))
+    delay_score = shared.score_heldout_belief_counterfactual(
+        sessions, splits, delayed
+    )
+    assert delay_score.nll_per_count != ordinary.nll_per_count
+
+    assert shared.fit_fingerprint_ == fingerprint
+    assert shared.parameter_count() == parameter_count
+    for expected, observed in zip(
+        parameter_copies, shared._parameter_arrays(), strict=True
+    ):
+        np.testing.assert_array_equal(observed, expected)
+
+
+def test_heldout_belief_counterfactual_validation_fails_closed() -> None:
+    sessions, splits = _synthetic_sessions(24)
+    shared = _fit_family("shared", sessions, splits)
+    intact = _heldout_beliefs(sessions, splits)
+    first_id = sessions[0].session_id
+
+    missing = dict(intact)
+    missing.pop(first_id)
+    with pytest.raises(ValueError, match="cover exactly"):
+        shared.score_heldout_belief_counterfactual(sessions, splits, missing)
+
+    wrong_shape = {key: value.copy() for key, value in intact.items()}
+    wrong_shape[first_id] = wrong_shape[first_id][:-1]
+    with pytest.raises(ValueError, match="shape"):
+        shared.score_heldout_belief_counterfactual(
+            sessions, splits, wrong_shape
+        )
+
+    hard = {key: value.copy() for key, value in intact.items()}
+    hard[first_id][0] = (1.0, 0.0)
+    with pytest.raises(ValueError, match="strictly soft"):
+        shared.score_heldout_belief_counterfactual(sessions, splits, hard)
+
+    common = _fit_family("common", sessions, splits)
+    with pytest.raises(ValueError, match="common dynamics do not consume beliefs"):
+        common.score_heldout_belief_counterfactual(sessions, splits, intact)
 
 
 def test_exact_poisson_likelihood_includes_factorial_term() -> None:

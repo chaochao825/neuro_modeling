@@ -23,11 +23,13 @@ from src.data.ibl_multisession import (
     full_trial_sensitivity_nuisance_table,
     past_safe_nuisance_table,
 )
+from src.models.context_belief import MDRecurrentBeliefGate
 from src.models.hierarchical_count_dynamics import (
     BeliefFitReceipt,
     NeuralCountSession,
     TrialBlockSplit,
 )
+from src.tasks.hidden_context import GateObservationBatch
 
 
 Array = np.ndarray
@@ -781,10 +783,72 @@ def _past_only_beliefs(
         raise IBLMultiSessionError(
             "model trial IDs are absent from gate history"
         ) from error
+    options = dict(hmm_options)
+    model_name = str(options.pop("model", "learned_categorical_hmm"))
+    if model_name == "md_recurrent_predictive":
+        require_identifiable = bool(options.pop("require_identifiable", False))
+        # The local recurrent estimator has no iterative convergence state: a
+        # completed fit is its convergence receipt.  Accept the common exp14
+        # option so paired configurations need not carry model-specific keys.
+        options.pop("require_converged", None)
+        options["seed"] = int(seed)
+        episode_positions = np.arange(len(session.gate_trial_ids), dtype=int)
+        episode_starts = np.zeros(len(session.gate_trial_ids), dtype=bool)
+        episode_starts[0] = True
+        gate_tape = GateObservationBatch(
+            cue_observations=session.gate_stimulus_side,
+            trial_ids=session.gate_trial_ids,
+            episode_ids=np.zeros(len(session.gate_trial_ids), dtype=int),
+            episode_trial_indices=episode_positions,
+            episode_start=episode_starts,
+        )
+        training_tape = gate_tape.subset(np.arange(gate_fit_stop, dtype=int))
+        md_gate = MDRecurrentBeliefGate(**options).fit(training_tape)
+        if require_identifiable and not md_gate.moment_anchor_identifiable_:
+            raise IBLMultiSessionError(
+                "MD recurrent predictive belief is not identifiable"
+            )
+        prediction = md_gate.predictive_prior(gate_tape)
+        selected_beliefs = prediction.beliefs[selected_gate_positions]
+        audit = md_gate.audit_metadata()
+        checkpoint = {
+            "model": model_name,
+            "initial": [0.5, 0.5],
+            "transition": md_gate.transition_.tolist(),
+            "emission": md_gate.emission_.tolist(),
+            "fit_observation_fingerprint": training_tape.fingerprint,
+            "fit_trial_ids": audit["fit_trial_ids"],
+            "fit_episode_ids": audit["fit_episode_ids"],
+            "local_update_l1": audit["local_update_l1"],
+            "estimated_context_hazard": audit["estimated_context_hazard"],
+            "estimated_cue_reliability": audit["estimated_cue_reliability"],
+            "moment_anchor_identifiable": audit["moment_anchor_identifiable"],
+            "predictive_prior": True,
+            "uses_current_trial_stimulus": False,
+            "uses_future_trials": False,
+            "accessed_true_context": False,
+            "converged": True,
+            "identifiable": bool(md_gate.moment_anchor_identifiable_),
+            "restart_selection_policy": "not_applicable_local_recurrent",
+            "selected_restart": None,
+            "eligible_restart_count": 1,
+            "eligible_restart_fallback": False,
+        }
+        receipt = BeliefFitReceipt.bind(
+            selected_beliefs,
+            method="md_recurrent_belief_predictive_prior",
+            fit_trial_ids=fit_ids,
+            observation_fit_trial_ids=tuple(
+                int(value) for value in session.gate_trial_ids[:gate_fit_stop]
+            ),
+            checkpoint_payload=checkpoint,
+        )
+        return selected_beliefs, receipt, checkpoint
+    if model_name != "learned_categorical_hmm":
+        raise IBLMultiSessionError(f"unknown past-only belief model {model_name!r}")
     observations = IBLBehaviorObservations(
         session.gate_trial_ids, session.gate_stimulus_side
     )
-    options = dict(hmm_options)
     require_converged = bool(options.pop("require_converged", True))
     require_identifiable = bool(options.pop("require_identifiable", True))
     options["seed"] = int(seed)
@@ -846,8 +910,14 @@ def build_model_session(
     min_units_per_region: int,
     hmm_options: Mapping[str, object],
     seed: int,
+    split_block_ids: Sequence[object] | None = None,
 ) -> BuiltNeuralSession:
-    """Fit the hidden gate and unit selection using this split's train prefix."""
+    """Fit the hidden gate and unit selection using this split's train prefix.
+
+    ``split_block_ids`` is an optional evaluation-owned schedule used only to
+    certify whole-block cross-validation.  It is never placed in the
+    :class:`GateObservationBatch`, neural covariates, or observation model.
+    """
 
     split_ids = tuple(int(value) for value in split.train_ids + split.heldout_ids)
     tape_positions = _positions(panel, split_ids)
@@ -855,6 +925,15 @@ def build_model_session(
         raise IBLMultiSessionError(
             "nested split must completely cover a chronological panel prefix"
         )
+    if split_block_ids is None:
+        split_blocks = np.asarray(panel.block_ids)
+    else:
+        split_blocks = np.asarray(split_block_ids)
+        if split_blocks.shape != panel.block_ids.shape:
+            raise IBLMultiSessionError(
+                "split_block_ids must align with every analysis panel trial"
+            )
+    analysis_split_blocks = split_blocks[tape_positions]
     analysis_panel = replace(
         panel,
         counts=panel.counts[tape_positions],
@@ -891,7 +970,7 @@ def build_model_session(
         tuple(int(value) for value in split.train_ids),
         tuple(int(value) for value in split.heldout_ids),
         all_ids,
-        tuple(analysis_panel.block_ids.tolist()),
+        tuple(analysis_split_blocks.tolist()),
     )
     return BuiltNeuralSession(
         session=neural,

@@ -198,6 +198,10 @@ class ReceiverSimulation:
     input_event_sum: float
     recurrent_event_sum: float
     firing_sum: float
+    pathway_scales: np.ndarray
+    pathway_control_rank: int
+    pathway_gating: bool
+    population_gain: bool
     receiver_fingerprint: str
 
 
@@ -220,8 +224,17 @@ def simulate_receiver(
     gain_strength: float,
     integration_substeps: int,
     trial_batch_size: int,
+    pathway_gating: bool = False,
+    population_gain: bool = True,
 ) -> ReceiverSimulation:
-    """Run unchanged sensory channels through one frozen receiver checkpoint."""
+    """Run sensory channels through one frozen receiver checkpoint.
+
+    The legacy/default mode preserves both input streams and applies only the
+    rank-one population gain used by Exp10.  ``pathway_gating=True`` implements
+    the complementary soft routing coefficients ``[1-p(z=1), p(z=1)]`` before
+    the two fixed input columns.  Both controls depend on the same scalar
+    posterior and neither accepts latent context labels.
+    """
 
     if network.n_inputs != 2:
         raise ValueError("hidden-context E/I receiver must have exactly two inputs")
@@ -239,12 +252,21 @@ def simulate_receiver(
         posterior,
         dataset.task.epoch,
         gain_axis,
-        strength=float(gain_strength),
+        strength=float(gain_strength) if population_gain else 0.0,
         neutral_epochs=("cue",),
     )
-    # Capability boundary: cue one-hot channels 2:4 are not passed to the
-    # receiver.  Both sensory streams 0:2 are copied without belief mixing.
+    pathway_scales = np.ones((n_trials, 2), dtype=np.float64)
+    if pathway_gating:
+        pathway_scales[:, 0] = 1.0 - posterior
+        pathway_scales[:, 1] = posterior
+    centered_pathways = pathway_scales - np.mean(
+        pathway_scales, axis=0, keepdims=True
+    )
+    pathway_control_rank = int(np.linalg.matrix_rank(centered_pathways, tol=1e-12))
+    # Capability boundary: cue one-hot channels 2:4 are never passed to the
+    # receiver.  Optional routing uses the frozen belief only, never truth.
     sensory_inputs = np.asarray(dataset.task.inputs[:, :, :2], dtype=np.float64)
+    sensory_inputs = sensory_inputs * pathway_scales[:, np.newaxis, :]
     epoch_indices = _epoch_feature_indices(dataset.task)
     feature_blocks: list[np.ndarray] = []
     mean_x_sum = np.zeros(network.n_units, dtype=np.float64)
@@ -288,12 +310,19 @@ def simulate_receiver(
         input_event_sum=float(input_events),
         recurrent_event_sum=float(recurrent_events),
         firing_sum=float(firing),
+        pathway_scales=pathway_scales,
+        pathway_control_rank=pathway_control_rank,
+        pathway_gating=bool(pathway_gating),
+        population_gain=bool(population_gain),
         receiver_fingerprint=_fingerprint(
-            "frozen-ei-receiver-features-v1",
+            "frozen-ei-receiver-features-v2",
             dataset.task.fingerprint,
             network.recurrent_weights,
             network.input_weights,
             gain.fingerprint,
+            pathway_scales,
+            bool(pathway_gating),
+            bool(population_gain),
             int(integration_substeps),
             feature_matrix,
         ),
@@ -450,13 +479,46 @@ def evaluate_receiver_condition(
     intervention_postfit = intervention != "none"
     if intervention_postfit and not base_prediction:
         raise RuntimeError("intervention is missing its intact belief provenance")
+    sensory = np.asarray(dataset.task.inputs[:, :, :2], dtype=np.float64)
+    sensory_mask = np.asarray(dataset.task.epoch) == "sensory"
+    routed_magnitude = np.sum(
+        np.abs(sensory[:, sensory_mask])
+        * simulation.pathway_scales[:, np.newaxis, :],
+        axis=1,
+    )
+    relevant = routed_magnitude[
+        np.arange(targets.size), dataset.truth.hidden_states.astype(int)
+    ]
+    irrelevant = routed_magnitude[
+        np.arange(targets.size), 1 - dataset.truth.hidden_states.astype(int)
+    ]
+    pathway_total = float(np.sum(relevant) + np.sum(irrelevant))
+    irrelevant_fraction = (
+        float(np.sum(irrelevant)) / pathway_total
+        if pathway_total > 0.0
+        else float("nan")
+    )
+    receiver_mode = (
+        "rank_one_gain_plus_soft_pathway"
+        if simulation.pathway_gating and simulation.population_gain
+        else "soft_pathway_only"
+        if simulation.pathway_gating
+        else "rank_one_gain_only"
+        if simulation.population_gain
+        else "ungated_receiver"
+    )
+    input_policy = (
+        "belief_complementary_soft_pathways_no_cue_channels"
+        if simulation.pathway_gating
+        else "both_streams_unchanged_no_cue_channels"
+    )
     return {
         "status": "complete",
         "statistics_unit": "seed",
         "split_unit": "episode",
         "bridge_scope": "belief_gain_to_frozen_dale_ei_receiver",
-        "receiver_gate_mode": "rank_one_gain_only",
-        "sensory_input_policy": "both_streams_unchanged_no_cue_channels",
+        "receiver_gate_mode": receiver_mode,
+        "sensory_input_policy": input_policy,
         "recurrent_learning": False,
         "three_factor_plasticity_claim_eligible": False,
         "behavior_accuracy": float(np.mean(predicted == targets)),
@@ -467,7 +529,12 @@ def evaluate_receiver_condition(
         "context_accuracy": calibration.accuracy,
         "activity_participation_ratio": participation_ratio(simulation.features),
         "recurrent_effective_rank": effective_rank(network.recurrent_weights),
-        "effective_control_rank": simulation.gain.control_rank,
+        "effective_control_rank": max(
+            simulation.gain.control_rank, simulation.pathway_control_rank
+        ),
+        "population_gain_control_rank": simulation.gain.control_rank,
+        "pathway_control_rank": simulation.pathway_control_rank,
+        "irrelevant_pathway_input_fraction": irrelevant_fraction,
         "gain_min": float(np.min(simulation.gain.gains)),
         "gain_max": float(np.max(simulation.gain.gains)),
         "plasticity_l1_cost": 0.0,

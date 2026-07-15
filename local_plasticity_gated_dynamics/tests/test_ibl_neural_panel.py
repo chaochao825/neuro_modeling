@@ -353,6 +353,65 @@ def test_heldout_stimulus_updates_online_belief_but_not_fitted_checkpoint() -> N
     )
 
 
+def test_md_recurrent_predictive_belief_is_strictly_past_only() -> None:
+    panel = prepare_neural_panel_input(
+        _prepared(41),
+        view="stimulus_pre",
+        panel="primary_past_safe",
+        minimum_trials=60,
+        minimum_blocks=5,
+    )
+    split = _outer(panel)
+    test_start = len(split.train_ids)
+    changed_side = panel.stimulus_side.copy()
+    changed_side[test_start] = 1 - changed_side[test_start]
+    changed_gate = panel.gate_stimulus_side.copy()
+    changed_trial_id = int(panel.trial_ids[test_start])
+    changed_gate_position = int(
+        np.flatnonzero(panel.gate_trial_ids == changed_trial_id)[0]
+    )
+    changed_gate[changed_gate_position] = 1 - changed_gate[changed_gate_position]
+    changed = replace(
+        panel,
+        stimulus_side=changed_side,
+        gate_stimulus_side=changed_gate,
+    )
+    anchors = common_region_anchors((panel,), min_units_per_region=2)
+    kwargs = {
+        "common_regions": anchors,
+        "max_units_per_region": 2,
+        "min_units_per_region": 2,
+        "hmm_options": {
+            "model": "md_recurrent_predictive",
+            "learning_rate": 0.02,
+            "n_passes": 1,
+        },
+        "seed": 17,
+    }
+    first = build_model_session(panel, split, **kwargs)
+    second = build_model_session(changed, split, **kwargs)
+
+    assert first.hmm_checkpoint == second.hmm_checkpoint
+    assert first.hmm_checkpoint["predictive_prior"]
+    assert not first.hmm_checkpoint["accessed_true_context"]
+    assert first.hmm_checkpoint["fit_episode_ids"] == [0]
+    np.testing.assert_array_equal(
+        first.session.beliefs[: test_start + 1],
+        second.session.beliefs[: test_start + 1],
+    )
+    assert not np.array_equal(
+        first.session.beliefs[test_start + 1 :],
+        second.session.beliefs[test_start + 1 :],
+    )
+    receipt = first.session.belief_receipt
+    assert receipt.method == "md_recurrent_belief_predictive_prior"
+    assert receipt.fit_trial_ids == first.split.train_trial_ids
+    assert receipt.input_columns == ("stimulus_side_lag1",)
+    assert not receipt.uses_current_trial_stimulus
+    assert not receipt.uses_future_trials
+    assert not receipt.accessed_true_context
+
+
 def test_gate_consumes_stimuli_from_neural_incomplete_trials() -> None:
     panel = prepare_neural_panel_input(
         _prepared(12),
