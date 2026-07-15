@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -98,6 +99,40 @@ def _environment_sha256(environment: Mapping[str, Any]) -> str:
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _analysis_provenance() -> dict[str, object]:
+    """Bind the generated snapshot to clean Python 3.11 analysis code."""
+
+    if sys.version_info[:2] != (3, 11):
+        raise ValueError("formal snapshot analysis must use Python 3.11")
+    repository = PROJECT_ROOT.parent
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError) as error:
+        raise ValueError("formal snapshot lacks Git analysis provenance") from error
+    if _COMMIT.fullmatch(commit) is None or status:
+        raise ValueError("formal snapshot analysis requires a clean Git commit")
+    return {
+        "analysis_git_commit": commit,
+        "analysis_script_sha256": _sha256(Path(__file__).resolve()),
+        "analysis_python": sys.version,
+    }
 
 
 def _expected_run_config(config: Mapping[str, Any], seed: int) -> dict[str, Any]:
@@ -548,7 +583,9 @@ def _plot(raw: pd.DataFrame, summary: pd.DataFrame, *, png: Path, pdf: Path) -> 
     outer = raw.loc[
         raw.get("stage").eq("outer_test") & raw.get("status").eq("complete")
     ].copy()
-    figure, axes = plt.subplots(2, 2, figsize=(11.0, 8.0))
+    figure, axes = plt.subplots(
+        2, 2, figsize=(12.0, 8.0), constrained_layout=True
+    )
     order = list(MODEL_CONDITIONS)
     nll = [
         pd.to_numeric(
@@ -560,7 +597,7 @@ def _plot(raw: pd.DataFrame, summary: pd.DataFrame, *, png: Path, pdf: Path) -> 
     axes[0, 0].bar(np.arange(len(order)), nll, color="#496A81")
     axes[0, 0].set_xticks(np.arange(len(order)), order, rotation=40, ha="right")
     axes[0, 0].set_ylabel("NLL / count (lower is better)")
-    axes[0, 0].set_title("Real IBL held-out prediction")
+    axes[0, 0].set_title("a  Real IBL held-out prediction", loc="left")
 
     effects = summary.loc[
         summary["proposition"].eq("belief_condition_neural_prediction")
@@ -580,7 +617,7 @@ def _plot(raw: pd.DataFrame, summary: pd.DataFrame, *, png: Path, pdf: Path) -> 
     axes[0, 1].axvline(0.0, color="black", linewidth=0.8)
     axes[0, 1].set_yticks(y, effects["comparison"])
     axes[0, 1].set_xlabel("comparator NLL - MD shared NLL")
-    axes[0, 1].set_title("Animal/session nested contrasts")
+    axes[0, 1].set_title("b  Animal/session nested contrasts", loc="left")
 
     gate_conditions = [
         "md_shared",
@@ -602,7 +639,7 @@ def _plot(raw: pd.DataFrame, summary: pd.DataFrame, *, png: Path, pdf: Path) -> 
         np.arange(len(gate_conditions)), gate_conditions, rotation=40, ha="right"
     )
     axes[1, 0].set_ylabel("Context NLL")
-    axes[1, 0].set_title("Past-only belief evaluation")
+    axes[1, 0].set_title("c  Past-only belief evaluation", loc="left")
 
     model_conditions = ["common", "md_shared", "md_full"]
     parameters = [
@@ -615,11 +652,15 @@ def _plot(raw: pd.DataFrame, summary: pd.DataFrame, *, png: Path, pdf: Path) -> 
     axes[1, 1].bar(np.arange(3), parameters, color="#7A6A9A")
     axes[1, 1].set_xticks(np.arange(3), model_conditions)
     axes[1, 1].set_ylabel("Parameters")
-    axes[1, 1].set_title("Shared vs full complexity")
-    figure.suptitle("Exp20: belief-gated shared dynamics on real IBL blocks")
-    figure.tight_layout()
-    figure.savefig(png, dpi=180)
-    figure.savefig(pdf)
+    axes[1, 1].set_title("d  Shared vs full complexity", loc="left")
+    for axis in axes.flat:
+        axis.spines[["top", "right"]].set_visible(False)
+    figure.savefig(png, dpi=300, bbox_inches="tight")
+    figure.savefig(
+        pdf,
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     plt.close(figure)
 
 
@@ -627,20 +668,28 @@ def publish_snapshot(
     results_root: str | Path,
     config: Mapping[str, Any],
     *,
+    output_dir: str | Path | None = None,
     prefix: str = DEFAULT_PREFIX,
 ) -> Mapping[str, Path]:
     root = Path(results_root)
+    target = root if output_dir is None else Path(output_dir)
+    analysis = _analysis_provenance()
     raw, receipts = collect_formal_run(root, config)
     summary = summarize_formal_run(raw, config)
+    raw = raw.assign(**analysis)
+    summary = summary.assign(
+        raw_run_git_commit=receipts["git_commit"].iloc[0], **analysis
+    )
+    receipts = receipts.assign(**analysis)
     paths = {
-        "raw": root / f"{prefix}_raw.csv.gz",
-        "summary": root / f"{prefix}_summary.csv",
-        "receipts": root / f"{prefix}_run_manifest.csv",
-        "report": root / f"{prefix}_report.md",
-        "png": root / f"{prefix}.png",
-        "pdf": root / f"{prefix}.pdf",
+        "raw": target / f"{prefix}_raw.csv.gz",
+        "summary": target / f"{prefix}_summary.csv",
+        "receipts": target / f"{prefix}_run_manifest.csv",
+        "report": target / f"{prefix}_report.md",
+        "png": target / f"{prefix}.png",
+        "pdf": target / f"{prefix}.pdf",
     }
-    root.mkdir(parents=True, exist_ok=True)
+    target.mkdir(parents=True, exist_ok=True)
     _csv_safe(raw).to_csv(paths["raw"], index=False, compression="gzip")
     _csv_safe(summary).to_csv(paths["summary"], index=False)
     receipts.to_csv(paths["receipts"], index=False)
@@ -653,6 +702,7 @@ def publish_snapshot(
         "- Model: teacher-forced one-step conditional Poisson shared-basis dynamics, not a full LDS.",
         "- Mechanism boundary: these recordings do not establish E/I, Dale, or recurrent plasticity.",
         "- Truth capability: probabilityLeft is restricted to whole-block splitting and post-fit evaluation.",
+        f"- Raw-run commit: `{receipts['git_commit'].iloc[0]}`; analysis commit: `{analysis['analysis_git_commit']}`.",
         "",
         _markdown_table(
             summary[
@@ -677,10 +727,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results-root", default=str(PROJECT_ROOT / "results"))
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--output-dir", default=None)
     parser.add_argument("--prefix", default=DEFAULT_PREFIX)
     args = parser.parse_args()
     config = load_json_config(args.config)
-    publish_snapshot(args.results_root, config, prefix=args.prefix)
+    publish_snapshot(
+        args.results_root,
+        config,
+        output_dir=args.output_dir,
+        prefix=args.prefix,
+    )
 
 
 if __name__ == "__main__":

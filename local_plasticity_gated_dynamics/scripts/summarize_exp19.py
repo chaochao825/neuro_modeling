@@ -12,7 +12,9 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -94,6 +96,40 @@ def _environment_sha256(environment: Mapping[str, Any]) -> str:
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _analysis_provenance() -> dict[str, object]:
+    """Bind the generated snapshot to clean Python 3.11 analysis code."""
+
+    if sys.version_info[:2] != (3, 11):
+        raise ValueError("formal snapshot analysis must use Python 3.11")
+    repository = PROJECT_ROOT.parent
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError) as error:
+        raise ValueError("formal snapshot lacks Git analysis provenance") from error
+    if _COMMIT.fullmatch(commit) is None or status:
+        raise ValueError("formal snapshot analysis requires a clean Git commit")
+    return {
+        "analysis_git_commit": commit,
+        "analysis_script_sha256": _sha256(Path(__file__).resolve()),
+        "analysis_python": sys.version,
+    }
 
 
 def _expected_run_config(config: Mapping[str, Any], seed: int) -> dict[str, Any]:
@@ -710,51 +746,74 @@ def _markdown_table(frame: pd.DataFrame) -> str:
 
 
 def _plot(summary: pd.DataFrame, raw: pd.DataFrame, png: Path, pdf: Path) -> None:
-    behavior = summary.loc[summary["proposition"] == "heldout_behavior_fixed_checkpoint"]
+    behavior = summary.loc[
+        summary["multiplicity_family"] == "exp19_paired_behavior_wilcoxon"
+    ].copy()
     audits = summary.loc[summary["multiplicity_family"] == "none_registered_threshold"]
-    figure, axes = plt.subplots(1, 2, figsize=(12.0, 5.2), constrained_layout=True)
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(12.5, 5.5),
+        gridspec_kw={"width_ratios": (1.05, 1.0)},
+        constrained_layout=True,
+    )
     if len(behavior):
         y = np.arange(len(behavior))
         estimate = behavior["estimate"].to_numpy(dtype=float)
         low = behavior["ci_low"].to_numpy(dtype=float)
         high = behavior["ci_high"].to_numpy(dtype=float)
-        axes[0].errorbar(
-            estimate,
-            y,
-            xerr=np.vstack([estimate - low, high - estimate]),
-            fmt="o",
-            color="#2166ac",
-            capsize=3,
+        labels = behavior["comparison"].str.replace(f"{INTACT}_vs_", "")
+        labels = labels.mask(
+            labels.eq("direct_evidence_mix"),
+            "direct_evidence_mix (separate fit)",
         )
-        axes[0].set_yticks(y, behavior["comparison"].str.replace(f"{INTACT}_vs_", ""))
-        axes[0].axvline(0.0, color="black", linewidth=0.8)
-        axes[0].set_xlabel("paired-seed delta balanced accuracy (95% bootstrap CI)")
+        for index, (center, lower, upper, proposition) in enumerate(
+            zip(estimate, low, high, behavior["proposition"], strict=True)
+        ):
+            separate = proposition == "separate_train_only_baseline"
+            axes[0].errorbar(
+                center,
+                y[index],
+                xerr=np.asarray([[center - lower], [upper - center]]),
+                fmt="s" if separate else "o",
+                color="#b2182b" if separate else "#2166ac",
+                capsize=3,
+            )
+        axes[0].set_yticks(y, labels)
+        axes[0].axvline(0.0, color="0.25", linewidth=0.8, linestyle="--")
+        axes[0].set_xlabel("Intact - comparator balanced accuracy (95% CI)")
     else:
         axes[0].text(0.5, 0.5, "No complete paired behavior rows", ha="center")
-    axes[0].set_title("A. Held-out behavior (seed is the unit)")
+    axes[0].set_title("a  Held-out behavior (seed is the unit)", loc="left")
+    axes[0].spines[["top", "right"]].set_visible(False)
 
     axes[1].axis("off")
     audit_text = [
-        f"{row.proposition}: {str(row.conclusion).upper()}\n  {row.threshold}"
+        f"{row.proposition}: {str(row.conclusion).upper()}\n"
+        + textwrap.fill(
+            str(row.threshold),
+            width=52,
+            initial_indent="  ",
+            subsequent_indent="  ",
+        )
         for row in audits.itertuples()
     ]
     failure_count = int((raw["status"] != "complete").sum())
     axes[1].text(
         0.0,
         1.0,
-        "B. Registered mechanism boundaries\n\n"
+        "b  Registered mechanism boundaries\n\n"
         + "\n\n".join(audit_text)
         + f"\n\nRetained failed/invalid cells: {failure_count}",
         va="top",
-        fontsize=9,
+        fontsize=8.5,
     )
-    figure.suptitle(
-        "Exp19: predictive belief -> frozen high-rank Dale E/I receiver\n"
-        "Reduced dynamics = three-epoch mean-rate surrogate, not a full trajectory LDS",
-        fontsize=12,
+    figure.savefig(png, dpi=300, bbox_inches="tight")
+    figure.savefig(
+        pdf,
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
     )
-    figure.savefig(png, dpi=180)
-    figure.savefig(pdf)
     plt.close(figure)
 
 
@@ -766,8 +825,14 @@ def publish_snapshot(
     prefix: str = DEFAULT_PREFIX,
     n_bootstrap: int = 5000,
 ) -> dict[str, Path]:
+    analysis = _analysis_provenance()
     raw, receipts = collect_formal_runs(results_root, config)
     summary = summarize_formal_runs(raw, config, n_bootstrap=n_bootstrap)
+    raw = raw.assign(**analysis)
+    summary = summary.assign(
+        raw_run_git_commit=receipts["git_commit"].iloc[0], **analysis
+    )
+    receipts = receipts.assign(**analysis)
     target = Path(output_dir)
     target.mkdir(parents=True, exist_ok=True)
     paths = {
@@ -793,7 +858,8 @@ def publish_snapshot(
         f"- Retained failed/invalid cells: {failures}",
         "- Behavioral multiplicity: paired Wilcoxon tests, one Holm family; 95% seed bootstrap CIs.",
         "- Mechanism classification: preregistered thresholds from the formal config; no neuron or time-bin pseudo-replication.",
-        "- Population-only and disconnected are architectural, not input-charge-matched pathway controls; primary clamp/delay/shuffle timing interventions preserve the complementary pathway coefficient sum.",
+        "- Population-only and disconnected are architectural, not input-charge-matched pathway controls; primary clamp/delay/shuffle belief interventions preserve the complementary pathway coefficient sum.",
+        f"- Raw-run commit: `{receipts['git_commit'].iloc[0]}`; analysis commit: `{analysis['analysis_git_commit']}`.",
         "",
         "## Conclusions",
         "",

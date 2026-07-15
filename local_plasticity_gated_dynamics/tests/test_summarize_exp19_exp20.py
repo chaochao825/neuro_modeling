@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
+from matplotlib.axes import Axes
 
+import scripts.summarize_exp19 as exp19_summary_module
+import scripts.summarize_exp20 as exp20_summary_module
 from experiments.exp19_belief_ei_effective_dynamics import ALL_CONDITION_SPECS
 from experiments.exp20_ibl_md_belief_dynamics import MODEL_CONDITIONS
 from scripts.summarize_exp19 import (
@@ -13,11 +17,13 @@ from scripts.summarize_exp19 import (
 )
 from scripts.summarize_exp19 import _environment_sha256 as exp19_environment_sha256
 from scripts.summarize_exp19 import _markdown_table as exp19_markdown_table
+from scripts.summarize_exp19 import _plot as plot_exp19
 from scripts.summarize_exp19 import _validate_cross_seed_receipts
 from scripts.summarize_exp19 import summarize_formal_runs as summarize_exp19
 from scripts.summarize_exp20 import _environment_sha256 as exp20_environment_sha256
 from scripts.summarize_exp20 import _validate_outer_contract
 from scripts.summarize_exp20 import _markdown_table as exp20_markdown_table
+from scripts.summarize_exp20 import _plot as plot_exp20
 from scripts.summarize_exp20 import summarize_formal_run as summarize_exp20
 from scripts.integrate_exp19_exp20 import SUMMARY_COLUMNS, integrate
 
@@ -205,6 +211,195 @@ def test_publication_environment_requires_python311_and_bound_packages(validator
     assert len(validator({"python": "3.11.15 build", "packages": packages})) == 64
     with pytest.raises(ValueError, match="Python 3.11"):
         validator({"python": "3.10.16 build", "packages": packages})
+
+
+@pytest.mark.parametrize(
+    "module", [exp19_summary_module, exp20_summary_module]
+)
+def test_snapshot_provenance_requires_clean_analysis_commit(monkeypatch, module) -> None:
+    outputs = iter(["a" * 40 + "\n", ""])
+
+    def clean_run(*args, **kwargs):
+        return SimpleNamespace(stdout=next(outputs))
+
+    monkeypatch.setattr(module.subprocess, "run", clean_run)
+    receipt = module._analysis_provenance()
+    assert receipt["analysis_git_commit"] == "a" * 40
+    assert len(receipt["analysis_script_sha256"]) == 64
+
+    outputs = iter(["a" * 40 + "\n", " M results/report.md\n"])
+    with pytest.raises(ValueError, match="clean Git commit"):
+        module._analysis_provenance()
+
+
+def test_publication_plots_generate_raster_and_vector_outputs(
+    tmp_path: Path, monkeypatch
+) -> None:
+    exp19_summary = pd.DataFrame(
+        [
+            {
+                "proposition": "heldout_behavior_fixed_checkpoint",
+                "multiplicity_family": "exp19_paired_behavior_wilcoxon",
+                "comparison": "md_combined_intact_vs_md_combined_clamp",
+                "estimate": 0.1,
+                "ci_low": 0.04,
+                "ci_high": 0.13,
+                "conclusion": "support",
+                "threshold": 0.0,
+            },
+            {
+                "proposition": "separate_train_only_baseline",
+                "multiplicity_family": "exp19_paired_behavior_wilcoxon",
+                "comparison": "md_combined_intact_vs_direct_evidence_mix",
+                "estimate": -0.03,
+                "ci_low": -0.05,
+                "ci_high": -0.01,
+                "conclusion": "oppose",
+                "threshold": 0.0,
+            },
+            {
+                "proposition": "local_normal_perturbation_decay",
+                "multiplicity_family": "none_registered_threshold",
+                "comparison": "registered_threshold_audit",
+                "estimate": 0.5,
+                "ci_low": float("nan"),
+                "ci_high": float("nan"),
+                "conclusion": "oppose",
+                "threshold": "eligible_fraction>=0.9; decay<1.0; max_real_part<0.0",
+            },
+        ]
+    )
+    calls = []
+    original_errorbar = Axes.errorbar
+
+    def capture_errorbar(axis, *args, **kwargs):
+        calls.append((args, kwargs))
+        return original_errorbar(axis, *args, **kwargs)
+
+    monkeypatch.setattr(Axes, "errorbar", capture_errorbar)
+    plot_exp19(
+        exp19_summary,
+        pd.DataFrame([{"status": "complete"}]),
+        tmp_path / "exp19.png",
+        tmp_path / "exp19.pdf",
+    )
+    assert calls[0][1]["xerr"][0, 0] == pytest.approx(0.06)
+    assert calls[0][1]["xerr"][1, 0] == pytest.approx(0.03)
+    assert calls[1][1]["fmt"] == "s"
+    assert calls[1][1]["color"] == "#b2182b"
+
+    outer = pd.DataFrame(
+        [
+            {
+                "stage": "outer_test",
+                "status": "complete",
+                "condition": condition,
+                "nll_per_count": 1.0 + 0.01 * index,
+                "context_nll": 0.5 + 0.01 * index,
+                "parameter_count": 100 + index,
+            }
+            for index, condition in enumerate(MODEL_CONDITIONS)
+        ]
+    )
+    exp20_summary = pd.DataFrame(
+        [
+            {
+                "proposition": "belief_condition_neural_prediction",
+                "comparison": "md_shared_vs_common",
+                "estimate": 0.02,
+                "ci_low": -0.01,
+                "ci_high": 0.025,
+            }
+        ]
+    )
+    exp20_call_index = len(calls)
+    plot_exp20(
+        outer,
+        exp20_summary,
+        png=tmp_path / "exp20.png",
+        pdf=tmp_path / "exp20.pdf",
+    )
+    assert calls[exp20_call_index][1]["xerr"][0, 0] == pytest.approx(0.03)
+    assert calls[exp20_call_index][1]["xerr"][1, 0] == pytest.approx(0.005)
+    for name in ("exp19.png", "exp19.pdf", "exp20.png", "exp20.pdf"):
+        assert (tmp_path / name).stat().st_size > 1_000
+
+    plot_exp19(
+        exp19_summary,
+        pd.DataFrame([{"status": "complete"}]),
+        tmp_path / "exp19_repeat.png",
+        tmp_path / "exp19_repeat.pdf",
+    )
+    plot_exp20(
+        outer,
+        exp20_summary,
+        png=tmp_path / "exp20_repeat.png",
+        pdf=tmp_path / "exp20_repeat.pdf",
+    )
+    for prefix in ("exp19", "exp20"):
+        for suffix in ("png", "pdf"):
+            assert (tmp_path / f"{prefix}.{suffix}").read_bytes() == (
+                tmp_path / f"{prefix}_repeat.{suffix}"
+            ).read_bytes()
+
+
+def test_exp20_snapshot_separates_results_input_from_output(
+    tmp_path: Path, monkeypatch
+) -> None:
+    results_root = tmp_path / "raw_results"
+    output_dir = tmp_path / "snapshot"
+    observed = {}
+
+    def fake_collect(root, config):
+        observed["root"] = Path(root)
+        return (
+            pd.DataFrame([{"stage": "outer_test", "git_commit": "a" * 40}]),
+            pd.DataFrame([{"git_commit": "a" * 40}]),
+        )
+
+    summary = pd.DataFrame(
+        [
+            {
+                "proposition": "p",
+                "comparison": "c",
+                "estimate": 0.0,
+                "ci_low": -0.1,
+                "ci_high": 0.1,
+                "conclusion": "inconclusive",
+                "claim_scope": "test",
+            }
+        ]
+    )
+
+    def fake_plot(raw, scoped, *, png, pdf):
+        png.write_bytes(b"png")
+        pdf.write_bytes(b"pdf")
+
+    analysis = {
+        "analysis_git_commit": "b" * 40,
+        "analysis_script_sha256": "c" * 64,
+        "analysis_python": "3.11 test",
+    }
+    monkeypatch.setattr(exp20_summary_module, "_analysis_provenance", lambda: analysis)
+    monkeypatch.setattr(exp20_summary_module, "collect_formal_run", fake_collect)
+    monkeypatch.setattr(
+        exp20_summary_module, "summarize_formal_run", lambda raw, config: summary
+    )
+    monkeypatch.setattr(exp20_summary_module, "_plot", fake_plot)
+    paths = exp20_summary_module.publish_snapshot(
+        results_root,
+        {},
+        output_dir=output_dir,
+        prefix="scoped",
+    )
+    assert observed["root"] == results_root
+    assert not results_root.exists()
+    assert all(path.parent == output_dir for path in paths.values())
+    published = pd.read_csv(paths["summary"])
+    assert published["raw_run_git_commit"].iloc[0] == "a" * 40
+    assert published["analysis_git_commit"].iloc[0] == "b" * 40
+    report = paths["report"].read_text(encoding="utf-8")
+    assert "a" * 40 in report and "b" * 40 in report
 
 
 def _outer_rows() -> list[dict[str, object]]:
