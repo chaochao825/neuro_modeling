@@ -25,7 +25,12 @@ from scripts.summarize_exp20 import _validate_outer_contract
 from scripts.summarize_exp20 import _markdown_table as exp20_markdown_table
 from scripts.summarize_exp20 import _plot as plot_exp20
 from scripts.summarize_exp20 import summarize_formal_run as summarize_exp20
-from scripts.integrate_exp19_exp20 import SUMMARY_COLUMNS, integrate
+from scripts.integrate_exp19_exp20 import (
+    SUMMARY_COLUMNS,
+    _append_summary_rows,
+    _preserved_summary_prefix,
+    integrate,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -587,31 +592,14 @@ def test_exp20_summary_reuses_stored_animal_nested_inference() -> None:
 def test_scoped_claims_integrate_idempotently(tmp_path: Path) -> None:
     root = tmp_path / "results"
     root.mkdir()
-    existing = pd.DataFrame(
-        [
-            {
-                "claim_id": "old",
-                "experiment": "exp00",
-                "metric": "metric",
-                "comparison": "comparison",
-                "stats_unit": "seed",
-                "n_planned": 1,
-                "n_complete": 1,
-                "n_failed": 0,
-                "estimate": 0.0,
-                "ci_low": -1.0,
-                "ci_high": 1.0,
-                "effect_size": 0.0,
-                "p_value": 1.0,
-                "multiplicity_method": "none",
-                "conclusion": "inconclusive",
-                "criterion": "test",
-                "note": "existing",
-            }
-        ],
-        columns=SUMMARY_COLUMNS,
-    )
-    existing.to_csv(root / "summary.csv", index=False)
+    preserved_prefix = (
+        ",".join(SUMMARY_COLUMNS)
+        + "\n"
+        + 'old,exp00,metric,"comparison, quoted",seed,1,1,0,'
+        + "0.12345678901234567,-1.0000000000000002,1.0000000000000002,"
+        + '0.12345678901234567,1.0,none,inconclusive,test,"existing, exact"\n'
+    ).replace("\n", "\r\n").encode("utf-8")
+    (root / "summary.csv").write_bytes(preserved_prefix)
     (root / "report.md").write_text("# Report\n", encoding="utf-8")
     template = pd.DataFrame(
         [
@@ -648,6 +636,8 @@ def test_scoped_claims_integrate_idempotently(tmp_path: Path) -> None:
     ).to_csv(root / "exp20_ibl_md_belief_dynamics_formal_summary.csv", index=False)
     integrate(root)
     integrate(root)
+    integrated_bytes = (root / "summary.csv").read_bytes()
+    assert integrated_bytes.startswith(preserved_prefix)
     combined = pd.read_csv(root / "summary.csv")
     assert len(combined) == 3
     assert set(combined["experiment"]) == {
@@ -657,3 +647,34 @@ def test_scoped_claims_integrate_idempotently(tmp_path: Path) -> None:
     }
     report = (root / "report.md").read_text(encoding="utf-8")
     assert report.count("<!-- exp19-exp20:start -->") == 1
+
+
+def test_scoped_claims_reject_interleaved_history(tmp_path: Path) -> None:
+    root = tmp_path / "results"
+    root.mkdir()
+    header = ",".join(SUMMARY_COLUMNS)
+    row = ["value"] * len(SUMMARY_COLUMNS)
+    row[0] = "scoped"
+    row[1] = "exp19_belief_ei_effective_dynamics"
+    later = row.copy()
+    later[0] = "old"
+    later[1] = "exp00"
+    (root / "summary.csv").write_text(
+        "\n".join((header, ",".join(row), ",".join(later), "")),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="contiguous CSV suffix"):
+        _preserved_summary_prefix(root / "summary.csv")
+
+
+def test_scoped_claims_reject_multiline_generated_fields(tmp_path: Path) -> None:
+    summary_path = tmp_path / "summary.csv"
+    summary_path.write_text(",".join(SUMMARY_COLUMNS) + "\n", encoding="utf-8")
+    row = {column: "value" for column in SUMMARY_COLUMNS}
+    row["claim_id"] = "new"
+    row["experiment"] = "exp19_belief_ei_effective_dynamics"
+    row["note"] = "first line\nsecond line"
+    appended = pd.DataFrame([row], columns=SUMMARY_COLUMNS)
+
+    with pytest.raises(ValueError, match="must remain single-line"):
+        _append_summary_rows(summary_path, appended)

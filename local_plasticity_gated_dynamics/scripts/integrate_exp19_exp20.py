@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import re
 from pathlib import Path
 
@@ -117,6 +119,83 @@ def _markdown_table(frame: pd.DataFrame) -> str:
     return "\n".join((header, rule, *body))
 
 
+def _preserved_summary_prefix(
+    summary_path: Path,
+) -> tuple[bytes, str, list[list[str]]]:
+    """Return the exact unscoped prefix and reject unsafe CSV layouts.
+
+    The project summary predates these experiments, so reserializing it would
+    silently alter historical floating-point spellings and quoting.  Scoped
+    Exp19/Exp20 rows are therefore required to be a contiguous suffix; only
+    that suffix may be regenerated.
+    """
+
+    raw = summary_path.read_bytes()
+    if not raw:
+        raise ValueError("results/summary.csv is empty")
+    physical_lines = raw.splitlines(keepends=True)
+    parsed: list[list[str]] = []
+    for line_number, encoded_line in enumerate(physical_lines, start=1):
+        try:
+            line = encoded_line.decode("utf-8")
+            records = list(csv.reader([line], strict=True))
+        except (UnicodeDecodeError, csv.Error) as exc:
+            raise ValueError(
+                "results/summary.csv must be single-line UTF-8 CSV records; "
+                f"record {line_number} is invalid"
+            ) from exc
+        if len(records) != 1 or len(records[0]) != len(SUMMARY_COLUMNS):
+            raise ValueError(
+                "results/summary.csv must contain one complete record per physical line"
+            )
+        parsed.append(records[0])
+    if tuple(parsed[0]) != SUMMARY_COLUMNS:
+        raise ValueError("results/summary.csv schema differs from the registered report")
+
+    data_rows = parsed[1:]
+    scoped_indices = [
+        index for index, row in enumerate(data_rows) if row[1] in EXPERIMENTS
+    ]
+    if scoped_indices:
+        first_scoped = scoped_indices[0]
+        if scoped_indices != list(range(first_scoped, len(data_rows))):
+            raise ValueError("existing Exp19/Exp20 rows must form a contiguous CSV suffix")
+        retained_rows = data_rows[:first_scoped]
+        prefix = b"".join(physical_lines[: first_scoped + 1])
+    else:
+        retained_rows = data_rows
+        prefix = raw
+
+    first_line = physical_lines[0]
+    newline = "\r\n" if first_line.endswith(b"\r\n") else "\n"
+    if prefix and not prefix.endswith((b"\n", b"\r")):
+        prefix += newline.encode("ascii")
+    return prefix, newline, retained_rows
+
+
+def _append_summary_rows(
+    summary_path: Path,
+    appended: pd.DataFrame,
+) -> None:
+    prefix, newline, retained_rows = _preserved_summary_prefix(summary_path)
+    for row_index, row in appended.iterrows():
+        for column, value in row.items():
+            if isinstance(value, str) and ("\r" in value or "\n" in value):
+                raise ValueError(
+                    "integrated summary fields must remain single-line; "
+                    f"row {row_index}, column {column!r} contains a line break"
+                )
+    retained_ids = [row[0] for row in retained_rows]
+    appended_ids = appended["claim_id"].astype(str).tolist()
+    all_ids = retained_ids + appended_ids
+    if len(all_ids) != len(set(all_ids)):
+        raise ValueError("integrated claim IDs are not unique")
+
+    buffer = io.StringIO(newline="")
+    appended.to_csv(buffer, index=False, header=False, lineterminator=newline)
+    summary_path.write_bytes(prefix + buffer.getvalue().encode("utf-8"))
+
+
 def integrate(results_root: str | Path) -> tuple[Path, Path]:
     root = Path(results_root)
     summary_path = root / "summary.csv"
@@ -128,9 +207,6 @@ def integrate(results_root: str | Path) -> tuple[Path, Path]:
     if missing:
         raise FileNotFoundError(f"integration inputs are incomplete: {missing}")
 
-    existing = pd.read_csv(summary_path)
-    if tuple(existing.columns) != SUMMARY_COLUMNS:
-        raise ValueError("results/summary.csv schema differs from the registered report")
     exp19 = pd.read_csv(exp19_path)
     exp20 = pd.read_csv(exp20_path)
     scoped = pd.concat((exp19, exp20), ignore_index=True, sort=False)
@@ -143,11 +219,7 @@ def integrate(results_root: str | Path) -> tuple[Path, Path]:
         ),
         ignore_index=True,
     )
-    retained = existing.loc[~existing["experiment"].isin(EXPERIMENTS)]
-    combined = pd.concat((retained, appended), ignore_index=True)
-    if combined["claim_id"].duplicated().any():
-        raise ValueError("integrated claim IDs are not unique")
-    combined.to_csv(summary_path, index=False, lineterminator="\n")
+    _append_summary_rows(summary_path, appended)
 
     report = report_path.read_text(encoding="utf-8")
     if START in report or END in report:

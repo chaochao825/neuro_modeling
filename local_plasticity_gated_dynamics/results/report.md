@@ -474,3 +474,35 @@ The referenced Zenodo sequence-memory record currently reports `access_right=res
 - `results/exp16_tiny_recursive_smoke_3seed_{raw,conditions,comparison,run_manifest,report}`: strict-deterministic, clean-commit, synthetic-fixture smoke snapshot; formal promotion is disabled.
 - `results/exp17_wichtounet_3seed_{candidates,freeze_decision,run_manifest,report}` and `results/exp16_tiny_recursive_retry_3seed_{raw,conditions,comparison,run_manifest,report}`: validation-only freeze receipts and the independent three-seed public-Sudoku confirmation snapshot.
 - `results/core_results.pdf`, `results/phase_models.pdf`, `results/hidden_context.pdf`, `results/exp10_bridge_pilot.pdf`, `results/exp10_bridge_formal.pdf`, `results/exp11_ibl_behavior_real.pdf`, `results/exp13_{arc,maze,sudoku}_formal.pdf`, `results/exp14_ibl_multisession_neural_formal.pdf`, `results/exp15_arc_matched_formal.pdf`, and `results/exp16_tiny_recursive_{smoke,retry}_3seed.pdf`: script-generated data figures when applicable.
+
+<!-- exp19-exp20:start -->
+## Exp19/Exp20 belief-to-dynamics extension
+
+| claim_id | metric | comparison | estimate | conclusion | note |
+| --- | --- | --- | --- | --- | --- |
+| E19_00_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_combined_clamp | 0.1712964583915278 | support | heldout task behavior; fixed intact readout/dynamics checkpoints |
+| E19_01_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_combined_delay | 0.0199545345369851 | support | heldout task behavior; fixed intact readout/dynamics checkpoints |
+| E19_02_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_combined_shuffle | 0.1665348787852916 | support | heldout task behavior; fixed intact readout/dynamics checkpoints |
+| E19_03_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_population_only | 0.1804585898775704 | support | architectural ablation with fixed intact checkpoints; not input-charge-matched for pathway-specific causal attribution |
+| E19_04_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_pathway_only | 0.1105499590133952 | support | heldout task behavior; fixed intact readout/dynamics checkpoints |
+| E19_05_heldout_behavior_fixed_checkpoint | heldout_behavior_fixed_checkpoint | md_combined_intact_vs_md_disconnected | 0.2185127830166398 | support | architectural ablation with fixed intact checkpoints; not input-charge-matched for pathway-specific causal attribution |
+| E19_06_separate_train_only_baseline | separate_train_only_baseline | md_combined_intact_vs_direct_evidence_mix | -0.0420873269204947 | oppose | heldout task behavior; separately train-fitted scalar ridge baseline |
+| E19_07_high_rank_dale_physical_background | high_rank_dale_physical_background | registered_threshold_audit | 1.0 | support | physical recurrent matrix only; descriptive mechanism audit |
+| E19_08_filtered_gate_moment_anchor_identifiability | filtered_gate_moment_anchor_identifiability | registered_threshold_audit | 1.0 | support | training-cue moment-anchor identifiability; no hidden-state labels used |
+| E19_09_scalar_effective_control | scalar_effective_control | registered_threshold_audit | 1.395682905200155 | support | nonzero scalar control/operator family; behavior benefit is a separate paired-seed claim |
+| E19_10_coarse_shared_dynamics_closure | coarse_shared_dynamics_closure | registered_threshold_audit | 0.6347635020424369 | support | three-epoch mean-rate soft-operator surrogate; explicitly not a full LDS |
+| E19_11_local_normal_perturbation_decay | local_normal_perturbation_decay | registered_threshold_audit | 0.5666666666666667 | oppose | local linearization at intact training mean state only |
+| E20_00_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_common | -4.175279188634029e-06 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_01_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_hmm_shared | -3.600151883663138e-05 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_02_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_md_clamp | -7.763186133463718e-06 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_03_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_md_delay_1 | 0.0001043037589771 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_04_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_md_delay_5 | 0.0002660966721382 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_05_belief_condition_neural_prediction | belief_condition_neural_prediction | md_shared_vs_md_shuffle | 0.0002034270105116 | inconclusive | teacher-forced one-step conditional Poisson prediction |
+| E20_06_shared_basis_joint_registered_claim | shared_basis_joint_registered_claim | md_shared_vs_common_and_full | -4.175279188634029e-06 | inconclusive | joint shared-vs-common, full gain, retention, and parameter-count gate |
+| E20_07_belief_vs_behavior_bias_switch_timing_descriptive | belief_vs_behavior_bias_switch_timing_descriptive | md_belief_minus_causal_choice_history_bias_latency | -3.9708333333333337 | inconclusive | descriptive causal EWMA choice-bias proxy; not a neural-latent lead claim |
+| E20_08_past_only_truth_capability_contract | past_only_truth_capability_contract | registered_threshold_audit | 1.0 | support | data/timing capability audit only |
+
+Exp19 is a frozen high-rank Dale E/I sufficiency audit with a train-only three-epoch surrogate; it is not recurrent-plasticity or full-LDS evidence. Exp20 is a real-IBL teacher-forced conditional Poisson analysis; probabilityLeft is evaluation/split-only and the recordings cannot identify E/I.
+
+Generated scoped artifacts: `exp19_belief_ei_effective_dynamics_formal_*` and `exp20_ibl_md_belief_dynamics_formal_*`.
+<!-- exp19-exp20:end -->
