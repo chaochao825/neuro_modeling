@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
 from dataclasses import replace
 from pathlib import Path
 
@@ -31,6 +33,30 @@ from src.data.arc_recursive_dataset import (
 )
 from src.data.arc_tasks import load_arc_directory, score_arc_attempts
 from src.data.structured_protocol import CapabilityError
+
+
+def test_arc2_canary_manifest_is_byte_pinned() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = json.loads(
+        (root / "configs/formal/exp18_arc_recursive_arc2_canary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    manifest = root / config["data"]["manifest_path"]
+    assert hashlib.sha256(manifest.read_bytes()).hexdigest() == (
+        config["data"]["manifest_sha256"]
+    )
+    acquisition = json.loads(
+        (root / config["data"]["acquisition_manifest_path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert acquisition["arc_manifest_sha256"]["ARC-AGI-2"] == (
+        config["data"]["manifest_sha256"]
+    )
+    lines = manifest.read_text(encoding="utf-8").splitlines()
+    assert sum("  training/" in line for line in lines) == 1000
+    assert sum("  evaluation/" in line for line in lines) == 120
 
 
 def test_exp18_smoke_run_persists_all_conditions(tmp_path: Path) -> None:
@@ -65,6 +91,74 @@ def test_exp18_smoke_run_persists_all_conditions(tmp_path: Path) -> None:
     assert all(path.is_file() for path in published.values())
     figures = plot_exp18(tmp_path / "published", prefix="exp18_unit")
     assert all(path.is_file() for path in figures.values())
+
+    tampered = tmp_path / "tampered_target_access"
+    shutil.copytree(run_path, tampered)
+    metric_rows = (tampered / "metrics.jsonl").read_text(encoding="utf-8").splitlines()
+    payload = json.loads(metric_rows[0])
+    payload["query_targets_used"] = True
+    metric_rows[0] = json.dumps(payload, sort_keys=True)
+    (tampered / "metrics.jsonl").write_text(
+        "\n".join(metric_rows) + "\n", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="target-free"):
+        publish_snapshot(
+            (tampered,), tmp_path / "rejected", prefix="exp18_rejected"
+        )
+
+    mixed = tmp_path / "mixed_dataset"
+    shutil.copytree(run_path, mixed)
+    manifest = json.loads((mixed / "manifest.json").read_text(encoding="utf-8"))
+    manifest["run_id"] = "independent-run-id"
+    (mixed / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    mixed_rows = [
+        json.loads(line)
+        for line in (mixed / "metrics.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    for row in mixed_rows:
+        row["run_id"] = "independent-run-id"
+    (mixed / "metrics.jsonl").write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in mixed_rows) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="one exact run per independent seed"):
+        publish_snapshot(
+            (run_path, mixed), tmp_path / "retry_rejected", prefix="exp18_retry"
+        )
+    mixed_config = json.loads((mixed / "config.json").read_text(encoding="utf-8"))
+    mixed_status = json.loads((mixed / "status.json").read_text(encoding="utf-8"))
+    mixed_config["seed"] = 1
+    mixed_status["seed"] = 1
+    manifest["seed"] = 1
+    for row in mixed_rows:
+        row["seed"] = 1
+    (mixed / "config.json").write_text(
+        json.dumps(mixed_config, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    (mixed / "status.json").write_text(
+        json.dumps(mixed_status, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    (mixed / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    (mixed / "metrics.jsonl").write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in mixed_rows) + "\n",
+        encoding="utf-8",
+    )
+    provenance = json.loads(
+        (mixed / "source_provenance.json").read_text(encoding="utf-8")
+    )
+    provenance["dataset_name"] = "ARC-AGI-2"
+    provenance["source_revision"] = "different-revision"
+    (mixed / "source_provenance.json").write_text(
+        json.dumps(provenance, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="cannot mix"):
+        publish_snapshot(
+            (run_path, mixed), tmp_path / "mixed_rejected", prefix="exp18_mixed"
+        )
 
 
 def _write_task(path: Path, *, offset: int) -> None:
@@ -141,6 +235,18 @@ def test_attempt_scorer_allows_querywise_top_two_but_fails_closed() -> None:
     result = score_arc_attempts(None, too_many, targets)  # type: ignore[arg-type]
     assert not result["exact"]
     assert result["too_many_attempts"]
+    invalid = {"attempts": ((np.asarray([[1.0]]), np.asarray([[2.0]])),)}
+    result = score_arc_attempts(None, invalid, targets)  # type: ignore[arg-type]
+    assert not result["exact"]
+    assert result["best_cell_accuracy"] == 0.0
+    extra_output = {
+        "attempts": (
+            (np.asarray([[1]]), np.asarray([[2]]), np.asarray([[3]])),
+        )
+    }
+    result = score_arc_attempts(None, extra_output, targets)  # type: ignore[arg-type]
+    assert not result["exact"]
+    assert result["malformed_attempts"] == (True,)
 
 
 def test_arc_examples_split_tasks_and_never_expose_test_query(tmp_path: Path) -> None:

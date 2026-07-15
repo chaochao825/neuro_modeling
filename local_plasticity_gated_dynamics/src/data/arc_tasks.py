@@ -96,6 +96,26 @@ def _prediction_outputs(prediction: object, *, n_queries: int) -> tuple[object, 
     return tuple(prediction)
 
 
+def _grid_comparison(candidate: object, expected: np.ndarray) -> tuple[bool, bool, float]:
+    """Validate one submitted ARC grid before computing diagnostics."""
+
+    try:
+        values = np.asarray(candidate)
+    except (TypeError, ValueError):
+        return False, False, 0.0
+    valid = (
+        values.ndim == 2
+        and values.dtype.kind in {"i", "u"}
+        and not np.any((values < 0) | (values > 9))
+    )
+    if not valid:
+        return False, False, 0.0
+    shape_exact = values.shape == expected.shape
+    exact = shape_exact and np.array_equal(values, expected)
+    cell_accuracy = float(np.mean(values == expected)) if shape_exact else 0.0
+    return bool(exact), bool(shape_exact), cell_accuracy
+
+
 def score_arc_prediction(
     task: PublicTask, prediction: object, target: object
 ) -> Mapping[str, object]:
@@ -109,13 +129,9 @@ def score_arc_prediction(
         if index >= len(outputs):
             query_exact.append(False)
             continue
-        try:
-            candidate = np.asarray(outputs[index])
-            exact = candidate.shape == expected.shape and np.array_equal(
-                candidate, expected
-            )
-        except (TypeError, ValueError):
-            exact = False
+        exact, _shape_exact, _cell_accuracy = _grid_comparison(
+            outputs[index], expected
+        )
         query_exact.append(bool(exact))
     complete = len(outputs) == len(targets) and bool(targets)
     all_exact = complete and all(query_exact)
@@ -170,6 +186,7 @@ def score_arc_attempts(
         _prediction_outputs(attempt, n_queries=len(targets))
         for attempt in accepted_attempts
     )
+    malformed_attempts = tuple(len(outputs) != len(targets) for outputs in parsed)
     query_exact: list[bool] = []
     query_winning_attempt: list[int | None] = []
     query_shape_exact: list[bool] = []
@@ -184,17 +201,9 @@ def score_arc_attempts(
             if query_index >= len(outputs):
                 attempt_exact[attempt_index].append(False)
                 continue
-            try:
-                candidate = np.asarray(outputs[query_index])
-                shape_exact = candidate.shape == expected.shape
-                exact = shape_exact and np.array_equal(candidate, expected)
-                cell_accuracy = (
-                    float(np.mean(candidate == expected)) if shape_exact else 0.0
-                )
-            except (TypeError, ValueError):
-                shape_exact = False
-                exact = False
-                cell_accuracy = 0.0
+            exact, shape_exact, cell_accuracy = _grid_comparison(
+                outputs[query_index], expected
+            )
             attempt_exact[attempt_index].append(bool(exact))
             shape_solved |= bool(shape_exact)
             best_cell_accuracy = max(best_cell_accuracy, cell_accuracy)
@@ -208,7 +217,12 @@ def score_arc_attempts(
         query_winning_attempt.append(winner)
         query_shape_exact.append(shape_solved)
         query_best_cell_accuracy.append(best_cell_accuracy)
-    all_exact = bool(targets) and all(query_exact) and not too_many_attempts
+    all_exact = (
+        bool(targets)
+        and all(query_exact)
+        and not too_many_attempts
+        and not any(malformed_attempts)
+    )
     return {
         "prediction_provided": prediction is not None,
         "n_queries": len(targets),
@@ -216,6 +230,7 @@ def score_arc_attempts(
         "n_attempts_scored": len(accepted_attempts),
         "max_attempts": max_attempts,
         "too_many_attempts": too_many_attempts,
+        "malformed_attempts": malformed_attempts,
         "query_exact_count": int(sum(query_exact)),
         "query_exact_fraction": (float(np.mean(query_exact)) if query_exact else 0.0),
         "query_exact": tuple(query_exact),

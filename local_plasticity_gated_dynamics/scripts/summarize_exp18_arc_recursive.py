@@ -39,6 +39,26 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
     run_id = str(manifest.get("run_id", ""))
     if not run_id:
         raise ValueError(f"{run_dir} has no run_id")
+    seed = int(config["seed"])
+    if int(status.get("seed", -1)) != seed or int(manifest.get("seed", -1)) != seed:
+        raise ValueError(f"{run_dir} has inconsistent seed provenance")
+    if status.get("status") not in {"complete", "complete_with_failures"}:
+        raise ValueError(f"{run_dir} is partial or failed: {status.get('status')!r}")
+    planned_path = run_dir / "planned_conditions.json"
+    planned = json.loads(planned_path.read_text(encoding="utf-8"))
+    if not isinstance(planned, list) or not planned:
+        raise ValueError(f"{run_dir} has no planned condition/task panel")
+    planned_keys: list[tuple[str, str]] = []
+    for row in planned:
+        if not isinstance(row, dict):
+            raise ValueError(f"{run_dir} has malformed planned conditions")
+        condition = row.get("condition")
+        task_id = row.get("task_id")
+        if not isinstance(condition, str) or not isinstance(task_id, str):
+            raise ValueError(f"{run_dir} planned panel lacks condition/task IDs")
+        planned_keys.append((condition, task_id))
+    if len(planned_keys) != len(set(planned_keys)):
+        raise ValueError(f"{run_dir} planned panel contains duplicates")
     metrics = [
         json.loads(line)
         for line in (run_dir / "metrics.jsonl").read_text(encoding="utf-8").splitlines()
@@ -47,23 +67,63 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
     for row in metrics:
         if row.get("run_id") != run_id:
             raise ValueError(f"{run_dir} mixes run IDs")
+        if int(row.get("seed", -1)) != seed:
+            raise ValueError(f"{run_dir} mixes independent seeds")
         row["published_run_path"] = str(run_dir.resolve())
     if not metrics:
-        metrics.append(
-            {
-                "run_id": run_id,
-                "experiment": EXPERIMENT,
-                "seed": int(config["seed"]),
-                "level": "run_status",
-                "status": status.get("status"),
-                "published_run_path": str(run_dir.resolve()),
-            }
-        )
+        raise ValueError(f"{run_dir} completed without metrics")
+    task_rows = [row for row in metrics if row.get("level") == "task"]
+    observed_keys = [
+        (str(row.get("condition")), str(row.get("task_id"))) for row in task_rows
+    ]
+    if len(observed_keys) != len(set(observed_keys)) or set(observed_keys) != set(
+        planned_keys
+    ):
+        raise ValueError(f"{run_dir} task metrics do not match the planned panel")
+    if any(row.get("query_targets_used") is not False for row in task_rows):
+        raise ValueError(f"{run_dir} does not prove target-free task inference")
+    planned_conditions = {condition for condition, _task_id in planned_keys}
+    summaries = [row for row in metrics if row.get("level") == "condition_summary"]
+    if (
+        {str(row.get("condition")) for row in summaries} != planned_conditions
+        or len(summaries) != len(planned_conditions)
+    ):
+        raise ValueError(f"{run_dir} condition summaries are incomplete")
+    for summary in summaries:
+        condition = str(summary["condition"])
+        expected_count = sum(key[0] == condition for key in planned_keys)
+        if (
+            int(summary.get("n_tasks", -1)) != expected_count
+            or summary.get("query_targets_used") is not False
+        ):
+            raise ValueError(f"{run_dir} has an invalid condition summary")
     provenance_path = run_dir / "source_provenance.json"
     fit_path = run_dir / "fit_receipts.json"
+    provenance = _json_object(provenance_path)
+    data_config = dict(config.get("data", {}))
+    if (
+        provenance.get("test_query_targets_used_for_fit_or_tta") is not False
+        or provenance.get("inner_validation_query_targets_used_for_selection")
+        is not False
+        or not bool(data_config.get("attempt_aware_scoring", False))
+    ):
+        raise ValueError(f"{run_dir} provenance does not prove target isolation")
+    if str(config.get("profile")) == "formal":
+        expected_source = {
+            "dataset_name": data_config.get("dataset_name"),
+            "source_revision": data_config.get("revision"),
+            "manifest_sha256": data_config.get("manifest_sha256"),
+        }
+        if any(provenance.get(key) != value for key, value in expected_source.items()):
+            raise ValueError(f"{run_dir} config and source provenance are not bound")
+        if (
+            provenance.get("source_manifest_verified") is not True
+            or provenance.get("source_acquisition_verified") is not True
+        ):
+            raise ValueError(f"{run_dir} formal source verification is incomplete")
     receipt = {
         "run_id": run_id,
-        "seed": int(config["seed"]),
+        "seed": seed,
         "profile": str(config.get("profile", "unspecified")),
         "evidence_stage": str(config.get("evidence_stage", "unspecified")),
         "run_status": str(status.get("status")),
@@ -72,6 +132,7 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
         "published_run_path": str(run_dir.resolve()),
         "config_sha256": _sha256(run_dir / "config.json"),
         "metrics_sha256": _sha256(run_dir / "metrics.jsonl"),
+        "planned_conditions_sha256": _sha256(planned_path),
         "fit_receipts_sha256": _sha256(fit_path) if fit_path.is_file() else None,
         "source_provenance_sha256": (
             _sha256(provenance_path) if provenance_path.is_file() else None
@@ -80,6 +141,11 @@ def _load_run(run_dir: Path) -> tuple[list[dict[str, object]], dict[str, object]
             config.get("formal_claim_promotion_enabled", False)
         ),
         "protocol": str(config.get("protocol", "unspecified")),
+        "planned_task_conditions": len(planned_keys),
+        "query_targets_verified_false": True,
+        "dataset_name": str(provenance.get("dataset_name", "unspecified")),
+        "dataset_revision": str(provenance.get("source_revision", "unspecified")),
+        "source_manifest_sha256": provenance.get("manifest_sha256"),
     }
     return metrics, receipt
 
@@ -159,6 +225,19 @@ def publish_snapshot(
         receipts.append(receipt)
     raw = pd.DataFrame(all_metrics)
     manifest = pd.DataFrame(receipts).sort_values(["seed", "run_id"])
+    if manifest["seed"].duplicated().any():
+        raise ValueError("Exp18 snapshots require one exact run per independent seed")
+    dataset_keys = set(
+        zip(
+            manifest["dataset_name"].astype(str),
+            manifest["dataset_revision"].astype(str),
+            strict=True,
+        )
+    )
+    if len(dataset_keys) != 1:
+        raise ValueError("Exp18 snapshots cannot mix ARC datasets or revisions")
+    if not manifest["query_targets_verified_false"].all():
+        raise ValueError("Exp18 snapshot contains an unverified target-access run")
     condition_rows = raw.loc[raw.get("level", pd.Series(dtype=str)).eq("condition_summary")].copy()
     comparison_rows = raw.loc[raw.get("level", pd.Series(dtype=str)).eq("registered_comparison")].copy()
     if not condition_rows.empty:
@@ -175,6 +254,8 @@ def publish_snapshot(
         "",
         f"- Exact runs: {len(manifest)}",
         f"- Seeds: {', '.join(str(value) for value in manifest['seed'].tolist())}",
+        f"- Dataset/revision: {manifest['dataset_name'].iloc[0]} / "
+        f"{manifest['dataset_revision'].iloc[0]}",
         f"- Protocols: {', '.join(sorted(set(manifest['protocol'].astype(str))))}",
         f"- Run failures/invalid: {int(manifest['condition_failures'].sum())}/"
         f"{int(manifest['condition_invalid'].sum())}",
@@ -207,4 +288,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
