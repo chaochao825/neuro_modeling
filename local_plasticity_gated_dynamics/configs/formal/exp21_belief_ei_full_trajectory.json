@@ -50,12 +50,10 @@
     "subspace_dim": 4
   },
   "perturbation": {
+    "geometry": "joint_state_pca_physical_x_projection_v2",
     "horizon_steps": 10,
     "amplitude_fractions": [0.01, 0.03, 0.05],
     "n_references": 32,
-    "derivative_tolerance": 1e-8,
-    "tangent_pullback_residual_tolerance": 0.05,
-    "minimum_initial_normal_purity": 0.80,
     "baseline_replay_tolerance": 1e-10
   },
   "attractor_probe": {

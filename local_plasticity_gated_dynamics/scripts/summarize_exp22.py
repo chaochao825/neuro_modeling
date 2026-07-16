@@ -856,25 +856,26 @@ def _exact_sign_p(values: np.ndarray) -> float:
     return float(min(1.0, 2.0 * tail / (2 ** int(nonzero.size))))
 
 
-def _exact_sign_p_greater(values: np.ndarray) -> float:
-    nonzero = values[np.abs(values) > np.finfo(np.float64).eps]
-    if nonzero.size == 0:
-        return 1.0
-    positives = int(np.count_nonzero(nonzero > 0.0))
-    tail = sum(
-        math.comb(int(nonzero.size), k) for k in range(positives, int(nonzero.size) + 1)
-    )
-    return float(tail / (2 ** int(nonzero.size)))
-
-
 def _holm(values: Sequence[float]) -> np.ndarray:
+    """Holm-adjust a fixed planned family, treating missing tests as p=1."""
+
     p = np.asarray(values, dtype=float)
-    adjusted = np.full_like(p, np.nan)
-    finite = np.flatnonzero(np.isfinite(p))
+    if p.ndim != 1:
+        raise ValueError("Holm p-values must be a one-dimensional planned family")
+    if bool(np.isinf(p).any()):
+        raise ValueError("Holm p-values must be finite or NaN")
+    finite = np.isfinite(p)
+    if bool(((p[finite] < 0.0) | (p[finite] > 1.0)).any()):
+        raise ValueError("finite Holm p-values must lie in [0, 1]")
+    planned = np.where(np.isnan(p), 1.0, p)
+    adjusted = np.empty_like(planned)
     running = 0.0
-    ordered = finite[np.argsort(p[finite])]
+    ordered = np.argsort(planned, kind="stable")
     for rank, index in enumerate(ordered):
-        running = max(running, min(1.0, (len(finite) - rank) * p[index]))
+        running = max(
+            running,
+            min(1.0, (len(planned) - rank) * planned[index]),
+        )
         adjusted[index] = running
     return adjusted
 
@@ -957,13 +958,14 @@ def _effect_row(
         "conclusion": "inconclusive",
         "claim_scope": (
             "held-out behavior after a development-trajectory off-policy "
-            "three-factor proposal; not closed-loop local learning and "
-            "recurrent weights are bitwise frozen"
+            f"three-factor proposal within the {panel.upper()}-budget-matched "
+            "panel only; not evidence for the other norm, not closed-loop local "
+            "learning, and recurrent weights are bitwise frozen"
             if role == "primary"
             else (
-                "fixed-feedback 90-degree orthogonal negative control; "
-                "diagnostic only, truth-free, and never sufficient for the "
-                "main claim"
+                "fixed-feedback 90-degree orthogonal negative control within "
+                f"the {panel.upper()}-budget-matched panel only; diagnostic, "
+                "truth-free, and never sufficient for the main claim"
             )
         ),
         "control_role": role,
@@ -1011,9 +1013,7 @@ def _oracle_row(
         seed=2_220_022 + 104729 * index,
     )
     lower_margin = -float(maximum_gap)
-    p_value = (
-        _exact_sign_p_greater(values - lower_margin) if values.size else float("nan")
-    )
+    p_value = _exact_sign_p(values - lower_margin) if values.size else float("nan")
     return {
         "experiment": EXPERIMENT,
         "proposition": "oracle_third_factor_upper_bound_gap",
@@ -1036,7 +1036,8 @@ def _oracle_row(
         "conclusion": "inconclusive",
         "claim_scope": (
             "development-hidden-context oracle third factor is an upper bound; "
-            "this margin result cannot establish the local mechanism alone"
+            f"this {panel.upper()}-budget-matched margin result cannot establish "
+            "the local mechanism or generalize to the other norm"
         ),
         "control_role": "upper_bound",
     }
@@ -1055,7 +1056,7 @@ def _classify_oracle_rows(
         )
         if enough and row["ci_low"] > row["threshold"] and p_holm < 0.05:
             row["conclusion"] = "support"
-        elif enough and row["ci_high"] < row["threshold"]:
+        elif enough and row["ci_high"] < row["threshold"] and p_holm < 0.05:
             row["conclusion"] = "oppose"
 
 
@@ -1125,9 +1126,10 @@ def _joint_row(
         "conclusion": conclusion,
         "claim_scope": (
             "joint held-out behavior specificity for a frozen-trajectory "
-            "off-policy gain-axis proposal that is also within the registered "
-            "oracle margin; explicitly not closed-loop local learning or "
-            "recurrent plasticity"
+            f"off-policy gain-axis proposal in the {panel.upper()}-budget-"
+            "matched panel that is also within the registered oracle margin; "
+            "does not generalize to the other norm and is explicitly not "
+            "closed-loop local learning or recurrent plasticity"
         ),
         "control_role": "joint_primary",
     }
@@ -1674,7 +1676,9 @@ def write_snapshot_artifacts(
             "orthogonal, and oracle proposal cells are selected-norm "
             "budget-matched within each panel; frozen_zero has a zero update "
             "budget and is an on/off baseline, not a matched-budget cell. The "
-            "unselected norm is diagnostic only."
+            "unselected norm is diagnostic only. An L2 conclusion is therefore "
+            "conditional on L2-budget matching and must not be generalized to "
+            "L1, and vice versa."
         ),
         (
             "- Oracle-third-factor and truth-free 90-degree orthogonal cells "
@@ -1700,6 +1704,13 @@ def write_snapshot_artifacts(
             "and the registered oracle noninferiority margin for the joint claim "
             "to support. Raw accuracy has no registered threshold and remains "
             "descriptive/inconclusive."
+        ),
+        (
+            "- Bootstrap intervals target the mean seed-level effect, whereas "
+            "the exact sign test checks cross-seed directional consistency. "
+            "Support or opposition requires both the corresponding interval and "
+            "the Holm-adjusted sign test; an inconclusive row can therefore "
+            "coexist with an adverse mean confidence interval."
         ),
         "",
         "## Conclusions",
@@ -1734,8 +1745,12 @@ def write_snapshot_artifacts(
         textwrap.fill(
             "Held-out balanced-accuracy contrasts are paired within seed. The "
             "three primary comparisons per panel use deterministic seed "
-            "bootstrap intervals, exact sign tests, and one Holm family across "
-            "both panels. The joint claim can support only when the aligned "
+            "bootstrap intervals for the mean effect, exact sign tests for "
+            "cross-seed directional consistency, and one fixed Holm family "
+            "across both panels. Missing tests enter as p=1 without shrinking "
+            "the planned family. Both the corresponding mean interval and the "
+            "Holm-adjusted sign test must pass for support or opposition. The "
+            "joint claim can support only when the aligned "
             "off-policy proposal supports all comparisons against frozen, "
             "random-signed, and shuffled feedback, meets the registered absolute "
             "balanced-accuracy threshold, and supports the registered oracle "
@@ -1747,7 +1762,9 @@ def write_snapshot_artifacts(
             "establish the mechanism alone. Failed and scientifically ineligible "
             "seeds remain visible in the raw snapshot. The registered absolute "
             "balanced-accuracy threshold, relative primary claims, and oracle "
-            "margin are joined through AND, never OR.",
+            "margin are joined through AND, never OR. Every panel-level conclusion "
+            "is conditional on its selected-norm budget match and does not "
+            "generalize to the other norm.",
             width=96,
         ),
         "",

@@ -63,6 +63,12 @@ from src.utils.reproducibility import derive_seed
 
 
 EXPERIMENT = "exp21_belief_ei_full_trajectory"
+PROTOCOL_VERSION = "exp21_v2"
+PERTURBATION_GEOMETRY = "joint_state_pca_physical_x_projection_v2"
+PERTURBATION_REPORT_SCOPE = "physical_x_projection_finite_amplitude_recovery"
+PERTURBATION_REFERENCE_FRACTION_POLICY = (
+    "sampled_over_planned_eligible_sampled_over_sampled_eligible_reference_over_planned"
+)
 GATE_TIMING = exp19.GATE_TIMING
 GATE_MODEL_NAME = exp19.GATE_MODEL_NAME
 CONDITION = {
@@ -93,7 +99,7 @@ def _fingerprint(label: str, *values: object) -> str:
 
 def _protocol_id(config: dict[str, Any]) -> str:
     payload = {key: value for key, value in config.items() if key != "config_path"}
-    return _fingerprint("exp21-full-trajectory-protocol-v1", payload)
+    return _fingerprint("exp21-full-trajectory-protocol-v2", payload)
 
 
 def _require_trajectory(
@@ -205,7 +211,7 @@ def _fit_dynamics_bundle(
         train_control_belief,
         train_epoch,
         belief_conditioned=True,
-        operator_mode="full",
+        operator_mode="full_shared_neutral_cue",
         pca_solver=str(options.get("pca_solver", "randomized")),
         pca_seed=pca_seed,
         **common,
@@ -342,6 +348,22 @@ def _fit_dynamics_bundle(
             f"{prefix}_total_operator_design_full_rank": (
                 total_full.operator_design_rank == total_full.operator_design_columns
             ),
+            f"{prefix}_total_operator_unconstrained_columns": (
+                total_full.operator_unconstrained_columns
+            ),
+            f"{prefix}_total_operator_identifiable_columns": (
+                total_full.operator_design_columns
+            ),
+            f"{prefix}_total_operator_constraint": total_full.operator_constraint,
+            f"{prefix}_total_operator_mode": total_full.operator_mode,
+            f"{prefix}_total_operator_identifiability_fingerprint": _fingerprint(
+                "exp21-total-operator-identifiability-v2",
+                total_full.operator_mode,
+                total_full.operator_unconstrained_columns,
+                total_full.operator_design_columns,
+                total_full.operator_constraint,
+                total_full.training_trajectory_fingerprint,
+            ),
             f"{prefix}_total_full_parameter_count": total_full.parameter_count,
             f"{prefix}_raw_common_parameter_count": raw_common.parameter_count,
             f"{prefix}_routed_common_parameter_count": (routed_common.parameter_count),
@@ -412,6 +434,9 @@ def _perturbation_metrics(
     test_values = _require_trajectory(test)
     train_x = _require_trajectory(train)[0]
     options = dict(config["perturbation"])
+    geometry = str(options.get("geometry", ""))
+    if geometry != PERTURBATION_GEOMETRY:
+        raise ValueError(f"perturbation.geometry must equal {PERTURBATION_GEOMETRY!r}")
     train_scale = float(np.sqrt(np.mean(np.var(train_x[:, 1:], axis=(0, 1)))))
     fractions = tuple(float(item) for item in options["amplitude_fractions"])
     amplitudes = tuple(train_scale * item for item in fractions)
@@ -431,13 +456,6 @@ def _perturbation_metrics(
             amplitudes=amplitudes,
             n_references=int(options["n_references"]),
             seed=derive_seed(seed, "exp21", prefix, "nonlinear-perturbation"),
-            derivative_tolerance=float(options.get("derivative_tolerance", 1e-8)),
-            tangent_pullback_residual_tolerance=float(
-                options.get("tangent_pullback_residual_tolerance", 0.05)
-            ),
-            minimum_initial_normal_purity=float(
-                options.get("minimum_initial_normal_purity", 0.8)
-            ),
             baseline_replay_tolerance=float(
                 options.get("baseline_replay_tolerance", 1e-10)
             ),
@@ -447,6 +465,11 @@ def _perturbation_metrics(
             f"{prefix}_perturbation_error": None,
             f"{prefix}_perturbation_train_x_scale": train_scale,
             f"{prefix}_perturbation_amplitude_fractions": list(fractions),
+            f"{prefix}_perturbation_geometry": geometry,
+            f"{prefix}_perturbation_report_scope": PERTURBATION_REPORT_SCOPE,
+            f"{prefix}_perturbation_reference_fraction_policy": (
+                PERTURBATION_REFERENCE_FRACTION_POLICY
+            ),
             **{
                 f"{prefix}_perturbation_{key}": value
                 for key, value in asdict(summary).items()
@@ -458,6 +481,11 @@ def _perturbation_metrics(
             f"{prefix}_perturbation_error": (f"{type(error).__name__}: {error}"),
             f"{prefix}_perturbation_train_x_scale": train_scale,
             f"{prefix}_perturbation_amplitude_fractions": list(fractions),
+            f"{prefix}_perturbation_geometry": geometry,
+            f"{prefix}_perturbation_report_scope": PERTURBATION_REPORT_SCOPE,
+            f"{prefix}_perturbation_reference_fraction_policy": (
+                PERTURBATION_REFERENCE_FRACTION_POLICY
+            ),
         }
     return result
 
@@ -495,7 +523,7 @@ def _attractor_metrics(
     return {
         "attractor_anchor_fit_scope": "training_trajectory_only",
         "attractor_anchor_indices_fingerprint": _fingerprint(
-            "exp21-attractor-anchor-indices-v1", indices
+            "exp21-attractor-anchor-indices-v2", indices
         ),
         **{f"attractor_{key}": value for key, value in asdict(summary).items()},
     }
@@ -532,8 +560,9 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
     run_config = {
         **config,
         "training_algorithm": (
-            "md_filtered_belief_full_substep_controlled_affine_koopman_audit"
+            "md_filtered_belief_full_substep_controlled_affine_koopman_audit_v2"
         ),
+        "experiment_protocol_version": PROTOCOL_VERSION,
         "used_autograd": False,
         "used_bptt": False,
         "recurrent_learning": False,
@@ -562,7 +591,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
             network = exp19._network(config, task, seed)
             initial_weights = network.recurrent_weights
             network_id = _fingerprint(
-                "exp21-frozen-dale-ei-network-v1",
+                "exp21-frozen-dale-ei-network-v2",
                 initial_weights,
                 network.input_weights,
                 network.excitatory_mask,
@@ -574,7 +603,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
                 network.excitatory_mask,
                 seed=derive_seed(seed, "exp19", "gain-axis"),
             )
-            gain_axis_id = _fingerprint("exp21-exp19-matched-gain-axis-v1", gain_axis)
+            gain_axis_id = _fingerprint("exp21-exp19-matched-gain-axis-v2", gain_axis)
             gate = MDRecurrentBeliefGate(
                 seed=derive_seed(seed, "exp19", "md-gate"),
                 **dict(config["md_gate"]),
@@ -587,7 +616,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
             ):
                 raise RuntimeError("held-out belief gate accessed hidden context")
             gate_checkpoint_id = _fingerprint(
-                "exp21-exp19-matched-gate-v1",
+                "exp21-exp19-matched-gate-v2",
                 train_prediction.parameters,
                 train_prediction.fit_trial_ids,
                 train_prediction.fit_episode_ids,
@@ -735,6 +764,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
                 {
                     **primary_behavior,
                     "profile": str(config.get("profile", "unspecified")),
+                    "experiment_protocol_version": PROTOCOL_VERSION,
                     "training_algorithm": run_config["training_algorithm"],
                     "used_autograd": False,
                     "used_bptt": False,
@@ -796,7 +826,7 @@ def run_seed(config: dict[str, Any], seed: int, results_root: str | Path) -> Pat
                     "experiment_protocol_id": _protocol_id(config),
                     "planned_condition_count": 1,
                     "planned_condition_grid_id": _fingerprint(
-                        "exp21-planned-grid-v1", CONDITION
+                        "exp21-planned-grid-v2", CONDITION
                     ),
                     "receiver_raw_sensory_input_policy": (
                         "two_sensory_channels_without_cue_channels"

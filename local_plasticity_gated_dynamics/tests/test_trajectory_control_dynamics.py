@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from src.analysis.trajectory_control_dynamics import (
     belief_manifold_geometry,
     fit_trajectory_koopman,
     fixed_drive_attractor_probe,
+    nonlinear_perturbation_recovery,
     persistence_trajectory_score,
 )
 from src.models.belief_gain import balanced_gain_axis
@@ -188,6 +190,398 @@ def _shared_controlled_system(
         n_steps,
     )
     return x, rates, controls, belief, epoch
+
+
+def _operator_identifiability_system(
+    *,
+    seed: int,
+    neutral_cue: bool,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    rng = np.random.default_rng(seed)
+    n_sequences = 32
+    n_steps = 16
+    n_units = 8
+    x_scale = np.geomspace(0.2, 3.0, n_units)
+    x = rng.normal(size=(n_sequences, n_steps + 1, n_units)) * x_scale
+    rates = np.maximum(np.tanh(x), 0.0)
+    controls = rng.normal(size=(n_sequences, n_steps, 2))
+    epoch = np.resize(
+        np.array(["cue", "sensory", "delay", "response"], dtype="U8"),
+        n_steps,
+    )
+    belief = rng.uniform(0.1, 0.9, size=(n_sequences, n_steps))
+    cue = epoch == "cue"
+    if neutral_cue:
+        belief[:, cue] = 0.5
+    else:
+        cue_values = np.where(np.arange(n_sequences) % 2 == 0, 0.2, 0.8)
+        belief[:, cue] = cue_values[:, None]
+    return x, rates, controls, belief, epoch
+
+
+def _negative_zero_weight_replay():
+    n_units = 6
+    n_sequences = 5
+    n_steps = 6
+    network = EIRateNetwork(
+        n_units,
+        n_inputs=2,
+        excitatory_fraction=0.5,
+        connection_probability=0.0,
+        tau_e=20.0,
+        tau_i=20.0,
+        dt=5.0,
+        input_scale=0.0,
+        activation="rectified_tanh",
+        seed=2,
+    )
+    rng = np.random.default_rng(91)
+    controls = np.zeros((n_sequences, n_steps, 2), dtype=float)
+    belief = np.full((n_sequences, n_steps), 0.5, dtype=float)
+    epoch = np.resize(
+        np.array(["sensory", "delay", "response"], dtype="U8"),
+        n_steps,
+    )
+    x = np.empty((n_sequences, n_steps + 1, n_units), dtype=float)
+    rates = np.empty_like(x)
+    for sequence in range(n_sequences):
+        state = network.initial_state(-1.0 - rng.uniform(size=n_units))
+        x[sequence, 0] = state.x
+        rates[sequence, 0] = state.rates
+        for time in range(n_steps):
+            state = network.step(
+                state,
+                controls[sequence, time],
+                gain=np.ones(n_units),
+            ).state
+            x[sequence, time + 1] = state.x
+            rates[sequence, time + 1] = state.rates
+    fitted = fit_trajectory_koopman(
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        integration_substeps=1,
+        latent_dim=2,
+        normalize_activity=True,
+        belief_conditioned=False,
+        operator_mode="common",
+    )
+    return (
+        network,
+        fitted,
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        np.zeros(n_units, dtype=float),
+    )
+
+
+def test_neutral_cue_constraint_resolves_the_registered_rank_deficiency() -> None:
+    trajectories = _operator_identifiability_system(seed=44, neutral_cue=True)
+    generic = fit_trajectory_koopman(
+        *trajectories,
+        integration_substeps=1,
+        latent_dim=4,
+        ridge=1e-8,
+        normalize_activity=True,
+        belief_conditioned=True,
+        operator_mode="full",
+    )
+    constrained = fit_trajectory_koopman(
+        *trajectories,
+        integration_substeps=1,
+        latent_dim=4,
+        ridge=1e-8,
+        normalize_activity=True,
+        belief_conditioned=True,
+        operator_mode="full_shared_neutral_cue",
+        shared_preprocessing=generic,
+    )
+
+    assert generic.operator_design_rank == 19
+    assert generic.operator_design_columns == 20
+    assert generic.operator_unconstrained_columns == 20
+    assert generic.operator_constraint == "none"
+    assert constrained.operator_design_rank == 19
+    assert constrained.operator_design_columns == 19
+    assert constrained.operator_unconstrained_columns == 20
+    assert constrained.operator_constraint == "shared_neutral_cue_coefficient"
+    cue_coefficient = constrained.latent_dim + constrained.n_inputs
+    np.testing.assert_array_equal(
+        constrained.operator_state0[cue_coefficient],
+        constrained.operator_state1[cue_coefficient],
+    )
+    np.testing.assert_allclose(
+        constrained.operator_state0,
+        generic.operator_state0,
+        atol=2e-7,
+        rtol=1e-7,
+    )
+    np.testing.assert_allclose(
+        constrained.operator_state1,
+        generic.operator_state1,
+        atol=2e-7,
+        rtol=1e-7,
+    )
+    generic_score = generic.score(*trajectories)
+    constrained_score = constrained.score(*trajectories)
+    assert constrained_score.one_step_normalized_mse == pytest.approx(
+        generic_score.one_step_normalized_mse,
+        abs=1e-14,
+    )
+    assert constrained_score.rollout_normalized_rmse == pytest.approx(
+        generic_score.rollout_normalized_rmse,
+        abs=1e-14,
+    )
+
+
+def test_generic_full_is_identifiable_when_cue_belief_varies() -> None:
+    trajectories = _operator_identifiability_system(seed=45, neutral_cue=False)
+    fitted = fit_trajectory_koopman(
+        *trajectories,
+        integration_substeps=1,
+        latent_dim=4,
+        ridge=1e-8,
+        normalize_activity=True,
+        belief_conditioned=True,
+        operator_mode="full",
+    )
+
+    assert fitted.operator_design_rank == 20
+    assert fitted.operator_design_columns == 20
+    assert fitted.operator_unconstrained_columns == 20
+    assert fitted.operator_constraint == "none"
+    with pytest.raises(ValueError, match="requires exact cue belief 0.5"):
+        fit_trajectory_koopman(
+            *trajectories,
+            integration_substeps=1,
+            latent_dim=4,
+            normalize_activity=True,
+            belief_conditioned=True,
+            operator_mode="full_shared_neutral_cue",
+        )
+
+
+def test_physical_x_tangent_basis_uses_raw_coordinates_and_is_rotation_invariant() -> (
+    None
+):
+    trajectories = _shared_controlled_system(
+        seed=18,
+        n_sequences=16,
+        n_steps=8,
+    )
+    fitted = fit_trajectory_koopman(
+        *trajectories,
+        integration_substeps=1,
+        latent_dim=2,
+        normalize_activity=True,
+    )
+    n_units = fitted.n_units
+    components = np.zeros((2, 2 * n_units), dtype=float)
+    components[0, 0] = 0.5
+    components[0, 2] = 0.5
+    components[0, n_units] = np.sqrt(0.5)
+    components[1, 1] = 0.5
+    components[1, 3] = 0.5
+    components[1, n_units + 1] = np.sqrt(0.5)
+    scale = np.ones(2 * n_units, dtype=float)
+    scale[:n_units] = np.array([1.0, 1.0, 4.0, 2.0])
+    state_pca = replace(
+        fitted.state_pca,
+        components_=components,
+        scale_=scale,
+    )
+    scaled = replace(fitted, state_pca=state_pca)
+
+    geometry = scaled.physical_x_tangent_basis
+    raw_joint = scale[:, None] * components.T
+    expected_left, expected_singular, _ = np.linalg.svd(
+        raw_joint[:n_units],
+        full_matrices=False,
+    )
+    expected_projector = expected_left[:, :2] @ expected_left[:, :2].T
+    actual_projector = geometry.basis @ geometry.basis.T
+    np.testing.assert_allclose(actual_projector, expected_projector, atol=1e-12)
+    np.testing.assert_allclose(
+        geometry.singular_values,
+        expected_singular,
+        atol=1e-12,
+    )
+    assert geometry.x_block_energy_fraction == pytest.approx(
+        np.sum(raw_joint[:n_units] ** 2) / np.sum(raw_joint**2)
+    )
+    standardized_left, _, _ = np.linalg.svd(
+        components.T[:n_units],
+        full_matrices=False,
+    )
+    standardized_projector = standardized_left[:, :2] @ standardized_left[:, :2].T
+    assert not np.allclose(actual_projector, standardized_projector)
+
+    angle = 0.37
+    rotation = np.array(
+        [
+            [np.cos(angle), -np.sin(angle)],
+            [np.sin(angle), np.cos(angle)],
+        ]
+    )
+    rotated = replace(
+        scaled,
+        state_pca=replace(state_pca, components_=rotation @ components),
+    )
+    rotated_basis = rotated.physical_x_tangent_basis.basis
+    np.testing.assert_allclose(
+        rotated_basis @ rotated_basis.T,
+        actual_projector,
+        atol=1e-12,
+    )
+
+
+def test_rank_deficient_physical_x_projection_fails_closed() -> None:
+    (
+        network,
+        fitted,
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        gain_axis,
+    ) = _negative_zero_weight_replay()
+    components = np.zeros_like(fitted.state_pca.components_)
+    components[0, 0] = 1.0
+    components[1, fitted.n_units] = 1.0
+    rank_deficient = replace(
+        fitted,
+        state_pca=replace(fitted.state_pca, components_=components),
+    )
+
+    assert rank_deficient.physical_x_tangent_basis.rank == 1
+    with pytest.raises(ValueError, match="physical-x projection.*rank-deficient"):
+        nonlinear_perturbation_recovery(
+            network,
+            rank_deficient,
+            x,
+            rates,
+            controls,
+            belief,
+            epoch,
+            gain_axis,
+            gain_strength=0.0,
+            integration_substeps=1,
+            horizon_steps=2,
+            amplitudes=(0.001,),
+            n_references=4,
+            seed=7,
+        )
+
+
+def test_physical_x_recovery_covers_rectified_inactive_states_and_matches_leak() -> (
+    None
+):
+    (
+        network,
+        fitted,
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        gain_axis,
+    ) = _negative_zero_weight_replay()
+    common = dict(
+        gain_strength=0.0,
+        integration_substeps=1,
+        horizon_steps=2,
+        amplitudes=(0.001, 0.002),
+        n_references=25,
+        seed=11,
+        baseline_replay_tolerance=1e-12,
+    )
+    first = nonlinear_perturbation_recovery(
+        network,
+        fitted,
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        gain_axis,
+        **common,
+    )
+    second = nonlinear_perturbation_recovery(
+        network,
+        fitted,
+        x,
+        rates,
+        controls,
+        belief,
+        epoch,
+        gain_axis,
+        **common,
+    )
+
+    assert np.all(x < 0.0)
+    np.testing.assert_array_equal(rates, 0.0)
+    assert first == second
+    assert first.tangent_basis_space == ("train_joint_state_pca_physical_x_projection")
+    assert first.tangent_basis_rank == fitted.latent_dim
+    assert first.candidate_reference_count == 20
+    assert first.sampled_reference_count == 20
+    assert first.planned_reference_count == 25
+    assert first.eligible_reference_count == 20
+    assert first.sampled_reference_fraction == pytest.approx(0.8)
+    assert first.eligible_sampled_reference_fraction == pytest.approx(1.0)
+    assert first.eligible_reference_fraction == pytest.approx(0.8)
+    assert first.normal_perturbation_count == 80
+    contraction = abs(1.0 - network.dt / 20.0) ** first.horizon_steps
+    assert first.normal_endpoint_ratio_median == pytest.approx(
+        contraction,
+        abs=2e-13,
+    )
+    assert first.normal_endpoint_ratio_maximum == pytest.approx(
+        contraction,
+        abs=2e-13,
+    )
+    assert first.tangent_endpoint_ratio_median == pytest.approx(
+        contraction,
+        abs=2e-13,
+    )
+    assert first.initial_normal_purity_median == pytest.approx(1.0, abs=1e-13)
+    assert first.initial_tangent_purity_median == pytest.approx(1.0, abs=1e-13)
+    assert first.baseline_replay_max_abs_error == 0.0
+
+    corrupted_x = np.array(x, copy=True)
+    corrupted_x[0, 2, 0] += 1e-4
+    with pytest.raises(RuntimeError, match="baseline replay differs"):
+        nonlinear_perturbation_recovery(
+            network,
+            fitted,
+            corrupted_x,
+            rates,
+            controls,
+            belief,
+            epoch,
+            gain_axis,
+            **common,
+        )
+    corrupted_rates = np.array(rates, copy=True)
+    corrupted_rates[0, 2, 0] = 1e-4
+    with pytest.raises(RuntimeError, match="baseline replay differs"):
+        nonlinear_perturbation_recovery(
+            network,
+            fitted,
+            x,
+            corrupted_rates,
+            controls,
+            belief,
+            epoch,
+            gain_axis,
+            **common,
+        )
 
 
 def test_belief_koopman_beats_common_and_persistence_on_heldout_sequences() -> None:

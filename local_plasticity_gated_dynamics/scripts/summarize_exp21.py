@@ -35,6 +35,10 @@ DEFAULT_PREFIX = "exp21_belief_ei_full_trajectory_formal"
 TERMINAL_RUN_STATUS = {"complete", "complete_with_failures"}
 ROW_STATUS = {"complete", "failed", "invalid"}
 GAIN_FAMILY = "Holm(exp21_trial_reset_seed_sign_family)"
+PROTOCOL_VERSION = "exp21_v2"
+TRAINING_ALGORITHM = (
+    "md_filtered_belief_full_substep_controlled_affine_koopman_audit_v2"
+)
 _COMMIT = re.compile(r"[0-9a-f]{40}")
 _DIGEST = re.compile(r"[0-9a-f]{64}")
 _ENVIRONMENT_PACKAGES = (
@@ -243,9 +247,8 @@ def _expected_run_config(config: Mapping[str, Any], seed: int) -> dict[str, Any]
         "experiment": EXPERIMENT,
         "seed": int(seed),
         **dict(config),
-        "training_algorithm": (
-            "md_filtered_belief_full_substep_controlled_affine_koopman_audit"
-        ),
+        "experiment_protocol_version": PROTOCOL_VERSION,
+        "training_algorithm": TRAINING_ALGORITHM,
         "used_autograd": False,
         "used_bptt": False,
         "recurrent_learning": False,
@@ -554,15 +557,86 @@ def _exact_sign_p(values: np.ndarray) -> float:
 
 
 def _holm(values: Sequence[float]) -> np.ndarray:
+    """Holm-adjust a fixed planned family, treating missing tests as p=1."""
+
     p = np.asarray(values, dtype=float)
-    adjusted = np.full_like(p, np.nan)
-    finite = np.flatnonzero(np.isfinite(p))
+    if p.ndim != 1:
+        raise ValueError("Holm p-values must be a one-dimensional planned family")
+    if bool(np.isinf(p).any()):
+        raise ValueError("Holm p-values must be finite or NaN")
+    finite = np.isfinite(p)
+    if bool(((p[finite] < 0.0) | (p[finite] > 1.0)).any()):
+        raise ValueError("finite Holm p-values must lie in [0, 1]")
+    planned = np.where(np.isnan(p), 1.0, p)
+    adjusted = np.empty_like(planned)
     running = 0.0
-    ordered = finite[np.argsort(p[finite])]
+    ordered = np.argsort(planned, kind="stable")
     for rank, index in enumerate(ordered):
-        running = max(running, min(1.0, (len(finite) - rank) * p[index]))
+        running = max(
+            running,
+            min(1.0, (len(planned) - rank) * planned[index]),
+        )
         adjusted[index] = running
     return adjusted
+
+
+def _v2_protocol_receipt(frame: pd.DataFrame) -> pd.Series:
+    """Identify exact v2 collection provenance without defining claim validity."""
+
+    return frame.get(
+        "experiment_protocol_version",
+        pd.Series("", index=frame.index),
+    ).eq(PROTOCOL_VERSION) & frame.get(
+        "training_algorithm",
+        pd.Series("", index=frame.index),
+    ).eq(TRAINING_ALGORITHM)
+
+
+def _total_operator_v2_receipt(
+    frame: pd.DataFrame,
+    *,
+    prefix: str,
+) -> pd.Series:
+    """Require the identifiable 19-column neutral-cue operator definition."""
+
+    eligible = frame.get(
+        f"{prefix}_total_operator_mode",
+        pd.Series("", index=frame.index),
+    ).eq("full_shared_neutral_cue")
+    eligible &= frame.get(
+        f"{prefix}_total_operator_constraint",
+        pd.Series("", index=frame.index),
+    ).eq("shared_neutral_cue_coefficient")
+    design_rank = _numeric(frame, f"{prefix}_total_operator_design_rank")
+    design_columns = _numeric(frame, f"{prefix}_total_operator_design_columns")
+    unconstrained_columns = _numeric(
+        frame,
+        f"{prefix}_total_operator_unconstrained_columns",
+    )
+    eligible &= (
+        design_rank.eq(19.0) & design_columns.eq(19.0) & unconstrained_columns.eq(20.0)
+    )
+    if "total_control_operator_mode" in frame:
+        eligible &= frame["total_control_operator_mode"].eq("full_shared_neutral_cue")
+    return eligible
+
+
+def _perturbation_v2_receipt(
+    frame: pd.DataFrame,
+    *,
+    prefix: str,
+) -> pd.Series:
+    """Require the physical-x perturbation definition and planned coverage."""
+
+    geometry = frame.get(
+        f"{prefix}_perturbation_geometry",
+        pd.Series("", index=frame.index),
+    ).eq("joint_state_pca_physical_x_projection_v2")
+    sampled_fraction = _numeric(
+        frame,
+        f"{prefix}_perturbation_sampled_reference_fraction",
+    )
+    return geometry & np.isfinite(sampled_fraction) & (sampled_fraction >= 1.0 - 1e-12)
 
 
 def _gain_rows(
@@ -573,6 +647,7 @@ def _gain_rows(
     n_bootstrap: int,
 ) -> list[dict[str, Any]]:
     minimum = float(thresholds["minimum_controlled_gain"])
+    trial_total_v2 = _total_operator_v2_receipt(complete, prefix="trial_reset")
     shared = _true(complete, "trial_reset_paired_models_share_state_pca")
     primary_scope = complete.get(
         "trial_reset_trajectory_sequence_scope",
@@ -595,7 +670,8 @@ def _gain_rows(
         rtol=1e-8,
     )
     total_valid = (
-        shared
+        trial_total_v2
+        & shared
         & primary_scope
         & _true(complete, "trial_reset_total_operator_design_full_rank")
         & complete.get(
@@ -802,10 +878,16 @@ def _audit_rows(
     n_planned: int,
     thresholds: Mapping[str, float],
 ) -> list[dict[str, Any]]:
+    trial_total_v2 = _total_operator_v2_receipt(complete, prefix="trial_reset")
+    trial_perturbation_v2 = _perturbation_v2_receipt(
+        complete,
+        prefix="trial_reset",
+    )
     closure = _numeric(complete, "trial_reset_total_full_rollout_normalized_rmse")
     closure_limit = float(thresholds["maximum_rollout_normalized_rmse"])
     closure_eligible = (
-        np.isfinite(closure)
+        trial_total_v2
+        & np.isfinite(closure)
         & _true(complete, "trial_reset_total_operator_design_full_rank")
         & _true(complete, "trial_reset_paired_models_share_state_pca")
     )
@@ -850,7 +932,9 @@ def _audit_rows(
         complete, "trial_reset_perturbation_candidate_reference_count"
     )
     perturbation_eligible = (
-        perturbation_complete
+        trial_total_v2
+        & trial_perturbation_v2
+        & perturbation_complete
         & np.isfinite(eligible_fraction)
         & np.isfinite(endpoint_ratio)
         & np.isfinite(growth)
@@ -929,8 +1013,9 @@ def _audit_rows(
                 "exact baseline replay and full planned reference coverage"
             ),
             scope=(
-                "finite-amplitude finite-time recovery relative to a train-rate PCA "
-                "tangent control; not an asymptotic Lyapunov exponent"
+                "finite-amplitude recovery normal to the physical-x projection "
+                "of the train-fitted joint latent subspace; not proof of a joint "
+                "manifold, global or asymptotic Lyapunov stability, or an attractor"
             ),
             n_planned=n_planned,
         ),
@@ -946,8 +1031,10 @@ def _audit_rows(
                 "for every seed"
             ),
             scope=(
-                "finite-horizon combined pathway-plus-population control probe on "
-                "training-derived anchors; not proof of global attractors"
+                "narrow finite-horizon combined-actuator endpoint-separation "
+                "sanity probe on training-derived anchors; does not support gate "
+                "causality, low-dimensional or shared-manifold dynamics, or "
+                "attractor claims"
             ),
             n_planned=n_planned,
         ),
@@ -1247,6 +1334,39 @@ def write_snapshot_artifacts(
         for column in ("seed", "status", "error_type", "error", "reason")
         if column in failures
     ]
+    claim_ineligible = summary.loc[
+        summary["n_eligible"].astype(int) < summary["n_planned"].astype(int),
+        [
+            "proposition",
+            "comparison",
+            "n_complete",
+            "n_eligible",
+            "n_planned",
+            "conclusion",
+        ],
+    ]
+    complete_rows = raw_sorted.loc[raw_sorted["status"].eq("complete")]
+    v2_protocol_count = int(np.count_nonzero(_v2_protocol_receipt(complete_rows)))
+    trial_operator_count = int(
+        np.count_nonzero(
+            _total_operator_v2_receipt(complete_rows, prefix="trial_reset")
+        )
+    )
+    trial_perturbation_count = int(
+        np.count_nonzero(_perturbation_v2_receipt(complete_rows, prefix="trial_reset"))
+    )
+    episode_sensitivity_count = int(
+        np.count_nonzero(
+            _total_operator_v2_receipt(
+                complete_rows,
+                prefix="episode_continuous",
+            )
+            & _perturbation_v2_receipt(
+                complete_rows,
+                prefix="episode_continuous",
+            )
+        )
+    )
     report = [
         "# Exp21: belief-controlled high-rank E/I full-trajectory audit",
         "",
@@ -1257,7 +1377,31 @@ def write_snapshot_artifacts(
         "",
         f"- Registered independent seeds: {len(_planned_seeds(config))}",
         f"- Complete seeds: {int(raw_sorted['status'].eq('complete').sum())}",
-        f"- Retained failed/invalid seeds: {len(failures)}",
+        (
+            f"- Retained failed/invalid seeds: {len(failures)} "
+            "(run-level execution status)"
+        ),
+        (
+            "- Claim-level scientifically ineligible conclusion rows: "
+            f"{len(claim_ineligible)} of {len(summary)}"
+        ),
+        (
+            "- Exact v2 collection-provenance seeds: "
+            f"{v2_protocol_count} of {len(_planned_seeds(config))}"
+        ),
+        (
+            "- Trial-reset identifiable total-operator receipts: "
+            f"{trial_operator_count} of {len(_planned_seeds(config))}"
+        ),
+        (
+            "- Trial-reset physical-x perturbation receipts: "
+            f"{trial_perturbation_count} of {len(_planned_seeds(config))}"
+        ),
+        (
+            "- Episode-continuous v2 sensitivity receipts: "
+            f"{episode_sensitivity_count} of {len(_planned_seeds(config))} "
+            "(reported only; never gates trial-reset conclusions)"
+        ),
         *provenance_lines,
         (
             f"- Registered latent dimension: d={_registered_latent_dim(config)} "
@@ -1274,7 +1418,20 @@ def write_snapshot_artifacts(
         ),
         (
             "- The nonlinear endpoint metric is finite-amplitude and finite-time; "
-            "the fixed-drive probe is not evidence for global attractors."
+            "the fixed-drive result is only a narrow combined-actuator endpoint-"
+            "separation sanity probe. It does not support gate causality, low-"
+            "dimensional or shared-manifold dynamics, or attractor claims."
+        ),
+        (
+            "- Claim-level eligibility is definition-specific. Total-control gain "
+            "and closure require the trial-reset 19-column "
+            "full_shared_neutral_cue operator; perturbation additionally requires "
+            "joint_state_pca_physical_x_projection_v2 with full sampled-reference "
+            "coverage. State-affine and fixed-drive measurements are not gated by "
+            "unrelated total-operator, perturbation, or episode-sensitivity "
+            "receipts. Historical v1 rows supplied directly to this audit remain "
+            "readable for claims whose scientific definition did not change, "
+            "while the formal collector selects exact v2 run configurations."
         ),
         "",
         "## Conclusions",
@@ -1299,16 +1456,26 @@ def write_snapshot_artifacts(
         "",
         (_markdown_table(failures[failure_columns]) if len(failures) else "None."),
         "",
+        "## Claim-level scientific ineligibility",
+        "",
+        (
+            _markdown_table(claim_ineligible)
+            if len(claim_ineligible)
+            else "None; every conclusion row had all planned seed-level measurements."
+        ),
+        "",
         "## Classification rule",
         "",
         textwrap.fill(
             "The two rollout-gain claims use the independent seed as the paired "
             "unit, deterministic bootstrap confidence intervals, exact sign "
-            "tests, and one Holm family. Registered mechanism audits require "
-            "complete, identifiable measurements for every planned seed. Rows "
-            "explicitly retained as failed or invalid, and scientifically "
-            "ineligible rows, therefore yield an inconclusive result rather than "
-            "support. A completely absent registered attempt aborts collection.",
+            "tests, and one fixed two-hypothesis Holm family. A missing or "
+            "scientifically ineligible hypothesis is entered as p=1 and still "
+            "occupies its planned family slot. Registered mechanism audits require "
+            "complete, identifiable measurements for every planned seed. Run-level "
+            "failures and claim-level scientific ineligibility are reported "
+            "separately; either prevents support for the affected claim. A "
+            "completely absent registered attempt aborts collection.",
             width=96,
         ),
         "",

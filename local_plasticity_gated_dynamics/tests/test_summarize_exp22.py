@@ -16,6 +16,7 @@ from scripts.summarize_exp22 import (
     ORTHOGONAL,
     _environment_sha256,
     _expected_run_config,
+    _holm,
     _require_formal_registration,
     _validate_publication_provenance,
     collect_registered_runs,
@@ -269,6 +270,13 @@ def _joint(summary: pd.DataFrame) -> pd.DataFrame:
     ]
 
 
+def test_exp22_holm_keeps_nan_in_the_planned_family() -> None:
+    adjusted = _holm([0.03, float("nan")])
+    assert adjusted.tolist() == pytest.approx([0.06, 1.0])
+    with pytest.raises(ValueError, match=r"lie in \[0, 1\]"):
+        _holm([-0.01, 0.2])
+
+
 def test_exp22_positive_and_negative_seed_panels_are_fail_closed() -> None:
     config = _config()
     supported = summarize_formal_runs(_raw(config), config, n_bootstrap=200)
@@ -393,6 +401,26 @@ def test_exp22_oracle_margin_failure_opposes_joint_only() -> None:
     assert set(oracle_rows["conclusion"]) == {"oppose"}
 
 
+def test_exp22_adverse_oracle_requires_holm_adjusted_sign_consistency() -> None:
+    config = _config()
+    raw = _raw(config)
+    l1_oracle = raw["condition"].eq("oracle_third_factor_l1")
+    l2_oracle = raw["condition"].eq("oracle_third_factor_l2")
+    raw.loc[l1_oracle & raw["seed"].lt(21), "behavior_balanced_accuracy"] = 0.90
+    raw.loc[l1_oracle & raw["seed"].ge(21), "behavior_balanced_accuracy"] = 0.849
+    raw.loc[l2_oracle, "behavior_balanced_accuracy"] = 0.85
+
+    summary = summarize_formal_runs(raw, config, n_bootstrap=500)
+    oracle_l1 = summary.loc[
+        summary["comparison"].eq("aligned_local_l1_vs_oracle_third_factor")
+    ].iloc[0]
+
+    assert oracle_l1["ci_high"] < oracle_l1["threshold"]
+    assert oracle_l1["p_value"] == pytest.approx(0.04277394525706768)
+    assert oracle_l1["holm_adjusted_p"] == pytest.approx(0.08554789051413536)
+    assert oracle_l1["conclusion"] == "inconclusive"
+
+
 def test_exp22_orthogonal_epoch_angle_receipt_is_fail_closed() -> None:
     config = _config()
     raw = _raw(config)
@@ -506,6 +534,10 @@ def test_exp22_snapshot_is_deterministic_and_never_claims_local_learning(
     report = first["report"].read_text(encoding="utf-8")
     assert "off-policy" in report
     assert "no conclusion is a claim of online local plasticity" in report
+    assert "conditional on L2-budget matching" in report
+    assert "must not be generalized to L1" in report
+    assert "Bootstrap intervals target the mean seed-level effect" in report
+    assert "exact sign test checks cross-seed directional consistency" in report
     assert "retained failure" in report
     for name in ("png", "pdf"):
         assert first[name].stat().st_size > 1_000

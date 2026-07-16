@@ -7,9 +7,11 @@ prediction and free multi-step rollout on disjoint held-out episodes.
 
 The nonlinear perturbation audit uses the frozen physical E/I checkpoint.  It
 does not infer stability from PCA variance: perturbations are injected into
-the network state and replayed with identical future inputs and gains.  PCA,
-normalization, operators, belief-conditioned subspaces, and all reference
-scales are fitted from training trajectories only.
+physical ``x`` coordinates tangent or normal to the x projection of the same
+train-fitted joint ``[x, rates]`` basis, then replayed with identical future
+inputs and gains.  PCA, normalization, operators, belief-conditioned
+subspaces, and all reference scales are fitted from training trajectories
+only.
 """
 
 from __future__ import annotations
@@ -270,6 +272,62 @@ def _soft_design(
     )
 
 
+def _shared_neutral_cue_expansion(*, block_columns: int, cue_column: int) -> FloatArray:
+    """Map one shared cue coefficient into two endpoint operator blocks."""
+
+    block = _positive_int(block_columns, name="block_columns")
+    if (
+        isinstance(cue_column, (bool, np.bool_))
+        or not isinstance(cue_column, (int, np.integer))
+        or not 0 <= int(cue_column) < block
+    ):
+        raise ValueError("cue_column must index one endpoint operator block")
+    cue = int(cue_column)
+    high_cue = block + cue
+    expansion = np.zeros((2 * block, 2 * block - 1), dtype=np.float64)
+    for unconstrained in range(2 * block):
+        if unconstrained == high_cue:
+            identifiable = cue
+        elif unconstrained < high_cue:
+            identifiable = unconstrained
+        else:
+            identifiable = unconstrained - 1
+        expansion[unconstrained, identifiable] = 1.0
+    return expansion
+
+
+def _soft_design_shared_neutral_cue(
+    latent: FloatArray,
+    inputs: FloatArray,
+    epoch_contrasts: FloatArray,
+    probability: FloatArray,
+) -> tuple[FloatArray, FloatArray]:
+    """Share one cue coefficient when cue control is exactly neutral.
+
+    The physical gate is not applied during the cue.  Consequently, the two
+    cue endpoint coefficients are not separately observable when cue belief is
+    exactly 0.5.  This explicit expansion keeps one shared coefficient (19
+    columns in registered Exp21) rather than fitting an unidentifiable
+    two-block design.
+    """
+
+    if epoch_contrasts.shape[1] != len(EPOCH_CONTRAST_NAMES):
+        raise ValueError("epoch contrasts do not match the registered epochs")
+    cue_mask = epoch_contrasts[:, 0] == 1.0
+    if not np.any(cue_mask):
+        raise ValueError("shared-neutral-cue mode requires observed cue transitions")
+    if not np.all(probability[cue_mask] == 0.5):
+        raise ValueError("shared-neutral-cue mode requires exact cue belief 0.5")
+    full = _soft_design(latent, inputs, epoch_contrasts, probability)
+    block = latent.shape[1] + inputs.shape[1] + epoch_contrasts.shape[1] + 1
+    cue_column = latent.shape[1] + inputs.shape[1]
+    expansion = _shared_neutral_cue_expansion(
+        block_columns=block,
+        cue_column=cue_column,
+    )
+    return full @ expansion, expansion
+
+
 def _state_only_design(
     latent: FloatArray,
     inputs: FloatArray,
@@ -314,6 +372,17 @@ class TrajectoryKoopmanScore:
 
 
 @dataclass(frozen=True, slots=True)
+class PhysicalXTangentBasis:
+    """Physical-x projection of the train-fitted joint latent basis."""
+
+    basis: FloatArray
+    singular_values: FloatArray
+    rank: int
+    condition_number: float
+    x_block_energy_fraction: float
+
+
+@dataclass(frozen=True, slots=True)
 class FittedTrajectoryKoopman:
     """Train-fitted PCA and scalar-belief controlled affine operators."""
 
@@ -330,6 +399,8 @@ class FittedTrajectoryKoopman:
     n_train_transitions: int
     operator_design_rank: int
     operator_design_columns: int
+    operator_unconstrained_columns: int
+    operator_constraint: str
     belief_conditioned: bool
     operator_mode: str
     training_trajectory_fingerprint: str
@@ -344,10 +415,46 @@ class FittedTrajectoryKoopman:
         return int(self.state_pca.components_.shape[0])
 
     @property
+    def operator_identifiable_columns(self) -> int:
+        """Number of free columns in the fitted operator parameterization."""
+
+        return self.operator_design_columns
+
+    @property
     def raw_rate_basis(self) -> FloatArray:
         raw_directions = self.rate_pca.scale_[:, None] * self.rate_pca.basis_
         basis, _ = np.linalg.qr(raw_directions, mode="reduced")
         return _readonly(basis)
+
+    @property
+    def physical_x_tangent_basis(self) -> PhysicalXTangentBasis:
+        """Return the x block of the same joint basis used by the operator."""
+
+        raw_joint = self.state_pca.scale_[:, None] * self.state_pca.components_.T
+        x_block = raw_joint[: self.n_units]
+        left, singular, _ = np.linalg.svd(x_block, full_matrices=False)
+        tolerance = (
+            np.finfo(np.float64).eps
+            * max(x_block.shape)
+            * (float(singular[0]) if singular.size else 0.0)
+        )
+        rank = int(np.count_nonzero(singular > tolerance))
+        condition = (
+            float(singular[0] / singular[self.latent_dim - 1])
+            if rank >= self.latent_dim
+            else float("inf")
+        )
+        joint_energy = float(np.sum(raw_joint * raw_joint))
+        x_energy = float(np.sum(x_block * x_block))
+        return PhysicalXTangentBasis(
+            basis=_readonly(left[:, : min(rank, self.latent_dim)]),
+            singular_values=_readonly(singular),
+            rank=rank,
+            condition_number=condition,
+            x_block_energy_fraction=(
+                x_energy / joint_energy if joint_energy > 0.0 else 0.0
+            ),
+        )
 
     @property
     def state_transition_delta_frobenius(self) -> float:
@@ -602,8 +709,11 @@ def fit_trajectory_koopman(
         if operator_mode is None
         else str(operator_mode)
     )
-    if mode not in {"common", "state_only", "full"}:
-        raise ValueError("operator_mode must be 'common', 'state_only', or 'full'")
+    if mode not in {"common", "state_only", "full", "full_shared_neutral_cue"}:
+        raise ValueError(
+            "operator_mode must be 'common', 'state_only', 'full', or "
+            "'full_shared_neutral_cue'"
+        )
     if operator_mode is not None and bool(belief_conditioned) != (mode != "common"):
         raise ValueError("belief_conditioned and operator_mode disagree")
     if shared_preprocessing is not None and not isinstance(
@@ -712,8 +822,16 @@ def fit_trajectory_koopman(
             np.ones(current.shape[0], dtype=np.float64),
         )
     )
+    expansion: FloatArray | None = None
     if mode == "full":
         design = _soft_design(
+            current,
+            flat_inputs,
+            flat_epoch,
+            fine_probability.reshape(-1),
+        )
+    elif mode == "full_shared_neutral_cue":
+        design, expansion = _soft_design_shared_neutral_cue(
             current,
             flat_inputs,
             flat_epoch,
@@ -728,17 +846,24 @@ def fit_trajectory_koopman(
         )
     else:
         design = base_design
-    gram = design.T @ design
-    penalty = ridge_value * np.eye(gram.shape[0], dtype=np.float64)
     block = int(latent_dim) + inputs.shape[2] + len(EPOCH_CONTRAST_NAMES) + 1
-    if mode == "full":
-        penalty[block - 1, block - 1] = 0.0
-        penalty[2 * block - 1, 2 * block - 1] = 0.0
+    if mode in {"full", "full_shared_neutral_cue"}:
+        unconstrained_penalty = ridge_value * np.eye(2 * block, dtype=np.float64)
+        unconstrained_penalty[block - 1, block - 1] = 0.0
+        unconstrained_penalty[2 * block - 1, 2 * block - 1] = 0.0
+        penalty = (
+            unconstrained_penalty
+            if expansion is None
+            else expansion.T @ unconstrained_penalty @ expansion
+        )
     elif mode == "state_only":
+        penalty = ridge_value * np.eye(design.shape[1], dtype=np.float64)
         penalty[-2, -2] = 0.0
         penalty[-1, -1] = 0.0
     else:
+        penalty = ridge_value * np.eye(design.shape[1], dtype=np.float64)
         penalty[-1, -1] = 0.0
+    gram = design.T @ design
     rhs = design.T @ following
     try:
         coefficients = np.linalg.solve(gram + penalty, rhs)
@@ -748,9 +873,12 @@ def fit_trajectory_koopman(
     following_latent_variance = np.where(
         variance > np.finfo(np.float64).eps, variance, 1.0
     )
-    if mode == "full":
-        state0 = coefficients[:block]
-        state1 = coefficients[block:]
+    if mode in {"full", "full_shared_neutral_cue"}:
+        unconstrained_coefficients = (
+            coefficients if expansion is None else expansion @ coefficients
+        )
+        state0 = unconstrained_coefficients[:block]
+        state1 = unconstrained_coefficients[block:]
     elif mode == "state_only":
         shared_start = 2 * int(latent_dim)
         shared_stop = shared_start + inputs.shape[2] + len(EPOCH_CONTRAST_NAMES)
@@ -786,6 +914,16 @@ def fit_trajectory_koopman(
         n_train_transitions=int(current.shape[0]),
         operator_design_rank=int(np.linalg.matrix_rank(design)),
         operator_design_columns=int(design.shape[1]),
+        operator_unconstrained_columns=(
+            int(2 * block)
+            if mode in {"full", "full_shared_neutral_cue"}
+            else int(design.shape[1])
+        ),
+        operator_constraint=(
+            "shared_neutral_cue_coefficient"
+            if mode == "full_shared_neutral_cue"
+            else "none"
+        ),
         belief_conditioned=mode != "common",
         operator_mode=mode,
         training_trajectory_fingerprint=training_receipt,
@@ -1119,8 +1257,15 @@ def belief_manifold_geometry(
 
 @dataclass(frozen=True, slots=True)
 class NonlinearPerturbationSummary:
-    """Frozen-network tangent/normal perturbation recovery statistics."""
+    """Frozen-network physical-x tangent/normal recovery statistics."""
 
+    tangent_basis_space: str
+    tangent_basis_rank: int
+    tangent_basis_singular_values: tuple[float, ...]
+    tangent_basis_condition_number: float
+    tangent_basis_x_block_energy_fraction: float
+    sampled_reference_fraction: float
+    eligible_sampled_reference_fraction: float
     eligible_reference_fraction: float
     eligible_reference_count: int
     planned_reference_count: int
@@ -1142,8 +1287,9 @@ class NonlinearPerturbationSummary:
     horizon_steps: int
     horizon_time: float
     interpretation: str = (
-        "finite_amplitude_projected_normal_recovery_in_frozen_network_with_"
-        "identical_future_input_and_gain_not_an_asymptotic_lyapunov_exponent"
+        "finite_amplitude_recovery_normal_to_physical_x_projection_of_train_"
+        "joint_latent_subspace_with_identical_future_input_and_gain_not_an_"
+        "asymptotic_lyapunov_exponent"
     )
 
 
@@ -1295,26 +1441,20 @@ def fixed_drive_attractor_probe(
     )
 
 
-def _rate_derivative(
-    network: EIRateNetwork, x: FloatArray, gain: FloatArray
-) -> FloatArray:
-    activated = np.tanh(gain * x)
-    derivative = gain * (1.0 - activated * activated)
-    if network.activation_name == "rectified_tanh":
-        derivative = np.where(activated > 0.0, derivative, 0.0)
-    return derivative
-
-
-def _future_rates(
+def _future_states(
     network: EIRateNetwork,
     state: EIRateState,
     future_inputs: FloatArray,
     future_gains: FloatArray,
-) -> FloatArray:
+) -> tuple[FloatArray, FloatArray]:
     if future_inputs.shape[0] != future_gains.shape[0]:
         raise ValueError("future inputs and gains must align")
-    history = np.empty((future_inputs.shape[0] + 1, network.n_units), dtype=float)
-    history[0] = state.rates
+    x_history = np.empty(
+        (future_inputs.shape[0] + 1, network.n_units), dtype=np.float64
+    )
+    rate_history = np.empty_like(x_history)
+    x_history[0] = state.x
+    rate_history[0] = state.rates
     current = state
     for index in range(future_inputs.shape[0]):
         current = network.step(
@@ -1322,8 +1462,9 @@ def _future_rates(
             future_inputs[index],
             gain=future_gains[index],
         ).state
-        history[index + 1] = current.rates
-    return history
+        x_history[index + 1] = current.x
+        rate_history[index + 1] = current.rates
+    return x_history, rate_history
 
 
 def nonlinear_perturbation_recovery(
@@ -1342,12 +1483,15 @@ def nonlinear_perturbation_recovery(
     amplitudes: Sequence[float],
     n_references: int,
     seed: int,
-    derivative_tolerance: float = 1e-8,
-    tangent_pullback_residual_tolerance: float = 0.05,
-    minimum_initial_normal_purity: float = 0.8,
     baseline_replay_tolerance: float = 1e-10,
 ) -> NonlinearPerturbationSummary:
-    """Inject tangent/normal state perturbations and replay future dynamics."""
+    """Replay physical-x perturbations around the train-fitted joint subspace.
+
+    The tangent basis is the x-coordinate projection of the same train-only
+    joint ``[x, rates]`` PCA used by the reduced operator.  This avoids an
+    ill-defined inverse activation derivative at rectified-tanh boundaries.
+    Endpoints are projected and scored in physical x coordinates.
+    """
 
     if not isinstance(network, EIRateNetwork):
         raise TypeError("network must be an EIRateNetwork")
@@ -1382,18 +1526,6 @@ def nonlinear_perturbation_recovery(
     strength = _nonnegative(gain_strength, name="gain_strength")
     if strength >= 1.0:
         raise ValueError("gain_strength must lie in [0, 1)")
-    derivative_floor = _nonnegative(derivative_tolerance, name="derivative_tolerance")
-    if derivative_floor <= 0.0:
-        raise ValueError("derivative_tolerance must be positive")
-    pullback_limit = _nonnegative(
-        tangent_pullback_residual_tolerance,
-        name="tangent_pullback_residual_tolerance",
-    )
-    purity_limit = _nonnegative(
-        minimum_initial_normal_purity, name="minimum_initial_normal_purity"
-    )
-    if purity_limit > 1.0:
-        raise ValueError("minimum_initial_normal_purity must not exceed one")
     replay_tolerance = _nonnegative(
         baseline_replay_tolerance, name="baseline_replay_tolerance"
     )
@@ -1421,6 +1553,16 @@ def nonlinear_perturbation_recovery(
     if np.any(fine_gains <= 0.0):
         raise RuntimeError("validated gains became non-positive")
 
+    tangent_geometry = fitted.physical_x_tangent_basis
+    if tangent_geometry.rank != fitted.latent_dim:
+        raise ValueError(
+            "physical-x projection of the joint latent basis is rank-deficient"
+        )
+    q_tangent = tangent_geometry.basis
+    if q_tangent.shape != (network.n_units, fitted.latent_dim):
+        raise RuntimeError("physical-x tangent basis has an invalid shape")
+    projector = q_tangent @ q_tangent.T
+
     candidates = [
         (sequence, time)
         for sequence in range(rates.shape[0])
@@ -1434,8 +1576,6 @@ def nonlinear_perturbation_recovery(
         len(candidates), size=min(references, len(candidates)), replace=False
     )
     chosen = [candidates[int(index)] for index in np.atleast_1d(chosen_indices)]
-    raw_basis = fitted.raw_rate_basis
-    projector = raw_basis @ raw_basis.T
 
     normal_ratios: list[float] = []
     normal_lyapunov: list[float] = []
@@ -1449,40 +1589,18 @@ def nonlinear_perturbation_recovery(
     baseline_replay_max_error = 0.0
     for sequence, time in chosen:
         state_gain = fine_gains[sequence, time - 1]
-        derivative = _rate_derivative(network, x[sequence, time], state_gain)
-        derivative_active = np.abs(derivative) > derivative_floor
-        pulled = np.zeros_like(raw_basis)
-        pulled[derivative_active] = (
-            raw_basis[derivative_active] / derivative[derivative_active, None]
-        )
-        reconstructed = derivative[:, None] * pulled
-        residual = float(
-            np.linalg.norm(reconstructed - raw_basis)
-            / max(np.linalg.norm(raw_basis), np.finfo(np.float64).eps)
-        )
-        tangent_basis, singular, _ = np.linalg.svd(pulled, full_matrices=False)
-        rank = int(
-            np.count_nonzero(
-                singular
-                > np.finfo(np.float64).eps
-                * max(pulled.shape)
-                * (float(singular[0]) if singular.size else 0.0)
-            )
-        )
-        if rank != fitted.latent_dim or residual > pullback_limit:
-            continue
-        q_tangent = tangent_basis[:, :rank]
         random_normal = rng.normal(size=network.n_units)
         normal_direction = random_normal - q_tangent @ (q_tangent.T @ random_normal)
         normal_norm = float(np.linalg.norm(normal_direction))
         if normal_norm <= np.finfo(np.float64).eps:
             continue
         normal_direction /= normal_norm
-        tangent_coefficients = rng.normal(size=rank)
+        tangent_coefficients = rng.normal(size=fitted.latent_dim)
         tangent_direction = q_tangent @ tangent_coefficients
-        tangent_direction /= max(
-            float(np.linalg.norm(tangent_direction)), np.finfo(np.float64).eps
-        )
+        tangent_norm = float(np.linalg.norm(tangent_direction))
+        if tangent_norm <= np.finfo(np.float64).eps:
+            continue
+        tangent_direction /= tangent_norm
 
         baseline_state = EIRateState(
             x=np.array(x[sequence, time], dtype=np.float64, copy=True),
@@ -1490,103 +1608,135 @@ def nonlinear_perturbation_recovery(
         )
         future_input = fine_inputs[sequence, time : time + horizon]
         future_gain = fine_gains[sequence, time : time + horizon]
-        baseline_rates = _future_rates(
+        baseline_x, baseline_rates = _future_states(
             network, baseline_state, future_input, future_gain
         )
-        replay_error = float(
-            np.max(np.abs(baseline_rates - rates[sequence, time : time + horizon + 1]))
+        replay_error = max(
+            float(np.max(np.abs(baseline_x - x[sequence, time : time + horizon + 1]))),
+            float(
+                np.max(
+                    np.abs(baseline_rates - rates[sequence, time : time + horizon + 1])
+                )
+            ),
         )
         baseline_replay_max_error = max(baseline_replay_max_error, replay_error)
         if replay_error > replay_tolerance:
             raise RuntimeError(
                 "baseline replay differs from the recorded frozen trajectory"
             )
-        reference_eligible = False
-        reference_ratios: list[float] = []
+        reference_normal_ratios: list[float] = []
+        reference_tangent_ratios: list[float] = []
+        reference_relative_ratios: list[float] = []
+        reference_normal_purities: list[float] = []
+        reference_tangent_purities: list[float] = []
+        reference_by_amplitude: list[list[float]] = [
+            [] for _ in range(len(amplitude_values))
+        ]
         for amplitude_index, amplitude in enumerate(amplitude_values):
-            normal_x = baseline_state.x + amplitude * normal_direction
-            normal_rate = network.initial_state(normal_x, gain=state_gain).rates
-            initial_delta = normal_rate - baseline_state.rates
-            initial_normal = initial_delta - projector @ initial_delta
-            initial_total_norm = float(np.linalg.norm(initial_delta))
-            initial_normal_norm = float(np.linalg.norm(initial_normal))
-            purity = initial_normal_norm / max(
-                initial_total_norm, np.finfo(np.float64).eps
-            )
-            if initial_normal_norm <= np.finfo(np.float64).eps or purity < purity_limit:
-                continue
-            normal_history = _future_rates(
-                network,
-                EIRateState(x=normal_x, rates=normal_rate),
-                future_input,
-                future_gain,
-            )
-            endpoint_delta = normal_history[-1] - baseline_rates[-1]
-            endpoint_normal = endpoint_delta - projector @ endpoint_delta
-            ratio = float(np.linalg.norm(endpoint_normal) / initial_normal_norm)
-            if not np.isfinite(ratio):
-                continue
-            normal_ratios.append(ratio)
-            reference_ratios.append(ratio)
-            ratios_by_amplitude[amplitude_index].append(ratio)
-            purities.append(purity)
-            normal_lyapunov.append(
-                float(
-                    np.log(max(ratio, np.finfo(np.float64).tiny))
-                    / (horizon * network.dt)
+            for sign in (-1.0, 1.0):
+                normal_delta = sign * amplitude * normal_direction
+                initial_normal = normal_delta - projector @ normal_delta
+                initial_normal_norm = float(np.linalg.norm(initial_normal))
+                initial_total_norm = float(np.linalg.norm(normal_delta))
+                normal_purity = initial_normal_norm / max(
+                    initial_total_norm, np.finfo(np.float64).eps
                 )
-            )
-            reference_eligible = True
-
-            tangent_x = baseline_state.x + amplitude * tangent_direction
-            tangent_rate = network.initial_state(tangent_x, gain=state_gain).rates
-            tangent_initial_delta = tangent_rate - baseline_state.rates
-            tangent_initial = projector @ tangent_initial_delta
-            tangent_initial_norm = float(np.linalg.norm(tangent_initial))
-            tangent_total_norm = float(np.linalg.norm(tangent_initial_delta))
-            tangent_purity = tangent_initial_norm / max(
-                tangent_total_norm, np.finfo(np.float64).eps
-            )
-            if (
-                tangent_initial_norm > np.finfo(np.float64).eps
-                and tangent_purity >= purity_limit
-            ):
-                tangent_purities.append(tangent_purity)
-                tangent_history = _future_rates(
+                normal_x = baseline_state.x + normal_delta
+                normal_rate = network.initial_state(normal_x, gain=state_gain).rates
+                normal_history_x, _ = _future_states(
+                    network,
+                    EIRateState(x=normal_x, rates=normal_rate),
+                    future_input,
+                    future_gain,
+                )
+                endpoint_delta = normal_history_x[-1] - baseline_x[-1]
+                endpoint_normal = endpoint_delta - projector @ endpoint_delta
+                normal_ratio = float(
+                    np.linalg.norm(endpoint_normal) / initial_normal_norm
+                )
+                tangent_delta = sign * amplitude * tangent_direction
+                tangent_initial = projector @ tangent_delta
+                tangent_initial_norm = float(np.linalg.norm(tangent_initial))
+                tangent_total_norm = float(np.linalg.norm(tangent_delta))
+                tangent_purity = tangent_initial_norm / max(
+                    tangent_total_norm, np.finfo(np.float64).eps
+                )
+                tangent_x = baseline_state.x + tangent_delta
+                tangent_rate = network.initial_state(tangent_x, gain=state_gain).rates
+                tangent_history_x, _ = _future_states(
                     network,
                     EIRateState(x=tangent_x, rates=tangent_rate),
                     future_input,
                     future_gain,
                 )
-                tangent_endpoint_delta = tangent_history[-1] - baseline_rates[-1]
+                tangent_endpoint_delta = tangent_history_x[-1] - baseline_x[-1]
                 tangent_endpoint = projector @ tangent_endpoint_delta
                 tangent_ratio = float(
                     np.linalg.norm(tangent_endpoint) / tangent_initial_norm
                 )
-                if np.isfinite(tangent_ratio):
-                    tangent_ratios.append(tangent_ratio)
-                    relative_log_ratios.append(
-                        float(
-                            np.log(
-                                max(ratio, np.finfo(np.float64).tiny)
-                                / max(
-                                    tangent_ratio,
-                                    np.finfo(np.float64).tiny,
-                                )
-                            )
+                if not (
+                    np.isfinite(normal_ratio)
+                    and np.isfinite(tangent_ratio)
+                    and initial_normal_norm > np.finfo(np.float64).eps
+                    and tangent_initial_norm > np.finfo(np.float64).eps
+                ):
+                    continue
+                reference_normal_ratios.append(normal_ratio)
+                reference_tangent_ratios.append(tangent_ratio)
+                reference_relative_ratios.append(
+                    float(
+                        np.log(
+                            max(normal_ratio, np.finfo(np.float64).tiny)
+                            / max(tangent_ratio, np.finfo(np.float64).tiny)
                         )
                     )
-        if reference_eligible:
+                )
+                reference_normal_purities.append(normal_purity)
+                reference_tangent_purities.append(tangent_purity)
+                reference_by_amplitude[amplitude_index].append(normal_ratio)
+        expected = 2 * len(amplitude_values)
+        if (
+            len(reference_normal_ratios) == expected
+            and len(reference_tangent_ratios) == expected
+        ):
             eligible_references += 1
-            reference_worst_ratios.append(max(reference_ratios))
+            normal_ratios.extend(reference_normal_ratios)
+            tangent_ratios.extend(reference_tangent_ratios)
+            relative_log_ratios.extend(reference_relative_ratios)
+            purities.extend(reference_normal_purities)
+            tangent_purities.extend(reference_tangent_purities)
+            reference_worst_ratios.append(max(reference_normal_ratios))
+            normal_lyapunov.extend(
+                float(
+                    np.log(max(ratio, np.finfo(np.float64).tiny))
+                    / (horizon * network.dt)
+                )
+                for ratio in reference_normal_ratios
+            )
+            for amplitude_index, values in enumerate(reference_by_amplitude):
+                ratios_by_amplitude[amplitude_index].extend(values)
 
     sampled = len(chosen)
+    sampled_fraction = sampled / references
+    eligible_sampled_fraction = eligible_references / sampled if sampled else 0.0
+    eligible_planned_fraction = eligible_references / references
     amplitude_medians = tuple(
         float(np.median(values)) if values else None for values in ratios_by_amplitude
     )
     if not normal_ratios:
         return NonlinearPerturbationSummary(
-            eligible_reference_fraction=eligible_references / references,
+            tangent_basis_space="train_joint_state_pca_physical_x_projection",
+            tangent_basis_rank=tangent_geometry.rank,
+            tangent_basis_singular_values=tuple(
+                float(item) for item in tangent_geometry.singular_values
+            ),
+            tangent_basis_condition_number=tangent_geometry.condition_number,
+            tangent_basis_x_block_energy_fraction=(
+                tangent_geometry.x_block_energy_fraction
+            ),
+            sampled_reference_fraction=sampled_fraction,
+            eligible_sampled_reference_fraction=eligible_sampled_fraction,
+            eligible_reference_fraction=eligible_planned_fraction,
             eligible_reference_count=eligible_references,
             planned_reference_count=references,
             candidate_reference_count=len(candidates),
@@ -1614,7 +1764,18 @@ def nonlinear_perturbation_recovery(
             horizon_time=float(horizon * network.dt),
         )
     return NonlinearPerturbationSummary(
-        eligible_reference_fraction=eligible_references / references,
+        tangent_basis_space="train_joint_state_pca_physical_x_projection",
+        tangent_basis_rank=tangent_geometry.rank,
+        tangent_basis_singular_values=tuple(
+            float(item) for item in tangent_geometry.singular_values
+        ),
+        tangent_basis_condition_number=tangent_geometry.condition_number,
+        tangent_basis_x_block_energy_fraction=(
+            tangent_geometry.x_block_energy_fraction
+        ),
+        sampled_reference_fraction=sampled_fraction,
+        eligible_sampled_reference_fraction=eligible_sampled_fraction,
+        eligible_reference_fraction=eligible_planned_fraction,
         eligible_reference_count=eligible_references,
         planned_reference_count=references,
         candidate_reference_count=len(candidates),
@@ -1652,6 +1813,7 @@ __all__ = [
     "FixedDriveAttractorProbe",
     "FittedTrajectoryKoopman",
     "NonlinearPerturbationSummary",
+    "PhysicalXTangentBasis",
     "TrajectoryKoopmanScore",
     "belief_manifold_geometry",
     "fixed_drive_attractor_probe",

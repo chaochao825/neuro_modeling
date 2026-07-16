@@ -13,6 +13,7 @@ from scripts.summarize_exp21 import (
     EXPERIMENT,
     _environment_sha256,
     _expected_run_config,
+    _holm,
     _require_formal_registration,
     collect_registered_runs,
     summarize_formal_runs,
@@ -51,9 +52,13 @@ def _row(
     raw_common = total_full + total_gain
     routed_state = 0.45
     routed_common = routed_state + state_gain
-    return {
+    row = {
         "run_id": f"run-{seed}",
         "experiment": EXPERIMENT,
+        "experiment_protocol_version": "exp21_v2",
+        "training_algorithm": (
+            "md_filtered_belief_full_substep_controlled_affine_koopman_audit_v2"
+        ),
         "seed": seed,
         "condition": CONDITION,
         "status": "complete",
@@ -112,10 +117,150 @@ def _row(
             0.2 if separated else 0.0
         ),
     }
+    for prefix in ("trial_reset", "episode_continuous"):
+        row.update(
+            {
+                f"{prefix}_total_operator_mode": "full_shared_neutral_cue",
+                f"{prefix}_total_operator_constraint": (
+                    "shared_neutral_cue_coefficient"
+                ),
+                f"{prefix}_total_operator_design_rank": 19,
+                f"{prefix}_total_operator_design_columns": 19,
+                f"{prefix}_total_operator_unconstrained_columns": 20,
+                f"{prefix}_perturbation_geometry": (
+                    "joint_state_pca_physical_x_projection_v2"
+                ),
+                f"{prefix}_perturbation_sampled_reference_fraction": 1.0,
+            }
+        )
+    return row
 
 
 def _conclusions(summary: pd.DataFrame) -> dict[str, str]:
     return dict(zip(summary["proposition"], summary["conclusion"], strict=True))
+
+
+def test_exp21_holm_keeps_nan_in_the_planned_family() -> None:
+    adjusted = _holm([float("nan"), 0.03])
+    assert adjusted.tolist() == pytest.approx([1.0, 0.06])
+    with pytest.raises(ValueError, match=r"lie in \[0, 1\]"):
+        _holm([0.2, 1.01])
+    with pytest.raises(ValueError, match="finite or NaN"):
+        _holm([0.2, float("inf")])
+
+
+def test_exp21_missing_first_gain_keeps_two_hypothesis_holm_family() -> None:
+    config = _config()
+    state_gains = [0.002] * 21 + [-0.001] * 9
+    rows = [_row(seed, state_gain=state_gains[seed]) for seed in range(30)]
+    for row in rows:
+        row.pop("experiment_protocol_version")
+        row["training_algorithm"] = (
+            "md_filtered_belief_full_substep_controlled_affine_koopman_audit"
+        )
+        for prefix in ("trial_reset", "episode_continuous"):
+            for suffix in (
+                "total_operator_mode",
+                "total_operator_constraint",
+                "total_operator_design_rank",
+                "total_operator_design_columns",
+                "total_operator_unconstrained_columns",
+                "perturbation_geometry",
+                "perturbation_sampled_reference_fraction",
+            ):
+                row.pop(f"{prefix}_{suffix}", None)
+    summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=500)
+    state = summary.loc[
+        summary["proposition"].eq(
+            "trial_reset_population_state_affine_gain_vs_routed_common"
+        )
+    ].iloc[0]
+    total = summary.loc[
+        summary["proposition"].eq("trial_reset_total_control_gain_vs_raw_common")
+    ].iloc[0]
+
+    assert state["p_value"] == pytest.approx(0.04277394525706768)
+    assert state["holm_adjusted_p"] == pytest.approx(0.08554789051413536)
+    assert state["ci_low"] > 0.0
+    assert state["n_eligible"] == 30
+    assert state["conclusion"] == "inconclusive"
+    assert total["holm_adjusted_p"] == pytest.approx(1.0)
+
+
+def test_exp21_v1_rows_only_enter_definition_compatible_claims() -> None:
+    config = _config()
+    rows = [_row(seed) for seed in range(30)]
+    for row in rows:
+        row.pop("experiment_protocol_version")
+        row["training_algorithm"] = (
+            "md_filtered_belief_full_substep_controlled_affine_koopman_audit"
+        )
+        for prefix in ("trial_reset", "episode_continuous"):
+            for suffix in (
+                "total_operator_mode",
+                "total_operator_constraint",
+                "total_operator_design_rank",
+                "total_operator_design_columns",
+                "total_operator_unconstrained_columns",
+                "perturbation_geometry",
+                "perturbation_sampled_reference_fraction",
+            ):
+                row.pop(f"{prefix}_{suffix}", None)
+
+    summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=200)
+    by_proposition = summary.set_index("proposition")
+
+    assert set(summary["n_complete"]) == {30}
+    for proposition in (
+        "trial_reset_total_control_gain_vs_raw_common",
+        "trial_reset_full_trajectory_closure",
+        "trial_reset_nonlinear_normal_recovery_relative_to_tangent",
+    ):
+        assert by_proposition.loc[proposition, "n_eligible"] == 0
+        assert by_proposition.loc[proposition, "conclusion"] == "inconclusive"
+    for proposition in (
+        "trial_reset_population_state_affine_gain_vs_routed_common",
+        "fixed_drive_separated_endpoint_probe",
+    ):
+        assert by_proposition.loc[proposition, "n_eligible"] == 30
+        assert by_proposition.loc[proposition, "conclusion"] == "support"
+
+
+def test_exp21_episode_sensitivity_failure_does_not_gate_trial_reset_claims() -> None:
+    config = _config()
+    rows = [_row(seed) for seed in range(30)]
+    for row in rows:
+        row["episode_continuous_perturbation_sampled_reference_fraction"] = 0.0
+        row["episode_continuous_perturbation_geometry"] = "legacy_rate_pullback_v1"
+
+    summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=200)
+
+    assert set(summary["n_eligible"]) == {30}
+    assert set(summary["conclusion"]) == {"support"}
+
+
+def test_exp21_trial_perturbation_failure_only_gates_perturbation_claim() -> None:
+    config = _config()
+    rows = [_row(seed) for seed in range(30)]
+    for row in rows:
+        row["trial_reset_perturbation_sampled_reference_fraction"] = 0.5
+
+    summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=200)
+    perturbation = summary.loc[
+        summary["proposition"].eq(
+            "trial_reset_nonlinear_normal_recovery_relative_to_tangent"
+        )
+    ].iloc[0]
+    other = summary.loc[
+        ~summary["proposition"].eq(
+            "trial_reset_nonlinear_normal_recovery_relative_to_tangent"
+        )
+    ]
+
+    assert perturbation["n_eligible"] == 0
+    assert perturbation["conclusion"] == "inconclusive"
+    assert set(other["n_eligible"]) == {30}
+    assert set(other["conclusion"]) == {"support"}
 
 
 def test_exp21_summary_supports_and_opposes_registered_seed_claims() -> None:
@@ -137,6 +282,18 @@ def test_exp21_summary_supports_and_opposes_registered_seed_claims() -> None:
         .str.contains("without nested-CV latent-dimension selection")
         .all()
     )
+    fixed_drive = supported.loc[
+        supported["proposition"].eq("fixed_drive_separated_endpoint_probe")
+    ].iloc[0]
+    assert "narrow finite-horizon" in fixed_drive["claim_scope"]
+    assert "does not support gate causality" in fixed_drive["claim_scope"]
+    perturbation = supported.loc[
+        supported["proposition"].eq(
+            "trial_reset_nonlinear_normal_recovery_relative_to_tangent"
+        )
+    ].iloc[0]
+    assert "physical-x projection" in perturbation["claim_scope"]
+    assert "not proof of a joint manifold" in perturbation["claim_scope"]
 
     opposed_rows = [
         _row(
@@ -323,6 +480,11 @@ def test_exp21_snapshot_writes_deterministic_scoped_artifacts(
     assert len(published_summary) == 5
     report = first["report"].read_text(encoding="utf-8")
     assert "Retained failed/invalid seeds: 1" in report
+    assert "run-level execution status" in report
+    assert "Claim-level scientifically ineligible conclusion rows: 5 of 5" in report
+    assert "## Claim-level scientific ineligibility" in report
+    assert "does not support gate causality" in report
+    assert "Historical v1 rows supplied directly to this audit" in report
     assert "planned failure retained" in report
     assert "does not modify" in report
     for name in ("png", "pdf"):
@@ -405,6 +567,9 @@ def _write_attempt(
 
 def test_exp21_collector_keeps_terminal_failed_seed(tmp_path: Path) -> None:
     config = _config()
+    expected = _expected_run_config(config, 0)
+    assert expected["experiment_protocol_version"] == "exp21_v2"
+    assert expected["training_algorithm"].endswith("_audit_v2")
     failed = {
         "run_id": "failed-run",
         "experiment": EXPERIMENT,
