@@ -28,13 +28,17 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from experiments.exp22_hidden_context_local_gain_axis import (  # noqa: E402
     EXPERIMENT,
     _planned_conditions,
 )
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = (
     PROJECT_ROOT / "configs/formal/exp22_hidden_context_local_gain_axis.json"
 )

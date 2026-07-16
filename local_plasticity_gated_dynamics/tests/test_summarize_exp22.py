@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -44,6 +46,21 @@ def _config(*, n_seeds: int = 30) -> dict[str, object]:
             "minimum_aligned_absolute_balanced_accuracy": 0.75,
         },
     }
+
+
+def test_exp22_summarizer_cli_imports_from_an_unrelated_working_directory(
+    tmp_path: Path,
+) -> None:
+    script = Path(__file__).resolve().parents[1] / "scripts" / "summarize_exp22.py"
+    completed = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--results-root" in completed.stdout
 
 
 def _condition_accuracy(condition: str, *, positive: bool) -> float:
