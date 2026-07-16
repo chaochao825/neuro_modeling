@@ -20,6 +20,7 @@ import math
 import sys
 import textwrap
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -2027,7 +2028,11 @@ def _plot_claims(
             figure.savefig(
                 pdf_path,
                 bbox_inches="tight",
-                metadata={"Creator": "summarize_exp23_exp25.py"},
+                metadata={
+                    "Creator": "summarize_exp23_exp25.py",
+                    "CreationDate": datetime(2000, 1, 1, tzinfo=timezone.utc),
+                    "ModDate": datetime(2000, 1, 1, tzinfo=timezone.utc),
+                },
             )
         plt.close(figure)
     return True

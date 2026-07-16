@@ -1,0 +1,60 @@
+{
+  "schema_version": "exp23_exp25_artifact_manifest_v1",
+  "branch": "agent/belief-ei-block-switch",
+  "formal_code_commits": {
+    "exp23_v1_and_exp24": "8076100b355d33fd976778e5e4e99f86b60f11f5",
+    "exp23_v2_final": "f6846742e196a481700f689a4ca68f48c504e261",
+    "exp25_corrected_checksum": "bc111961fb26ea0b52bd581695e9a1969e30b1f2"
+  },
+  "storage_policy": "raw metrics and logs are retained off-git; failed and superseded attempts are not deleted",
+  "local_archive_root": "E:/Codex_work/ssh_experiment/artifacts",
+  "archives": [
+    {
+      "name": "formal_8076100_results_236.tar.gz",
+      "contents": "Exp23 formal-v1 and Exp24 formal results, including the three retained Exp23 reachability-invalid seeds",
+      "bytes": 1432887,
+      "sha256": "a2387bfa3400405f5265530ad9864dbda321bf1cffbe2407d014500f92c07774"
+    },
+    {
+      "name": "formal_logs_8076100_236.tar.gz",
+      "contents": "Exp23 formal-v1 and Exp24 process logs and exit-code receipts",
+      "bytes": 2569,
+      "sha256": "7722a638e0766b8003e141efed6646d033e6fc8dd94cb9848b4998d167ba0790"
+    },
+    {
+      "name": "formal_f684674_exp23_v2_final_results_236.tar.gz",
+      "contents": "Exp23 outcome-blind feasibility-calibrated formal-v2 results for seeds 0 through 29",
+      "bytes": 360010,
+      "sha256": "20f0ef9229ddbedadf634506137df5da4f73c48e7962c934fb6d600e4cb33c40"
+    },
+    {
+      "name": "formal_logs_f684674_exp23_v2_final_236.tar.gz",
+      "contents": "Exp23 formal-v2 process logs and exit-code receipts",
+      "bytes": 1021,
+      "sha256": "c042ca97b72f2a480be3adb3b87e05732ccb6ead37a47e0a9eab60d0612a5d64"
+    },
+    {
+      "name": "formal_8076100_exp25_210.tar.gz",
+      "contents": "Both Exp25 attempts: retained checksum-typo failure and corrected canonical-counts-absent fail-closed result",
+      "bytes": 3733,
+      "sha256": "ed6549b0a98d1ae3eb2b6b4d91fb03e9cf1484217461267be2c1116bf1ed08f2"
+    }
+  ],
+  "remote_locations": {
+    "server_236_results": "/home/wangmeiqi/sow_linear/neuro_modeling_exp23_exp25_8076100/local_plasticity_gated_dynamics/results",
+    "server_236_logs": "/home/wangmeiqi/sow_linear/neuro_modeling_exp23_exp25_8076100",
+    "server_210_exp25_results": "/home/spco/sow_linear/neuro_modeling_exp21_exp22_771526e/local_plasticity_gated_dynamics/results/formal_8076100"
+  },
+  "exp25_attempts": [
+    {
+      "attempt": "20260716T201843.183350Z",
+      "status": "retained_failed",
+      "reason": "loader checksum constant typo for GLMdata.mat"
+    },
+    {
+      "attempt": "20260716T202138.983742Z",
+      "status": "complete_with_failures",
+      "reason": "official Figshare bytes verified; canonical trial-level neural counts and hash-pinned conversion manifest are absent"
+    }
+  ]
+}
