@@ -191,3 +191,21 @@ def test_exp21_setup_failure_still_emits_registered_cell(tmp_path: Path) -> None
     assert row["status"] == "failed"
     assert row["condition"] == "md_combined_intact_full_trajectory"
     assert row["error_type"] == "ValueError"
+
+
+def test_exp21_unexpected_perturbation_error_fails_the_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def broken_replay(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("baseline replay integrity failure")
+
+    monkeypatch.setattr(exp21, "nonlinear_perturbation_recovery", broken_replay)
+    path = exp21.run_seed(_config(), 4, tmp_path)
+    status = json.loads((path / "status.json").read_text(encoding="utf-8"))
+    row = _record(path)
+
+    assert status["status"] == "complete_with_failures"
+    assert row["status"] == "failed"
+    assert row["error_type"] == "RuntimeError"
+    assert "baseline replay integrity failure" in str(row["error"])

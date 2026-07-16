@@ -39,6 +39,12 @@ PROTOCOL_VERSION = "exp21_v2"
 TRAINING_ALGORITHM = (
     "md_filtered_belief_full_substep_controlled_affine_koopman_audit_v2"
 )
+PERTURBATION_GEOMETRY = "joint_state_pca_physical_x_projection_v2"
+PERTURBATION_REPORT_SCOPE = "physical_x_projection_finite_amplitude_recovery"
+PERTURBATION_REFERENCE_FRACTION_POLICY = (
+    "sampled_over_planned_eligible_sampled_over_sampled_eligible_reference_over_planned"
+)
+PERTURBATION_TANGENT_BASIS_SPACE = "train_joint_state_pca_physical_x_projection"
 _COMMIT = re.compile(r"[0-9a-f]{40}")
 _DIGEST = re.compile(r"[0-9a-f]{64}")
 _ENVIRONMENT_PACKAGES = (
@@ -592,6 +598,20 @@ def _v2_protocol_receipt(frame: pd.DataFrame) -> pd.Series:
     ).eq(TRAINING_ALGORITHM)
 
 
+def _valid_singular_values(value: object, *, latent_dim: int) -> bool:
+    if not isinstance(value, (list, tuple, np.ndarray)):
+        return False
+    try:
+        singular = np.asarray(value, dtype=float)
+    except (TypeError, ValueError):
+        return False
+    return bool(
+        singular.shape == (latent_dim,)
+        and np.all(np.isfinite(singular))
+        and np.all(singular > 0.0)
+    )
+
+
 def _total_operator_v2_receipt(
     frame: pd.DataFrame,
     *,
@@ -625,18 +645,113 @@ def _perturbation_v2_receipt(
     frame: pd.DataFrame,
     *,
     prefix: str,
+    latent_dim: int,
 ) -> pd.Series:
-    """Require the physical-x perturbation definition and planned coverage."""
+    """Require the physical-x definition, basis diagnostics, and count receipts."""
 
     geometry = frame.get(
         f"{prefix}_perturbation_geometry",
         pd.Series("", index=frame.index),
-    ).eq("joint_state_pca_physical_x_projection_v2")
+    ).eq(PERTURBATION_GEOMETRY)
+    report_scope = frame.get(
+        f"{prefix}_perturbation_report_scope",
+        pd.Series("", index=frame.index),
+    ).eq(PERTURBATION_REPORT_SCOPE)
+    fraction_policy = frame.get(
+        f"{prefix}_perturbation_reference_fraction_policy",
+        pd.Series("", index=frame.index),
+    ).eq(PERTURBATION_REFERENCE_FRACTION_POLICY)
+    basis_space = frame.get(
+        f"{prefix}_perturbation_tangent_basis_space",
+        pd.Series("", index=frame.index),
+    ).eq(PERTURBATION_TANGENT_BASIS_SPACE)
+    basis_rank = _numeric(frame, f"{prefix}_perturbation_tangent_basis_rank")
+    condition_number = _numeric(
+        frame,
+        f"{prefix}_perturbation_tangent_basis_condition_number",
+    )
+    x_block_energy = _numeric(
+        frame,
+        f"{prefix}_perturbation_tangent_basis_x_block_energy_fraction",
+    )
+    singular_values = frame.get(
+        f"{prefix}_perturbation_tangent_basis_singular_values",
+        pd.Series(None, index=frame.index, dtype=object),
+    ).map(lambda value: _valid_singular_values(value, latent_dim=latent_dim))
+    planned = _numeric(frame, f"{prefix}_perturbation_planned_reference_count")
+    candidate = _numeric(frame, f"{prefix}_perturbation_candidate_reference_count")
+    sampled = _numeric(frame, f"{prefix}_perturbation_sampled_reference_count")
+    eligible_count = _numeric(
+        frame,
+        f"{prefix}_perturbation_eligible_reference_count",
+    )
     sampled_fraction = _numeric(
         frame,
         f"{prefix}_perturbation_sampled_reference_fraction",
     )
-    return geometry & np.isfinite(sampled_fraction) & (sampled_fraction >= 1.0 - 1e-12)
+    eligible_sampled_fraction = _numeric(
+        frame,
+        f"{prefix}_perturbation_eligible_sampled_reference_fraction",
+    )
+    eligible_planned_fraction = _numeric(
+        frame,
+        f"{prefix}_perturbation_eligible_reference_fraction",
+    )
+    planned_denominator = planned.where(planned > 0.0, np.nan)
+    sampled_denominator = sampled.where(sampled > 0.0, np.nan)
+    valid_counts = (
+        np.isfinite(planned)
+        & np.isfinite(candidate)
+        & np.isfinite(sampled)
+        & np.isfinite(eligible_count)
+        & np.isclose(planned, np.round(planned), atol=0.0, rtol=0.0)
+        & np.isclose(candidate, np.round(candidate), atol=0.0, rtol=0.0)
+        & np.isclose(sampled, np.round(sampled), atol=0.0, rtol=0.0)
+        & np.isclose(eligible_count, np.round(eligible_count), atol=0.0, rtol=0.0)
+        & (planned > 0.0)
+        & (candidate >= sampled)
+        & (sampled == planned)
+        & (eligible_count >= 0.0)
+        & (eligible_count <= sampled)
+    )
+    valid_fractions = (
+        np.isfinite(sampled_fraction)
+        & np.isfinite(eligible_sampled_fraction)
+        & np.isfinite(eligible_planned_fraction)
+        & np.isclose(
+            sampled_fraction,
+            sampled / planned_denominator,
+            atol=1e-12,
+            rtol=0.0,
+        )
+        & np.isclose(
+            eligible_sampled_fraction,
+            eligible_count / sampled_denominator,
+            atol=1e-12,
+            rtol=0.0,
+        )
+        & np.isclose(
+            eligible_planned_fraction,
+            eligible_count / planned_denominator,
+            atol=1e-12,
+            rtol=0.0,
+        )
+    )
+    return (
+        geometry
+        & report_scope
+        & fraction_policy
+        & basis_space
+        & basis_rank.eq(float(latent_dim))
+        & np.isfinite(condition_number)
+        & (condition_number >= 1.0)
+        & np.isfinite(x_block_energy)
+        & (x_block_energy > 0.0)
+        & (x_block_energy <= 1.0)
+        & singular_values
+        & valid_counts
+        & valid_fractions
+    )
 
 
 def _gain_rows(
@@ -877,11 +992,13 @@ def _audit_rows(
     *,
     n_planned: int,
     thresholds: Mapping[str, float],
+    latent_dim: int,
 ) -> list[dict[str, Any]]:
     trial_total_v2 = _total_operator_v2_receipt(complete, prefix="trial_reset")
     trial_perturbation_v2 = _perturbation_v2_receipt(
         complete,
         prefix="trial_reset",
+        latent_dim=latent_dim,
     )
     closure = _numeric(complete, "trial_reset_total_full_rollout_normalized_rmse")
     closure_limit = float(thresholds["maximum_rollout_normalized_rmse"])
@@ -1069,6 +1186,7 @@ def summarize_formal_runs(
             complete,
             n_planned=len(planned),
             thresholds=thresholds,
+            latent_dim=latent_dim,
         ),
     ]
     summary = pd.DataFrame(rows)
@@ -1346,6 +1464,7 @@ def write_snapshot_artifacts(
         ],
     ]
     complete_rows = raw_sorted.loc[raw_sorted["status"].eq("complete")]
+    latent_dim = _registered_latent_dim(config)
     v2_protocol_count = int(np.count_nonzero(_v2_protocol_receipt(complete_rows)))
     trial_operator_count = int(
         np.count_nonzero(
@@ -1353,7 +1472,13 @@ def write_snapshot_artifacts(
         )
     )
     trial_perturbation_count = int(
-        np.count_nonzero(_perturbation_v2_receipt(complete_rows, prefix="trial_reset"))
+        np.count_nonzero(
+            _perturbation_v2_receipt(
+                complete_rows,
+                prefix="trial_reset",
+                latent_dim=latent_dim,
+            )
+        )
     )
     episode_sensitivity_count = int(
         np.count_nonzero(
@@ -1364,6 +1489,7 @@ def write_snapshot_artifacts(
             & _perturbation_v2_receipt(
                 complete_rows,
                 prefix="episode_continuous",
+                latent_dim=latent_dim,
             )
         )
     )

@@ -38,6 +38,7 @@ from experiments.common import (
 )
 from src.analysis.trajectory_control_dynamics import (
     FittedTrajectoryKoopman,
+    PerturbationEligibilityError,
     TrajectoryKoopmanScore,
     belief_manifold_geometry,
     fit_trajectory_koopman,
@@ -475,7 +476,7 @@ def _perturbation_metrics(
                 for key, value in asdict(summary).items()
             },
         }
-    except Exception as error:
+    except PerturbationEligibilityError as error:
         result = {
             f"{prefix}_perturbation_status": "ineligible",
             f"{prefix}_perturbation_error": (f"{type(error).__name__}: {error}"),

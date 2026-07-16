@@ -421,6 +421,36 @@ def test_exp22_adverse_oracle_requires_holm_adjusted_sign_consistency() -> None:
     assert oracle_l1["conclusion"] == "inconclusive"
 
 
+def test_exp22_joint_requires_identical_primary_and_oracle_seed_sets() -> None:
+    config = _config()
+    raw = _raw(config)
+    oracle_seed_zero = raw["condition"].eq("oracle_third_factor_l1") & raw["seed"].eq(0)
+    raw.loc[oracle_seed_zero, "condition_third_factor_id"] = raw.loc[
+        oracle_seed_zero,
+        "learned_third_factor_id",
+    ]
+
+    summary = summarize_formal_runs(raw, config, n_bootstrap=200)
+    primary_l1 = summary.loc[
+        summary["comparison"].eq("aligned_local_l1_vs_frozen_zero")
+    ].iloc[0]
+    oracle_l1 = summary.loc[
+        summary["comparison"].eq("aligned_local_l1_vs_oracle_third_factor")
+    ].iloc[0]
+    joint_l1 = _joint(summary).loc[_joint(summary)["panel"].eq("l1")].iloc[0]
+
+    assert primary_l1["n_eligible"] == 30
+    assert oracle_l1["n_eligible"] == 29
+    assert primary_l1["conclusion"] == "support"
+    assert oracle_l1["conclusion"] == "support"
+    assert joint_l1["primary_eligible_seed_count"] == 30
+    assert joint_l1["oracle_eligible_seed_count"] == 29
+    assert joint_l1["joint_seed_intersection_count"] == 29
+    assert not joint_l1["component_seed_sets_identical"]
+    assert joint_l1["n_eligible"] == 29
+    assert joint_l1["conclusion"] == "inconclusive"
+
+
 def test_exp22_orthogonal_epoch_angle_receipt_is_fail_closed() -> None:
     config = _config()
     raw = _raw(config)
@@ -538,6 +568,8 @@ def test_exp22_snapshot_is_deterministic_and_never_claims_local_learning(
     assert "must not be generalized to L1" in report
     assert "Bootstrap intervals target the mean seed-level effect" in report
     assert "exact sign test checks cross-seed directional consistency" in report
+    assert "identical eligible seed set" in report
+    assert "joint eligibility receipt" in report
     assert "retained failure" in report
     for name in ("png", "pdf"):
         assert first[name].stat().st_size > 1_000

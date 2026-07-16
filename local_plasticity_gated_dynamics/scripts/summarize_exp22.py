@@ -1067,7 +1067,10 @@ def _joint_row(
     oracle_margin: Mapping[str, Any],
     *,
     n_planned: int,
-    n_eligible: int,
+    n_primary_eligible: int,
+    n_oracle_eligible: int,
+    n_joint_eligible: int,
+    component_seed_sets_identical: bool,
     minimum_valid_fraction: float,
 ) -> dict[str, Any]:
     by_comparison = {
@@ -1078,7 +1081,10 @@ def _joint_row(
     }
     absolute_conclusion = str(absolute_balanced["conclusion"])
     oracle_conclusion = str(oracle_margin["conclusion"])
-    enough = n_eligible / n_planned >= minimum_valid_fraction
+    enough = (
+        component_seed_sets_identical
+        and n_joint_eligible / n_planned >= minimum_valid_fraction
+    )
     if (
         enough
         and all(value == "support" for value in conclusions.values())
@@ -1112,22 +1118,28 @@ def _joint_row(
         "ci_high": float("nan"),
         "p_value": float("nan"),
         "holm_adjusted_p": float("nan"),
-        "n_complete": int(n_eligible),
-        "n_eligible": int(n_eligible),
+        "n_complete": int(n_joint_eligible),
+        "n_eligible": int(n_joint_eligible),
         "n_planned": int(n_planned),
-        "eligible_fraction": n_eligible / n_planned,
+        "eligible_fraction": n_joint_eligible / n_planned,
+        "primary_eligible_seed_count": int(n_primary_eligible),
+        "oracle_eligible_seed_count": int(n_oracle_eligible),
+        "joint_seed_intersection_count": int(n_joint_eligible),
+        "component_seed_sets_identical": bool(component_seed_sets_identical),
         "minimum_eligible_fraction": minimum_valid_fraction,
         "threshold": (
             "aligned exceeds frozen, random-signed, and shuffled registered "
             "thresholds and independently meets the registered absolute "
             "balanced-accuracy threshold and registered oracle noninferiority "
-            "margin; frozen and shuffled must both support"
+            "margin on the identical eligible seed set; frozen and shuffled "
+            "must both support"
         ),
         "conclusion": conclusion,
         "claim_scope": (
             "joint held-out behavior specificity for a frozen-trajectory "
             f"off-policy gain-axis proposal in the {panel.upper()}-budget-"
             "matched panel that is also within the registered oracle margin; "
+            "all components require the identical seed-level eligibility set; "
             "does not generalize to the other norm and is explicitly not "
             "closed-loop local learning or recurrent plasticity"
         ),
@@ -1349,29 +1361,44 @@ def summarize_formal_runs(
         [row for row in absolute_rows if row["control_role"] == "absolute_registered"],
         minimum_valid_fraction=minimum_fraction,
     )
-    joint_rows = [
-        _joint_row(
-            panel,
-            [row for row in primary_rows if row["panel"] == panel],
-            next(
-                row
-                for row in absolute_rows
-                if row["panel"] == panel
-                and row["control_role"] == "absolute_registered"
-            ),
-            next(row for row in oracle_rows if row["panel"] == panel),
-            n_planned=n_planned,
-            n_eligible=int(
-                receipts.loc[
-                    receipts["panel"].eq(panel)
-                    & receipts["eligibility_role"].eq("primary"),
-                    "eligible",
-                ].sum()
-            ),
-            minimum_valid_fraction=minimum_fraction,
+    joint_rows: list[dict[str, Any]] = []
+    for panel in PANELS:
+        primary_seed_set = set(
+            receipts.loc[
+                receipts["panel"].eq(panel)
+                & receipts["eligibility_role"].eq("primary")
+                & receipts["eligible"],
+                "seed",
+            ].astype(int)
         )
-        for panel in PANELS
-    ]
+        oracle_seed_set = set(
+            receipts.loc[
+                receipts["panel"].eq(panel)
+                & receipts["eligibility_role"].eq("upper_bound")
+                & receipts["eligible"],
+                "seed",
+            ].astype(int)
+        )
+        joint_seed_set = primary_seed_set & oracle_seed_set
+        joint_rows.append(
+            _joint_row(
+                panel,
+                [row for row in primary_rows if row["panel"] == panel],
+                next(
+                    row
+                    for row in absolute_rows
+                    if row["panel"] == panel
+                    and row["control_role"] == "absolute_registered"
+                ),
+                next(row for row in oracle_rows if row["panel"] == panel),
+                n_planned=n_planned,
+                n_primary_eligible=len(primary_seed_set),
+                n_oracle_eligible=len(oracle_seed_set),
+                n_joint_eligible=len(joint_seed_set),
+                component_seed_sets_identical=(primary_seed_set == oracle_seed_set),
+                minimum_valid_fraction=minimum_fraction,
+            )
+        )
     summary = pd.DataFrame(
         [
             *primary_rows,
@@ -1702,8 +1729,9 @@ def write_snapshot_artifacts(
             "contrasts. Balanced accuracy has its own registered threshold and "
             "must support, together with all three relative primary contrasts, "
             "and the registered oracle noninferiority margin for the joint claim "
-            "to support. Raw accuracy has no registered threshold and remains "
-            "descriptive/inconclusive."
+            "to support. Those joint components must use an identical eligible "
+            "seed set; otherwise the joint result is inconclusive. Raw accuracy "
+            "has no registered threshold and remains descriptive/inconclusive."
         ),
         (
             "- Bootstrap intervals target the mean seed-level effect, whereas "
@@ -1758,13 +1786,15 @@ def write_snapshot_artifacts(
             "shuffled can never support it. Oracle and orthogonal failures do not "
             "invalidate otherwise eligible non-oracle comparisons, but an "
             "unavailable or inconclusive oracle margin leaves the joint claim "
-            "inconclusive. These controls remain bounded diagnostics and cannot "
-            "establish the mechanism alone. Failed and scientifically ineligible "
-            "seeds remain visible in the raw snapshot. The registered absolute "
-            "balanced-accuracy threshold, relative primary claims, and oracle "
-            "margin are joined through AND, never OR. Every panel-level conclusion "
-            "is conditional on its selected-norm budget match and does not "
-            "generalize to the other norm.",
+            "inconclusive. The primary, absolute, and oracle components must also "
+            "have an identical eligible seed set; their intersection is reported "
+            "as the joint eligibility receipt. These controls remain bounded "
+            "diagnostics and cannot establish the mechanism alone. Failed and "
+            "scientifically ineligible seeds remain visible in the raw snapshot. "
+            "The registered absolute balanced-accuracy threshold, relative primary "
+            "claims, and oracle margin are joined through AND, never OR. Every "
+            "panel-level conclusion is conditional on its selected-norm budget "
+            "match and does not generalize to the other norm.",
             width=96,
         ),
         "",

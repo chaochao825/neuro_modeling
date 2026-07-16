@@ -130,7 +130,33 @@ def _row(
                 f"{prefix}_perturbation_geometry": (
                     "joint_state_pca_physical_x_projection_v2"
                 ),
+                f"{prefix}_perturbation_report_scope": (
+                    "physical_x_projection_finite_amplitude_recovery"
+                ),
+                f"{prefix}_perturbation_reference_fraction_policy": (
+                    "sampled_over_planned_eligible_sampled_over_sampled_"
+                    "eligible_reference_over_planned"
+                ),
+                f"{prefix}_perturbation_tangent_basis_space": (
+                    "train_joint_state_pca_physical_x_projection"
+                ),
+                f"{prefix}_perturbation_tangent_basis_rank": 4,
+                f"{prefix}_perturbation_tangent_basis_singular_values": [
+                    1.0,
+                    0.7,
+                    0.4,
+                    0.2,
+                ],
+                f"{prefix}_perturbation_tangent_basis_condition_number": 5.0,
+                f"{prefix}_perturbation_tangent_basis_x_block_energy_fraction": 0.5,
+                f"{prefix}_perturbation_status": "complete",
+                f"{prefix}_perturbation_planned_reference_count": 32,
+                f"{prefix}_perturbation_candidate_reference_count": 100,
+                f"{prefix}_perturbation_sampled_reference_count": 32,
+                f"{prefix}_perturbation_eligible_reference_count": 32,
                 f"{prefix}_perturbation_sampled_reference_fraction": 1.0,
+                f"{prefix}_perturbation_eligible_sampled_reference_fraction": 1.0,
+                f"{prefix}_perturbation_eligible_reference_fraction": 1.0,
             }
         )
     return row
@@ -244,6 +270,31 @@ def test_exp21_trial_perturbation_failure_only_gates_perturbation_claim() -> Non
     rows = [_row(seed) for seed in range(30)]
     for row in rows:
         row["trial_reset_perturbation_sampled_reference_fraction"] = 0.5
+
+    summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=200)
+    perturbation = summary.loc[
+        summary["proposition"].eq(
+            "trial_reset_nonlinear_normal_recovery_relative_to_tangent"
+        )
+    ].iloc[0]
+    other = summary.loc[
+        ~summary["proposition"].eq(
+            "trial_reset_nonlinear_normal_recovery_relative_to_tangent"
+        )
+    ]
+
+    assert perturbation["n_eligible"] == 0
+    assert perturbation["conclusion"] == "inconclusive"
+    assert set(other["n_eligible"]) == {30}
+    assert set(other["conclusion"]) == {"support"}
+
+
+def test_exp21_perturbation_receipt_rejects_inconsistent_basis_and_counts() -> None:
+    config = _config()
+    rows = [_row(seed) for seed in range(30)]
+    for row in rows:
+        row["trial_reset_perturbation_tangent_basis_rank"] = 3
+        row["trial_reset_perturbation_eligible_reference_count"] = 31
 
     summary = summarize_formal_runs(pd.DataFrame(rows), config, n_bootstrap=200)
     perturbation = summary.loc[

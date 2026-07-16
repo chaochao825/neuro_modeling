@@ -1255,6 +1255,10 @@ def belief_manifold_geometry(
     )
 
 
+class PerturbationEligibilityError(ValueError):
+    """Expected scientific ineligibility for the nonlinear perturbation audit."""
+
+
 @dataclass(frozen=True, slots=True)
 class NonlinearPerturbationSummary:
     """Frozen-network physical-x tangent/normal recovery statistics."""
@@ -1555,7 +1559,7 @@ def nonlinear_perturbation_recovery(
 
     tangent_geometry = fitted.physical_x_tangent_basis
     if tangent_geometry.rank != fitted.latent_dim:
-        raise ValueError(
+        raise PerturbationEligibilityError(
             "physical-x projection of the joint latent basis is rank-deficient"
         )
     q_tangent = tangent_geometry.basis
@@ -1570,7 +1574,9 @@ def nonlinear_perturbation_recovery(
         if time > 0 and active[time - 1]
     ]
     if not candidates:
-        raise ValueError("no active reference has the requested future horizon")
+        raise PerturbationEligibilityError(
+            "no active reference has the requested future horizon"
+        )
     rng = np.random.default_rng(int(seed))
     chosen_indices = rng.choice(
         len(candidates), size=min(references, len(candidates)), replace=False
@@ -1813,6 +1819,7 @@ __all__ = [
     "FixedDriveAttractorProbe",
     "FittedTrajectoryKoopman",
     "NonlinearPerturbationSummary",
+    "PerturbationEligibilityError",
     "PhysicalXTangentBasis",
     "TrajectoryKoopmanScore",
     "belief_manifold_geometry",
