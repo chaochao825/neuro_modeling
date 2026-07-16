@@ -88,11 +88,12 @@ class EIRateTrajectory:
 class EIRateBatchTrajectory:
     """Trial-major trajectories and exact substep event aggregates.
 
-    The state histories are sampled after every coarse task step.  Energy
-    aggregates, in contrast, are accumulated at every Euler substep so a
-    caller cannot make a condition appear cheaper merely by requesting fewer
-    saved samples.  They are transparent unitless compute proxies, not ATP
-    estimates.
+    By default the state histories are sampled after every coarse task step.
+    ``save_substeps=True`` instead retains every Euler substep, including the
+    common initial state at index zero.  Energy aggregates are always
+    accumulated at every Euler substep, so changing the saved sampling cannot
+    make a condition appear cheaper.  They are transparent unitless compute
+    proxies, not ATP estimates.
     """
 
     x: Array
@@ -101,6 +102,7 @@ class EIRateBatchTrajectory:
     substep_recurrent_event_sum: float
     substep_input_event_sum: float
     integration_substeps: int
+    history_sampling: Literal["coarse_step", "euler_substep"] = "coarse_step"
 
 
 @dataclass(frozen=True)
@@ -442,6 +444,7 @@ class EIRateNetwork:
         *,
         gains: Array | float = 1.0,
         substeps: int = 1,
+        save_substeps: bool = False,
     ) -> EIRateBatchTrajectory:
         """Run independent trials with a shared deterministic checkpoint.
 
@@ -450,7 +453,8 @@ class EIRateNetwork:
         vector, or a full ``(trial, time, n_units)`` tensor.  Coarse inputs and
         gains are held fixed across ``substeps`` Euler updates.  This method is
         deliberately stateless: it neither samples noise nor carries receiver
-        state between trials.
+        state between trials.  ``save_substeps`` changes only the history
+        sampling and never the numerical integration or event accounting.
         """
 
         input_array = np.asarray(inputs, dtype=float)
@@ -470,6 +474,8 @@ class EIRateNetwork:
             or int(substeps) < 1
         ):
             raise ValueError("substeps must be a positive integer")
+        if not isinstance(save_substeps, (bool, np.bool_)):
+            raise TypeError("save_substeps must be boolean")
         integration_substeps = int(substeps)
         n_trials, n_steps, _ = input_array.shape
 
@@ -494,7 +500,8 @@ class EIRateNetwork:
 
         x = np.zeros((n_trials, self.n_units), dtype=float)
         rates = np.zeros_like(x)
-        x_history = np.empty((n_trials, n_steps + 1, self.n_units), dtype=float)
+        saved_steps = n_steps * integration_substeps if bool(save_substeps) else n_steps
+        x_history = np.empty((n_trials, saved_steps + 1, self.n_units), dtype=float)
         rate_history = np.empty_like(x_history)
         x_history[:, 0] = x
         rate_history[:, 0] = rates
@@ -503,6 +510,7 @@ class EIRateNetwork:
         firing_sum = 0.0
         recurrent_event_sum = 0.0
         input_event_sum = 0.0
+        saved_index = 0
 
         for t in range(n_steps):
             input_t = input_array[:, t]
@@ -525,8 +533,14 @@ class EIRateNetwork:
                 x = x + self.dt * dx
                 rates = self._activate(x, gain_t)
                 firing_sum += float(np.sum(np.abs(rates)))
-            x_history[:, t + 1] = x
-            rate_history[:, t + 1] = rates
+                if bool(save_substeps):
+                    saved_index += 1
+                    x_history[:, saved_index] = x
+                    rate_history[:, saved_index] = rates
+            if not bool(save_substeps):
+                saved_index += 1
+                x_history[:, saved_index] = x
+                rate_history[:, saved_index] = rates
 
         return EIRateBatchTrajectory(
             x=x_history,
@@ -535,6 +549,9 @@ class EIRateNetwork:
             substep_recurrent_event_sum=recurrent_event_sum,
             substep_input_event_sum=input_event_sum,
             integration_substeps=integration_substeps,
+            history_sampling=(
+                "euler_substep" if bool(save_substeps) else "coarse_step"
+            ),
         )
 
     def _apply_component_update(

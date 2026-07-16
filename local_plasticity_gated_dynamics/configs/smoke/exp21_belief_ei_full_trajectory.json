@@ -1,0 +1,87 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "cue_reliability": 0.85,
+  "context_hazard": 0.10,
+  "gate_timing": "current_cue_filtered_after_cue_epoch_before_sensory",
+  "task": {
+    "n_episodes": 9,
+    "trials_per_episode": 20,
+    "dt_ms": 100,
+    "cue_ms": 100,
+    "sensory_ms": 400,
+    "delay_ms": 100,
+    "response_ms": 100,
+    "coherence_values": [-0.5, -0.25, 0.25, 0.5],
+    "sensory_noise_std": 1.0,
+    "input_scale": 1.0,
+    "response_target": "choice"
+  },
+  "outer_test_fraction": 0.3333333333333333,
+  "validation_fraction": 0.3333333333333333,
+  "network": {
+    "n_units": 32,
+    "excitatory_fraction": 0.8,
+    "connection_probability": 0.25,
+    "tau_e": 100.0,
+    "tau_i": 50.0,
+    "dt": 50.0,
+    "bulk_gain": 0.7,
+    "inhibitory_gain": 1.2,
+    "input_scale": 0.8,
+    "activation": "rectified_tanh",
+    "normalize_fan_in_after_update": true
+  },
+  "integration_substeps": 2,
+  "trial_batch_size": 64,
+  "gain_strength": 0.60,
+  "readout_alpha": 1.0,
+  "trajectory_dynamics": {
+    "latent_dim": 4,
+    "ridge": 0.01,
+    "normalize_activity": true,
+    "pca_solver": "randomized",
+    "rollout_horizon_steps": 20,
+    "rollout_stride_steps": 7
+  },
+  "belief_geometry": {
+    "low_threshold": 0.25,
+    "high_threshold": 0.75,
+    "subspace_dim": 4
+  },
+  "perturbation": {
+    "horizon_steps": 4,
+    "amplitude_fractions": [0.02, 0.05],
+    "n_references": 4,
+    "derivative_tolerance": 1e-8,
+    "tangent_pullback_residual_tolerance": 0.10,
+    "minimum_initial_normal_purity": 0.70,
+    "baseline_replay_tolerance": 1e-10
+  },
+  "attractor_probe": {
+    "n_anchors": 8,
+    "beliefs": [0.1, 0.9],
+    "raw_drive": [0.25, 0.25],
+    "horizon_steps": 8,
+    "minimum_separation": 1.0,
+    "minimum_initial_scaled_separation": 0.05
+  },
+  "md_gate": {
+    "learning_rate": 0.03,
+    "inverse_temperature": 1.2,
+    "pseudocount": 0.05,
+    "n_passes": 2
+  },
+  "gate_compute": {
+    "operations": 12.0,
+    "states": 2.0
+  },
+  "registered_claim_thresholds": {
+    "maximum_rollout_normalized_rmse": 1.0,
+    "minimum_controlled_gain": 0.0,
+    "minimum_perturbation_eligible_fraction": 0.9,
+    "maximum_normal_endpoint_ratio": 1.0,
+    "maximum_projected_normal_log_growth_rate": 0.0,
+    "maximum_normal_vs_tangent_log_ratio": 0.0
+  }
+}

@@ -270,6 +270,38 @@ def test_trial_batch_matches_independent_fine_step_runs() -> None:
         np.testing.assert_allclose(batched.rates[trial, 1:], independent.rates[[2, 4]])
 
 
+def test_trial_batch_full_substep_history_preserves_coarse_outputs_and_events() -> None:
+    network = EIRateNetwork(
+        8,
+        n_inputs=2,
+        connection_probability=0.25,
+        tau_e=20.0,
+        tau_i=10.0,
+        dt=5.0,
+        seed=37,
+    )
+    rng = np.random.default_rng(11)
+    inputs = rng.normal(size=(3, 4, 2))
+    gains = rng.uniform(0.8, 1.2, size=(3, 4, 8))
+    coarse = network.run_trial_batch(inputs, gains=gains, substeps=3)
+    fine = network.run_trial_batch(
+        inputs,
+        gains=gains,
+        substeps=3,
+        save_substeps=True,
+    )
+
+    assert coarse.history_sampling == "coarse_step"
+    assert fine.history_sampling == "euler_substep"
+    assert coarse.x.shape == (3, 5, 8)
+    assert fine.x.shape == (3, 13, 8)
+    np.testing.assert_array_equal(fine.x[:, ::3], coarse.x)
+    np.testing.assert_array_equal(fine.rates[:, ::3], coarse.rates)
+    assert fine.substep_firing_sum == coarse.substep_firing_sum
+    assert fine.substep_input_event_sum == coarse.substep_input_event_sum
+    assert fine.substep_recurrent_event_sum == coarse.substep_recurrent_event_sum
+
+
 def test_trial_batch_rejects_misaligned_gains_and_invalid_substeps() -> None:
     network = EIRateNetwork(8, n_inputs=2, seed=5)
     inputs = np.zeros((3, 4, 2))
@@ -277,6 +309,8 @@ def test_trial_batch_rejects_misaligned_gains_and_invalid_substeps() -> None:
         network.run_trial_batch(inputs, gains=np.ones((3, 4, 7)))
     with pytest.raises(ValueError, match="substeps"):
         network.run_trial_batch(inputs, substeps=0)
+    with pytest.raises(TypeError, match="save_substeps"):
+        network.run_trial_batch(inputs, save_substeps=1)
 
 
 @pytest.mark.parametrize(

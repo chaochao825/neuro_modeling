@@ -66,6 +66,12 @@ def _fingerprint(*values: object) -> str:
     return digest.hexdigest()
 
 
+def _freeze_array(value: np.ndarray | None) -> np.ndarray | None:
+    if value is not None:
+        value.setflags(write=False)
+    return value
+
+
 @dataclass(frozen=True)
 class SplitGatePredictions:
     """One frozen gate checkpoint evaluated independently on every split."""
@@ -203,6 +209,21 @@ class ReceiverSimulation:
     pathway_gating: bool
     population_gain: bool
     receiver_fingerprint: str
+    full_x_trajectory: np.ndarray | None = None
+    full_rate_trajectory: np.ndarray | None = None
+    raw_inputs: np.ndarray | None = None
+    receiver_raw_sensory_inputs: np.ndarray | None = None
+    routed_inputs: np.ndarray | None = None
+    trajectory_posterior: np.ndarray | None = None
+    trajectory_belief: np.ndarray | None = None
+    trajectory_population_gain_belief: np.ndarray | None = None
+    trajectory_pathway_belief: np.ndarray | None = None
+    trajectory_epoch: np.ndarray | None = None
+    trajectory_trial_ids: np.ndarray | None = None
+    trajectory_sequence_ids: np.ndarray | None = None
+    trajectory_sequence_scope: str | None = None
+    trajectory_dt: float | None = None
+    trajectory_fingerprint: str | None = None
 
 
 def _epoch_feature_indices(task: TaskLearningBatch) -> tuple[np.ndarray, ...]:
@@ -226,6 +247,8 @@ def simulate_receiver(
     trial_batch_size: int,
     pathway_gating: bool = False,
     population_gain: bool = True,
+    record_substeps: bool = False,
+    continuous_episodes: bool = False,
 ) -> ReceiverSimulation:
     """Run sensory channels through one frozen receiver checkpoint.
 
@@ -238,6 +261,10 @@ def simulate_receiver(
 
     if network.n_inputs != 2:
         raise ValueError("hidden-context E/I receiver must have exactly two inputs")
+    if not isinstance(record_substeps, (bool, np.bool_)):
+        raise TypeError("record_substeps must be boolean")
+    if not isinstance(continuous_episodes, (bool, np.bool_)):
+        raise TypeError("continuous_episodes must be boolean")
     if (
         isinstance(trial_batch_size, (bool, np.bool_))
         or not isinstance(trial_batch_size, (int, np.integer))
@@ -259,16 +286,86 @@ def simulate_receiver(
     if pathway_gating:
         pathway_scales[:, 0] = 1.0 - posterior
         pathway_scales[:, 1] = posterior
-    centered_pathways = pathway_scales - np.mean(
-        pathway_scales, axis=0, keepdims=True
-    )
+    centered_pathways = pathway_scales - np.mean(pathway_scales, axis=0, keepdims=True)
     pathway_control_rank = int(np.linalg.matrix_rank(centered_pathways, tol=1e-12))
     # Capability boundary: cue one-hot channels 2:4 are never passed to the
     # receiver.  Optional routing uses the frozen belief only, never truth.
-    sensory_inputs = np.asarray(dataset.task.inputs[:, :, :2], dtype=np.float64)
-    sensory_inputs = sensory_inputs * pathway_scales[:, np.newaxis, :]
+    raw_sensory_inputs = np.asarray(dataset.task.inputs[:, :, :2], dtype=np.float64)
+    sensory_inputs = raw_sensory_inputs * pathway_scales[:, np.newaxis, :]
+    n_steps = sensory_inputs.shape[1]
+    if bool(continuous_episodes):
+        episode_ids = np.asarray(dataset.task.episode_ids, dtype=int)
+        ordered_episodes = np.asarray(list(dict.fromkeys(episode_ids.tolist())))
+        grouped = [np.flatnonzero(episode_ids == item) for item in ordered_episodes]
+        if not grouped or len({indices.size for indices in grouped}) != 1:
+            raise ValueError(
+                "continuous_episodes requires equal non-empty whole episodes"
+            )
+        trials_per_episode = int(grouped[0].size)
+        if any(
+            not np.array_equal(
+                indices, np.arange(indices[0], indices[-1] + 1, dtype=int)
+            )
+            for indices in grouped
+        ):
+            raise ValueError("continuous_episodes requires contiguous episode trials")
+        grouped_indices = np.stack(grouped, axis=0)
+        sequence_raw_inputs = raw_sensory_inputs[grouped_indices].reshape(
+            ordered_episodes.size,
+            trials_per_episode * n_steps,
+            network.n_inputs,
+        )
+        sequence_inputs = sensory_inputs[grouped_indices].reshape(
+            ordered_episodes.size,
+            trials_per_episode * n_steps,
+            network.n_inputs,
+        )
+        sequence_gains = gain.gains[grouped_indices].reshape(
+            ordered_episodes.size,
+            trials_per_episode * n_steps,
+            network.n_units,
+        )
+        sequence_belief = np.repeat(posterior[grouped_indices], n_steps, axis=1)
+        sequence_epoch = np.tile(
+            np.asarray(dataset.task.epoch, dtype="U8"), trials_per_episode
+        )
+        sequence_trial_ids = np.repeat(
+            np.asarray(dataset.task.trial_ids, dtype=int)[grouped_indices],
+            n_steps,
+            axis=1,
+        )
+        sequence_ids = ordered_episodes
+        sequence_scope = "episode_continuous_state"
+    else:
+        trials_per_episode = 1
+        sequence_raw_inputs = raw_sensory_inputs
+        sequence_inputs = sensory_inputs
+        sequence_gains = gain.gains
+        sequence_belief = np.repeat(posterior[:, None], n_steps, axis=1)
+        sequence_epoch = np.asarray(dataset.task.epoch, dtype="U8")
+        sequence_trial_ids = np.repeat(
+            np.asarray(dataset.task.trial_ids, dtype=int)[:, None],
+            n_steps,
+            axis=1,
+        )
+        sequence_ids = np.asarray(dataset.task.trial_ids, dtype=int)
+        sequence_scope = "trial_reset_state"
+    applied_control_belief = np.full_like(sequence_belief, 0.5, dtype=np.float64)
+    population_gain_belief = np.full_like(sequence_belief, 0.5, dtype=np.float64)
+    pathway_belief = None
+    if bool(population_gain):
+        population_gain_belief = np.array(sequence_belief, dtype=np.float64, copy=True)
+        population_gain_belief[:, sequence_epoch == "cue"] = 0.5
+        applied_control_belief = population_gain_belief.copy()
+    if bool(pathway_gating):
+        pathway_belief = np.full_like(sequence_belief, 0.5, dtype=np.float64)
+        sensory_epoch = sequence_epoch == "sensory"
+        pathway_belief[:, sensory_epoch] = sequence_belief[:, sensory_epoch]
+        applied_control_belief[:, sensory_epoch] = sequence_belief[:, sensory_epoch]
     epoch_indices = _epoch_feature_indices(dataset.task)
     feature_blocks: list[np.ndarray] = []
+    x_trajectory_blocks: list[np.ndarray] = []
+    rate_trajectory_blocks: list[np.ndarray] = []
     mean_x_sum = np.zeros(network.n_units, dtype=np.float64)
     mean_gain_sum = np.zeros(network.n_units, dtype=np.float64)
     mean_count = 0
@@ -276,25 +373,61 @@ def simulate_receiver(
     recurrent_events = 0.0
     firing = 0.0
     batch = int(trial_batch_size)
-    for start in range(0, n_trials, batch):
-        stop = min(start + batch, n_trials)
+    n_sequences = sequence_inputs.shape[0]
+    for start in range(0, n_sequences, batch):
+        stop = min(start + batch, n_sequences)
         trajectory = network.run_trial_batch(
-            sensory_inputs[start:stop],
-            gains=gain.gains[start:stop],
+            sequence_inputs[start:stop],
+            gains=sequence_gains[start:stop],
             substeps=int(integration_substeps),
+            save_substeps=bool(record_substeps),
         )
         # History index 0 is the initial state; coarse task step t is stored at
-        # t+1 and is the fixed sampling convention for every condition.
-        saved_rates = trajectory.rates[:, 1:]
+        # t+1 in the legacy history.  A full-substep history instead samples
+        # the same coarse endpoints at integer multiples of substeps, keeping
+        # readout features bitwise identical across recording modes.
+        if bool(record_substeps):
+            coarse_indices = np.arange(
+                int(integration_substeps),
+                sequence_inputs.shape[1] * int(integration_substeps) + 1,
+                int(integration_substeps),
+            )
+            saved_x_coarse = trajectory.x[:, coarse_indices]
+            saved_rates = trajectory.rates[:, coarse_indices]
+            x_trajectory_blocks.append(trajectory.x)
+            rate_trajectory_blocks.append(trajectory.rates)
+        else:
+            saved_x_coarse = trajectory.x[:, 1:]
+            saved_rates = trajectory.rates[:, 1:]
+        if bool(continuous_episodes):
+            trial_x = saved_x_coarse.reshape(
+                (stop - start) * trials_per_episode,
+                n_steps,
+                network.n_units,
+            )
+            trial_rates = saved_rates.reshape(
+                (stop - start) * trials_per_episode,
+                n_steps,
+                network.n_units,
+            )
+            trial_gains = sequence_gains[start:stop].reshape(
+                (stop - start) * trials_per_episode,
+                n_steps,
+                network.n_units,
+            )
+        else:
+            trial_x = saved_x_coarse
+            trial_rates = saved_rates
+            trial_gains = sequence_gains[start:stop]
         features = np.concatenate(
-            [np.mean(saved_rates[:, indices], axis=1) for indices in epoch_indices],
+            [np.mean(trial_rates[:, indices], axis=1) for indices in epoch_indices],
             axis=1,
         )
         feature_blocks.append(features)
         active = gain.active_time_mask
-        saved_x = trajectory.x[:, 1:][:, active]
+        saved_x = trial_x[:, active]
         mean_x_sum += np.sum(saved_x, axis=(0, 1))
-        mean_gain_sum += np.sum(gain.gains[start:stop][:, active], axis=(0, 1))
+        mean_gain_sum += np.sum(trial_gains[:, active], axis=(0, 1))
         mean_count += saved_x.shape[0] * saved_x.shape[1]
         input_events += trajectory.substep_input_event_sum
         recurrent_events += trajectory.substep_recurrent_event_sum
@@ -302,6 +435,53 @@ def simulate_receiver(
     feature_matrix = np.concatenate(feature_blocks, axis=0)
     mean_x = mean_x_sum / mean_count
     mean_gain = mean_gain_sum / mean_count
+    full_x = (
+        np.concatenate(x_trajectory_blocks, axis=0) if bool(record_substeps) else None
+    )
+    full_rates = (
+        np.concatenate(rate_trajectory_blocks, axis=0)
+        if bool(record_substeps)
+        else None
+    )
+    trajectory_fingerprint = (
+        _fingerprint(
+            "frozen-ei-receiver-full-substep-trajectory-v1",
+            dataset.task.fingerprint,
+            network.recurrent_weights,
+            network.input_weights,
+            gain.fingerprint,
+            pathway_scales,
+            int(integration_substeps),
+            sequence_scope,
+            sequence_raw_inputs,
+            sequence_inputs,
+            sequence_belief,
+            applied_control_belief,
+            population_gain_belief,
+            pathway_belief,
+            sequence_epoch,
+            sequence_trial_ids,
+            full_x,
+            full_rates,
+        )
+        if bool(record_substeps)
+        else None
+    )
+    if bool(record_substeps):
+        for value in (
+            full_x,
+            full_rates,
+            sequence_raw_inputs,
+            sequence_inputs,
+            applied_control_belief,
+            sequence_belief,
+            population_gain_belief,
+            pathway_belief,
+            sequence_epoch,
+            sequence_trial_ids,
+            sequence_ids,
+        ):
+            _freeze_array(value)
     return ReceiverSimulation(
         features=feature_matrix,
         mean_x=mean_x,
@@ -326,6 +506,29 @@ def simulate_receiver(
             int(integration_substeps),
             feature_matrix,
         ),
+        full_x_trajectory=full_x,
+        full_rate_trajectory=full_rates,
+        routed_inputs=(sequence_inputs if bool(record_substeps) else None),
+        raw_inputs=(sequence_raw_inputs if bool(record_substeps) else None),
+        receiver_raw_sensory_inputs=(
+            sequence_raw_inputs if bool(record_substeps) else None
+        ),
+        trajectory_belief=(applied_control_belief if bool(record_substeps) else None),
+        trajectory_posterior=(sequence_belief if bool(record_substeps) else None),
+        trajectory_population_gain_belief=(
+            population_gain_belief if bool(record_substeps) else None
+        ),
+        trajectory_pathway_belief=(
+            pathway_belief
+            if bool(record_substeps) and pathway_belief is not None
+            else None
+        ),
+        trajectory_epoch=(sequence_epoch if bool(record_substeps) else None),
+        trajectory_trial_ids=(sequence_trial_ids if bool(record_substeps) else None),
+        trajectory_sequence_ids=(sequence_ids if bool(record_substeps) else None),
+        trajectory_sequence_scope=sequence_scope if bool(record_substeps) else None,
+        trajectory_dt=float(network.dt) if bool(record_substeps) else None,
+        trajectory_fingerprint=trajectory_fingerprint,
     )
 
 
@@ -482,8 +685,7 @@ def evaluate_receiver_condition(
     sensory = np.asarray(dataset.task.inputs[:, :, :2], dtype=np.float64)
     sensory_mask = np.asarray(dataset.task.epoch) == "sensory"
     routed_magnitude = np.sum(
-        np.abs(sensory[:, sensory_mask])
-        * simulation.pathway_scales[:, np.newaxis, :],
+        np.abs(sensory[:, sensory_mask]) * simulation.pathway_scales[:, np.newaxis, :],
         axis=1,
     )
     relevant = routed_magnitude[
