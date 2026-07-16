@@ -145,7 +145,7 @@ OFFICIAL_FILE_SPECS: Mapping[str, OfficialFileSpec] = MappingProxyType(
                 "GLMdata.mat",
                 58487164,
                 288_180_371,
-                "ee2eb0897709364cf906c42ebf701ed4a",
+                "ee2eb0897709364cf906c42ebf701ed4",
             ),
         )
     }

@@ -162,6 +162,14 @@ def test_official_release_constants_are_pinned() -> None:
     assert OFFICIAL_FILE_SPECS["BhvData.mat"].file_id == 58487176
     assert OFFICIAL_FILE_SPECS["GLMdata.mat"].size == 288_180_371
     assert (
+        OFFICIAL_FILE_SPECS["GLMdata.mat"].md5
+        == "ee2eb0897709364cf906c42ebf701ed4"
+    )
+    assert all(
+        len(spec.md5) == 32
+        for spec in OFFICIAL_FILE_SPECS.values()
+    )
+    assert (
         OFFICIAL_FILE_SPECS["DynamicTransformationData.mat"].md5
         == "d73c9aeea6a61268ee880b192c38006b"
     )
