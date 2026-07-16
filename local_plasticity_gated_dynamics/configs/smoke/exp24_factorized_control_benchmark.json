@@ -1,0 +1,56 @@
+{
+  "profile": "smoke",
+  "seeds": [0, 1, 2, 3, 4],
+  "training_algorithm": "oracle_factorized_actuator_isolation",
+  "used_autograd": false,
+  "task": {
+    "n_train_blocks": 4,
+    "n_test_blocks": 2,
+    "n_ood_blocks": 2,
+    "trials_per_block": 12,
+    "n_steps": 8,
+    "routing_sensory_steps": 1,
+    "sensory_noise_std": 0.35,
+    "evidence_min": 1.0,
+    "evidence_max": 1.5,
+    "dynamics_rho": 0.8
+  },
+  "network": {
+    "n_units": 12,
+    "inhibitory_fraction": 0.25,
+    "spectral_radius": 0.55,
+    "input_scale": 0.35,
+    "gain_axis_strength": 0.8,
+    "routing_task_low_rank_strength": 2.0,
+    "dynamics_low_rank_strength": 0.8,
+    "gain_min": 0.2,
+    "gain_max": 1.8,
+    "routing_min": 0.05,
+    "routing_max": 1.95
+  },
+  "functional_budget": {
+    "initial_scale": 1.0,
+    "max_scale": 8.0,
+    "relative_tolerance": 0.08,
+    "rate_change_relative_tolerance": 0.35,
+    "gain_envelope_limit": 0.80,
+    "event_change_relative_tolerance": 0.50,
+    "envelope_target_fraction": 0.90,
+    "absolute_tolerance": 1e-10,
+    "max_iterations": 40
+  },
+  "analysis": {
+    "readout_alpha": 1.0,
+    "time_readout_alpha": 2.0,
+    "switch_stable_steps": 2,
+    "dynamics_ridge": 1.0,
+    "jacobian_samples": 12,
+    "jacobian_outlier_radius": 1.0,
+    "tangent_rank": 3,
+    "perturbation_amplitude": 0.05,
+    "perturbation_trials": 3,
+    "covariance_components": 2,
+    "communication_rank": 2,
+    "communication_ridge": 0.1
+  }
+}

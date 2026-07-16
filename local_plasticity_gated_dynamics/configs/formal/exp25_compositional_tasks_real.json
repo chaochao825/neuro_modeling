@@ -1,0 +1,33 @@
+{
+  "profile": "formal",
+  "seeds": [0],
+  "data_mode": "official_canonical_only",
+  "data_root": "data/compositional_tasks/official_canonical_v1",
+  "manifest_path": "data/compositional_tasks/official_canonical_v1/canonical_manifest.json",
+  "expected_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "minimum_sessions": 2,
+  "minimum_animals": 2,
+  "protocols": [
+    "leave-one-block-out",
+    "leave-one-composition-out",
+    "unseen-stimulus-action-composition",
+    "cross-session-transfer"
+  ],
+  "candidate_latent_dims": [2, 4, 8, 16],
+  "max_outer_folds": null,
+  "max_inner_folds": 5,
+  "belief": {
+    "cue_columns": ["cue"],
+    "behavior_columns": ["behavior"],
+    "numeric_columns": [],
+    "fit_label_column": "composition_id",
+    "ridge": 1.0,
+    "temperature": 1.0
+  },
+  "model": {
+    "gate_rank": 2,
+    "ridge": 0.001,
+    "poisson_ridge": 0.001,
+    "max_irls": 40
+  }
+}
