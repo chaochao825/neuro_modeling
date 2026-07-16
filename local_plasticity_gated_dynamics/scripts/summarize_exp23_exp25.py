@@ -1889,7 +1889,12 @@ def _markdown_table(frame: pd.DataFrame) -> str:
     return "\n".join((header, rule, *body))
 
 
-def _plot_claims(claims: pd.DataFrame, path: Path) -> bool:
+def _plot_claims(
+    claims: pd.DataFrame,
+    path: Path,
+    *,
+    pdf_path: Path | None = None,
+) -> bool:
     plotted = claims.loc[
         claims["row_kind"].eq("claim")
         & claims["estimate"].map(lambda value: _numeric(value) is not None)
@@ -1918,48 +1923,112 @@ def _plot_claims(claims: pd.DataFrame, path: Path) -> bool:
         "oppose": "#D55E00",
         "inconclusive": "#7F7F7F",
     }
-    labels = [
-        f"{row.experiment.replace('exp', 'E')} · {row.claim_id.split('_', 1)[-1]}"
-        for row in plotted.itertuples()
-    ]
-    height = max(4.0, 0.32 * len(plotted) + 1.5)
+    labels = {
+        "exp23_current_gain_vs_frozen": "current: local − frozen",
+        "exp23_current_gain_vs_random": "current: local − random",
+        "exp23_current_median_update_cosine": "current",
+        "exp23_delayed_gain_vs_frozen": "delayed: local − frozen",
+        "exp23_delayed_gain_vs_random": "delayed: local − random",
+        "exp23_delayed_median_update_cosine": "delayed",
+        "exp24_dynamics_prefers_low_rank_to_routing": (
+            "dynamics: low-rank − routing"
+        ),
+        "exp24_dynamics_prefers_rgl_to_routing": "dynamics: RGL − routing",
+        "exp24_routing_prefers_gain_to_low_rank": "routing: gain − low-rank",
+        "exp24_routing_prefers_routing_to_low_rank": (
+            "routing: routing − low-rank"
+        ),
+    }
+    panels = (
+        (
+            "a",
+            plotted.loc[
+                plotted["claim_id"].str.startswith("exp23_")
+                & plotted["claim_id"].str.contains("_gain_vs_")
+            ],
+            "Balanced-accuracy effect minus 0.03 criterion",
+        ),
+        (
+            "b",
+            plotted.loc[
+                plotted["claim_id"].str.startswith("exp23_")
+                & plotted["claim_id"].str.contains("_median_update_cosine")
+            ],
+            "Median update cosine minus 0 criterion",
+        ),
+        (
+            "c",
+            plotted.loc[plotted["claim_id"].str.startswith("exp24_")],
+            "Balanced-accuracy difference",
+        ),
+    )
+    panels = tuple(panel for panel in panels if not panel[1].empty)
     with plt.rc_context(
         {
             "font.family": "sans-serif",
-            "font.size": 8,
+            "font.size": 9,
             "axes.labelsize": 9,
+            "xtick.labelsize": 8,
+            "ytick.labelsize": 8,
             "pdf.fonttype": 42,
         }
     ):
-        figure, axis = plt.subplots(figsize=(9.0, height), constrained_layout=True)
-        y = np.arange(len(plotted))
-        for index, row in enumerate(plotted.itertuples()):
-            axis.errorbar(
-                float(row.margin),
-                y[index],
-                xerr=np.asarray(
-                    [
-                        [max(0.0, float(row.margin - row.margin_low))],
-                        [max(0.0, float(row.margin_high - row.margin))],
-                    ]
-                ),
-                fmt="o",
-                color=colors[str(row.conclusion)],
-                capsize=3,
-                markersize=4,
+        figure, axes = plt.subplots(
+            len(panels),
+            1,
+            figsize=(7.2, 6.6),
+            constrained_layout=True,
+        )
+        axes = np.atleast_1d(axes)
+        for axis, (panel_label, panel, xlabel) in zip(
+            axes,
+            panels,
+            strict=True,
+        ):
+            y = np.arange(len(panel))
+            for index, row in enumerate(panel.itertuples()):
+                axis.errorbar(
+                    float(row.margin),
+                    y[index],
+                    xerr=np.asarray(
+                        [
+                            [max(0.0, float(row.margin - row.margin_low))],
+                            [max(0.0, float(row.margin_high - row.margin))],
+                        ]
+                    ),
+                    fmt="o",
+                    color=colors[str(row.conclusion)],
+                    capsize=3,
+                    markersize=4,
+                )
+            axis.axvline(0.0, color="0.25", linestyle="--", linewidth=0.8)
+            axis.set_yticks(
+                y,
+                [labels[str(value)] for value in panel["claim_id"]],
             )
-        axis.axvline(0.0, color="0.25", linestyle="--", linewidth=0.8)
-        axis.set_yticks(y, labels)
-        axis.set_ylim(len(plotted) - 0.5, -0.5)
-        axis.set_xlabel("Effect minus registered threshold (95% unit bootstrap CI)")
-        axis.set_title("Exp23-25 formal claim margins", loc="left")
-        axis.spines[["top", "right"]].set_visible(False)
+            axis.set_ylim(len(panel) - 0.5, -0.5)
+            axis.set_xlabel(f"{xlabel} (95% seed-level bootstrap CI)")
+            axis.text(
+                -0.16,
+                1.02,
+                panel_label,
+                transform=axis.transAxes,
+                fontweight="bold",
+                va="bottom",
+            )
+            axis.spines[["top", "right"]].set_visible(False)
         figure.savefig(
             path,
-            dpi=220,
+            dpi=300,
             bbox_inches="tight",
             metadata={"Software": "summarize_exp23_exp25.py"},
         )
+        if pdf_path is not None:
+            figure.savefig(
+                pdf_path,
+                bbox_inches="tight",
+                metadata={"Creator": "summarize_exp23_exp25.py"},
+            )
         plt.close(figure)
     return True
 
@@ -1979,6 +2048,7 @@ def write_summary_artifacts(
         "summary": output / "summary.csv",
         "report": output / "report.md",
         "figure": output / "exp23_exp25_summary.png",
+        "figure_pdf": output / "exp23_exp25_summary.pdf",
     }
     summary.to_csv(paths["summary"], index=False, lineterminator="\n")
     claims = summary.loc[summary["row_kind"].eq("claim")]
@@ -2108,14 +2178,25 @@ def write_summary_artifacts(
             "gates, never OR. Exp23 formal readiness also requires explicit "
             "pairing IDs, frozen-recurrent hash/copy receipts, train/dev/test "
             "separation, no true-context access, and local-eprop no-autograd/BPTT "
-            "receipts for every registered seed.",
+            "receipts for every registered seed. The Exp23 formal-v2 conclusion is "
+            "limited to the registered matched state-displacement budget of 0.001 "
+            "and the implemented local-eprop rule; it does not reject all budgets "
+            "or all local rules. That fixed target was selected without behavior, "
+            "loss, test, or OOD fields from the retained v1 development-reachability "
+            "receipt. Exact config matching excludes the superseded 0.002 attempts "
+            "from v2 inference while leaving their raw artifacts intact.",
             width=96,
         ),
         "",
     ]
     paths["report"].write_text("\n".join(report), encoding="utf-8")
-    if not _plot_claims(claims, paths["figure"]):
+    if not _plot_claims(
+        claims,
+        paths["figure"],
+        pdf_path=paths["figure_pdf"],
+    ):
         paths.pop("figure")
+        paths.pop("figure_pdf")
     return paths
 
 

@@ -19,6 +19,8 @@ data/structured/
 results/runs/
 results/*.png
 results/*.pdf
+!results/exp23_exp25_summary.png
+!results/exp23_exp25_summary.pdf
 !results/core_results.png
 !results/core_results.pdf
 !results/phase_models.png

@@ -412,6 +412,7 @@ def test_positive_formal_bundle_supports_all_registered_joint_claims_and_writes(
     assert paths["summary"].name == "summary.csv"
     assert paths["report"].name == "report.md"
     assert paths["figure"].stat().st_size > 1_000
+    assert paths["figure_pdf"].stat().st_size > 1_000
     published = pd.read_csv(paths["summary"])
     assert {"condition_coverage", "claim"} <= set(published["row_kind"])
     report = paths["report"].read_text(encoding="utf-8")
