@@ -1,0 +1,226 @@
+[
+  {
+    "actuator_mode": "frozen",
+    "condition": "frozen",
+    "condition_index": 0,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "routing",
+    "condition": "routing",
+    "condition_index": 1,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "low_rank",
+    "condition": "low_rank",
+    "condition_index": 2,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative",
+    "condition": "associative",
+    "condition_index": 3,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative_shuffled",
+    "condition": "associative_shuffled",
+    "condition_index": 4,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "fixed_best",
+    "condition": "fixed_best",
+    "condition_index": 5,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "matched",
+    "condition": "matched",
+    "condition_index": 6,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "combined",
+    "condition": "combined",
+    "condition_index": 7,
+    "memory_demand": 0.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "frozen",
+    "condition": "frozen",
+    "condition_index": 8,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "routing",
+    "condition": "routing",
+    "condition_index": 9,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "low_rank",
+    "condition": "low_rank",
+    "condition_index": 10,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative",
+    "condition": "associative",
+    "condition_index": 11,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative_shuffled",
+    "condition": "associative_shuffled",
+    "condition_index": 12,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "fixed_best",
+    "condition": "fixed_best",
+    "condition_index": 13,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "matched",
+    "condition": "matched",
+    "condition_index": 14,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "combined",
+    "condition": "combined",
+    "condition_index": 15,
+    "memory_demand": 0.25,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "frozen",
+    "condition": "frozen",
+    "condition_index": 16,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "routing",
+    "condition": "routing",
+    "condition_index": 17,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "low_rank",
+    "condition": "low_rank",
+    "condition_index": 18,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative",
+    "condition": "associative",
+    "condition_index": 19,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative_shuffled",
+    "condition": "associative_shuffled",
+    "condition_index": 20,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "fixed_best",
+    "condition": "fixed_best",
+    "condition_index": 21,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "matched",
+    "condition": "matched",
+    "condition_index": 22,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "combined",
+    "condition": "combined",
+    "condition_index": 23,
+    "memory_demand": 0.75,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "frozen",
+    "condition": "frozen",
+    "condition_index": 24,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "routing",
+    "condition": "routing",
+    "condition_index": 25,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "low_rank",
+    "condition": "low_rank",
+    "condition_index": 26,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative",
+    "condition": "associative",
+    "condition_index": 27,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "associative_shuffled",
+    "condition": "associative_shuffled",
+    "condition_index": 28,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "fixed_best",
+    "condition": "fixed_best",
+    "condition_index": 29,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "matched",
+    "condition": "matched",
+    "condition_index": 30,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  },
+  {
+    "actuator_mode": "combined",
+    "condition": "combined",
+    "condition_index": 31,
+    "memory_demand": 1.0,
+    "protocol_version": "exp30_trend_v1"
+  }
+]

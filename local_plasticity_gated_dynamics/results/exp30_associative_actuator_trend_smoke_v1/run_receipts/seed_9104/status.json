@@ -1,0 +1,10 @@
+{
+  "condition_failures": 0,
+  "condition_invalid": 0,
+  "duration_seconds": 0.064028,
+  "ended_at": "2026-07-17T19:41:07.785356+00:00",
+  "run_label": "exp30-trend-v1-clean210",
+  "seed": 9104,
+  "started_at": "2026-07-17T19:41:07.721328+00:00",
+  "status": "complete"
+}

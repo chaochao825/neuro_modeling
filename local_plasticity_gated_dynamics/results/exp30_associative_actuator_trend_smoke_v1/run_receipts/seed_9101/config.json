@@ -1,0 +1,66 @@
+{
+  "analysis": {
+    "exploratory_min_seed_fraction": 0.8,
+    "tie_tolerance": 1e-12
+  },
+  "carrier": {
+    "inhibitory_fraction": 0.2,
+    "input_scale": 0.4,
+    "n_inputs": 4,
+    "n_neurons": 64,
+    "n_outputs": 1,
+    "spectral_radius": 0.7
+  },
+  "evidence_provenance": {
+    "critical_file_sha256": {
+      "experiments/exp30_associative_actuator_trend.py": "b1d6510c3ff4503e7ad80c5f623f7eb538a490495c1eb17be3960c6aedfd1389",
+      "figures/exp30_associative_actuator_trend_plot.py": "f4c9a6b1fd1cd42158926bcd85cf0fee3a93b79251eac2f026548b413afd9572",
+      "scripts/summarize_exp30.py": "59b0206ec85ad10e632b0f211bf0df159876c5e8ca19ef32b8513e471fa5bc44",
+      "src/analysis/associative_actuator_metrics.py": "28ab8869861da90fa823c990e545d1e33f8b4eebf660148e22c181ae21573d33",
+      "src/models/associative_memory_actuator.py": "0e455de03e9cca983e0352c59b601094c60257264dd4324f8a4b208785dd2010",
+      "src/tasks/associative_actuator.py": "774e929b5e77471556720f1dd6e6570cfc61558db6f302089c750c9259878152"
+    },
+    "git": {
+      "commit": "00fbb341b63787e7947e69aa04cf1695cab2ad0a",
+      "dirty": false,
+      "tree": "f485718cf8d66129c13d6f8ef47d6a28ea0cd502"
+    },
+    "protocol_version": "exp30_trend_v1",
+    "schema_version": "exp30_evidence_v1",
+    "source_config_sha256": "086b1d00a83d64deffec4065c2de0ea4027692e9048237062b1cfc68fd6e1fb6"
+  },
+  "experiment": "exp30_associative_actuator_trend",
+  "memory_demand_values": [
+    0.0,
+    0.25,
+    0.75,
+    1.0
+  ],
+  "model": {
+    "compression_decay": 0.98,
+    "distractor_gain": 0.08
+  },
+  "profile": "smoke",
+  "protocol_version": "exp30_trend_v1",
+  "run_label": "exp30-trend-v1-clean210",
+  "seed": 9101,
+  "seeds": [
+    9100,
+    9101,
+    9102,
+    9103,
+    9104
+  ],
+  "task": {
+    "delay": 4,
+    "key_dim": 8,
+    "n_pairs": 4,
+    "n_test_blocks": 4,
+    "n_train_blocks": 8,
+    "target_noise_std": 0.05,
+    "trials_per_block": 32
+  },
+  "training_algorithm": "analytic_fixed_motif_dictionary_train_rms_matching",
+  "used_autograd": false,
+  "used_bptt": false
+}

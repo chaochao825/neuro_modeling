@@ -1,0 +1,2 @@
+experiment,profile,n_seeds,trend_classification,claim_classification,positive_seed_fraction,mean_matched_minus_fixed,mean_demand_advantage_spearman,mean_associative_over_shuffled_high,strong_baseline_claimed,learned_memory_selector_claimed
+exp30_associative_actuator_trend,smoke,5,trend-positive,inconclusive,1.0,0.7179830125164481,1.0,2.0065518531202464,False,False

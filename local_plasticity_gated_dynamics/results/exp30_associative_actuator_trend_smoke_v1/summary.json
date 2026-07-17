@@ -1,0 +1,13 @@
+{
+  "claim_classification": "inconclusive",
+  "experiment": "exp30_associative_actuator_trend",
+  "learned_memory_selector_claimed": false,
+  "mean_associative_over_shuffled_high": 2.0065518531202464,
+  "mean_demand_advantage_spearman": 1.0,
+  "mean_matched_minus_fixed": 0.7179830125164481,
+  "n_seeds": 5,
+  "positive_seed_fraction": 1.0,
+  "profile": "smoke",
+  "strong_baseline_claimed": false,
+  "trend_classification": "trend-positive"
+}
