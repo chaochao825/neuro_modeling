@@ -1,0 +1,15 @@
+{
+  "critical_code_sha256": "ca150d76c3d9cbb0501e7c87fa0b555794fcdf8857c2b0598e233b489b2a9804",
+  "critical_file_sha256": {
+    "experiments/exp26_actuator_phase_diagram.py": "0a48d7af70f061985764f5ccb54ce4d1f4b5fa9b62220a2d83c8a8923edea534",
+    "experiments/exp26_formal_budget_preflight.py": "85ea61b92516e57205c5a650566f2e07732dfa8b420bbac233724e296a215072",
+    "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+    "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+    "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+  },
+  "fit_entrypoint": "src.models.task_matched_actuators.fit_task_matched_actuator",
+  "git_commit": "8c5d48f0fabcde5c4396c2ec5c1a8eb95b73f91d",
+  "git_dirty": true,
+  "git_tree": "4c30d0ae6575dfd80a5a8ecfe14b4d0faeff257a",
+  "worktree_content_sha256": "9bfe4dbab79d7704aaf1c2df15f1ab3ab723b2e6f51e3b5ddfc70e6c6dbb3f3c"
+}

@@ -83,7 +83,7 @@ def test_artifacts_register_plan_and_retain_failed_and_invalid_conditions(
     assert {"numpy", "scipy", "pandas", "scikit-learn", "torch"} <= environment[
         "packages"
     ].keys()
-    assert {"commit", "dirty"} == environment["git"].keys()
+    assert {"commit", "tree", "dirty"} == environment["git"].keys()
     assert "RuntimeError: boom" in (path / "run.log").read_text(encoding="utf-8")
     assert (
         len(json.loads((path / "planned_conditions.json").read_text(encoding="utf-8")))
@@ -126,6 +126,10 @@ def test_running_artifact_persists_start_time(tmp_path: Path) -> None:
         manifest = json.loads((run.path / "manifest.json").read_text(encoding="utf-8"))
         assert status["started_at"] == manifest["started_at"]
         assert status["status"] == "running"
+        assert "run_label" not in status
+        assert "run_label" not in manifest
+        config = json.loads((run.path / "config.json").read_text(encoding="utf-8"))
+        assert "run_label" not in config
     finally:
         run.__exit__(None, None, None)
 
@@ -133,6 +137,8 @@ def test_running_artifact_persists_start_time(tmp_path: Path) -> None:
 def test_artifacts_reject_provenance_overrides_and_path_escape(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="reserved"):
         ExperimentRun("exp", 0, {"seed": 99}, results_root=tmp_path)
+    with pytest.raises(ValueError, match="reserved"):
+        ExperimentRun("exp", 0, {"run_label": "forged"}, results_root=tmp_path)
     with pytest.raises(ValueError, match="path separators"):
         ExperimentRun("../escape", 0, {}, results_root=tmp_path)
     with ExperimentRun("exp", 0, {}, results_root=tmp_path) as run:
@@ -146,3 +152,32 @@ def test_artifacts_reject_provenance_overrides_and_path_escape(tmp_path: Path) -
         run.register_conditions([{"condition": "a"}])
         with pytest.raises(RuntimeError, match="already"):
             run.register_conditions([{"condition": "b"}])
+
+
+def test_artifact_run_label_is_path_safe_and_bound_to_metadata(
+    tmp_path: Path,
+) -> None:
+    with ExperimentRun(
+        "exp",
+        7,
+        {},
+        results_root=tmp_path,
+        run_label="formal-panel-a",
+    ) as run:
+        path = run.path
+        assert path.name.endswith("_formal-panel-a")
+    for name in ("config.json", "manifest.json", "status.json"):
+        payload = json.loads((path / name).read_text(encoding="utf-8"))
+        assert payload["run_label"] == "formal-panel-a"
+    with pytest.raises(ValueError, match="path separators"):
+        ExperimentRun(
+            "exp",
+            0,
+            {},
+            results_root=tmp_path,
+            run_label="../escape",
+        )
+    with pytest.raises(ValueError, match="portable path-safe"):
+        ExperimentRun("exp", 0, {}, results_root=tmp_path, run_label="bad:label")
+    with pytest.raises(ValueError, match="portable path-safe"):
+        ExperimentRun("exp", 0, {}, results_root=tmp_path, run_label="CON")

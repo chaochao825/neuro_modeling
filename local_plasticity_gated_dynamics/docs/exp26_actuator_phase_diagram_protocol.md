@@ -83,6 +83,33 @@ corrections are not Dale constrained; Exp26 must therefore be described as a
 high-rank Dale-compatible carrier with unconstrained effective control, not as
 a fully Dale-constrained plastic network.
 
+## Train-only budget reachability
+
+Before any formal validation or test endpoint is evaluated, a dedicated
+preflight enumerates all 30 seeds, 88 registered generators, and four active
+actuator modes using a train-split-only generator. It does not construct a
+validation/test split and does not call a readout, behavior scorer, or rollout.
+The resulting seven-file receipt must be staged outside the Git worktree or
+under the ignored `results/runs` tree so that the formal runner can require the
+same clean commit/tree at preflight and execution time.
+The first frozen revision used `max_scale=25`; the preflight retained this as a
+failed design audit because 144 of 10,560 active fits were blocked even though
+all required scales were finite. The maximum required scale was 90.0921.
+
+The revised ceiling follows one outcome-independent rule:
+
+\[
+s_{\max}=2^{\lceil\log_2(1.25\,s_{\mathrm{train,max}})\rceil}=128.
+\]
+
+Changing this ceiling does not change the registered residual budget, raw
+actuator direction, or unique matching scale. It only removes an arbitrary
+numerical admission gate. Poorly aligned but finite actuators remain in the
+panel: for example, the largest-scale routing fit has negative training
+explained fraction and is therefore a useful negative control, not a successful
+fit. Effective-dynamics stability is still evaluated separately and fails
+closed.
+
 ## Manifest and inference
 
 The analytic grid has 2,112 cells:
@@ -117,6 +144,9 @@ are never treated as independent replicates.
 Every planned row is retained. Missing seeds, duplicate attempts, failed
 cells, invalid budgets, unstable effective dynamics, or inconsistent
 manifests make the formal conclusion inconclusive rather than being dropped.
+Every formal row also binds the canonical config hash, manifest hash, analysis
+settings, Git commit/tree, Python version, and scientific-package versions.
+Cross-seed disagreement in any of these receipts makes the summary fail closed.
 
 ## Current status
 
@@ -124,5 +154,8 @@ The two-seed smoke completed all 240 planned rows with exact paired tape
 receipts and valid functional budgets. Its seed-level held-out Spearman values
 were 0.856 and 0.725. These numbers validate execution only: the smoke summary
 is forcibly `inconclusive`, and no threshold, grid cell, or formal criterion is
-changed from this result. A low-dimensional actuator selector is permitted
-only after the frozen formal Exp26 analysis passes its registered gates.
+changed from this result. The initial formal launch was stopped before any
+validation/test evaluation when the train-only reachability audit rejected the
+old numerical ceiling. A low-dimensional actuator selector is permitted only
+after the revised, provenance-bound formal Exp26 analysis passes its registered
+gates.

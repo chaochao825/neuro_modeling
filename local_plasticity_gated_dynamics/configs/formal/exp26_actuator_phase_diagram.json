@@ -1,6 +1,7 @@
 {
   "profile": "formal",
   "dev_only": false,
+  "protocol_version": "exp26_preregistered_v2_train_only_budget_bound",
   "seeds": [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -9,6 +10,17 @@
   "training_algorithm": "train_only_closed_form_task_matched_actuators",
   "used_autograd": false,
   "used_bptt": false,
+  "budget_preflight": {
+    "revision": "20260717_clean_train_only_v3",
+    "receipt_schema": "exp26_budget_preflight_v2_observed_bound",
+    "fit_scope": "training_blocks_only",
+    "n_registered_active_fits": 10560,
+    "required_scale_max": 90.09208739042293,
+    "headroom_multiplier": 1.25,
+    "rounding_rule": "next_power_of_two",
+    "validation_test_behavior_used": false,
+    "validation_test_rollout_used": false
+  },
   "manifest": {
     "selection_seed": 2601,
     "per_alpha_per_split": 4,
@@ -44,7 +56,7 @@
     "rank_a_capacity": 4,
     "rank_b_capacity": 4,
     "ridge": 1e-6,
-    "max_scale": 25.0,
+    "max_scale": 128.0,
     "degeneracy_tolerance": 1e-12,
     "budget_relative_tolerance": 1e-8,
     "context_center_tolerance": 1e-12

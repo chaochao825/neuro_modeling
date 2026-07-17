@@ -7,11 +7,13 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
+from src.tasks import actuator_matching as actuator_task
 from src.tasks.actuator_matching import (
     ActuatorCarrier,
     ActuatorMatchingDataset,
     CarrierConfig,
     DatasetConfig,
+    make_actuator_matching_train_split,
     make_carrier,
     make_dataset,
     make_task_spec,
@@ -242,6 +244,28 @@ def test_grid_extension_does_not_change_registered_random_tapes() -> None:
             )
     # The common tape is fixed, but task-dependent target states need not be.
     assert not np.array_equal(input_data.train.target_states, state_data.train.target_states)
+
+
+def test_public_train_only_factory_never_builds_heldout_splits(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spec = _spec()
+    config = _dataset_config()
+    expected = make_dataset(spec, config, seed=606).train
+    original = actuator_task._make_split
+    calls: list[str] = []
+
+    def spy(*args: object, **kwargs: object):
+        calls.append(str(kwargs["split_name"]))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(actuator_task, "_make_split", spy)
+    observed = make_actuator_matching_train_split(spec, config, seed=606)
+    assert calls == ["train"]
+    assert observed.fingerprint == expected.fingerprint
+    np.testing.assert_array_equal(observed.target_states, expected.target_states)
+    np.testing.assert_array_equal(observed.inputs, expected.inputs)
+    np.testing.assert_array_equal(observed.noise, expected.noise)
 
 
 def test_dataset_arrays_are_immutable_copies_without_cross_split_aliasing() -> None:

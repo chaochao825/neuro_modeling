@@ -62,11 +62,19 @@ def _software_provenance() -> dict[str, Any]:
             packages[distribution] = version(distribution)
         except PackageNotFoundError:
             packages[distribution] = None
-    repository = Path(__file__).resolve().parents[3]
-    git: dict[str, Any] = {"commit": None, "dirty": None}
+    repository = Path(__file__).resolve().parents[2]
+    git: dict[str, Any] = {"commit": None, "tree": None, "dirty": None}
     try:
         commit = subprocess.run(
             ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        tree = subprocess.run(
+            ["git", "rev-parse", "HEAD^{tree}"],
             cwd=repository,
             check=True,
             capture_output=True,
@@ -81,7 +89,11 @@ def _software_provenance() -> dict[str, Any]:
             text=True,
             timeout=5,
         ).stdout
-        git = {"commit": commit or None, "dirty": bool(status.strip())}
+        git = {
+            "commit": commit or None,
+            "tree": tree or None,
+            "dirty": bool(status.strip()),
+        }
     except (OSError, subprocess.SubprocessError):
         pass
     return {"packages": packages, "git": git}
@@ -94,6 +106,20 @@ def _safe_path_component(name: str, value: object, *, optional: bool = False) ->
         raise ValueError(f"{name} must be a non-empty path-safe string")
     if Path(value).name != value or "/" in value or "\\" in value:
         raise ValueError(f"{name} must not contain path separators")
+    if (
+        any(character in '<>:"|?*' or ord(character) < 32 for character in value)
+        or value.endswith((" ", "."))
+        or value.split(".", maxsplit=1)[0].upper()
+        in {
+            "CON",
+            "PRN",
+            "AUX",
+            "NUL",
+            *(f"COM{index}" for index in range(1, 10)),
+            *(f"LPT{index}" for index in range(1, 10)),
+        }
+    ):
+        raise ValueError(f"{name} must be a portable path-safe string")
     return value
 
 
@@ -119,7 +145,7 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
             raise ValueError("seed must be non-negative")
         if not isinstance(config, Mapping):
             raise TypeError("config must be a mapping")
-        if {"experiment", "seed", "run_id"} & set(config):
+        if {"experiment", "seed", "run_id", "run_label"} & set(config):
             raise ValueError("config must not redefine reserved provenance fields")
         if run_label is not None:
             _safe_path_component("run_label", run_label)
@@ -138,6 +164,7 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         self.run_id = str(uuid.uuid4())
         self.experiment = experiment
         self.seed = seed
+        self.run_label = run_label
         self.config = config_payload
         self.metrics_path = self.path / "metrics.jsonl"
         self.metrics_path.touch()
@@ -156,7 +183,12 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
 
         _write_json(
             self.path / "config.json",
-            {"experiment": experiment, "seed": seed, **self.config},
+            {
+                "experiment": experiment,
+                "seed": seed,
+                **({"run_label": run_label} if run_label is not None else {}),
+                **self.config,
+            },
         )
         _write_json(
             self.path / "environment.json",
@@ -172,6 +204,7 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
             {
                 "status": "running",
                 "seed": seed,
+                **({"run_label": run_label} if run_label is not None else {}),
                 "started_at": self.started_at.isoformat(),
             },
         )
@@ -182,10 +215,12 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
                 "run_id": self.run_id,
                 "experiment": experiment,
                 "seed": seed,
+                **({"run_label": run_label} if run_label is not None else {}),
                 "profile": self.config.get("profile", "unspecified"),
                 "training_algorithm": self.config.get("training_algorithm"),
                 "used_autograd": self.config.get("used_autograd"),
                 "parent_checkpoint": self.config.get("parent_checkpoint"),
+                "evidence_provenance": self.config.get("evidence_provenance"),
                 "status": "running",
                 "started_at": self.started_at.isoformat(),
             },
@@ -313,6 +348,11 @@ class ExperimentRun(AbstractContextManager["ExperimentRun"]):
         status: dict[str, Any] = {
             "status": final_status,
             "seed": self.seed,
+            **(
+                {"run_label": self.run_label}
+                if self.run_label is not None
+                else {}
+            ),
             "started_at": self.started_at.isoformat(),
             "ended_at": ended_at.isoformat(),
             "duration_seconds": (ended_at - self.started_at).total_seconds(),

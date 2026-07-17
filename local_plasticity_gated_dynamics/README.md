@@ -135,12 +135,28 @@ $exp18Runs = & .\.venv\Scripts\python.exe `
 .\.venv\Scripts\python.exe figures\exp18_arc_recursive_plot.py `
   --results-root results --prefix exp18_arc_recursive_smoke
 # Exp26 smoke uses development-only seeds 9000/9001; formal uses 0--29.
+# Keep the clean preflight receipt outside the worktree (or under the ignored
+# results/runs tree), because the formal runner rejects a dirty Git checkout.
+$exp26Receipt = Join-Path $env:TEMP "exp26-preflight-clean-v3"
+.\.venv\Scripts\python.exe experiments\exp26_formal_budget_preflight.py `
+  --config configs\formal\exp26_actuator_phase_diagram.json `
+  --output-dir $exp26Receipt `
+  --workers 8
+.\.venv\Scripts\python.exe experiments\exp26_actuator_phase_diagram.py `
+  --config configs\formal\exp26_actuator_phase_diagram.json `
+  --results-root results `
+  --run-label exp26-formal-v2 `
+  --preflight-receipt $exp26Receipt
+.\.venv\Scripts\python.exe scripts\summarize_exp26.py `
+  --results-root results `
+  --output-dir results\exp26_actuator_phase_diagram_formal_v2 `
+  --profile formal --run-label exp26-formal-v2
 .\.venv\Scripts\python.exe experiments\exp26_actuator_phase_diagram.py `
   --config configs\smoke\exp26_actuator_phase_diagram.json `
-  --results-root results
+  --results-root results --run-label exp26-smoke-v2
 .\.venv\Scripts\python.exe scripts\summarize_exp26.py `
   --results-root results --output-dir results\exp26_actuator_phase_diagram_smoke `
-  --profile smoke
+  --profile smoke --run-label exp26-smoke-v2
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 

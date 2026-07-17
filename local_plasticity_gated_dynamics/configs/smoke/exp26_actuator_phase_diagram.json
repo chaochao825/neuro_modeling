@@ -1,6 +1,7 @@
 {
   "profile": "smoke",
   "dev_only": true,
+  "protocol_version": "exp26_preregistered_v2_train_only_budget_bound",
   "seeds": [9000, 9001],
   "training_algorithm": "train_only_closed_form_task_matched_actuators",
   "used_autograd": false,

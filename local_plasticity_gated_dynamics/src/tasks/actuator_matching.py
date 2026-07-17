@@ -1083,6 +1083,35 @@ def make_dataset(
     )
 
 
+def make_actuator_matching_train_split(
+    spec: ActuatorTaskSpec,
+    config: DatasetConfig | None = None,
+    *,
+    seed: int | None = None,
+) -> ActuatorTaskSplit:
+    """Generate only the registered training blocks for strict preflights.
+
+    This is not a view over :func:`make_dataset`: validation and test split
+    factories are never invoked.  It shares the exact labelled ``_make_split``
+    path used by the full dataset, so its training fingerprint is identical.
+    """
+
+    if not isinstance(spec, ActuatorTaskSpec):
+        raise TypeError("spec must be an ActuatorTaskSpec")
+    if config is None:
+        config = DatasetConfig()
+    if not isinstance(config, DatasetConfig):
+        raise TypeError("config must be a DatasetConfig")
+    dataset_seed = spec.carrier.seed if seed is None else _integer(seed, name="seed")
+    return _make_split(
+        spec,
+        config,
+        split_name="train",
+        n_blocks=config.n_train_blocks,
+        seed=dataset_seed,
+    )
+
+
 __all__ = [
     "ActuatorCarrier",
     "ActuatorCarrierConfig",
@@ -1094,6 +1123,7 @@ __all__ = [
     "CarrierConfig",
     "DatasetConfig",
     "make_carrier",
+    "make_actuator_matching_train_split",
     "make_dataset",
     "make_task_spec",
 ]

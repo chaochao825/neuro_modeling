@@ -16,10 +16,15 @@ recurrent control.
 
 from __future__ import annotations
 
+import hashlib
+import json
+import platform
+import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
@@ -68,10 +73,595 @@ from src.utils.artifacts import ExperimentRun
 FloatArray = NDArray[np.float64]
 IntArray = NDArray[np.int64]
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT = "exp26_actuator_phase_diagram"
-PROTOCOL_VERSION = "exp26_preregistered_v1"
+PROTOCOL_VERSION = "exp26_preregistered_v2_train_only_budget_bound"
 MODES = ("frozen", "routing", "gain", "low_rank", "rgl")
 PRIMARY_SINGLE_FAMILY_MODES = ("routing", "gain", "low_rank")
+EVIDENCE_SCHEMA_VERSION = "exp26_formal_evidence_v1"
+BUDGET_PREFLIGHT_SCHEMA_VERSION = "exp26_budget_preflight_v2_observed_bound"
+BUDGET_PREFLIGHT_ACTIVE_MODES = tuple(mode for mode in MODES if mode != "frozen")
+BUDGET_PREFLIGHT_FILES = (
+    "code_tree_provenance.json",
+    "config.json",
+    "config.sha256",
+    "generator_manifest.json",
+    "manifest.sha256",
+    "preflight_cells.jsonl",
+    "preflight_summary.json",
+)
+BUDGET_PREFLIGHT_CRITICAL_CODE_FILES = (
+    "experiments/exp26_formal_budget_preflight.py",
+    "experiments/exp26_actuator_phase_diagram.py",
+    "src/models/task_matched_actuators.py",
+    "src/tasks/actuator_matching.py",
+    "src/analysis/actuator_manifest.py",
+)
+RUNTIME_VERSION_DISTRIBUTIONS = {
+    "numpy": "numpy",
+    "scipy": "scipy",
+    "scikit_learn": "scikit-learn",
+    "pandas": "pandas",
+    "statsmodels": "statsmodels",
+}
+_RUNTIME_CONFIG_KEYS = {
+    "config_path",
+    "evidence_provenance",
+    "experiment",
+    "run_label",
+    "seed",
+}
+
+
+def canonical_config_payload(config: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the scientific config without path/run-specific provenance."""
+
+    if not isinstance(config, Mapping):
+        raise TypeError("config must be a mapping")
+    return {
+        str(key): value
+        for key, value in config.items()
+        if str(key) not in _RUNTIME_CONFIG_KEYS
+    }
+
+
+def canonical_config_sha256(config: Mapping[str, Any]) -> str:
+    """Hash canonical JSON, independent of path and platform line endings."""
+
+    payload = canonical_config_payload(config)
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def scientific_runtime_versions() -> dict[str, str | None]:
+    """Return the exact Python and registered scientific-stack versions."""
+
+    result: dict[str, str | None] = {"python": platform.python_version()}
+    for label, distribution in RUNTIME_VERSION_DISTRIBUTIONS.items():
+        try:
+            result[label] = version(distribution)
+        except PackageNotFoundError:
+            result[label] = None
+    return result
+
+
+def git_identity(repository: Path = PROJECT_ROOT) -> dict[str, object]:
+    """Return commit/tree/dirty receipts, or explicit unavailable values."""
+
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+        tree = subprocess.run(
+            ["git", "rev-parse", "HEAD^{tree}"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return {"commit": None, "tree": None, "dirty": None}
+    return {"commit": commit or None, "tree": tree or None, "dirty": bool(status)}
+
+
+def _json_object(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read Exp26 preflight JSON {path}") from error
+    if not isinstance(value, Mapping):
+        raise ValueError(f"Exp26 preflight JSON must be an object: {path}")
+    return dict(value)
+
+
+def _json_array(path: Path) -> list[Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read Exp26 preflight JSON {path}") from error
+    if not isinstance(value, list):
+        raise ValueError(f"Exp26 preflight JSON must be an array: {path}")
+    return value
+
+
+def _jsonl_objects(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise ValueError(f"cannot read Exp26 preflight cells {path}") from error
+    if not lines or any(not line.strip() for line in lines):
+        raise ValueError("Exp26 preflight cells must be non-empty JSONL")
+    for line_number, line in enumerate(lines, start=1):
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                f"invalid Exp26 preflight cell at line {line_number}"
+            ) from error
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"Exp26 preflight cell {line_number} must be an object"
+            )
+        rows.append(dict(value))
+    return rows
+
+
+def _sha256_text(path: Path) -> str:
+    try:
+        value = path.read_text(encoding="ascii").strip()
+    except (OSError, UnicodeError) as error:
+        raise ValueError(f"cannot read Exp26 preflight hash {path}") from error
+    if len(value) != 64 or any(character not in "0123456789abcdef" for character in value):
+        raise ValueError(f"invalid Exp26 preflight SHA-256 in {path}")
+    return value
+
+
+def _preflight_receipt_sha256(directory: Path) -> str:
+    """Hash every immutable machine-readable file in a preflight receipt."""
+
+    digest = hashlib.sha256()
+    for name in BUDGET_PREFLIGHT_FILES:
+        path = directory / name
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"Exp26 preflight receipt lacks regular file {name}")
+        payload = path.read_bytes()
+        encoded_name = name.encode("utf-8")
+        digest.update(len(encoded_name).to_bytes(8, "little"))
+        digest.update(encoded_name)
+        digest.update(len(payload).to_bytes(8, "little"))
+        digest.update(payload)
+    return digest.hexdigest()
+
+
+def _critical_code_sha256(file_hashes: Mapping[str, str]) -> str:
+    digest = hashlib.sha256()
+    for relative in BUDGET_PREFLIGHT_CRITICAL_CODE_FILES:
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(file_hashes[relative]))
+    return digest.hexdigest()
+
+
+def _finite_float(value: object, *, name: str) -> float:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(
+        value, (int, float, np.integer, np.floating)
+    ):
+        raise ValueError(f"{name} must be a finite real number")
+    result = float(value)
+    if not np.isfinite(result):
+        raise ValueError(f"{name} must be a finite real number")
+    return result
+
+
+def _exact_integer(value: object, *, name: str) -> int:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(
+        value, (int, np.integer)
+    ):
+        raise ValueError(f"{name} must be an integer")
+    return int(value)
+
+
+def _same_float(first: object, second: object, *, name: str) -> float:
+    resolved = _finite_float(first, name=name)
+    expected = _finite_float(second, name=f"expected {name}")
+    if not np.isclose(resolved, expected, rtol=1e-10, atol=1e-12):
+        raise ValueError(f"Exp26 preflight {name} is inconsistent")
+    return resolved
+
+
+def _next_power_of_two(value: float) -> float:
+    if not np.isfinite(value) or value <= 0.0:
+        raise ValueError("Exp26 preflight policy ceiling input is invalid")
+    return float(2.0 ** int(np.ceil(np.log2(value))))
+
+
+def validate_budget_preflight_receipt(
+    config: Mapping[str, Any],
+    cells: Sequence[GeneratorCell],
+    receipt_path: str | Path,
+    *,
+    current_git: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    """Validate a complete clean train-only receipt before a formal run starts."""
+
+    if config.get("profile") != "formal" or config.get("dev_only") is not False:
+        raise ValueError("budget preflight receipts are only valid for formal Exp26")
+    seeds_value = config.get("seeds")
+    if not isinstance(seeds_value, Sequence) or isinstance(
+        seeds_value, (str, bytes)
+    ):
+        raise ValueError("formal Exp26 seeds must be a sequence")
+    seeds = tuple(
+        _exact_integer(seed, name="formal seed") for seed in seeds_value
+    )
+    if seeds != tuple(range(30)):
+        raise ValueError("formal Exp26 requires the registered seeds 0--29")
+    if len(cells) != 88 or len({cell.generator_id for cell in cells}) != 88:
+        raise ValueError("formal Exp26 requires 88 unique registered generators")
+
+    directory = Path(receipt_path)
+    if not directory.is_dir():
+        raise ValueError("formal Exp26 requires a preflight receipt directory")
+    receipt_sha256 = _preflight_receipt_sha256(directory)
+    receipt_config = _json_object(directory / "config.json")
+    summary = _json_object(directory / "preflight_summary.json")
+    code_tree = _json_object(directory / "code_tree_provenance.json")
+    manifest_rows = _json_array(directory / "generator_manifest.json")
+    raw_rows = _jsonl_objects(directory / "preflight_cells.jsonl")
+
+    registered_config_sha = canonical_config_sha256(config)
+    receipt_config_sha = canonical_config_sha256(receipt_config)
+    if (
+        receipt_config_sha != registered_config_sha
+        or _sha256_text(directory / "config.sha256") != registered_config_sha
+        or summary.get("config_sha256") != registered_config_sha
+        or summary.get("canonical_config_sha256") != registered_config_sha
+    ):
+        raise ValueError("Exp26 preflight config SHA binding is invalid")
+
+    expected_manifest_rows = [asdict(cell) for cell in cells]
+    current_manifest_sha = manifest_hash(cells)
+    if (
+        manifest_rows != expected_manifest_rows
+        or _sha256_text(directory / "manifest.sha256") != current_manifest_sha
+        or summary.get("manifest_hash") != current_manifest_sha
+        or config.get("manifest", {}).get("expected_hash") != current_manifest_sha
+    ):
+        raise ValueError("Exp26 preflight manifest binding is invalid")
+
+    if (
+        summary.get("schema_version") != BUDGET_PREFLIGHT_SCHEMA_VERSION
+        or summary.get("receipt_schema") != BUDGET_PREFLIGHT_SCHEMA_VERSION
+        or summary.get("registered_receipt_schema")
+        != BUDGET_PREFLIGHT_SCHEMA_VERSION
+        or summary.get("receipt_schema_matches") is not True
+    ):
+        raise ValueError("Exp26 preflight receipt schema is not registered")
+    if summary.get("code_tree_provenance") != code_tree:
+        raise ValueError("Exp26 preflight code-tree receipt is inconsistent")
+
+    recorded_file_hashes = code_tree.get("critical_file_sha256")
+    if not isinstance(recorded_file_hashes, Mapping):
+        raise ValueError("Exp26 preflight critical-code hashes are missing")
+    current_file_hashes = {
+        relative: _file_sha256(PROJECT_ROOT / relative)
+        for relative in BUDGET_PREFLIGHT_CRITICAL_CODE_FILES
+    }
+    if (
+        dict(recorded_file_hashes) != current_file_hashes
+        or code_tree.get("critical_code_sha256")
+        != _critical_code_sha256(current_file_hashes)
+    ):
+        raise ValueError("Exp26 preflight critical-code hash binding is invalid")
+
+    run_git = dict(git_identity() if current_git is None else current_git)
+    commit = run_git.get("commit")
+    tree = run_git.get("tree")
+    if (
+        not isinstance(commit, str)
+        or not commit
+        or not isinstance(tree, str)
+        or not tree
+        or run_git.get("dirty") is not False
+    ):
+        raise ValueError("formal Exp26 must start from a clean identifiable git tree")
+    end_snapshot = code_tree.get("end_snapshot")
+    if (
+        code_tree.get("stable_during_run") is not True
+        or code_tree.get("git_dirty") is not False
+        or code_tree.get("git_commit") != commit
+        or code_tree.get("git_tree") != tree
+        or not isinstance(end_snapshot, Mapping)
+        or end_snapshot.get("git_dirty") is not False
+        or end_snapshot.get("git_commit") != commit
+        or end_snapshot.get("git_tree") != tree
+        or end_snapshot.get("critical_code_sha256")
+        != code_tree.get("critical_code_sha256")
+        or end_snapshot.get("worktree_content_sha256")
+        != code_tree.get("worktree_content_sha256")
+        or summary.get("git_commit") != commit
+        or summary.get("git_tree") != tree
+        or summary.get("provenance_clean") is not True
+        or summary.get("provenance_stable_during_run") is not True
+    ):
+        raise ValueError("Exp26 preflight is not clean, stable, and git-identical")
+
+    expected_keys = {
+        (seed, cell.generator_id, mode)
+        for seed in seeds
+        for cell in cells
+        for mode in BUDGET_PREFLIGHT_ACTIVE_MODES
+    }
+    observed_keys: list[tuple[int, str, str]] = []
+    required_scales: list[float] = []
+    cell_by_id = {cell.generator_id: asdict(cell) for cell in cells}
+    configured_ceiling = _finite_float(
+        config.get("actuator", {}).get("max_scale"),
+        name="configured max_scale",
+    )
+    for row_number, row in enumerate(raw_rows, start=1):
+        seed = _exact_integer(row.get("seed"), name=f"cell {row_number} seed")
+        generator_id = row.get("generator_id")
+        mode = row.get("actuator_mode")
+        if not isinstance(generator_id, str) or not isinstance(mode, str):
+            raise ValueError("Exp26 preflight cell identity is malformed")
+        expected_cell = cell_by_id.get(generator_id)
+        if expected_cell is None or any(
+            row.get(name) != value for name, value in expected_cell.items()
+        ):
+            raise ValueError("Exp26 preflight generator metadata is inconsistent")
+        observed_keys.append((seed, generator_id, mode))
+        required = _finite_float(
+            row.get("required_budget_scale"),
+            name=f"cell {row_number} required scale",
+        )
+        if required <= 0.0:
+            raise ValueError("Exp26 preflight required scales must be positive")
+        required_scales.append(required)
+        _same_float(
+            row.get("registered_max_scale"),
+            configured_ceiling,
+            name=f"cell {row_number} registered max_scale",
+        )
+        if (
+            row.get("fit_status") != "complete"
+            or row.get("reachable_under_registered_max_scale") is not True
+            or row.get("max_scale_exceeded") is not False
+            or row.get("diagnostic_refit_used") is not False
+            or row.get("validation_rollout_accessed") is not False
+            or row.get("test_rollout_accessed") is not False
+            or row.get("validation_behavior_accessed") is not False
+            or row.get("test_behavior_accessed") is not False
+        ):
+            raise ValueError(
+                "Exp26 preflight contains a failed, unreachable, or held-out cell"
+            )
+    if len(observed_keys) != len(expected_keys) or set(observed_keys) != expected_keys:
+        raise ValueError("Exp26 preflight does not cover the complete formal panel")
+    if len(set(observed_keys)) != len(observed_keys):
+        raise ValueError("Exp26 preflight contains duplicate panel cells")
+
+    expected_panel_size = len(expected_keys)
+    count_bindings = {
+        "n_records": expected_panel_size,
+        "n_seeds": len(seeds),
+        "n_generators": len(cells),
+        "n_modes": len(BUDGET_PREFLIGHT_ACTIVE_MODES),
+        "n_required_scales_recovered": expected_panel_size,
+        "observed_panel_size": expected_panel_size,
+        "registered_panel_size": expected_panel_size,
+        "expected_panel_size": expected_panel_size,
+        "n_unreachable": 0,
+        "n_max_scale_blockers": 0,
+        "n_other_failures": 0,
+    }
+    if any(
+        _exact_integer(summary.get(name), name=f"summary {name}") != expected
+        for name, expected in count_bindings.items()
+    ):
+        raise ValueError("Exp26 preflight panel counts are inconsistent")
+    if summary.get("registered_active_modes") != list(
+        BUDGET_PREFLIGHT_ACTIVE_MODES
+    ):
+        raise ValueError("Exp26 preflight actuator modes are inconsistent")
+    if (
+        summary.get("fit_scope") != "training_blocks_only"
+        or summary.get("fit_entrypoint_matches_exp26") is not True
+        or summary.get("validation_rollout_accessed") is not False
+        or summary.get("test_rollout_accessed") is not False
+        or summary.get("validation_behavior_accessed") is not False
+        or summary.get("test_behavior_accessed") is not False
+    ):
+        raise ValueError("Exp26 preflight violates the train-only capability boundary")
+
+    policy = config.get("budget_preflight")
+    if not isinstance(policy, Mapping):
+        raise ValueError("formal Exp26 lacks a registered budget policy")
+    policy_required = _finite_float(
+        policy.get("required_scale_max"), name="policy required scale max"
+    )
+    headroom = _finite_float(
+        policy.get("headroom_multiplier"), name="policy headroom multiplier"
+    )
+    if policy.get("receipt_schema") != BUDGET_PREFLIGHT_SCHEMA_VERSION:
+        raise ValueError("formal Exp26 budget policy lacks the v2 receipt schema")
+    if (
+        policy.get("rounding_rule") != "next_power_of_two"
+        or _exact_integer(
+            policy.get("n_registered_active_fits"),
+            name="registered active fit count",
+        )
+        != expected_panel_size
+    ):
+        raise ValueError("formal Exp26 budget policy is inconsistent")
+    observed_max = max(required_scales)
+    derived_ceiling = _next_power_of_two(headroom * policy_required)
+    observed_ceiling = _next_power_of_two(headroom * observed_max)
+    _same_float(
+        observed_max,
+        policy_required,
+        name="observed required scale max",
+    )
+    for name, expected in {
+        "observed_required_scale_max": observed_max,
+        "registered_required_scale_max": policy_required,
+        "policy_required_scale_max": policy_required,
+        "registered_headroom_multiplier": headroom,
+        "rounded_policy_ceiling": derived_ceiling,
+        "observed_rounded_policy_ceiling": observed_ceiling,
+        "derived_ceiling": derived_ceiling,
+        "configured_max_scale": configured_ceiling,
+    }.items():
+        _same_float(summary.get(name), expected, name=f"summary {name}")
+    if derived_ceiling != configured_ceiling or observed_ceiling != configured_ceiling:
+        raise ValueError("Exp26 preflight policy ceiling differs from max_scale")
+    required_true = (
+        "policy_contract_valid",
+        "policy_valid",
+        "observed_max_matches",
+        "record_ceiling_binding_valid",
+        "ceiling_binding_valid",
+        "panel_binding_valid",
+        "all_required_scales_observed",
+        "all_reachable_under_registered_max_scale",
+        "preflight_passed",
+    )
+    if any(summary.get(name) is not True for name in required_true):
+        raise ValueError("Exp26 preflight did not pass every registered gate")
+
+    return {
+        "required": True,
+        "receipt_schema": BUDGET_PREFLIGHT_SCHEMA_VERSION,
+        "receipt_sha256": receipt_sha256,
+        "preflight_passed": True,
+        "registered_config_sha256": registered_config_sha,
+        "manifest_sha256": current_manifest_sha,
+        "observed_required_scale_max": observed_max,
+        "policy_required_scale_max": policy_required,
+        "derived_ceiling": derived_ceiling,
+        "provenance_clean": True,
+        "provenance_stable_during_run": True,
+        "git_commit": commit,
+        "git_tree": tree,
+    }
+
+
+def build_evidence_provenance(
+    config: Mapping[str, Any],
+    *,
+    manifest_sha256: str,
+    budget_preflight: Mapping[str, object] | None = None,
+    run_git: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    """Bind a run to its source config, analysis contract, code, and runtime."""
+
+    if config.get("protocol_version") != PROTOCOL_VERSION:
+        raise ValueError("Exp26 config protocol_version is not registered")
+    config_path_value = config.get("config_path")
+    if not isinstance(config_path_value, str) or not config_path_value:
+        raise ValueError("Exp26 evidence runs require config_path provenance")
+    config_path = Path(config_path_value)
+    try:
+        source = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read Exp26 source config {config_path}") from error
+    if not isinstance(source, Mapping):
+        raise ValueError("Exp26 source config must be a JSON object")
+    if canonical_config_payload(source) != canonical_config_payload(config):
+        raise ValueError("runtime Exp26 config differs from its source config")
+    analysis = config.get("analysis")
+    if not isinstance(analysis, Mapping):
+        raise ValueError("Exp26 config requires an analysis mapping")
+    return {
+        "schema_version": EVIDENCE_SCHEMA_VERSION,
+        "canonical_config_sha256": canonical_config_sha256(config),
+        "source_config_file_sha256": _file_sha256(config_path),
+        "manifest_sha256": str(manifest_sha256),
+        "analysis": {
+            "tie_margin": float(analysis["tie_margin"]),
+            "bootstrap_samples": int(analysis["bootstrap_samples"]),
+            "permutation_samples": int(analysis["permutation_samples"]),
+            "statistics_seed": int(analysis["statistics_seed"]),
+        },
+        "budget_preflight": (
+            dict(budget_preflight) if budget_preflight is not None else None
+        ),
+        "git": dict(git_identity() if run_git is None else run_git),
+        "runtime_versions": scientific_runtime_versions(),
+    }
+
+
+def evidence_row_fields(
+    provenance: Mapping[str, Any],
+    *,
+    run_label: str | None,
+) -> dict[str, object]:
+    """Flatten the immutable provenance receipt into every metrics row."""
+
+    analysis = dict(provenance["analysis"])
+    git = dict(provenance["git"])
+    versions = dict(provenance["runtime_versions"])
+    budget_value = provenance.get("budget_preflight")
+    budget = dict(budget_value) if isinstance(budget_value, Mapping) else None
+    return {
+        "evidence_schema_version": provenance["schema_version"],
+        "formal_config_sha256": provenance["canonical_config_sha256"],
+        "source_config_file_sha256": provenance["source_config_file_sha256"],
+        "registered_manifest_sha256": provenance["manifest_sha256"],
+        "registered_tie_margin": analysis["tie_margin"],
+        "registered_bootstrap_samples": analysis["bootstrap_samples"],
+        "registered_permutation_samples": analysis["permutation_samples"],
+        "registered_statistics_seed": analysis["statistics_seed"],
+        "run_git_commit": git["commit"],
+        "run_git_tree": git["tree"],
+        "run_git_dirty": git["dirty"],
+        "run_python_version": versions["python"],
+        "run_numpy_version": versions["numpy"],
+        "run_scipy_version": versions["scipy"],
+        "run_scikit_learn_version": versions["scikit_learn"],
+        "run_pandas_version": versions["pandas"],
+        "run_statsmodels_version": versions["statsmodels"],
+        "run_label": run_label,
+        "preflight_required": bool(budget is not None and budget["required"]),
+        "preflight_passed": (
+            bool(budget["preflight_passed"]) if budget is not None else None
+        ),
+        "preflight_receipt_sha256": (
+            budget["receipt_sha256"] if budget is not None else None
+        ),
+        "preflight_git_commit": (
+            budget["git_commit"] if budget is not None else None
+        ),
+        "preflight_git_tree": budget["git_tree"] if budget is not None else None,
+    }
 
 
 @dataclass(frozen=True)
@@ -723,6 +1313,7 @@ def _dimensions(
     *,
     mode: str,
     receipt: str,
+    evidence: Mapping[str, object],
 ) -> dict[str, object]:
     return {
         "generator_id": cell.generator_id,
@@ -736,6 +1327,7 @@ def _dimensions(
         "actuator_mode": mode,
         "condition": mode,
         "manifest_hash": receipt,
+        **evidence,
     }
 
 
@@ -743,23 +1335,65 @@ def run_seed(
     config: dict[str, Any],
     seed: int,
     results_root: str | Path,
+    *,
+    run_label: str | None = None,
+    preflight_receipt: str | Path | None = None,
 ) -> Path:
-    initialize_seed(seed)
+    if config.get("profile") == "formal" and (
+        not isinstance(run_label, str) or not run_label
+    ):
+        raise ValueError("formal Exp26 requires a non-empty shared run_label")
+    registered_seeds = config.get("seeds")
+    if not isinstance(registered_seeds, Sequence) or isinstance(
+        registered_seeds, (str, bytes)
+    ):
+        raise ValueError("Exp26 config seeds must be a sequence")
+    resolved_seeds = tuple(
+        _exact_integer(value, name="registered seed") for value in registered_seeds
+    )
+    requested_seed = _exact_integer(seed, name="requested seed")
+    if requested_seed not in resolved_seeds:
+        raise ValueError("requested Exp26 seed is not registered in the config")
+    seed = requested_seed
     cells = _manifest(config)
     receipt = manifest_hash(cells)
-    carrier = make_carrier(_carrier_config(config), seed)
+    run_git = git_identity()
+    if config.get("profile") == "formal":
+        if preflight_receipt is None:
+            raise ValueError("formal Exp26 requires --preflight-receipt")
+        budget_preflight = validate_budget_preflight_receipt(
+            config,
+            cells,
+            preflight_receipt,
+            current_git=run_git,
+        )
+    else:
+        if preflight_receipt is not None:
+            raise ValueError("preflight receipts are only accepted for formal Exp26")
+        budget_preflight = None
+    initialize_seed(seed)
+    provenance = build_evidence_provenance(
+        config,
+        manifest_sha256=receipt,
+        budget_preflight=budget_preflight,
+        run_git=run_git,
+    )
+    evidence = evidence_row_fields(provenance, run_label=run_label)
+    run_config = {**config, "evidence_provenance": provenance}
+    carrier = make_carrier(_carrier_config(run_config), seed)
     moment_cache: dict[tuple[int, float], tuple[FloatArray, FloatArray]] = {}
     with ExperimentRun(
         EXPERIMENT,
         seed,
-        config,
+        run_config,
         results_root=results_root,
+        run_label=run_label,
     ) as run:
-        run.register_conditions(_planned_conditions(config))
+        run.register_conditions(_planned_conditions(run_config))
         for cell in cells:
             try:
                 setup = _setup_generator(
-                    config,
+                    run_config,
                     carrier,
                     cell,
                     seed=seed,
@@ -769,14 +1403,24 @@ def run_seed(
                 for mode in MODES:
                     run.mark_condition_failure(
                         error,
-                        **_dimensions(cell, mode=mode, receipt=receipt),
+                        **_dimensions(
+                            cell,
+                            mode=mode,
+                            receipt=receipt,
+                            evidence=evidence,
+                        ),
                     )
                 continue
             for mode in MODES:
-                dimensions = _dimensions(cell, mode=mode, receipt=receipt)
+                dimensions = _dimensions(
+                    cell,
+                    mode=mode,
+                    receipt=receipt,
+                    evidence=evidence,
+                )
                 try:
                     metrics, valid = _condition_metrics(
-                        config,
+                        run_config,
                         setup,
                         mode=mode,
                     )
@@ -792,6 +1436,15 @@ def run_seed(
                         run.record_failed_condition(metrics, **dimensions)
                 except Exception as error:
                     run.mark_condition_failure(error, **dimensions)
+        if config.get("profile") == "formal":
+            end_git = git_identity()
+            if any(
+                end_git.get(name) != run_git.get(name)
+                for name in ("commit", "tree", "dirty")
+            ):
+                raise RuntimeError(
+                    "formal Exp26 git identity changed during the seed run"
+                )
         return run.path
 
 
@@ -804,10 +1457,32 @@ def main() -> None:
         "Exp26 preregistered task-actuator matching phase diagram",
         "configs/formal/exp26_actuator_phase_diagram.json",
     )
+    parser.add_argument(
+        "--run-label",
+        help="path-safe label shared by every seed in one immutable run panel",
+    )
+    parser.add_argument(
+        "--preflight-receipt",
+        type=Path,
+        help=(
+            "clean v2 train-only budget-preflight receipt directory; required "
+            "for the formal profile"
+        ),
+    )
     args = parser.parse_args()
     config = load_json_config(args.config)
+    if config.get("profile") == "formal" and args.preflight_receipt is None:
+        parser.error("formal Exp26 requires --preflight-receipt")
+    if config.get("profile") == "formal" and not args.run_label:
+        parser.error("formal Exp26 requires --run-label")
     for seed in _selected_seeds(config, args.seeds):
-        path = run_seed(config, seed, args.results_root)
+        path = run_seed(
+            config,
+            seed,
+            args.results_root,
+            run_label=args.run_label,
+            preflight_receipt=args.preflight_receipt,
+        )
         print(path)
 
 
