@@ -1,0 +1,68 @@
+{
+  "attempts": [
+    {
+      "normalizer_fit_fingerprint": "33a97cb34a3fcf97263271079a4dbd95c1adbcd70598d622b89cd0936734e44b",
+      "normalizer_receipt_sha256": "b4dfbd3d7284137e978138f697742512c0110b8d6a38ccae1d94064208534c92",
+      "observed_rows": 48,
+      "path": "/home/spco/sow_linear/exp27_smoke_v1_c445191/runs/exp27_low_dimensional_actuator_selector/seed_9000/20260717T082545.692844Z_exp27-smoke-v1",
+      "planned_conditions": 48,
+      "run_git_commit": "c44519135e48521ef3742fd63081ee34846936e2",
+      "run_git_tree": "f10986b5ad25cf721659bc3f2013b165a728a8b3",
+      "seed": 9000,
+      "source_receipt_sha256": "8dbc30996400690612492328889c937230c4c3c00a4fa439b05ad27eebac1aa1",
+      "training_receipt_sha256": "9f229898c8440e1b6511ddffa6850dbb7102c8102e89c30d7dfe3e6e46c4b2b3"
+    },
+    {
+      "normalizer_fit_fingerprint": "a5c46aacf153cb7888b5b3edd595623edf22ffd15d82bb0da110d2b9d46f0c47",
+      "normalizer_receipt_sha256": "2fe119913982626c8e1e0edf61988aa255cdc270319bc320e6db5b1b7a4e3ac5",
+      "observed_rows": 48,
+      "path": "/home/spco/sow_linear/exp27_smoke_v1_c445191/runs/exp27_low_dimensional_actuator_selector/seed_9001/20260717T082546.968027Z_exp27-smoke-v1",
+      "planned_conditions": 48,
+      "run_git_commit": "c44519135e48521ef3742fd63081ee34846936e2",
+      "run_git_tree": "f10986b5ad25cf721659bc3f2013b165a728a8b3",
+      "seed": 9001,
+      "source_receipt_sha256": "8dbc30996400690612492328889c937230c4c3c00a4fa439b05ad27eebac1aa1",
+      "training_receipt_sha256": "e3aa68257579ffa4906ce626fc6cfddf6eb720ad90a006d1c70002f42770e8df"
+    }
+  ],
+  "canonical_config_sha256": "7760df73788dd8ee908465e51fc30caf6862d02ff0ff34fda0d05b827dcb77c0",
+  "inference_scope": "cross_fitted_outer_seed_endpoints_with_overlapping_training_folds",
+  "protocol_version": "exp27_preregistered_v1_frozen_exp26_dictionary",
+  "raw_metrics_sha256": "adead48dae43a5763afa4a6cde21fa7338ad4efc27fe4bd29881fdb3c4e9c0a8",
+  "run_git_commit": "c44519135e48521ef3742fd63081ee34846936e2",
+  "run_git_tree": "f10986b5ad25cf721659bc3f2013b165a728a8b3",
+  "run_label": "exp27-smoke-v1",
+  "runtime_identity": {
+    "packages": {
+      "matplotlib": "3.10.8",
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "torch": "2.7.0"
+    },
+    "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]"
+  },
+  "source_receipt": {
+    "candidate_rows": 144,
+    "conclusion_path": "/home/spco/sow_linear/neuro_modeling_exp26_publish_20260717_130100/local_plasticity_gated_dynamics/results/exp26_actuator_matching_formal_v2_e08beaf/smoke/conclusion.json",
+    "conclusion_sha256": "7a0f1dd04fb7d8ac88e05ea9ab4eff614f0b6bfc68873c4c7dd78a1058c96d1b",
+    "preflight_receipt_sha256": null,
+    "raw_metrics_path": "/home/spco/sow_linear/neuro_modeling_exp26_publish_20260717_130100/local_plasticity_gated_dynamics/results/exp26_actuator_matching_formal_v2_e08beaf/smoke/raw_metrics.csv.gz",
+    "raw_metrics_sha256": "e5dfd3ba9ea26b7b4319de910a0724b40a631f0f591f585f3b0c09033250700c",
+    "receipt_sha256": "8dbc30996400690612492328889c937230c4c3c00a4fa439b05ad27eebac1aa1",
+    "schema_version": "exp27_frozen_exp26_source_v1",
+    "source_conclusion": "inconclusive",
+    "source_config_sha256": "583f42e522cbbc9ad42a36434ab6305ecdf715db62e368ed3eb306d429f96084",
+    "source_manifest_sha256": "9d334f0e3de86843b5e61b8f70cd7466c6933d47dcf50464fd51bd9a65519d5d",
+    "source_profile": "smoke",
+    "source_protocol_version": "exp26_preregistered_v2_train_only_budget_bound",
+    "source_run_label": "exp26-smoke-v2",
+    "source_seeds": [
+      9000,
+      9001
+    ]
+  },
+  "source_receipt_sha256": "8dbc30996400690612492328889c937230c4c3c00a4fa439b05ad27eebac1aa1"
+}
