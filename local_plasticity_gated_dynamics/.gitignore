@@ -17,6 +17,9 @@ data/ibl_neural/
 data/arc/
 data/structured/
 results/runs/
+# Large canonical source packages are materialized from their tracked,
+# hash-bound archives before formal replay.
+results/exp28_source_amend1_v1_28b6c76/package/
 results/*.png
 results/*.pdf
 !results/exp23_exp25_summary.png
