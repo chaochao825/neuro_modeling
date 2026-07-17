@@ -1,0 +1,150 @@
+{
+  "profile": "confirmatory_test",
+  "dev_only": false,
+  "protocol_version": "exp29_confirmatory_source_v1",
+  "required_run_label": "exp29-confirmatory-source-v1",
+  "evidence_role": "confirmatory_test_source_only",
+  "standalone_inference_permitted": false,
+  "seeds": [
+    60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+    70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+    80, 81, 82, 83, 84, 85, 86, 87, 88, 89
+  ],
+  "training_algorithm": "train_only_closed_form_task_matched_actuators",
+  "used_autograd": false,
+  "used_bptt": false,
+  "preregistration": {
+    "registration_status": "must_be_committed_before_any_seed_60_89_attempt",
+    "meta_training_seeds": [
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+      10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+      20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+    ],
+    "evaluation_seeds": [
+      60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+      70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+      80, 81, 82, 83, 84, 85, 86, 87, 88, 89
+    ],
+    "evaluation_seed_performance_or_reachability_read_before_registration": false,
+    "ceiling_retuning_after_registration_permitted": false,
+    "selective_rerun_permitted": false,
+    "missing_or_failed_attempt_replacement_permitted": false,
+    "max_scale_selection": "fixed_256_before_seed_60_89_access",
+    "statistics_unit": "seed",
+    "primary_scope": "unconditional_all_registered_heldout_cells"
+  },
+  "feasibility_policy": {
+    "version": "exp29_frozen_fallback_v1",
+    "terminal_statuses": ["complete", "infeasible", "failed", "invalid"],
+    "infeasible_causes": [
+      "budget_scale_above_cap",
+      "degenerate_actuator",
+      "budget_mismatch",
+      "effective_instability"
+    ],
+    "infeasible_rows_retained": true,
+    "infeasible_rows_deleted_or_imputed": false,
+    "deployment_fallback_mode": "frozen",
+    "infeasible_selected_utility": "same_cell_same_split_frozen_utility",
+    "selector_candidate_modes": ["routing", "gain", "low_rank"],
+    "nonselector_control_mode": "rgl",
+    "oracle_choice_set": "frozen_plus_feasible_selector_candidate_modes",
+    "matched_budget_support_requires_feasible_active_row": true,
+    "infeasible_rate_reporting": "seed_by_actuator_family",
+    "unconditional_inference": true
+  },
+  "source_binding": {
+    "source_config_relative_path": "configs/formal/exp26_actuator_phase_diagram.json",
+    "source_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_config_canonical_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_preflight_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/preflight",
+    "source_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "source_preflight_schema": "exp26_budget_preflight_v2_observed_bound",
+    "source_preflight_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_preflight_git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+    "source_preflight_git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+    "source_published_manifest_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/MANIFEST.sha256",
+    "source_published_manifest_file_sha256": "31808a5b6ab773a8f63d738f7a5da19cc86a56ed0a9891f666f16b0f07f976b2",
+    "exp29_implementation_hash_scheme": "runner_config_literal_sentinel_v1",
+    "exp29_implementation_sha256": {
+      "experiments/exp29_confirmatory_source_panel.py": "a95a4a2ead2e5704e3625dd8f79089350093bd746ba8c8927105730b66809c7f",
+      "scripts/package_exp29_confirmatory_source_panel.py": "90f142e07762991312ead3efd6e13e8bbdc95637ffa98ecc161649896308b72f",
+      "src/data/exp29_feasibility_selector_dataset.py": "9bfa9a46af063c6a4f695075bb0b7c0666d6968b2e2b526d61bf2cde9159420f"
+    },
+    "critical_file_sha256": {
+      "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+      "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+      "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+      "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+      "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+    },
+    "budget_policy": {
+      "selection_scope": "preregistered_without_seed_60_89_access",
+      "evaluation_panel_refit_permitted": false,
+      "max_scale": 256.0,
+      "no_further_ceiling_amendment": true
+    }
+  },
+  "runtime_policy": {
+    "python_major_minor": "3.11",
+    "required_distributions": [
+      "numpy",
+      "scipy",
+      "pandas",
+      "scikit_learn",
+      "statsmodels"
+    ],
+    "exact_match_across_seeds": true
+  },
+  "manifest": {
+    "selection_seed": 2601,
+    "per_alpha_per_split": 4,
+    "expected_hash": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "grid": {
+      "alpha": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "transition_rank": [1, 2, 4, 8],
+      "input_rank": [1, 2, 4],
+      "delay": [0, 4, 12, 24],
+      "noise_std": [0.1, 0.3, 0.6, 1.0]
+    }
+  },
+  "carrier": {
+    "n_neurons": 128,
+    "n_inputs": 4,
+    "n_outputs": 1,
+    "inhibitory_fraction": 0.2,
+    "spectral_radius": 0.65,
+    "input_scale": 0.3
+  },
+  "task": {
+    "n_train_blocks": 12,
+    "n_validation_blocks": 4,
+    "n_test_blocks": 8,
+    "trials_per_block": 24,
+    "input_steps": 4,
+    "input_std": 1.0,
+    "delta_a_log10_range": [-1.2, -0.2],
+    "delta_b_log10_range": [-1.2, -0.2],
+    "stability_limit": 0.95
+  },
+  "actuator": {
+    "rank_a_capacity": 4,
+    "rank_b_capacity": 4,
+    "ridge": 1e-6,
+    "max_scale": 256.0,
+    "degeneracy_tolerance": 1e-12,
+    "budget_relative_tolerance": 1e-8,
+    "context_center_tolerance": 1e-12
+  },
+  "analysis": {
+    "readout_ridge": 1.0,
+    "rank_rtol": 1e-9,
+    "support_rtol": 1e-9,
+    "cross_relative_tolerance": 0.05,
+    "tie_margin": 0.01,
+    "bootstrap_samples": 20000,
+    "permutation_samples": 100000,
+    "statistics_seed": 2601
+  }
+}
