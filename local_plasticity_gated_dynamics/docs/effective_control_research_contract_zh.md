@@ -1,5 +1,9 @@
 # 高秩 E/I 基底上的低维 credit assignment：执行合同
 
+> **历史合同说明：** 本文件保留 P0--P6 的机制审计定义。项目当前总纲已
+> 收敛为 [Actuator Matching Principle](actuator_matching_principle.md)；
+> Exp26/29 的已验证边界、Exp30 关联记忆扩展和后续 scale 门槛以该总纲为准。
+
 ## 修正后的核心命题
 
 本项目不再把“低维反馈必然产生低秩物理连接”作为主命题。稀疏 mask、

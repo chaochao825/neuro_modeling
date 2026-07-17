@@ -1,16 +1,21 @@
-# Local Plasticity to Gated Low-Dimensional Dynamics
+# Actuator Matching Principle
 
-This repository tests a revised, more precise hypothesis: local eligibility
-traces combined with a low-dimensional credit signal can shape a small number
-of controllable/observable modes on top of a high-rank sparse E/I substrate.
-Low-dimensional gates may then modify effective dynamics without requiring the
-physical recurrent matrix or its masked update to be low rank. The repository
-also contains shared-subspace prototypes for public sequence-memory and IBL
-data. The legacy one-session `exp06` pilot remains inconclusive; `exp11` is a
-distinct trials-only behavior benchmark. `exp14` now provides a fail-closed
-multi-session count-dynamics pipeline, a reviewed hash-bound 20-session/
-20-animal compact cache, and a completed registered comparison. The registered
-primary result is inconclusive and does not support the shared-dynamics claim.
+Flexible computation need not retrain a full network for every task. A system
+can reuse a fixed high-dimensional carrier and a small set of control motifs,
+selecting the actuator that best matches a task's demand on input mapping,
+internal dynamics, or associative memory.
+
+Current evidence supports a bounded synthetic special case. Exp26 shows that
+prospective task-demand geometry predicts which task-matched actuator family is
+more useful, and Exp29 independently confirms that a low-dimensional local
+selector improves utility over one globally fixed family. Exp30 adds a
+five-seed, trend-positive **positive-control sanity panel** for an associative-
+memory crossover, but remains exploratory and formally inconclusive. Globally
+reusable learned motif parameters,
+observation-only belief inference, and real-data validation of the complete
+principle remain open. See
+[the evidence ledger](docs/actuator_matching_principle.md) for exact claims and
+non-claims.
 
 The scientific protocol is intentionally falsifiable. Every core claim is
 classified as `support`, `oppose`, or `inconclusive`; failed seeds and missing
@@ -36,7 +41,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp26_*.py` are executable entry points as implementation advances. `exp07`
+`exp30_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -56,6 +61,15 @@ state/input demands on one frozen high-rank Dale-compatible carrier. Its
 including the held-out Gramian-`chi` over raw-`alpha` incremental gate. See
 [the protocol](docs/exp26_actuator_phase_diagram_protocol.md) and the
 [immutable evidence bundle](results/exp26_actuator_matching_formal_v2_e08beaf/README.md).
+
+`exp29` independently confirms the descriptor-driven selector on unseen seeds
+without replacing failed cells or refitting on the confirmatory panel. `exp30`
+then adds a fixed associative write/retrieve motif and an exactly
+write-budget-matched shuffled control. Its development panel tests only the
+routing-to-memory crossover and matched-over-fixed trend; it does not claim a
+strong-baseline win or a carrier-dynamics contribution. See the
+[Exp30 protocol](docs/exp30_associative_actuator_trend_protocol.md) and scoped
+[development report](results/exp30_associative_actuator_trend_smoke_v1/report.md).
 
 ## Reproduce
 
@@ -160,6 +174,16 @@ $exp26Receipt = Join-Path $env:TEMP "exp26-preflight-clean-v3"
 .\.venv\Scripts\python.exe scripts\summarize_exp26.py `
   --results-root results --output-dir results\exp26_actuator_phase_diagram_smoke `
   --profile smoke --run-label exp26-smoke-v2
+# Exp30 is development-only until the registered five-seed trend gate passes.
+.\.venv\Scripts\python.exe experiments\exp30_associative_actuator_trend.py `
+  --config configs\smoke\exp30_associative_actuator_trend.json `
+  --results-root results --run-label exp30-trend-v1-dev
+.\.venv\Scripts\python.exe scripts\summarize_exp30.py `
+  --config configs\smoke\exp30_associative_actuator_trend.json `
+  --results-root results --run-label exp30-trend-v1-dev `
+  --output-dir results\exp30_associative_actuator_trend_smoke_v1
+.\.venv\Scripts\python.exe figures\exp30_associative_actuator_trend_plot.py `
+  --output-dir results\exp30_associative_actuator_trend_smoke_v1
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 

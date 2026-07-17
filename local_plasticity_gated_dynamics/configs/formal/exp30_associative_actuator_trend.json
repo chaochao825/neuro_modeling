@@ -1,0 +1,45 @@
+{
+  "profile": "formal",
+  "protocol_version": "exp30_trend_v1",
+  "seeds": [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+  ],
+  "training_algorithm": "analytic_fixed_motif_dictionary_train_rms_matching",
+  "used_autograd": false,
+  "used_bptt": false,
+  "memory_demand_values": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+  "task": {
+    "n_train_blocks": 24,
+    "n_test_blocks": 12,
+    "trials_per_block": 64,
+    "key_dim": 16,
+    "n_pairs": 8,
+    "delay": 8,
+    "target_noise_std": 0.1
+  },
+  "carrier": {
+    "n_neurons": 128,
+    "n_inputs": 4,
+    "n_outputs": 1,
+    "inhibitory_fraction": 0.2,
+    "spectral_radius": 0.7,
+    "input_scale": 0.4
+  },
+  "model": {
+    "compression_decay": 0.98,
+    "distractor_gain": 0.08
+  },
+  "analysis": {
+    "tie_tolerance": 1e-12,
+    "bootstrap_samples": 100000,
+    "permutation_samples": 100000,
+    "statistics_seed": 30030,
+    "holm_family": [
+      "routing_to_associative_crossover",
+      "matched_over_fixed",
+      "associative_over_shuffled_high_demand"
+    ]
+  }
+}

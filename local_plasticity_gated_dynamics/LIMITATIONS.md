@@ -2,6 +2,28 @@
 
 The committed summary is an immutable snapshot of the completed runs, not a claim that every mechanism is identified.
 
+- The full Actuator Matching Principle remains formally inconclusive. Exp26
+  and Exp29 support task-demand-conditioned selection among synthetic
+  task-matched actuator-family policies; they do not show that one globally
+  fixed set of learned motif parameters transfers across arbitrary tasks.
+- The Exp29 selector receives prospective generator descriptors and candidate
+  validation utilities. It is not an observation-only hidden-belief controller
+  and does not learn from the scalar reward of only the executed actuator.
+- Exp30 adds a fixed associative outer-product motif only in a constructed
+  five-seed development panel. Its routing-to-memory crossover is
+  `trend-positive` but formally `inconclusive`. The target is explicitly built
+  from direct-cue and retrievable-value components, and the carrier bridge is
+  identity calibrated; this is a positive-control sanity test, not evidence
+  that high-rank carrier dynamics perform the computation. Functional matching
+  covers query-output RMS only. Only associative-versus-shuffled write L1/L2 is
+  matched; write/state/energy budgets are not matched across every actuator.
+  It is not a strong sequence-model comparison, real-data validation, or
+  evidence that fixed state can replace arbitrary history or KV cache.
+- Exp29 local-minus-GRU is descriptive only. The current project claim is the
+  matched-versus-fixed trend, not superiority over a strongest available
+  baseline. Broad baseline and scale comparisons are deferred until the
+  actuator crossover is stable under the registered formal panel.
+
 - Exp26 is an oracle task-matched actuator capability benchmark, not a learned
   local controller. Its recurrent base is high-rank and Dale-compatible, but
   its fitted effective corrections are not Dale constrained. Its primary
