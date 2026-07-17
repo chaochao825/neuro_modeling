@@ -207,6 +207,86 @@ def test_runner_retains_every_mode_when_carrier_setup_fails(
     assert status["condition_failures"] == len(independent.EXPECTED_MODES)
 
 
+def test_runner_records_complete_rows_without_metric_dimension_overlap(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    cell = _cell()
+    contract = _contract()
+    monkeypatch.setattr(
+        independent, "validate_source_contract", lambda config: contract
+    )
+    monkeypatch.setattr(exp26, "_manifest", lambda config: (cell,))
+    monkeypatch.setattr(
+        exp26,
+        "_planned_conditions",
+        lambda config: [
+            {
+                "generator_id": cell.generator_id,
+                "generator_split": cell.generator_split,
+                "alpha": cell.alpha,
+                "transition_rank": cell.transition_rank,
+                "input_rank": cell.input_rank,
+                "delay": cell.delay,
+                "noise_std": cell.noise_std,
+                "rotation_seed": cell.rotation_seed,
+                "actuator_mode": mode,
+                "condition": mode,
+                "manifest_hash": "fixture",
+            }
+            for mode in independent.EXPECTED_MODES
+        ],
+    )
+    monkeypatch.setattr(exp26, "_carrier_config", lambda config: object())
+    monkeypatch.setattr(exp26, "make_carrier", lambda config, seed: object())
+    monkeypatch.setattr(
+        exp26,
+        "_setup_generator",
+        lambda config, carrier, generator, **kwargs: object(),
+    )
+    monkeypatch.setattr(
+        exp26,
+        "_condition_metrics",
+        lambda config, setup, *, mode: (
+            {
+                "status": "complete",
+                "functional_budget_valid": True,
+                "effective_dynamics_strictly_stable": True,
+                "test_balanced_accuracy": 0.75,
+            },
+            True,
+        ),
+    )
+    monkeypatch.setattr(exp26, "git_identity", lambda: dict(FAKE_GIT))
+    monkeypatch.setattr(
+        exp26,
+        "scientific_runtime_versions",
+        lambda: dict(contract.runtime_versions),
+    )
+
+    path = independent.run_seed(
+        {"profile": "independent_test"},
+        30,
+        tmp_path,
+        run_label=independent.REQUIRED_RUN_LABEL,
+    )
+    rows = [
+        json.loads(line)
+        for line in (path / "metrics.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    status = json.loads((path / "status.json").read_text(encoding="utf-8"))
+
+    assert len(rows) == len(independent.EXPECTED_MODES)
+    assert all(row["status"] == "complete" for row in rows)
+    assert all(row["source_only"] is True for row in rows)
+    assert all(row["standalone_inference_permitted"] is False for row in rows)
+    assert all(
+        row["source_panel_protocol_version"] == independent.PROTOCOL_VERSION
+        for row in rows
+    )
+    assert status["status"] == "complete"
+
+
 def _complete_collection() -> packager.PanelCollection:
     config = _config()
     rows: list[dict[str, object]] = []

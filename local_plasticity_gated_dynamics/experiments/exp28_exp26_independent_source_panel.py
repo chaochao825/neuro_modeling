@@ -573,11 +573,12 @@ def run_seed(
                             setup,
                             mode=mode,
                         )
-                        metrics.update(
-                            source_panel_protocol_version=PROTOCOL_VERSION,
-                            source_only=True,
-                            standalone_inference_permitted=False,
-                        )
+                        # ``source_only`` and
+                        # ``standalone_inference_permitted`` are immutable
+                        # evidence dimensions.  Do not duplicate them in the
+                        # metric payload: ExperimentRun correctly rejects any
+                        # metric/dimension overlap.
+                        metrics["source_panel_protocol_version"] = PROTOCOL_VERSION
                         if valid:
                             run.record(metrics, **dimensions)
                         else:
