@@ -51,8 +51,11 @@ folders under `results/runs/`. `scripts/build_report.py` aggregates all statuses
 
 `exp26` is the preregistered task--actuator matching phase diagram. It replaces
 the two hand-aligned Exp24 endpoints with continuous independently rotated
-state/input demands on one frozen high-rank Dale-compatible carrier. See
-[docs/exp26_actuator_phase_diagram_protocol.md](docs/exp26_actuator_phase_diagram_protocol.md).
+state/input demands on one frozen high-rank Dale-compatible carrier. Its
+30-seed formal-v2 panel supports the registered task--actuator matching claim,
+including the held-out Gramian-`chi` over raw-`alpha` incremental gate. See
+[the protocol](docs/exp26_actuator_phase_diagram_protocol.md) and the
+[immutable evidence bundle](results/exp26_actuator_matching_formal_v2_e08beaf/README.md).
 
 ## Reproduce
 

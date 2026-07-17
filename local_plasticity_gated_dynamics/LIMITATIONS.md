@@ -8,18 +8,21 @@ The committed summary is an immutable snapshot of the completed runs, not a clai
   behavior is a frozen-counterfactual control-induced observable, while
   absolute behavior is secondary. L2 correction-current RMS is matched; L1 is
   descriptive. The two-seed smoke is development-only and cannot support the
-  phase claim. The selector stage remains locked until all 30 formal seeds and
-  the held-out `chi`-over-`alpha` gate pass. A strict train-only preflight
+  phase claim. The 30-seed formal-v2 panel and held-out
+  `chi`-over-`alpha` gate passed, so a separately preregistered selector stage
+  is now eligible; no selector result should be inferred from Exp26 itself. A
+  strict train-only preflight
   rejected the initial `max_scale=25` design before formal evaluation (144 of
   10,560 active fits were numerically blocked). The revised ceiling of 128 is
   the next power of two above 1.25 times the train-only maximum; it does not
   improve actuator direction or relax the matched functional-current budget.
 
 This monorepo carries the compact evidence snapshot (`raw_metrics.csv.gz`,
-`runs.csv`, `summary.csv`, the generated report, and PNG/PDF figures). The
-timestamped `results/runs/` directories and per-attempt logs remain in the
-source experiment workspace and are intentionally not duplicated here; the
-committed configs and scripts regenerate that layout.
+`runs.csv`, `summary.csv`, the generated report, and PNG/PDF figures).
+Timestamped `results/runs/` directories and per-attempt logs normally remain
+in the source experiment workspace. Exp26 formal-v2 is the explicit exception:
+its compact raw-run archive, receipt, and logs are committed in the
+hash-manifested evidence bundle.
 
 - Phase 1 is the clean constructive test: the aligned rank-4 update is rank matched and non-inferior to full feedback on the synthetic latent task.
 - In Phase 2, derivative modulation, sparse masks, Dale projection, and fan-in normalization do not preserve the algebraic rank bound of the raw outer-product rule. The final E/I update is therefore not low rank even when activity remains low dimensional.

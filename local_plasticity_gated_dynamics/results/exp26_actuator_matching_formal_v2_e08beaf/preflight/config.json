@@ -1,0 +1,139 @@
+{
+  "actuator": {
+    "budget_relative_tolerance": 1e-08,
+    "context_center_tolerance": 1e-12,
+    "degeneracy_tolerance": 1e-12,
+    "max_scale": 128.0,
+    "rank_a_capacity": 4,
+    "rank_b_capacity": 4,
+    "ridge": 1e-06
+  },
+  "analysis": {
+    "bootstrap_samples": 20000,
+    "cross_relative_tolerance": 0.05,
+    "permutation_samples": 100000,
+    "rank_rtol": 1e-09,
+    "readout_ridge": 1.0,
+    "statistics_seed": 2601,
+    "support_rtol": 1e-09,
+    "tie_margin": 0.01
+  },
+  "budget_preflight": {
+    "fit_scope": "training_blocks_only",
+    "headroom_multiplier": 1.25,
+    "n_registered_active_fits": 10560,
+    "receipt_schema": "exp26_budget_preflight_v2_observed_bound",
+    "required_scale_max": 90.09208739042293,
+    "revision": "20260717_clean_train_only_v3",
+    "rounding_rule": "next_power_of_two",
+    "validation_test_behavior_used": false,
+    "validation_test_rollout_used": false
+  },
+  "carrier": {
+    "inhibitory_fraction": 0.2,
+    "input_scale": 0.3,
+    "n_inputs": 4,
+    "n_neurons": 128,
+    "n_outputs": 1,
+    "spectral_radius": 0.65
+  },
+  "config_path": "/home/spco/sow_linear/neuro_modeling_exp26_publish_20260717_130100/local_plasticity_gated_dynamics/configs/formal/exp26_actuator_phase_diagram.json",
+  "dev_only": false,
+  "manifest": {
+    "expected_hash": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "grid": {
+      "alpha": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "delay": [
+        0,
+        4,
+        12,
+        24
+      ],
+      "input_rank": [
+        1,
+        2,
+        4
+      ],
+      "noise_std": [
+        0.1,
+        0.3,
+        0.6,
+        1.0
+      ],
+      "transition_rank": [
+        1,
+        2,
+        4,
+        8
+      ]
+    },
+    "per_alpha_per_split": 4,
+    "selection_seed": 2601
+  },
+  "profile": "formal",
+  "protocol_version": "exp26_preregistered_v2_train_only_budget_bound",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "task": {
+    "delta_a_log10_range": [
+      -1.2,
+      -0.2
+    ],
+    "delta_b_log10_range": [
+      -1.2,
+      -0.2
+    ],
+    "input_std": 1.0,
+    "input_steps": 4,
+    "n_test_blocks": 8,
+    "n_train_blocks": 12,
+    "n_validation_blocks": 4,
+    "stability_limit": 0.95,
+    "trials_per_block": 24
+  },
+  "training_algorithm": "train_only_closed_form_task_matched_actuators",
+  "used_autograd": false,
+  "used_bptt": false
+}

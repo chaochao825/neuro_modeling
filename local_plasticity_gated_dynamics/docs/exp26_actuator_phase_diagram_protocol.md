@@ -151,11 +151,22 @@ Cross-seed disagreement in any of these receipts makes the summary fail closed.
 ## Current status
 
 The two-seed smoke completed all 240 planned rows with exact paired tape
-receipts and valid functional budgets. Its seed-level held-out Spearman values
-were 0.856 and 0.725. These numbers validate execution only: the smoke summary
-is forcibly `inconclusive`, and no threshold, grid cell, or formal criterion is
-changed from this result. The initial formal launch was stopped before any
-validation/test evaluation when the train-only reachability audit rejected the
-old numerical ceiling. A low-dimensional actuator selector is permitted only
-after the revised, provenance-bound formal Exp26 analysis passes its registered
-gates.
+receipts and valid functional budgets and remains forcibly `inconclusive`. The
+initial formal launch was stopped before any validation/test evaluation when
+the train-only reachability audit rejected the old numerical ceiling. The clean
+v3 preflight subsequently passed all 10,560 train-only fits with zero blockers.
+
+The frozen 30-seed formal-v2 panel then completed all 13,200 rows with no
+failed, invalid, duplicate, budget-invalid, or missing cell. The registered
+conclusion is **support**: held-out seed-level Spearman rho was 0.7605 (95% CI
+0.7443--0.7757), classifier balanced accuracy was 0.8572 (0.8375--0.8758), and
+classifier AUROC was 0.9467 (0.9365--0.9560). All three Holm-adjusted one-sided
+tests had `p=2.99997e-05`. Gramian `chi` exceeded raw `alpha` by 0.1148 AUROC
+(0.1009--0.1286; `p=9.9999e-06`), satisfying the incremental gate.
+
+This unlocks a separately registered low-dimensional selector experiment. It
+does not turn Exp26 into evidence that a local biological controller learned
+the selector, and RGL remains only a descriptive ceiling. The immutable
+receipt, compressed raw metrics, exact run archive, logs, report, and figures
+are stored under
+`results/exp26_actuator_matching_formal_v2_e08beaf/`.

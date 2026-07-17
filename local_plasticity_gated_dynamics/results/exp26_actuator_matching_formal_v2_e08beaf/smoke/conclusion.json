@@ -1,0 +1,149 @@
+{
+  "complete_primary_coverage": true,
+  "conclusion": "inconclusive",
+  "confirmatory_eligible": false,
+  "coverage": {
+    "budget_invalid_complete_row_count": 0,
+    "complete_row_count": 240,
+    "distinct_planned_fingerprint_count": 1,
+    "duplicate_primary_cell_row_count": 0,
+    "expected_seed_count": 2,
+    "expected_seeds": [
+      9000,
+      9001
+    ],
+    "failed_or_nonterminal_attempt_count": 0,
+    "failed_row_count": 0,
+    "invalid_row_count": 0,
+    "missing_seed_count": 0,
+    "missing_seeds": [],
+    "observed_attempt_seed_count": 2,
+    "observed_attempt_seeds": [
+      9000,
+      9001
+    ],
+    "planned_coverage_invalid_attempt_count": 0,
+    "planned_coverage_valid_attempt_count": 2,
+    "primary_row_count": 192,
+    "raw_row_count": 240,
+    "rgl_ceiling_row_count": 48,
+    "selected_attempt_count": 2,
+    "terminal_attempt_count": 2,
+    "unexpected_seed_count": 0,
+    "unexpected_seeds": [],
+    "unknown_original_row_status_count": 0
+  },
+  "dev_only": true,
+  "development_result_before_scope_gate": "inconclusive",
+  "endpoint_summaries": [
+    {
+      "lower_confidence": 0.7249769186635725,
+      "mean": 0.7902847900672925,
+      "name": "spearman_rho",
+      "null_value": 0.0,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.8555926614710123
+    },
+    {
+      "lower_confidence": 0.8333333333333333,
+      "mean": 0.8666666666666667,
+      "name": "classifier_balanced_accuracy",
+      "null_value": 0.5,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.9
+    },
+    {
+      "lower_confidence": 0.9666666666666668,
+      "mean": 0.9694444444444446,
+      "name": "classifier_auroc",
+      "null_value": 0.5,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.9722222222222223
+    }
+  ],
+  "evidence_scope": "development_only",
+  "gramian_predictor_beats_alpha": false,
+  "incremental_auc_summary": {
+    "lower_confidence": 0.0,
+    "mean": 0.01388888888888895,
+    "name": "chi_minus_alpha_auroc",
+    "null_value": 0.0,
+    "p_value": 0.6,
+    "p_value_holm": 0.6,
+    "upper_confidence": 0.0277777777777779
+  },
+  "n_seeds": 2,
+  "profile": "smoke",
+  "reason": "smoke profile is development-only and cannot support or oppose the registered claim",
+  "registered_analysis": {
+    "bootstrap_samples": 1000,
+    "permutation_samples": 2000,
+    "statistics_seed": 2601,
+    "tie_margin": 0.01
+  },
+  "registered_config_sha256": "583f42e522cbbc9ad42a36434ab6305ecdf715db62e368ed3eb306d429f96084",
+  "registered_manifest_sha256": "9d334f0e3de86843b5e61b8f70cd7466c6933d47dcf50464fd51bd9a65519d5d",
+  "rgl_role": "descriptive composite ceiling only; excluded from all co-primary actuator-family inference",
+  "run_provenance": {
+    "analysis": {
+      "bootstrap_samples": 1000,
+      "permutation_samples": 2000,
+      "statistics_seed": 2601,
+      "tie_margin": 0.01
+    },
+    "budget_preflight": null,
+    "canonical_config_sha256": "583f42e522cbbc9ad42a36434ab6305ecdf715db62e368ed3eb306d429f96084",
+    "git": {
+      "commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+      "dirty": false,
+      "tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774"
+    },
+    "manifest_sha256": "9d334f0e3de86843b5e61b8f70cd7466c6933d47dcf50464fd51bd9a65519d5d",
+    "run_label": "exp26-smoke-v2",
+    "runtime_versions": {
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "python": "3.11.15",
+      "scikit_learn": "1.8.0",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6"
+    },
+    "schema_version": "exp26_formal_evidence_v1"
+  },
+  "seed_endpoints": [
+    {
+      "alpha_classifier_auroc": 0.9444444444444444,
+      "alpha_classifier_balanced_accuracy": 0.8333333333333333,
+      "chi_minus_alpha_auroc": 0.0277777777777779,
+      "classifier_auroc": 0.9722222222222223,
+      "classifier_balanced_accuracy": 0.8333333333333333,
+      "discovery_alpha_threshold": 0.25,
+      "discovery_threshold": 0.11523827240894471,
+      "heldout_generators": 12,
+      "heldout_ties": 0,
+      "seed": 9000,
+      "spearman_rho": 0.8555926614710123
+    },
+    {
+      "alpha_classifier_auroc": 0.9666666666666668,
+      "alpha_classifier_balanced_accuracy": 0.8333333333333333,
+      "chi_minus_alpha_auroc": 0.0,
+      "classifier_auroc": 0.9666666666666668,
+      "classifier_balanced_accuracy": 0.9,
+      "discovery_alpha_threshold": 0.25,
+      "discovery_threshold": 0.5616744109734503,
+      "heldout_generators": 12,
+      "heldout_ties": 1,
+      "seed": 9001,
+      "spearman_rho": 0.7249769186635725
+    }
+  ],
+  "source_config_file_sha256_by_seed": {
+    "9000": "898657182994513689dd1349e0a392cf5d9ea8c88631f21e43e7cdbfc5649956",
+    "9001": "898657182994513689dd1349e0a392cf5d9ea8c88631f21e43e7cdbfc5649956"
+  },
+  "statistics_unit": "seed"
+}

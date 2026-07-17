@@ -1,0 +1,31 @@
+{
+  "critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+  "critical_file_sha256": {
+    "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+    "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+    "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+    "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+    "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+  },
+  "end_snapshot": {
+    "critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "critical_file_sha256": {
+      "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+      "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+      "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+      "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+      "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+    },
+    "fit_entrypoint": "src.models.task_matched_actuators.fit_task_matched_actuator",
+    "git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+    "git_dirty": false,
+    "git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+    "worktree_content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "fit_entrypoint": "src.models.task_matched_actuators.fit_task_matched_actuator",
+  "git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+  "git_dirty": false,
+  "git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+  "stable_during_run": true,
+  "worktree_content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
