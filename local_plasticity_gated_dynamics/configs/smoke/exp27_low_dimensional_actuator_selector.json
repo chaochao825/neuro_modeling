@@ -1,0 +1,88 @@
+{
+  "profile": "smoke",
+  "dev_only": true,
+  "protocol_version": "exp27_preregistered_v1_frozen_exp26_dictionary",
+  "seeds": [9000, 9001],
+  "training_algorithm": "selector_only_on_frozen_exp26_actuator_dictionary",
+  "used_autograd": false,
+  "used_bptt": false,
+  "dictionary": ["routing", "gain", "low_rank"],
+  "selectors": [
+    "oracle",
+    "gru_bptt",
+    "local_three_factor",
+    "fixed_best"
+  ],
+  "feature_columns": [
+    "chi",
+    "state_demand",
+    "input_demand",
+    "transition_rank",
+    "input_rank",
+    "delay",
+    "noise_std"
+  ],
+  "feature_transform": {
+    "cues": ["demand", "ranks", "timing_noise"],
+    "raw_to_transformed": {
+      "chi": "identity",
+      "state_demand": "log",
+      "input_demand": "log",
+      "transition_rank": "log2",
+      "input_rank": "log2",
+      "delay": "scaled",
+      "noise_std": "log"
+    },
+    "include_bias": true,
+    "fit_scope": "other_seed_discovery_validation_only"
+  },
+  "source_exp26": {
+    "raw_metrics_path": "results/exp26_actuator_matching_formal_v2_e08beaf/smoke/raw_metrics.csv.gz",
+    "conclusion_path": "results/exp26_actuator_matching_formal_v2_e08beaf/smoke/conclusion.json",
+    "expected_raw_metrics_sha256": "e5dfd3ba9ea26b7b4319de910a0724b40a631f0f591f585f3b0c09033250700c",
+    "expected_conclusion_sha256": "7a0f1dd04fb7d8ac88e05ea9ab4eff614f0b6bfc68873c4c7dd78a1058c96d1b",
+    "expected_preflight_receipt_sha256": null,
+    "expected_config_sha256": "583f42e522cbbc9ad42a36434ab6305ecdf715db62e368ed3eb306d429f96084",
+    "expected_manifest_sha256": "9d334f0e3de86843b5e61b8f70cd7466c6933d47dcf50464fd51bd9a65519d5d",
+    "expected_run_label": "exp26-smoke-v2",
+    "expected_protocol_version": "exp26_preregistered_v2_train_only_budget_bound",
+    "required_conclusion": "inconclusive",
+    "required_profile": "smoke"
+  },
+  "local_selector": {
+    "epochs": 20,
+    "learning_rate": 0.05,
+    "temperature": 1.0,
+    "teacher_temperature": 0.05,
+    "l2": 0.0001,
+    "eligibility_decay": 0.8,
+    "belief_retention": 0.8
+  },
+  "gru_selector": {
+    "hidden_dim": 8,
+    "epochs": 20,
+    "learning_rate": 0.02,
+    "weight_decay": 0.0001,
+    "teacher_temperature": 0.05,
+    "device": "cpu",
+    "deterministic": true
+  },
+  "evaluation": {
+    "train_generator_split": "discovery",
+    "train_endpoint": "validation_balanced_accuracy",
+    "test_generator_split": "heldout",
+    "test_endpoint": "test_balanced_accuracy",
+    "outer_unit": "seed",
+    "tie_break_order": ["routing", "gain", "low_rank"],
+    "local_oracle_gain_fraction_threshold": 0.8,
+    "expected_heldout_generators_per_seed": 12,
+    "expected_strict_unseen_per_seed": 4
+  },
+  "analysis": {
+    "bootstrap_samples": 200,
+    "permutation_samples": 500,
+    "confidence": 0.95,
+    "statistics_seed": 2701,
+    "force_inconclusive": true
+  }
+}
