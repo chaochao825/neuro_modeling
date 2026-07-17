@@ -1,0 +1,1029 @@
+{
+  "attempts": [
+    {
+      "file_sha256": {
+        "config.json": "722cb7bb1c9afdf631764c69246352d118dc65e324ec0262f4b29d6674024ed3",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "3e7b1c63ae716071d85c0caf25c5479205f95854d886f56b5c43e49868e8e77e",
+        "metrics.jsonl": "589a8c13758cd70cdad24290c4382db2f12e96e9159de15ddf8eb7e66f282ac9",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "6182687af43c455c9463aa11dc78250a7116d8523f88fd182e5694ef185982b1"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0060/20260717T112320.520973Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "dcc17044-a2ea-4870-a948-1b4015a5d4cc",
+      "run_status": "complete",
+      "seed": 60
+    },
+    {
+      "file_sha256": {
+        "config.json": "2c35edd0d9ed300bc1bfa574209224d15010eac33ea4df7ae9a783d2700da571",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "05e848c5d780aeea9e19ff5334b51b6cce1babf615dad7a314c0493a2e89e9e4",
+        "metrics.jsonl": "a09a428c2626edaffb5088189cb4fb4ff18e2be5a1c519ef049b715d9da6dad8",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "ca1cfeb1c4e5c1fb6b1c7120f92a757ea08dd8cd6ed57e429bbbd3ae450b6705"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0061/20260717T112320.570373Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "43e0a469-5879-4888-9562-1f50ffafd027",
+      "run_status": "complete",
+      "seed": 61
+    },
+    {
+      "file_sha256": {
+        "config.json": "e619a015d1dea8658c6bb9b91f5ef996ea2e5fa4713c4848b9842192d3bd30d6",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "801d636cd330d08b74926f203191092ea41506de6abbcbee9c1894a13506aa6a",
+        "metrics.jsonl": "1f365e7b9b1a71427749e0853459804d3940ec416d773d6cab257056edff1880",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "ad7793fd6372f891c1f4e7b3132fb8fa9ccc6379a3f7f7e88c99e37ea822d92d"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0062/20260717T112320.887497Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "1d698f17-1a53-43a6-8f9f-c3f32949ad4d",
+      "run_status": "complete",
+      "seed": 62
+    },
+    {
+      "file_sha256": {
+        "config.json": "15c6aa0ebf2e9a4a93b1e59582dd0dc85439c9bc4173578b9ecd100ef516ed1a",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "d0872add5f2db97f934b32adeeef89b8faa1ddf2e0fc723131a4c8f29d860872",
+        "metrics.jsonl": "716f5c917ea2398335f3a853a8070e58f801db08aa8e02bd9407fdfbbe0946ea",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "3e4db62fea1581541388535c9b402ac02d00a807df577605c19ab311ae9e1fe5"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0063/20260717T112320.853374Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "46de362d-5c2f-41fb-b1e0-9d680c756c56",
+      "run_status": "complete",
+      "seed": 63
+    },
+    {
+      "file_sha256": {
+        "config.json": "97de116e054108beb7ec3889ea911579bb5d607b7139e32c99353df1932ff643",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "3651b4357e74b6aedf4061a5b7b4cc4c37b454f02c945173b19f4c519e44b38f",
+        "metrics.jsonl": "cf327b9c27f39403f6a7a2456d452a67a9569a805ad098b364f53ac9bb4c9a5b",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f45aa1bd053b31b8996837a938d1e97cf078e1dc93004a10ef2ba1a2b6dcd323"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0064/20260717T112320.817512Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "52c3809f-d67e-4724-aa66-6806390a1504",
+      "run_status": "complete",
+      "seed": 64
+    },
+    {
+      "file_sha256": {
+        "config.json": "e11088075fa58db18c24f7d7105636553bf5e9a0e218aacf41f87ee1d76f5a78",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "c1d2487ec15bcadd4f653a9f5d8bc08718dfe3ab58dc07a818a680667d0408c0",
+        "metrics.jsonl": "080788de55b92e29dadbf16fe07622603264fd495da2e6a6b19b1c63ba2654da",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "dad6f5c9b981152fd6a86fad7313469251f77509053e134cefd4759f9f340d25"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0065/20260717T112320.858680Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "4cd0db13-8a75-4847-a9fe-a4b41209f32a",
+      "run_status": "complete",
+      "seed": 65
+    },
+    {
+      "file_sha256": {
+        "config.json": "856f9264ccda5bd136a03212cdaefaeb991d5693dd7e902179cc72208349ce1e",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "38f0d88fd58f80a9d1f93d8d80bdf411e43ff478ff88f1ea254db6db8097f667",
+        "metrics.jsonl": "673e1d5f10b4205f9e291eeff41384703ae325dd560975d4e71fc23806802780",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "ffff7364f22030753156c009ca76a5ed99acfbbd8b0b5fc361fbcc61d731e634"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0066/20260717T112320.870915Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "75bde056-4482-4a4b-a23f-df5b42e98fa9",
+      "run_status": "complete",
+      "seed": 66
+    },
+    {
+      "file_sha256": {
+        "config.json": "5a0e23ad06a24c4c905ba193b87b14d5ca32e9fc8d4b4f7676864aba0bf76802",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "c30a0f2f6a7656b8376c2ee3e30ab6e2c62550c43e921085b6268eb72eddac3f",
+        "metrics.jsonl": "3ba7c9708e67e33ca944f64557c656616f34e3cd26d9a631510a2db385f5bf1b",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f0de94af43e3150848a3d9aaec698a912bb8834d051111158b89f60be42154ed"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0067/20260717T112318.200540Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "3cc57b28-7dd5-488c-ac25-6052ddccfeba",
+      "run_status": "complete",
+      "seed": 67
+    },
+    {
+      "file_sha256": {
+        "config.json": "96f3a4d31a95d431d3e30ea038aa18a2ede882c722028b61efa6880f75907280",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "d2dc7d79991a31373655e4e65b186583ebb6e4b528fcc6081a6253afe8e03160",
+        "metrics.jsonl": "5faedabece8f65117d29961c4bc39b7378a36d7ce174ac120ae20c23a426524f",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "763cc6777031952cc4ff6a28e382ece15808306cbd6cdd356a718db6b30dc1f1"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0068/20260717T112320.844036Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "0fa06e06-f12e-43a8-9daa-1d1823782c8c",
+      "run_status": "complete",
+      "seed": 68
+    },
+    {
+      "file_sha256": {
+        "config.json": "70b51dcc5e0119aa5016d247c2e8da3b4840a1ac2741d41f0f6b7b867229db6d",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "7feebc89bdd22c5d22cd3ae64b5de03c94076993199cd6ca6aa14dcd0a8eeee6",
+        "metrics.jsonl": "99368d7e5e6f793852b4232863560b3313e90b2f0ee86248ea1c83457b9410e0",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "1c5d4d78ce906c3018c69f8c7f7224f4bbd21aec3f42c7a0ba0de4fc530e5c53"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0069/20260717T112320.634129Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "1de3ee8d-e21d-48ff-ab10-e5980738bcd4",
+      "run_status": "complete",
+      "seed": 69
+    },
+    {
+      "file_sha256": {
+        "config.json": "264a2fb9ed964d63f24777ce9bab2d927ee4773a4bb698630037a2e69423ae4b",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "5257e22323bcfd93a46cafb49c4548d61754dd09e14cb24d4fa8059e8e038847",
+        "metrics.jsonl": "719db37b748a22c2c8375974fc1ce2d36fe17efcea94b0a1bbf6d67f7997b568",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "661a5ff4c21452f8cd57c69c0b31292b694c384c10022f2b3945913cbbf9ce9b"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0070/20260717T112320.531553Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "1c48034e-c81e-40db-8583-164b2f22cad4",
+      "run_status": "complete",
+      "seed": 70
+    },
+    {
+      "file_sha256": {
+        "config.json": "982de00aa9f7942e25dc54840026954cf4785bb6b93956136e4d7d29a3d42ab9",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "56e7cf25cff29d2c1bc63e6bdac465a02950610abb92f43ea2538da25f1d6d84",
+        "metrics.jsonl": "f89838d03f515e3f77771a28d8272d50123ebf68b7525311c379169c261bc0cc",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "04c3dc088c87fd9c6d78e95b4747ee0767de47a67a2347031c138f2e32be4271"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0071/20260717T112320.780632Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "b5bd3e70-4b2c-424e-b967-45bd7f61e29c",
+      "run_status": "complete",
+      "seed": 71
+    },
+    {
+      "file_sha256": {
+        "config.json": "04e661db8741eda336d74f0db8cc367eeeaa36d64b1d20af50488ea8b3024370",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "c6280ae58babe9ae099e8ebe6438493d23e4c82afa8f0bd462a4dca40d07b3f6",
+        "metrics.jsonl": "8483265e853644bf3382e73f6db48d778e9db59915596516930e5547d0f2c691",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "81dc5ed97ddd96fc5e0bb455d10f870515567e48b4b13a3a0d3167351e7dc5ac"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0072/20260717T112320.497958Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "f9cadeba-29a6-49b2-9a70-3359023e8a21",
+      "run_status": "complete",
+      "seed": 72
+    },
+    {
+      "file_sha256": {
+        "config.json": "3b6ca40175fead108b784c96df4f99347ce60fd2f7899f6ffa86c2753288513c",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "9cae6043adec46bdbeb52c477081585ae53385638a3b23b92ee5324dbba5de0c",
+        "metrics.jsonl": "b07047c0fc66e0a402a6e772d0a162288d86a87608117c207f67eeb2d7146876",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "277ef426dd7abd138d81c4fdde33f591f3c65f1f7ebb1e0c7dfc5ef9c213f31b"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0073/20260717T112320.792083Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "cdbbeb34-3fb4-4ee1-9473-cb9920c0b082",
+      "run_status": "complete",
+      "seed": 73
+    },
+    {
+      "file_sha256": {
+        "config.json": "1981e130b987e6b9ef2b910c820a55c472bf70513212e16f71560322800fdeaf",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "6f95d8e53ebf8735f37561c5fbe0369ed465fb84bdc8e770c34e0a393109c35c",
+        "metrics.jsonl": "e56db47c961cea093fb824c3403787be1fa53e08c616668f83c632a88421f5de",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "e06b845c58c359e69e82676c78b5014677d31171bdab99e97032695eb929ee77"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0074/20260717T112320.739924Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "6dd1a997-82bb-4260-be8c-53c6b225afbe",
+      "run_status": "complete",
+      "seed": 74
+    },
+    {
+      "file_sha256": {
+        "config.json": "6dd837382da1f99fbe691c123519cafd3933b6b1fdb3db012d04d8616da0958f",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "4eb418b3e92af707490016dea27987ac4e0cee33aa5d04664c11ba85fabcaa8c",
+        "metrics.jsonl": "18f03014a00e6960dcbb84cdd06fe27772b0e19038d9d6af685a49a1c77991ae",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "a45e32ebdf84d70b8f9944e10e0ebbeba301dd834ec18b1e69b8d78220624aa5"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0075/20260717T112318.869298Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "70e069c0-79ab-4213-bd6b-0290e0db0208",
+      "run_status": "complete",
+      "seed": 75
+    },
+    {
+      "file_sha256": {
+        "config.json": "c9b67a2706a24ff700001fc02b3c0417cbd2773a17e4060caf852038fbe500fd",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "a740fed5060dbb364bf81dd233deb8a47c882339c6103fe404bd429b48e42563",
+        "metrics.jsonl": "3c7bc3029b6c3c1b22dde1873cd93c28294640d76d558bb647b88bcb3c2b0248",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "3b0b5dcf524ecf2b94768a35e340a9ac802db94b0b2be2992f11836e5a60e396"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0076/20260717T112320.885066Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "cefa4617-f979-40b0-8fcb-4548ee21a291",
+      "run_status": "complete",
+      "seed": 76
+    },
+    {
+      "file_sha256": {
+        "config.json": "d43358658d53b61f098e038e0f73c9d77296496d39bd7f79c64634ce4cc19d5e",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "a9eccccf8528686147327bd938caa515397908c255bc3fc024677c2f2cd90c35",
+        "metrics.jsonl": "d3eeb1b5a352e692a612aa6a122739288ca92f37fa084739b45712a7d11d69b9",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "7c8d2024758ba38e9c69e640cbe11c674f21a8fa522a0906e91725bb1a3b8568"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0077/20260717T112320.442973Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "178ab120-1773-46f2-befe-6d5ddce2a681",
+      "run_status": "complete",
+      "seed": 77
+    },
+    {
+      "file_sha256": {
+        "config.json": "ed9750457692f80e489139405f180cdab8b8ed25f8f33babe3d6e998a3aac15a",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "4b552e812a088781ace97c92d6462500b668f869c2418339d3c9b574e1ce051e",
+        "metrics.jsonl": "5deed584a529c73f280fb201972df7b20dd2ceac9bf08c77def4c9b5326500ed",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "bf201d5f55006cb6a826245a40749b1265ffd6ce5ba62a4b680e2b526cc27818"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0078/20260717T112320.647658Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "b270ee78-781c-4bba-b7e1-0a8190e450cd",
+      "run_status": "complete",
+      "seed": 78
+    },
+    {
+      "file_sha256": {
+        "config.json": "4f5739007d295cf483279adddbc49553a2a26928d1af983042ee605531af2082",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "62caf3b95e9f65643bdb47809c2fb2bbb5b86641594f6152ad2d57a8a668282c",
+        "metrics.jsonl": "6b5cb95b6990d9d302d19ff3cbbb711e8b777b8e40f668f94e38f419e64ee213",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "434d37fcddec704fd20f2a301bafaa7ac44833411d32e290978eee63f2e5e6dc"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0079/20260717T112318.887664Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "0c5618cf-df6b-48ee-ba26-eed799cfa00a",
+      "run_status": "complete",
+      "seed": 79
+    },
+    {
+      "file_sha256": {
+        "config.json": "8967a8f5299f09d9289c43a3907e088be793c145a59475048da5543e72417b59",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "7662089837bcc7cc886365451b642659ce461388ff2fbf88d42645b27ecff2a2",
+        "metrics.jsonl": "a162c0b2dfc52a00cfe3689912a21f8f2c9d360d2c1ca02e5bd30b179d35e755",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "15fcd193acf91a94e8e16bc4d5e926df163ebb64f98dd7cf9ea8230d04e5a566"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0080/20260717T112320.586777Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "ca0b7bd8-4dae-48d5-b555-4cf095d7e789",
+      "run_status": "complete",
+      "seed": 80
+    },
+    {
+      "file_sha256": {
+        "config.json": "13e58bdd6d2bc4e2406c559db04da15d39b66299c1b50c71445919cc77b00925",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "284ab580455df610f23c35b0b24eb3b832982c6b1eabe65f2d7f114cdb896896",
+        "metrics.jsonl": "fee29418907d6a6ea52f7ddce54c44d8fea57e2be58698b4154b4ef519521ce8",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "b65822dc5a5d35ee7ab3b2d9ac6fc5fbf3d20b53d2357024cdd88fbe2cb3f04e"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0081/20260717T112320.822144Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "8914c852-fe4e-4d75-a5ef-5cfe1d9b88b0",
+      "run_status": "complete",
+      "seed": 81
+    },
+    {
+      "file_sha256": {
+        "config.json": "d1cf671e99e1e9675c7c8be05f81d84f9f6d9dd6edd16d10e25d285038f5c4a2",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "5954f99bd581bd6d4a84fbbcac31d2e0f2d8691737885f008a75331c3015279e",
+        "metrics.jsonl": "538e89e24d084fba66be58ca7ce2b298b11422c739f4ec524902d8847311cfe8",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f74e4b94fef8beb061815781d206a4b72b6877e0fa70cb302928c10a41ac539e"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0082/20260717T112320.589518Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "b777ba9c-4903-45dc-8da2-9a5a63c580ae",
+      "run_status": "complete",
+      "seed": 82
+    },
+    {
+      "file_sha256": {
+        "config.json": "b4d01dda87b0008f1a435dbc5937d4885242de03b67a90f6aadc686dbfa73ede",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "d8a86dd534cfc42dc97d8b597ea7768e38122604a091e9004873bb9ec85255de",
+        "metrics.jsonl": "413e34c44d6e3ac2a68f67db144d0d7462e5100f3ff3b4b78bcf66190795ffab",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "939fe4ea8e18377635f6e79ee3a0afccb1da110a04844c33e0ee4a5cea7bf319"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0083/20260717T112320.650456Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "4959ee2f-881f-4b94-b88c-cce06897e714",
+      "run_status": "complete",
+      "seed": 83
+    },
+    {
+      "file_sha256": {
+        "config.json": "abffcd89cf7a0efba93968b4a803449e9ebb78e02eb2afc8bfd7f959d61974d2",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "276fc1df2c8f9bccb6db18ac64f3b57e695b1b8cdb81da1c0a1706f92045822c",
+        "metrics.jsonl": "95a2274ee9851460219cd4ba6877e66480a2bd52a7ef6a5e828da9ed563ece61",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "9efbbc8cfd9adbcab157cdba1d8446c936b52b6a053f25fd78d45d6e62855e4a"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0084/20260717T112320.339816Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "726fffef-f977-4223-921e-c0f320310dea",
+      "run_status": "complete",
+      "seed": 84
+    },
+    {
+      "file_sha256": {
+        "config.json": "bfa219e98a233710ab57e3e83c0e3af9faff128e8950cfced1c31cc80522e30b",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "6fd335d337844f8bc35d9b7f0550d316ef39e4a24b6d48450dba6fe622364aab",
+        "metrics.jsonl": "b39bd93bcd35072169613e68b9cb1db8bb6b617edc39f8533c1d1c31cf7f29bd",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "6bfbf3197a1e11f47dcabc1e8affef1606009fb0f53709a1e5deafb50907b505"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0085/20260717T112320.632103Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "ac073920-9f3a-454d-8a44-cad176520ed2",
+      "run_status": "complete",
+      "seed": 85
+    },
+    {
+      "file_sha256": {
+        "config.json": "02294f21cba70b0ae19a5536456a24208bf402986357c23e8a24ad16c8ac7227",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "aef03a353c4079a10afa00a48b11189058adab2a09b2f53663a89777dc08b0d4",
+        "metrics.jsonl": "cddd7571432a5243e3cb744a0c03e7af70d351d85b914ce659180140a92a0db1",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "996c971305b285fd719a94853d7c4a017b236ee573e11ffad79d23f40e528d60"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0086/20260717T112320.724311Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "d7b1a0e8-ff4a-4ade-9238-9283c4187ddb",
+      "run_status": "complete",
+      "seed": 86
+    },
+    {
+      "file_sha256": {
+        "config.json": "e85af8927b98812aa365d516c4dc6a0d95e6550f9e51b652ec32b1ca4da063e6",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "637c70cc7844c8ee48268f8ffdcc0f84f0f5d3e45c09e6cfbdfa1f3ddef70739",
+        "metrics.jsonl": "e1d0925ec857604c6b2de7a6fb672756e5802b8353b7f9072cbeb2cb2ac80d5e",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "ddca69736d0aa306480a2a9dc16879b8478c2a0804b0effd14f10df567cbd603"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0087/20260717T112320.427874Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "6ad2ef22-ac31-42f5-99f3-e03498466a09",
+      "run_status": "complete",
+      "seed": 87
+    },
+    {
+      "file_sha256": {
+        "config.json": "d94356b8c98ca767c2d2b580682b0c747cd6c14bb3d217c1e10823aecd6d5438",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "12a7b6e5f50815f5866a1136cb6e12fa9056b61fc44cec90363a8a6fbf1189b0",
+        "metrics.jsonl": "880ecd270cf2769aec2ca2ba1bab17e506c047d813d7b512dac0e5288c18c32b",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "071ca021b1a051e78127477b18e500bf2e54886dbd6645996d86579984752bd6"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0088/20260717T112320.668029Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "6210442d-9819-43b9-8488-3e95ece512b0",
+      "run_status": "complete",
+      "seed": 88
+    },
+    {
+      "file_sha256": {
+        "config.json": "32dcffc1facf31e735b031c24e14abe75068bf0bd935ecbb173c99ccb99accb3",
+        "environment.json": "af324a1f103272cf6d1d2d6ff4cc4cc86cd96db85b7acce89b36a9eb43f92b23",
+        "manifest.json": "83e9741dc5ea04efe2a47af54cd3853eed7868485069443abaa8bf77ccaac827",
+        "metrics.jsonl": "d91eaca62ed74463ff885e2e507a2ca823284b739a451b0e629687982b75b031",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "c070dc3fa1807a158b0b28c6b925eefb78894e867a390298d76b1619e444cc9e"
+      },
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp29_confirmatory_source_v1_94fa1c8/runs/exp29_confirmatory_source_panel/seed_0089/20260717T112320.890897Z_exp29-confirmatory-source-v1",
+      "planned_coverage_valid": true,
+      "row_status_counts": {
+        "complete": 440,
+        "failed": 0,
+        "infeasible": 0,
+        "invalid": 0
+      },
+      "run_id": "e7338ceb-a9d3-4e7c-b78a-a87af9ac81d6",
+      "run_status": "complete",
+      "seed": 89
+    }
+  ],
+  "conclusion": "inconclusive",
+  "coverage": {
+    "all_registered_rows_retained": true,
+    "cartesian_complete": true,
+    "expected_generators_per_seed": 88,
+    "expected_modes_per_generator": 5,
+    "expected_row_count": 13200,
+    "expected_rows_per_seed": 440,
+    "expected_seed_count": 30,
+    "expected_seeds": [
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "feasibility_semantics_valid": true,
+    "feasible_active_row_count": 10560,
+    "infeasible_rate_by_family": {
+      "gain": 0.0,
+      "low_rank": 0.0,
+      "rgl": 0.0,
+      "routing": 0.0
+    },
+    "infeasible_rate_by_seed_family": {
+      "60": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "61": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "62": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "63": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "64": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "65": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "66": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "67": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "68": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "69": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "70": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "71": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "72": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "73": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "74": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "75": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "76": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "77": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "78": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "79": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "80": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "81": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "82": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "83": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "84": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "85": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "86": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "87": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "88": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "89": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      }
+    },
+    "matched_budget_support_row_count": 10560,
+    "missing_seeds": [],
+    "observed_row_count": 13200,
+    "observed_seed_count": 30,
+    "observed_seeds": [
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "row_status_counts": {
+      "complete": 13200,
+      "failed": 0,
+      "infeasible": 0,
+      "invalid": 0
+    },
+    "selective_rerun_permitted": false,
+    "source_panel_valid": true,
+    "statistics_unit": "seed",
+    "terminal_attempts_complete": true
+  },
+  "evidence_role": "confirmatory_test_source_only",
+  "evidence_schema_version": "exp29_confirmatory_source_evidence_v1",
+  "experiment": "exp29_confirmatory_source_panel",
+  "profile": "confirmatory_test",
+  "protocol_version": "exp29_confirmatory_source_v1",
+  "raw_metrics_file": "raw_metrics.jsonl",
+  "raw_metrics_row_count": 13200,
+  "raw_metrics_sha256": "a5708c123c5d1ba9486fa190c3517b6fb29f4a8d454024d965db42e0058a6818",
+  "reason": "source-only panel; inference is separately preregistered",
+  "receipt_payload_sha256": "64a5bf3d11e82dca491f7c98fb7af7be898715af75927d616909876b886c5a43",
+  "registered_config_file_sha256": "a058e175d2634cbcb0dde68e1709904c897f51ec8055fe9de666b0e1cffd7500",
+  "registered_config_sha256": "70db02c9e578ace8a1719e4ff6c71c07048a1836f2dafc9fcd845ad5b0bd9e14",
+  "run_provenance": {
+    "evaluation_seeds_sha256": "4348f3800349406f5f49d3250bac55279abc3019676430d6419bb1538ff5e06a",
+    "evidence_role": "confirmatory_test_source_only",
+    "exp29_implementation_contract_sha256": "2f2a37c031d63157b3d3ee55897733e2952f4ddcb11b287508abc106b8a9ee57",
+    "exp29_implementation_hash_scheme": "runner_config_literal_sentinel_v1",
+    "exp29_implementation_sha256": {
+      "experiments/exp29_confirmatory_source_panel.py": "a95a4a2ead2e5704e3625dd8f79089350093bd746ba8c8927105730b66809c7f",
+      "scripts/package_exp29_confirmatory_source_panel.py": "90f142e07762991312ead3efd6e13e8bbdc95637ffa98ecc161649896308b72f",
+      "src/data/exp29_feasibility_selector_dataset.py": "9bfa9a46af063c6a4f695075bb0b7c0666d6968b2e2b526d61bf2cde9159420f"
+    },
+    "feasibility_policy_sha256": "e0821c61305c5e34cb562fe3274c02ef30e33056fbbcd4f7d36847f81182a282",
+    "protocol_version": "exp29_confirmatory_source_v1",
+    "registered_config_file_sha256": "a058e175d2634cbcb0dde68e1709904c897f51ec8055fe9de666b0e1cffd7500",
+    "registered_config_sha256": "70db02c9e578ace8a1719e4ff6c71c07048a1836f2dafc9fcd845ad5b0bd9e14",
+    "run_git": {
+      "commit": "94fa1c86e210e5bddd4e0ac7332577c07923cfca",
+      "dirty": false,
+      "tree": "f95d2ba7180ec93c57f27dc257987ae8df13ae8c"
+    },
+    "run_label": "exp29-confirmatory-source-v1",
+    "runtime_versions": {
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "python": "3.11.15",
+      "scikit_learn": "1.8.0",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6"
+    },
+    "schema_version": "exp29_confirmatory_source_evidence_v1",
+    "source_contract_sha256": "f548724759f2b95a862feca564dfc9897a7356ee81ac949b20f0106077e689c3",
+    "source_exp26_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_exp26_config_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_exp26_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_exp26_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_exp26_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "standalone_inference_permitted": false
+  },
+  "schema_version": "exp29_confirmatory_source_package_v1",
+  "source_contract": {
+    "budget_policy": {
+      "evaluation_panel_refit_permitted": false,
+      "max_scale": 256.0,
+      "no_further_ceiling_amendment": true,
+      "selection_scope": "preregistered_without_seed_60_89_access"
+    },
+    "critical_file_sha256": {
+      "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+      "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+      "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+      "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+      "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+    },
+    "exp29_implementation_hash_scheme": "runner_config_literal_sentinel_v1",
+    "exp29_implementation_sha256": {
+      "experiments/exp29_confirmatory_source_panel.py": "a95a4a2ead2e5704e3625dd8f79089350093bd746ba8c8927105730b66809c7f",
+      "scripts/package_exp29_confirmatory_source_panel.py": "90f142e07762991312ead3efd6e13e8bbdc95637ffa98ecc161649896308b72f",
+      "src/data/exp29_feasibility_selector_dataset.py": "9bfa9a46af063c6a4f695075bb0b7c0666d6968b2e2b526d61bf2cde9159420f"
+    },
+    "source_config_canonical_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_config_relative_path": "configs/formal/exp26_actuator_phase_diagram.json",
+    "source_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_preflight_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_preflight_git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+    "source_preflight_git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+    "source_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "source_preflight_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/preflight",
+    "source_preflight_schema": "exp26_budget_preflight_v2_observed_bound",
+    "source_published_manifest_file_sha256": "31808a5b6ab773a8f63d738f7a5da19cc86a56ed0a9891f666f16b0f07f976b2",
+    "source_published_manifest_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/MANIFEST.sha256"
+  },
+  "source_contract_sha256": "f548724759f2b95a862feca564dfc9897a7356ee81ac949b20f0106077e689c3",
+  "standalone_inference_performed": false,
+  "standalone_inference_permitted": false,
+  "statistics_unit": "seed"
+}

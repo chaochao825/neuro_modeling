@@ -1,0 +1,288 @@
+{
+  "conclusion": "inconclusive",
+  "coverage": {
+    "all_registered_rows_retained": true,
+    "cartesian_complete": true,
+    "expected_generators_per_seed": 88,
+    "expected_modes_per_generator": 5,
+    "expected_row_count": 13200,
+    "expected_rows_per_seed": 440,
+    "expected_seed_count": 30,
+    "expected_seeds": [
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "feasibility_semantics_valid": true,
+    "feasible_active_row_count": 10560,
+    "infeasible_rate_by_family": {
+      "gain": 0.0,
+      "low_rank": 0.0,
+      "rgl": 0.0,
+      "routing": 0.0
+    },
+    "infeasible_rate_by_seed_family": {
+      "60": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "61": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "62": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "63": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "64": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "65": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "66": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "67": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "68": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "69": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "70": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "71": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "72": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "73": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "74": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "75": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "76": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "77": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "78": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "79": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "80": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "81": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "82": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "83": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "84": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "85": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "86": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "87": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "88": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      },
+      "89": {
+        "gain": 0.0,
+        "low_rank": 0.0,
+        "rgl": 0.0,
+        "routing": 0.0
+      }
+    },
+    "matched_budget_support_row_count": 10560,
+    "missing_seeds": [],
+    "observed_row_count": 13200,
+    "observed_seed_count": 30,
+    "observed_seeds": [
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "row_status_counts": {
+      "complete": 13200,
+      "failed": 0,
+      "infeasible": 0,
+      "invalid": 0
+    },
+    "selective_rerun_permitted": false,
+    "source_panel_valid": true,
+    "statistics_unit": "seed",
+    "terminal_attempts_complete": true
+  },
+  "evidence_role": "confirmatory_test_source_only",
+  "profile": "confirmatory_test",
+  "raw_metrics_sha256": "a5708c123c5d1ba9486fa190c3517b6fb29f4a8d454024d965db42e0058a6818",
+  "reason": "source-only panel; inference is separately preregistered",
+  "source_panel_receipt_payload_sha256": "64a5bf3d11e82dca491f7c98fb7af7be898715af75927d616909876b886c5a43",
+  "source_panel_valid": true,
+  "standalone_inference_performed": false,
+  "statistics_unit": "seed"
+}
