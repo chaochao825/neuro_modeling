@@ -1,0 +1,111 @@
+{
+  "complete_primary_coverage": true,
+  "conclusion": "inconclusive",
+  "confirmatory_eligible": false,
+  "coverage": {
+    "budget_invalid_complete_row_count": 0,
+    "complete_row_count": 240,
+    "distinct_planned_fingerprint_count": 1,
+    "duplicate_primary_cell_row_count": 0,
+    "expected_seed_count": 2,
+    "expected_seeds": [
+      9000,
+      9001
+    ],
+    "failed_or_nonterminal_attempt_count": 0,
+    "failed_row_count": 0,
+    "invalid_row_count": 0,
+    "missing_seed_count": 0,
+    "missing_seeds": [],
+    "observed_attempt_seed_count": 2,
+    "observed_attempt_seeds": [
+      9000,
+      9001
+    ],
+    "planned_coverage_invalid_attempt_count": 0,
+    "planned_coverage_valid_attempt_count": 2,
+    "primary_row_count": 192,
+    "raw_row_count": 240,
+    "rgl_ceiling_row_count": 48,
+    "selected_attempt_count": 2,
+    "terminal_attempt_count": 2,
+    "unexpected_seed_count": 0,
+    "unexpected_seeds": [],
+    "unknown_original_row_status_count": 0
+  },
+  "dev_only": true,
+  "development_result_before_scope_gate": "inconclusive",
+  "endpoint_summaries": [
+    {
+      "lower_confidence": 0.7249769186635725,
+      "mean": 0.7902847900672925,
+      "name": "spearman_rho",
+      "null_value": 0.0,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.8555926614710123
+    },
+    {
+      "lower_confidence": 0.8333333333333333,
+      "mean": 0.8666666666666667,
+      "name": "classifier_balanced_accuracy",
+      "null_value": 0.5,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.9
+    },
+    {
+      "lower_confidence": 0.9666666666666668,
+      "mean": 0.9694444444444446,
+      "name": "classifier_auroc",
+      "null_value": 0.5,
+      "p_value": 0.4,
+      "p_value_holm": 1.0,
+      "upper_confidence": 0.9722222222222223
+    }
+  ],
+  "evidence_scope": "development_only",
+  "gramian_predictor_beats_alpha": false,
+  "incremental_auc_summary": {
+    "lower_confidence": 0.0,
+    "mean": 0.01388888888888895,
+    "name": "chi_minus_alpha_auroc",
+    "null_value": 0.0,
+    "p_value": 0.6,
+    "p_value_holm": 0.6,
+    "upper_confidence": 0.0277777777777779
+  },
+  "n_seeds": 2,
+  "profile": "smoke",
+  "reason": "smoke profile is development-only and cannot support or oppose the registered claim",
+  "rgl_role": "descriptive composite ceiling only; excluded from all co-primary actuator-family inference",
+  "seed_endpoints": [
+    {
+      "alpha_classifier_auroc": 0.9444444444444444,
+      "alpha_classifier_balanced_accuracy": 0.8333333333333333,
+      "chi_minus_alpha_auroc": 0.0277777777777779,
+      "classifier_auroc": 0.9722222222222223,
+      "classifier_balanced_accuracy": 0.8333333333333333,
+      "discovery_alpha_threshold": 0.25,
+      "discovery_threshold": 0.11523827240894478,
+      "heldout_generators": 12,
+      "heldout_ties": 0,
+      "seed": 9000,
+      "spearman_rho": 0.8555926614710123
+    },
+    {
+      "alpha_classifier_auroc": 0.9666666666666668,
+      "alpha_classifier_balanced_accuracy": 0.8333333333333333,
+      "chi_minus_alpha_auroc": 0.0,
+      "classifier_auroc": 0.9666666666666668,
+      "classifier_balanced_accuracy": 0.9,
+      "discovery_alpha_threshold": 0.25,
+      "discovery_threshold": 0.5616744109734503,
+      "heldout_generators": 12,
+      "heldout_ties": 1,
+      "seed": 9001,
+      "spearman_rho": 0.7249769186635725
+    }
+  ],
+  "statistics_unit": "seed"
+}

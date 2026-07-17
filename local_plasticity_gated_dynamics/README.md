@@ -36,7 +36,7 @@ preserve the raw low-rank update bound.
 ## Layout
 
 The requested modules live under `src/`; `experiments/exp00_*.py` through
-`exp18_*.py` are executable entry points as implementation advances. `exp07`
+`exp26_*.py` are executable entry points as implementation advances. `exp07`
 is the strict P0 pairing/budget experiment and `exp08` audits rank stages and
 effective dimensions. `exp09` is the leakage-safe hidden-HMM gate audit.
 `exp10` connects frozen hidden beliefs to a shared Dale E/I receiver through a
@@ -48,6 +48,11 @@ states, an explicit low-dimensional control bottleneck, and an optional
 discounted bilinear rate trace; spikes are not required. Formal runs write immutable run
 folders under `results/runs/`. `scripts/build_report.py` aggregates all statuses
 (including failures) into `results/summary.csv` and `results/report.md`.
+
+`exp26` is the preregistered task--actuator matching phase diagram. It replaces
+the two hand-aligned Exp24 endpoints with continuous independently rotated
+state/input demands on one frozen high-rank Dale-compatible carrier. See
+[docs/exp26_actuator_phase_diagram_protocol.md](docs/exp26_actuator_phase_diagram_protocol.md).
 
 ## Reproduce
 
@@ -129,6 +134,13 @@ $exp18Runs = & .\.venv\Scripts\python.exe `
   --runs $exp18Runs --results-root results --prefix exp18_arc_recursive_smoke
 .\.venv\Scripts\python.exe figures\exp18_arc_recursive_plot.py `
   --results-root results --prefix exp18_arc_recursive_smoke
+# Exp26 smoke uses development-only seeds 9000/9001; formal uses 0--29.
+.\.venv\Scripts\python.exe experiments\exp26_actuator_phase_diagram.py `
+  --config configs\smoke\exp26_actuator_phase_diagram.json `
+  --results-root results
+.\.venv\Scripts\python.exe scripts\summarize_exp26.py `
+  --results-root results --output-dir results\exp26_actuator_phase_diagram_smoke `
+  --profile smoke
 .\.venv\Scripts\python.exe scripts\build_report.py --results-root results --plots
 ```
 

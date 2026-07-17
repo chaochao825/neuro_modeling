@@ -1,0 +1,58 @@
+{
+  "profile": "smoke",
+  "dev_only": true,
+  "seeds": [9000, 9001],
+  "training_algorithm": "train_only_closed_form_task_matched_actuators",
+  "used_autograd": false,
+  "used_bptt": false,
+  "manifest": {
+    "selection_seed": 2601,
+    "per_alpha_per_split": 4,
+    "expected_hash": "9d334f0e3de86843b5e61b8f70cd7466c6933d47dcf50464fd51bd9a65519d5d",
+    "grid": {
+      "alpha": [0.0, 0.5, 1.0],
+      "transition_rank": [1, 4],
+      "input_rank": [1, 4],
+      "delay": [0, 12],
+      "noise_std": [0.3, 0.6]
+    }
+  },
+  "carrier": {
+    "n_neurons": 32,
+    "n_inputs": 4,
+    "n_outputs": 1,
+    "inhibitory_fraction": 0.2,
+    "spectral_radius": 0.65,
+    "input_scale": 0.3
+  },
+  "task": {
+    "n_train_blocks": 4,
+    "n_validation_blocks": 2,
+    "n_test_blocks": 2,
+    "trials_per_block": 8,
+    "input_steps": 4,
+    "input_std": 1.0,
+    "delta_a_log10_range": [-1.2, -0.2],
+    "delta_b_log10_range": [-1.2, -0.2],
+    "stability_limit": 0.95
+  },
+  "actuator": {
+    "rank_a_capacity": 4,
+    "rank_b_capacity": 4,
+    "ridge": 1e-6,
+    "max_scale": 25.0,
+    "degeneracy_tolerance": 1e-12,
+    "budget_relative_tolerance": 1e-8,
+    "context_center_tolerance": 1e-12
+  },
+  "analysis": {
+    "readout_ridge": 1.0,
+    "rank_rtol": 1e-9,
+    "support_rtol": 1e-9,
+    "cross_relative_tolerance": 0.05,
+    "tie_margin": 0.01,
+    "bootstrap_samples": 1000,
+    "permutation_samples": 2000,
+    "statistics_seed": 2601
+  }
+}

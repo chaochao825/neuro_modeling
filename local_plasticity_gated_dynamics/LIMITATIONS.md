@@ -2,6 +2,15 @@
 
 The committed summary is an immutable snapshot of the completed runs, not a claim that every mechanism is identified.
 
+- Exp26 is an oracle task-matched actuator capability benchmark, not a learned
+  local controller. Its recurrent base is high-rank and Dale-compatible, but
+  its fitted effective corrections are not Dale constrained. Its primary
+  behavior is a frozen-counterfactual control-induced observable, while
+  absolute behavior is secondary. L2 correction-current RMS is matched; L1 is
+  descriptive. The two-seed smoke is development-only and cannot support the
+  phase claim. The selector stage remains locked until all 30 formal seeds and
+  the held-out `chi`-over-`alpha` gate pass.
+
 This monorepo carries the compact evidence snapshot (`raw_metrics.csv.gz`,
 `runs.csv`, `summary.csv`, the generated report, and PNG/PDF figures). The
 timestamped `results/runs/` directories and per-attempt logs remain in the
