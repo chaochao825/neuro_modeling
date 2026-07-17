@@ -1058,7 +1058,15 @@ def write_exp28_summary(
         _report(collection, conclusion, raw_sha256=raw_sha), encoding="utf-8"
     )
     if make_figure:
-        plot_selector_evidence(endpoints, output / "exp28_amended_sensitivity_evidence")
+        plot_selector_evidence(
+            endpoints,
+            output / "exp28_amended_sensitivity_evidence",
+            title=(
+                "Exp28 post-hoc amended actuator-selector sensitivity "
+                f"(NON-CONFIRMATORY; n={endpoints.shape[0]} seeds)"
+            ),
+            contrast_title="B  Directional non-inferiority sensitivity",
+        )
     return conclusion
 
 

@@ -97,10 +97,20 @@ def plot_selector_evidence(
     output_prefix: str | Path,
     *,
     dpi: int = 220,
+    title: str | None = None,
+    contrast_title: str | None = None,
 ) -> tuple[Path, Path, Path]:
     """Write PNG/PDF/SVG evidence views from one row per outer seed."""
 
     frame = _validated_endpoints(seed_endpoints)
+    if title is not None and (not isinstance(title, str) or not title.strip()):
+        raise ValueError("title must be a non-empty string when provided")
+    if contrast_title is not None and (
+        not isinstance(contrast_title, str) or not contrast_title.strip()
+    ):
+        raise ValueError(
+            "contrast_title must be a non-empty string when provided"
+        )
     output = Path(output_prefix)
     output.parent.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update(
@@ -156,7 +166,9 @@ def plot_selector_evidence(
     axes[0, 1].axhline(0.0, color="#AAAAAA", linewidth=0.8)
     axes[0, 1].set_xlabel("Oracle − fixed-best gain")
     axes[0, 1].set_ylabel("Local − fixed-best gain")
-    axes[0, 1].set_title("B  Registered non-inferiority contrast", loc="left")
+    axes[0, 1].set_title(
+        contrast_title or "B  Registered non-inferiority contrast", loc="left"
+    )
     axes[0, 1].legend(frameon=False, fontsize=8)
 
     local_accuracy = frame["local_selection_accuracy"].to_numpy(dtype=np.float64)
@@ -200,8 +212,12 @@ def plot_selector_evidence(
     axes[1, 1].set_title("D  Fixed-family comparisons", loc="left")
 
     profile = "formal" if frame.shape[0] == 30 else "development"
+    default_title = (
+        f"Exp27 frozen-family actuator selector "
+        f"({profile}; n={frame.shape[0]} seeds)"
+    )
     figure.suptitle(
-        f"Exp27 frozen-family actuator selector ({profile}; n={frame.shape[0]} seeds)",
+        title or default_title,
         fontsize=12,
         fontweight="bold",
     )

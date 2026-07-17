@@ -34,6 +34,22 @@ def test_plot_exp27_writes_all_registered_formats(tmp_path: Path) -> None:
     assert all(path.exists() and path.stat().st_size > 1_000 for path in outputs)
 
 
+def test_plot_exp27_accepts_an_explicit_nonconfirmatory_title(tmp_path: Path) -> None:
+    title = "Exp28 post-hoc sensitivity (NON-CONFIRMATORY; n=3 seeds)"
+    contrast_title = "B  Directional non-inferiority sensitivity"
+    outputs = plot_selector_evidence(
+        _endpoints(),
+        tmp_path / "sensitivity",
+        title=title,
+        contrast_title=contrast_title,
+    )
+
+    svg = outputs[2].read_text(encoding="utf-8")
+    assert title in svg
+    assert contrast_title in svg
+    assert "Exp27 frozen-family" not in svg
+
+
 def test_plot_exp27_rejects_pseudoreplicated_or_incomplete_table(
     tmp_path: Path,
 ) -> None:
