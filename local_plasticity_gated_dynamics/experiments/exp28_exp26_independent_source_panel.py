@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 import sys
+import tarfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -32,6 +33,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT = "exp28_exp26_independent_source_panel"
 PROTOCOL_VERSION = "exp28_exp26_independent_source_v1"
 EVIDENCE_SCHEMA_VERSION = "exp28_independent_source_evidence_v1"
+AMENDED_PROTOCOL_VERSION = (
+    "exp28_exp26_independent_source_v1_ceiling_amendment_1"
+)
+AMENDED_EVIDENCE_SCHEMA_VERSION = (
+    "exp28_independent_source_evidence_v1_ceiling_amendment_1"
+)
 PROFILE = "independent_test"
 EXPECTED_SEEDS = tuple(range(30, 60))
 EXPECTED_GENERATORS = 88
@@ -39,6 +46,15 @@ EXPECTED_MODES = tuple(exp26.MODES)
 EXPECTED_ROWS_PER_SEED = EXPECTED_GENERATORS * len(EXPECTED_MODES)
 EXPECTED_PANEL_ROWS = len(EXPECTED_SEEDS) * EXPECTED_ROWS_PER_SEED
 REQUIRED_RUN_LABEL = "exp28-exp26-independent-source-v1"
+AMENDED_REQUIRED_RUN_LABEL = (
+    "exp28-exp26-independent-source-v1-ceiling-amendment-1"
+)
+FROZEN_MAX_SCALE = 128.0
+AMENDED_MAX_SCALE = 256.0
+AMENDMENT_ID = "exp28_ceiling_reachability_amendment_1"
+AMENDED_CONFIG_CANONICAL_SHA256 = (
+    "0ec0ff7c1079df793063b0bb37f52b9c823b8fff96a8572e021f51438788c03b"
+)
 SOURCE_CONFIG_RELATIVE_PATH = "configs/formal/exp26_actuator_phase_diagram.json"
 SOURCE_PREFLIGHT_RELATIVE_PATH = (
     "results/exp26_actuator_matching_formal_v2_e08beaf/preflight"
@@ -62,7 +78,6 @@ _COPIED_SOURCE_KEYS = (
     "manifest",
     "carrier",
     "task",
-    "actuator",
     "analysis",
 )
 _ROW_EVIDENCE_FIELDS = (
@@ -104,6 +119,12 @@ class SourceContract:
     source_critical_code_sha256: str
     current_git: Mapping[str, object]
     runtime_versions: Mapping[str, str]
+    protocol_version: str = PROTOCOL_VERSION
+    evidence_schema_version: str = EVIDENCE_SCHEMA_VERSION
+    required_run_label: str = REQUIRED_RUN_LABEL
+    functional_budget_max_scale: float = FROZEN_MAX_SCALE
+    protocol_amendment: Mapping[str, object] | None = None
+    protocol_amendment_sha256: str | None = None
 
 
 def _file_sha256(path: Path) -> str:
@@ -138,6 +159,231 @@ def canonical_config_payload(config: Mapping[str, Any]) -> dict[str, Any]:
 
 def canonical_config_sha256(config: Mapping[str, Any]) -> str:
     return _canonical_sha256(canonical_config_payload(config))
+
+
+_EXPECTED_AMENDMENT: dict[str, object] = {
+    "amendment_id": AMENDMENT_ID,
+    "amendment_status": "transparent_post_hoc_protocol_amendment",
+    "amendment_scope": "independent_test_functional_budget_ceiling_only",
+    "trigger_class": "reachability_only",
+    "decision_rule": "next_power_of_two_strictly_above_previous_ceiling",
+    "previous_max_scale": FROZEN_MAX_SCALE,
+    "amended_max_scale": AMENDED_MAX_SCALE,
+    "performance_metrics_inspected": True,
+    "performance_metrics_inspection_timing": (
+        "after_deterministic_amendment_decision_draft"
+    ),
+    "performance_metrics_used_for_amendment": False,
+    "confirmatory_independence_restored": False,
+    "selective_rerun_permitted": False,
+    "further_ceiling_amendments_permitted": False,
+    "rerun_scope": "all_30_seeds_x_88_generators_x_5_modes",
+    "trigger_evidence": {
+        "source_package_locator": (
+            "results/exp28_independent_source_ceiling128_invalid_v3_e650dd1"
+        ),
+        "source_package_archive_file": (
+            "exp28_source_v3_e650dd1_invalid_package.tar.gz"
+        ),
+        "source_package_archive_sha256": (
+            "107039999aaa271d27aafd97746d74e76eb341be15247d4a84994a884a7d7c10"
+        ),
+        "source_panel_receipt_file_sha256": (
+            "d01352232ac22d35153ebd74e4916bbb8e9b598ddcb622b269fa73d6733be96d"
+        ),
+        "source_panel_receipt_payload_sha256": (
+            "816ce6f72a5bd4d02b3f18eda06fc1d280de0e0d9d90f75becbcbc93ccc10084"
+        ),
+        "source_panel_conclusion_file_sha256": (
+            "07ea53eb824d77f1d53699f73d1cc158b038c735fb0e67c3cf68833716660ff0"
+        ),
+        "source_panel_raw_metrics_sha256": (
+            "55e825667f003d5f80b489eb13cdecb57dcb4a40aab10b0c68250e69b37632fe"
+        ),
+        "run_git_commit": "e650dd17554d62124f714e52a1ab7d171fa3f2b2",
+        "run_git_tree": "30d7939386c4ec218c5b74ef92e35f645b571224",
+        "observed_row_count": 13200,
+        "observed_complete_rows": 13199,
+        "observed_failed_rows": 1,
+        "failing_cell": {
+            "seed": 52,
+            "generator_id": "d65464a1a0917550a226",
+            "actuator_mode": "routing",
+            "alpha": 1.0,
+            "transition_rank": 1,
+            "input_rank": 2,
+            "delay": 12,
+            "noise_std": 0.3,
+            "error_type": "ActuatorFitError",
+            "error": (
+                "functional-budget scale is non-finite or exceeds max_scale"
+            ),
+        },
+    },
+    "unchanged_components": [
+        "meta_source",
+        "generator_manifest",
+        "task",
+        "carrier",
+        "noise",
+        "trial_order",
+        "actuator_modes",
+        "performance_endpoints",
+        "performance_acceptance_criteria",
+    ],
+}
+
+
+def _registered_protocol(config: Mapping[str, Any]) -> dict[str, object]:
+    """Resolve either frozen-v1 or its explicit reachability amendment."""
+
+    version = config.get("protocol_version")
+    amendment = config.get("protocol_amendment")
+    if version == PROTOCOL_VERSION:
+        if amendment is not None:
+            raise ValueError("frozen-v1 protocol must not contain an amendment")
+        return {
+            "protocol_version": PROTOCOL_VERSION,
+            "evidence_schema_version": EVIDENCE_SCHEMA_VERSION,
+            "required_run_label": REQUIRED_RUN_LABEL,
+            "max_scale": FROZEN_MAX_SCALE,
+            "protocol_amendment": None,
+            "protocol_amendment_sha256": None,
+        }
+    if version != AMENDED_PROTOCOL_VERSION:
+        raise ValueError("independent source protocol is not registered")
+    if not isinstance(amendment, Mapping) or dict(amendment) != _EXPECTED_AMENDMENT:
+        raise ValueError("independent source ceiling amendment is not registered")
+    if canonical_config_sha256(config) != AMENDED_CONFIG_CANONICAL_SHA256:
+        raise ValueError("independent source amended config hash is not registered")
+    return {
+        "protocol_version": AMENDED_PROTOCOL_VERSION,
+        "evidence_schema_version": AMENDED_EVIDENCE_SCHEMA_VERSION,
+        "required_run_label": AMENDED_REQUIRED_RUN_LABEL,
+        "max_scale": AMENDED_MAX_SCALE,
+        "protocol_amendment": dict(amendment),
+        "protocol_amendment_sha256": _canonical_sha256(amendment),
+    }
+
+
+def _validate_amendment_trigger_artifact(amendment: Mapping[str, Any]) -> None:
+    """Verify the preserved ceiling-128 failure without reading performance fields."""
+
+    trigger = amendment.get("trigger_evidence")
+    if not isinstance(trigger, Mapping):
+        raise ValueError("ceiling amendment trigger evidence is malformed")
+    locator = trigger.get("source_package_locator")
+    archive_name = trigger.get("source_package_archive_file")
+    if not isinstance(locator, str) or not isinstance(archive_name, str):
+        raise ValueError("ceiling amendment trigger paths are malformed")
+    evidence_dir = (PROJECT_ROOT / locator).resolve()
+    try:
+        evidence_dir.relative_to(PROJECT_ROOT.resolve())
+    except ValueError as error:
+        raise ValueError("ceiling amendment trigger escapes the project") from error
+    receipt_path = evidence_dir / "source_panel_receipt.json"
+    conclusion_path = evidence_dir / "conclusion.json"
+    archive_path = evidence_dir / archive_name
+    if (
+        _file_sha256(receipt_path)
+        != trigger.get("source_panel_receipt_file_sha256")
+        or _file_sha256(conclusion_path)
+        != trigger.get("source_panel_conclusion_file_sha256")
+        or _file_sha256(archive_path)
+        != trigger.get("source_package_archive_sha256")
+    ):
+        raise ValueError("ceiling amendment trigger artifact hash is invalid")
+
+    receipt = _read_object(receipt_path)
+    conclusion = _read_object(conclusion_path)
+    receipt_payload = {
+        key: value
+        for key, value in receipt.items()
+        if key != "receipt_payload_sha256"
+    }
+    coverage = receipt.get("coverage")
+    attempts = receipt.get("attempts")
+    run_provenance = receipt.get("run_provenance")
+    if (
+        receipt.get("receipt_payload_sha256")
+        != trigger.get("source_panel_receipt_payload_sha256")
+        or _canonical_sha256(receipt_payload)
+        != trigger.get("source_panel_receipt_payload_sha256")
+        or receipt.get("raw_metrics_sha256")
+        != trigger.get("source_panel_raw_metrics_sha256")
+        or receipt.get("raw_metrics_row_count") != 13200
+        or not isinstance(coverage, Mapping)
+        or coverage.get("observed_row_count") != 13200
+        or coverage.get("row_status_counts")
+        != {"complete": 13199, "failed": 1, "invalid": 0}
+        or coverage.get("cartesian_complete") is not True
+        or coverage.get("source_panel_valid") is not False
+        or coverage.get("all_functional_budgets_valid") is not False
+        or not isinstance(attempts, list)
+        or len(attempts) != 30
+        or not isinstance(run_provenance, Mapping)
+        or run_provenance.get("run_git")
+        != {
+            "commit": trigger.get("run_git_commit"),
+            "tree": trigger.get("run_git_tree"),
+            "dirty": False,
+        }
+        or conclusion.get("coverage") != coverage
+        or conclusion.get("source_panel_valid") is not False
+        or conclusion.get("conclusion") != "inconclusive"
+        or conclusion.get("raw_metrics_sha256")
+        != trigger.get("source_panel_raw_metrics_sha256")
+    ):
+        raise ValueError("ceiling amendment trigger receipt is invalid")
+    failed_attempts = [
+        attempt
+        for attempt in attempts
+        if isinstance(attempt, Mapping)
+        and int(attempt.get("observed_failed_rows", 0)) != 0
+    ]
+    if (
+        len(failed_attempts) != 1
+        or failed_attempts[0].get("seed") != 52
+        or failed_attempts[0].get("observed_row_count") != 440
+        or failed_attempts[0].get("observed_complete_rows") != 439
+        or failed_attempts[0].get("observed_failed_rows") != 1
+        or failed_attempts[0].get("observed_invalid_rows") != 0
+        or failed_attempts[0].get("run_status") != "complete_with_failures"
+    ):
+        raise ValueError("ceiling amendment trigger failure count is invalid")
+
+    with tarfile.open(archive_path, mode="r:gz") as archive:
+        receipt_member = archive.extractfile("package/source_panel_receipt.json")
+        conclusion_member = archive.extractfile("package/conclusion.json")
+        raw_member = archive.extractfile("package/raw_metrics.jsonl")
+        if receipt_member is None or conclusion_member is None or raw_member is None:
+            raise ValueError("ceiling amendment trigger archive is incomplete")
+        if (
+            receipt_member.read() != receipt_path.read_bytes()
+            or conclusion_member.read() != conclusion_path.read_bytes()
+        ):
+            raise ValueError("ceiling amendment trigger archive metadata differs")
+        raw_digest = hashlib.sha256()
+        failed_rows: list[dict[str, Any]] = []
+        row_count = 0
+        for raw_line in raw_member:
+            raw_digest.update(raw_line)
+            row_count += 1
+            if b'"status":"failed"' in raw_line:
+                value = json.loads(raw_line)
+                if not isinstance(value, dict):
+                    raise ValueError("ceiling amendment failed row is malformed")
+                failed_rows.append(value)
+    failing_cell = trigger.get("failing_cell")
+    if not isinstance(failing_cell, Mapping):
+        raise ValueError("ceiling amendment failing-cell identity is malformed")
+    if (
+        row_count != 13200
+        or raw_digest.hexdigest() != trigger.get("source_panel_raw_metrics_sha256")
+        or len(failed_rows) != 1
+        or any(failed_rows[0].get(key) != value for key, value in failing_cell.items())
+    ):
+        raise ValueError("ceiling amendment unique failed-cell identity is invalid")
 
 
 def _read_object(path: Path) -> dict[str, Any]:
@@ -233,11 +479,17 @@ def validate_source_contract(
 ) -> SourceContract:
     """Fail closed unless Exp28 is an exact independent replay of Exp26."""
 
+    protocol = _registered_protocol(config)
+    if protocol["protocol_amendment"] is not None:
+        amendment = protocol["protocol_amendment"]
+        if not isinstance(amendment, Mapping):
+            raise ValueError("independent source amendment is malformed")
+        _validate_amendment_trigger_artifact(amendment)
     if (
         config.get("profile") != PROFILE
         or config.get("dev_only") is not False
-        or config.get("protocol_version") != PROTOCOL_VERSION
-        or config.get("required_run_label") != REQUIRED_RUN_LABEL
+        or config.get("protocol_version") != protocol["protocol_version"]
+        or config.get("required_run_label") != protocol["required_run_label"]
         or config.get("evidence_role") != "independent_test_source_only"
         or config.get("standalone_inference_permitted") is not False
     ):
@@ -283,8 +535,15 @@ def validate_source_contract(
         if config.get(key) != source_config.get(key):
             raise ValueError(f"independent source {key} differs from frozen Exp26")
     actuator = config.get("actuator")
-    if not isinstance(actuator, Mapping) or float(actuator.get("max_scale", -1.0)) != 128.0:
-        raise ValueError("independent source max_scale must remain frozen at 128")
+    source_actuator = source_config.get("actuator")
+    if not isinstance(actuator, Mapping) or not isinstance(source_actuator, Mapping):
+        raise ValueError("independent source actuator contract is malformed")
+    expected_actuator = dict(source_actuator)
+    expected_actuator["max_scale"] = protocol["max_scale"]
+    if dict(actuator) != expected_actuator:
+        raise ValueError(
+            "independent source actuator differs beyond the registered ceiling"
+        )
 
     cells = exp26._manifest(config)
     source_manifest_sha = manifest_hash(cells)
@@ -378,6 +637,16 @@ def validate_source_contract(
         ),
         current_git=run_git,
         runtime_versions=versions,
+        protocol_version=str(protocol["protocol_version"]),
+        evidence_schema_version=str(protocol["evidence_schema_version"]),
+        required_run_label=str(protocol["required_run_label"]),
+        functional_budget_max_scale=float(protocol["max_scale"]),
+        protocol_amendment=protocol["protocol_amendment"],
+        protocol_amendment_sha256=(
+            None
+            if protocol["protocol_amendment_sha256"] is None
+            else str(protocol["protocol_amendment_sha256"])
+        ),
     )
 
 
@@ -388,8 +657,12 @@ def build_evidence_provenance(
 ) -> dict[str, object]:
     """Create one identity shared by the config, manifest, and every row."""
 
-    return {
-        "schema_version": EVIDENCE_SCHEMA_VERSION,
+    if run_label != contract.required_run_label:
+        raise ValueError(
+            f"registered independent source requires {contract.required_run_label!r}"
+        )
+    provenance: dict[str, object] = {
+        "schema_version": contract.evidence_schema_version,
         "evidence_role": "independent_test_source_only",
         "standalone_inference_permitted": False,
         "independent_config_sha256": contract.independent_config_sha256,
@@ -406,6 +679,20 @@ def build_evidence_provenance(
         "runtime_versions": dict(contract.runtime_versions),
         "run_label": run_label,
     }
+    if contract.protocol_amendment is not None:
+        provenance.update(
+            {
+                "protocol_version": contract.protocol_version,
+                "functional_budget_max_scale": (
+                    contract.functional_budget_max_scale
+                ),
+                "protocol_amendment": dict(contract.protocol_amendment),
+                "protocol_amendment_sha256": (
+                    contract.protocol_amendment_sha256
+                ),
+            }
+        )
+    return provenance
 
 
 def evidence_row_fields(provenance: Mapping[str, Any]) -> dict[str, object]:
@@ -413,7 +700,7 @@ def evidence_row_fields(provenance: Mapping[str, Any]) -> dict[str, object]:
     versions = provenance["runtime_versions"]
     if not isinstance(git, Mapping) or not isinstance(versions, Mapping):
         raise ValueError("independent source provenance is malformed")
-    return {
+    fields: dict[str, object] = {
         "source_panel_evidence_schema": provenance["schema_version"],
         "independent_config_sha256": provenance["independent_config_sha256"],
         "independent_config_file_sha256": provenance[
@@ -446,6 +733,36 @@ def evidence_row_fields(provenance: Mapping[str, Any]) -> dict[str, object]:
         "source_only": True,
         "standalone_inference_permitted": False,
     }
+    amendment = provenance.get("protocol_amendment")
+    if amendment is not None:
+        if not isinstance(amendment, Mapping):
+            raise ValueError("independent source amendment provenance is malformed")
+        trigger = amendment.get("trigger_evidence")
+        if not isinstance(trigger, Mapping):
+            raise ValueError("independent source amendment trigger is malformed")
+        fields.update(
+            {
+                "source_panel_protocol_version": provenance["protocol_version"],
+                "functional_budget_max_scale": provenance[
+                    "functional_budget_max_scale"
+                ],
+                "protocol_amendment_id": amendment["amendment_id"],
+                "protocol_amendment_sha256": provenance[
+                    "protocol_amendment_sha256"
+                ],
+                "protocol_amendment_trigger_class": amendment["trigger_class"],
+                "protocol_amendment_performance_metrics_inspected": amendment[
+                    "performance_metrics_inspected"
+                ],
+                "protocol_amendment_trigger_receipt_file_sha256": trigger[
+                    "source_panel_receipt_file_sha256"
+                ],
+                "protocol_amendment_trigger_raw_metrics_sha256": trigger[
+                    "source_panel_raw_metrics_sha256"
+                ],
+            }
+        )
+    return fields
 
 
 def planned_conditions(config: Mapping[str, Any]) -> list[dict[str, object]]:
@@ -505,9 +822,11 @@ def run_seed(
 ) -> Path:
     """Run one independent source seed without fitting any selector."""
 
-    if run_label != REQUIRED_RUN_LABEL:
-        raise ValueError(f"formal independent source requires {REQUIRED_RUN_LABEL!r}")
     contract = validate_source_contract(config)
+    if run_label != contract.required_run_label:
+        raise ValueError(
+            f"formal independent source requires {contract.required_run_label!r}"
+        )
     requested_seed = _exact_integer(seed, name="requested seed")
     if requested_seed not in EXPECTED_SEEDS:
         raise ValueError("requested independent source seed is not in 30--59")
@@ -578,7 +897,10 @@ def run_seed(
                         # evidence dimensions.  Do not duplicate them in the
                         # metric payload: ExperimentRun correctly rejects any
                         # metric/dimension overlap.
-                        metrics["source_panel_protocol_version"] = PROTOCOL_VERSION
+                        if "source_panel_protocol_version" not in dimensions:
+                            metrics["source_panel_protocol_version"] = (
+                                contract.protocol_version
+                            )
                         if valid:
                             run.record(metrics, **dimensions)
                         else:
@@ -619,12 +941,16 @@ def main() -> None:
     parser.add_argument(
         "--run-label",
         required=True,
-        help=f"must equal {REQUIRED_RUN_LABEL}",
+        help="must equal the run label registered by the selected config",
     )
     args = parser.parse_args()
     config = load_json_config(args.config)
-    if args.run_label != REQUIRED_RUN_LABEL:
-        parser.error(f"--run-label must equal {REQUIRED_RUN_LABEL}")
+    try:
+        required_run_label = str(_registered_protocol(config)["required_run_label"])
+    except ValueError as error:
+        parser.error(str(error))
+    if args.run_label != required_run_label:
+        parser.error(f"--run-label must equal {required_run_label}")
     for seed in _selected_seeds(config, args.seeds):
         print(
             run_seed(

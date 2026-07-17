@@ -27,7 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from experiments import exp26_actuator_phase_diagram as exp26  # noqa: E402
 from experiments.common import load_json_config  # noqa: E402
 from experiments.exp28_exp26_independent_source_panel import (  # noqa: E402
-    EVIDENCE_SCHEMA_VERSION,
+    AMENDED_PROTOCOL_VERSION,
     EXPECTED_MODES,
     EXPECTED_PANEL_ROWS,
     EXPECTED_ROWS_PER_SEED,
@@ -39,7 +39,9 @@ from experiments.exp28_exp26_independent_source_panel import (  # noqa: E402
     _canonical_sha256,
     _dimensions,
     _file_sha256,
+    _registered_protocol,
     build_evidence_provenance,
+    canonical_config_sha256,
     canonical_config_payload,
     evidence_row_fields,
     planned_conditions,
@@ -49,6 +51,9 @@ from src.analysis.actuator_manifest import manifest_hash  # noqa: E402
 
 
 SOURCE_PACKAGE_SCHEMA_VERSION = "exp28_independent_source_package_v1"
+AMENDED_SOURCE_PACKAGE_SCHEMA_VERSION = (
+    "exp28_independent_source_package_v1_ceiling_amendment_1"
+)
 TERMINAL_STATUSES = {"complete", "complete_with_failures"}
 ROW_STATUSES = {"complete", "failed", "invalid"}
 DEFAULT_CONFIG = (
@@ -57,6 +62,13 @@ DEFAULT_CONFIG = (
     / "formal"
     / "exp28_exp26_independent_source_panel.json"
 )
+AMENDED_CONFIG = (
+    PROJECT_ROOT
+    / "configs"
+    / "formal"
+    / "exp28_exp26_independent_source_panel_ceiling_amendment_1.json"
+)
+KNOWN_CONFIGS = (DEFAULT_CONFIG, AMENDED_CONFIG)
 ATTEMPT_FILES = (
     "config.json",
     "environment.json",
@@ -223,6 +235,8 @@ def _validate_attempt(
     registered_config: Mapping[str, Any],
     expected_provenance: Mapping[str, Any],
 ) -> tuple[AttemptReceipt, list[dict[str, Any]]]:
+    expected_run_label = str(expected_provenance["run_label"])
+    expected_schema = str(expected_provenance["schema_version"])
     required = [name for name in ATTEMPT_FILES if not (attempt / name).is_file()]
     if required:
         raise ValueError(f"independent source attempt lacks files {required}: {attempt}")
@@ -244,13 +258,13 @@ def _validate_attempt(
     if (
         config.get("experiment") != EXPERIMENT
         or config.get("seed") != seed
-        or config.get("run_label") != REQUIRED_RUN_LABEL
+        or config.get("run_label") != expected_run_label
         or config.get("profile") != PROFILE
         or status.get("seed") != seed
-        or status.get("run_label") != REQUIRED_RUN_LABEL
+        or status.get("run_label") != expected_run_label
         or manifest.get("experiment") != EXPERIMENT
         or manifest.get("seed") != seed
-        or manifest.get("run_label") != REQUIRED_RUN_LABEL
+        or manifest.get("run_label") != expected_run_label
         or manifest.get("profile") != PROFILE
         or manifest.get("status") != run_status
         or not isinstance(run_id, str)
@@ -262,48 +276,14 @@ def _validate_attempt(
         not isinstance(provenance, Mapping)
         or dict(provenance) != dict(expected_provenance)
         or manifest.get("evidence_provenance") != provenance
-        or provenance.get("schema_version") != EVIDENCE_SCHEMA_VERSION
+        or provenance.get("schema_version") != expected_schema
         or not _environment_matches(environment, provenance)
     ):
         raise ValueError(f"attempt evidence provenance is inconsistent: {attempt}")
 
     cells = exp26._manifest(registered_config)
     receipt = manifest_hash(cells)
-    expected_row_evidence = {
-        "source_panel_evidence_schema": provenance["schema_version"],
-        "independent_config_sha256": provenance["independent_config_sha256"],
-        "independent_config_file_sha256": provenance[
-            "independent_config_file_sha256"
-        ],
-        "source_contract_sha256": provenance["source_contract_sha256"],
-        "source_exp26_config_sha256": provenance["source_exp26_config_sha256"],
-        "source_exp26_config_file_sha256": provenance[
-            "source_exp26_config_file_sha256"
-        ],
-        "source_exp26_manifest_sha256": provenance[
-            "source_exp26_manifest_sha256"
-        ],
-        "source_exp26_preflight_receipt_sha256": provenance[
-            "source_exp26_preflight_receipt_sha256"
-        ],
-        "source_exp26_critical_code_sha256": provenance[
-            "source_exp26_critical_code_sha256"
-        ],
-        "run_git_commit": provenance["run_git"]["commit"],
-        "run_git_tree": provenance["run_git"]["tree"],
-        "run_git_dirty": provenance["run_git"]["dirty"],
-        "run_python_version": provenance["runtime_versions"]["python"],
-        "run_numpy_version": provenance["runtime_versions"]["numpy"],
-        "run_scipy_version": provenance["runtime_versions"]["scipy"],
-        "run_scikit_learn_version": provenance["runtime_versions"][
-            "scikit_learn"
-        ],
-        "run_pandas_version": provenance["runtime_versions"]["pandas"],
-        "run_statsmodels_version": provenance["runtime_versions"]["statsmodels"],
-        "run_label": REQUIRED_RUN_LABEL,
-        "source_only": True,
-        "standalone_inference_permitted": False,
-    }
+    expected_row_evidence = evidence_row_fields(provenance)
     expected_dimensions = {
         (cell.generator_id, mode): _dimensions(
             cell,
@@ -381,14 +361,14 @@ def collect_source_panel(
 ) -> PanelCollection:
     """Collect all matching attempts without selecting by success or recency."""
 
-    if run_label != REQUIRED_RUN_LABEL:
-        raise ValueError(f"run_label must equal {REQUIRED_RUN_LABEL}")
     registered_config = load_json_config(config_path)
     contract = validate_source_contract(
         registered_config,
         current_git=current_git,
         runtime_versions=runtime_versions,
     )
+    if run_label != contract.required_run_label:
+        raise ValueError(f"run_label must equal {contract.required_run_label}")
     provenance = build_evidence_provenance(contract, run_label=run_label)
     candidates = _attempt_candidates(Path(results_root), run_label=run_label)
     duplicates = {
@@ -823,18 +803,32 @@ def write_source_panel_package(
     raw_path.write_bytes(raw_payload)
     raw_sha = hashlib.sha256(raw_payload).hexdigest()
     coverage = panel_coverage(collection)
+    protocol = _registered_protocol(collection.config)
+    is_amended = protocol["protocol_version"] == AMENDED_PROTOCOL_VERSION
+    package_schema = (
+        AMENDED_SOURCE_PACKAGE_SCHEMA_VERSION
+        if is_amended
+        else SOURCE_PACKAGE_SCHEMA_VERSION
+    )
+    reason = (
+        "source-only post-hoc amended sensitivity panel; ceiling amendment "
+        "does not restore confirmatory independence and downstream inference "
+        "is separately registered"
+        if is_amended
+        else (
+            "source-only independent panel; downstream inference is separately "
+            "preregistered"
+        )
+    )
     receipt_payload: dict[str, Any] = {
-        "schema_version": SOURCE_PACKAGE_SCHEMA_VERSION,
+        "schema_version": package_schema,
         "experiment": EXPERIMENT,
         "profile": PROFILE,
         "evidence_role": "independent_test_source_only",
         "conclusion": "inconclusive",
         "standalone_inference_performed": False,
         "standalone_inference_permitted": False,
-        "reason": (
-            "source-only independent panel; downstream inference is separately "
-            "preregistered"
-        ),
+        "reason": reason,
         "registered_config_sha256": collection.config_sha256,
         "registered_config_file_sha256": collection.config_file_sha256,
         "source_contract": dict(collection.source_contract),
@@ -846,6 +840,20 @@ def write_source_panel_package(
         "raw_metrics_row_count": len(collection.rows),
         "attempts": [asdict(attempt) for attempt in collection.attempts],
     }
+    if is_amended:
+        receipt_payload.update(
+            {
+                "protocol_version": protocol["protocol_version"],
+                "protocol_amendment": protocol["protocol_amendment"],
+                "protocol_amendment_sha256": protocol[
+                    "protocol_amendment_sha256"
+                ],
+                "inference_status": (
+                    "post_hoc_amended_sensitivity_non_confirmatory"
+                ),
+                "confirmatory_independence_restored": False,
+            }
+        )
     receipt_payload_sha = _canonical_sha256(receipt_payload)
     receipt = {
         **receipt_payload,
@@ -866,6 +874,19 @@ def write_source_panel_package(
         "raw_metrics_sha256": raw_sha,
         "reason": receipt_payload["reason"],
     }
+    if is_amended:
+        conclusion.update(
+            {
+                "protocol_version": protocol["protocol_version"],
+                "protocol_amendment_sha256": protocol[
+                    "protocol_amendment_sha256"
+                ],
+                "inference_status": (
+                    "post_hoc_amended_sensitivity_non_confirmatory"
+                ),
+                "confirmatory_independence_restored": False,
+            }
+        )
     (output / "conclusion.json").write_text(
         json.dumps(conclusion, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
         encoding="utf-8",
@@ -876,6 +897,16 @@ def write_source_panel_package(
         "This artifact is source-only and has conclusion **inconclusive**. No ",
         "selector or standalone hypothesis test was fit while packaging it.",
         "",
+        *(
+            [
+                "This is a post-hoc amended sensitivity panel; it does not ",
+                "restore confirmatory independence. The sole registered change ",
+                "is the reachability ceiling 128 -> 256.",
+                "",
+            ]
+            if is_amended
+            else []
+        ),
         f"- Expected rows: {EXPECTED_PANEL_ROWS}",
         f"- Observed rows: {coverage['observed_row_count']}",
         f"- Complete Cartesian panel: {coverage['cartesian_complete']}",
@@ -892,10 +923,37 @@ def write_source_panel_package(
     return output
 
 
+def _registered_config_from_receipt(
+    receipt: Mapping[str, Any],
+    config_path: str | Path | None,
+) -> dict[str, Any]:
+    """Resolve an exact known config; never trust a path embedded in evidence."""
+
+    candidates = (Path(config_path),) if config_path is not None else KNOWN_CONFIGS
+    matches: list[dict[str, Any]] = []
+    for candidate in candidates:
+        resolved = candidate if candidate.is_absolute() else PROJECT_ROOT / candidate
+        config = load_json_config(resolved)
+        if (
+            canonical_config_payload(config)
+            and canonical_config_sha256(config)
+            == receipt.get("registered_config_sha256")
+            and _file_sha256(resolved)
+            == receipt.get("registered_config_file_sha256")
+        ):
+            matches.append(config)
+    if len(matches) != 1:
+        raise ValueError(
+            "independent source package does not match exactly one known config"
+        )
+    return matches[0]
+
+
 def load_source_panel_package(
     package_dir: str | Path,
     *,
     require_complete: bool = True,
+    config_path: str | Path | None = None,
 ) -> SourcePanelPackage:
     """Rebuild every package invariant without trusting its self-declarations."""
 
@@ -907,12 +965,20 @@ def load_source_panel_package(
     conclusion = _read_json(directory / "conclusion.json")
     if not isinstance(receipt, Mapping) or not isinstance(conclusion, Mapping):
         raise ValueError("independent source package metadata is malformed")
+    registered_config = _registered_config_from_receipt(receipt, config_path)
+    protocol = _registered_protocol(registered_config)
+    is_amended = protocol["protocol_version"] == AMENDED_PROTOCOL_VERSION
+    expected_package_schema = (
+        AMENDED_SOURCE_PACKAGE_SCHEMA_VERSION
+        if is_amended
+        else SOURCE_PACKAGE_SCHEMA_VERSION
+    )
     recorded_receipt_sha = receipt.get("receipt_payload_sha256")
     payload = {
         key: value for key, value in receipt.items() if key != "receipt_payload_sha256"
     }
     if (
-        receipt.get("schema_version") != SOURCE_PACKAGE_SCHEMA_VERSION
+        receipt.get("schema_version") != expected_package_schema
         or receipt.get("profile") != PROFILE
         or receipt.get("conclusion") != "inconclusive"
         or receipt.get("evidence_role") != "independent_test_source_only"
@@ -929,6 +995,22 @@ def load_source_panel_package(
         != receipt.get("coverage", {}).get("source_panel_valid")
     ):
         raise ValueError("independent source package receipt is invalid")
+    if is_amended and (
+        receipt.get("protocol_version") != protocol["protocol_version"]
+        or receipt.get("protocol_amendment") != protocol["protocol_amendment"]
+        or receipt.get("protocol_amendment_sha256")
+        != protocol["protocol_amendment_sha256"]
+        or receipt.get("inference_status")
+        != "post_hoc_amended_sensitivity_non_confirmatory"
+        or receipt.get("confirmatory_independence_restored") is not False
+        or conclusion.get("protocol_version") != protocol["protocol_version"]
+        or conclusion.get("protocol_amendment_sha256")
+        != protocol["protocol_amendment_sha256"]
+        or conclusion.get("inference_status")
+        != "post_hoc_amended_sensitivity_non_confirmatory"
+        or conclusion.get("confirmatory_independence_restored") is not False
+    ):
+        raise ValueError("independent source amendment package binding is invalid")
     raw_name = receipt.get("raw_metrics_file")
     if not isinstance(raw_name, str) or Path(raw_name).name != raw_name:
         raise ValueError("independent source raw path is invalid")
@@ -942,7 +1024,6 @@ def load_source_panel_package(
     if len(rows) != receipt.get("raw_metrics_row_count"):
         raise ValueError("independent source raw row count is invalid")
 
-    registered_config = load_json_config(DEFAULT_CONFIG)
     run_provenance = receipt.get("run_provenance")
     if not isinstance(run_provenance, Mapping):
         raise ValueError("independent source package lacks run provenance")
@@ -956,7 +1037,7 @@ def load_source_panel_package(
         runtime_versions=runtime_versions,
     )
     expected_provenance = build_evidence_provenance(
-        contract, run_label=REQUIRED_RUN_LABEL
+        contract, run_label=contract.required_run_label
     )
     source_contract = receipt.get("source_contract")
     if (
@@ -1008,12 +1089,21 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--results-root", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
-    parser.add_argument("--run-label", default=REQUIRED_RUN_LABEL)
+    parser.add_argument(
+        "--run-label",
+        default=None,
+        help="defaults to the run label registered by --config",
+    )
     args = parser.parse_args(argv)
+    registered_config = load_json_config(args.config)
+    required_run_label = str(
+        _registered_protocol(registered_config)["required_run_label"]
+    )
+    run_label = required_run_label if args.run_label is None else args.run_label
     collection = collect_source_panel(
         args.results_root,
         config_path=args.config,
-        run_label=args.run_label,
+        run_label=run_label,
     )
     output = write_source_panel_package(collection, args.output_dir)
     print(output)

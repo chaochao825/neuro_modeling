@@ -1,0 +1,730 @@
+{
+  "attempts": [
+    {
+      "file_sha256": {
+        "config.json": "ef3390407ad9ffcbce574b9838c14c332182e728455409432fdc97ad473dcc60",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "b74e34cdfe1147a9ce673e480f9de1a7afa9deaa6d227580b37ccf123058b3d4",
+        "metrics.jsonl": "cf64fa345552c4ed7c4b0d1279cee83def6ff107b44c737b1828ad70545b370f",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "7351a8237e70bebacd66d2c075bd68c23f992a962399c48b8a92068959bb37b5"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0030/20260717T094050.380902Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "87cffb11-b941-46a3-a3cc-fc77b829bcdc",
+      "run_status": "complete",
+      "seed": 30
+    },
+    {
+      "file_sha256": {
+        "config.json": "56c71c41bdca7a0abc09f1dd263a381df99193da4d33868480528abef743c631",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "70d497db90c06c60c939bf6811739dd55f38dd08b2f30765a72d4eb923da2764",
+        "metrics.jsonl": "cce6c7592a2432bd13eace40a3ea5a7eaede211310bb40099aef78ed338a9445",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "e9e7ef754a8639e372d391459ca40c4258c687ad02f7ae96fd5af7301aa90007"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0031/20260717T094050.499062Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "c732e949-319f-4e48-99cd-e29b0508d262",
+      "run_status": "complete",
+      "seed": 31
+    },
+    {
+      "file_sha256": {
+        "config.json": "d68e6068bf3ef4513b10dd6f7548aa946fc8afe99b50da2b2a1edcb28526cc02",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "7a1a5ec5b7d2dd4ab55822d2ebdb2c9071a95c61efc31ca1f2b3ad2ea4684783",
+        "metrics.jsonl": "6a19f142b6f8e90affea60f3f42a3554a198c6bf395b67c920ecb437c9b430b4",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "26385add7583a54b2f69124d4ea86daf214a735421be53595bb06ff15c0f27c5"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0032/20260717T094050.461197Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "5a00b49a-5905-4074-b1aa-7f78c135a91f",
+      "run_status": "complete",
+      "seed": 32
+    },
+    {
+      "file_sha256": {
+        "config.json": "e63d06453925adfad3b183eed967d8578dfde6ff51984edfdd49ef14fbd7d640",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "ed1c61b0a292d7105b95fa9cee5b3bcec3f4087613dd48e33697c917379dd1f3",
+        "metrics.jsonl": "4610d00cd6cc9c91c0f7e646060e517c3adcef79cac7f5c829ca9ecd3a4c30b4",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "69048e66ea7c9485d86aa5c34ac4f8c25124e2fefacf778a92e35395ef3f2ff0"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0033/20260717T094050.260020Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "6090809b-f421-4908-a1cb-ad173e6ff8f7",
+      "run_status": "complete",
+      "seed": 33
+    },
+    {
+      "file_sha256": {
+        "config.json": "254ad8d1bcda9e4c6f05b997f47c3c5c080ac73584dc4138e629cfb74abc58ce",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "40f3188569bc560057ad87dee12aeeb417354fdad4bf15107aba792e306e57c5",
+        "metrics.jsonl": "0a3e0cbeaa4b9fb57b97c51765da16c2873c1a4200eb894e736f8a02e5f3afb6",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "18d0082b4a8c504128c7b2d2a38b33556fc6c608bd192e66c5c4ed10dbc55859"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0034/20260717T094050.346552Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "1769cc04-3cd0-474d-928d-28e89e2c0d61",
+      "run_status": "complete",
+      "seed": 34
+    },
+    {
+      "file_sha256": {
+        "config.json": "24748a32ab27e92f3e61268162b39e5a4b147fdad3e71bb0d29a7ca0f7c636fb",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "2e54de9b0348ad84cc525b3c53679444594d064023ec9bfa36a586d0c0569ccd",
+        "metrics.jsonl": "43f0a0a4799003a672a56150f2675c8a90d8f5096dd37195c0f06bab17a7b22c",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "e2946a5611948fa0edef35d277fc5110f90c44e9e6c7a58315f64502caf3d617"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0035/20260717T094050.213617Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "621c12bd-c725-4f57-9522-fcdff7767fb3",
+      "run_status": "complete",
+      "seed": 35
+    },
+    {
+      "file_sha256": {
+        "config.json": "a4065b0161bd93162b6655d7dacd6623a408b12a170f25d65fb4b4736d3cf7ed",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "04a2ca5e308e1cabb34799aa115624151b1e9988c4bbcc3151157debd7bad67e",
+        "metrics.jsonl": "3a8c743eb16bbb8182b3a1397efceaf6728d586bc6d569dac44f172c06b9bd8c",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "7be398d4a4c9e0fbfd8ade7f068d3dab1fd719354fa05c17f3bddaca568eefe2"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0036/20260717T094050.126447Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "85775f1d-23fd-4846-b77a-986e54b876aa",
+      "run_status": "complete",
+      "seed": 36
+    },
+    {
+      "file_sha256": {
+        "config.json": "efdf2ce6d51463774f1eb1cee5562bc0aa5df9f773b2863aad5bf858169ad5e7",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "50b26213f34d35b530934bf76d6455f12ffb1d4af09c19445dbe5728b09194e7",
+        "metrics.jsonl": "853a4016f014cdefab3320b2796c2222628475416139930f6547a73c3aeb1ca7",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "4f5198f5c49e38881610a1b2b602522e838f8da70cf58b93e0edb19ba49695cc"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0037/20260717T094050.318206Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "903533cb-c957-4bda-8895-272311f2432b",
+      "run_status": "complete",
+      "seed": 37
+    },
+    {
+      "file_sha256": {
+        "config.json": "b25af07a815c7d230ce2f7146c2f381b310b8b01bf28dd3f7e3fb3c0c542609d",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "e8b725d8e4a4c505ff69d6f3e649b6c62303d5ef694e2ac5ee8583feb997f0c7",
+        "metrics.jsonl": "39509fb38306901c771789ed320f6311fe102784ecc2f02d2660049ec876c615",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "58656352e6fd8a14250696b0533e0b48e541888fbdda7c0a867be3cfa0655bc6"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0038/20260717T094050.413501Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "74fb6b8c-4e5a-4f39-9be9-869d8ec350ca",
+      "run_status": "complete",
+      "seed": 38
+    },
+    {
+      "file_sha256": {
+        "config.json": "6de952be9763df55dd4d48b88f2f790d9331c2dcd9520a619de89698589dd83d",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "f4e49b9bcf1c0a483002e882a545ce39bbb22d6d34d71875327e4dfb609a7c04",
+        "metrics.jsonl": "41cb0525a94564efa56ea7c4038e1865e4563f09d48a1f4b7468588be2a6b01c",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "b3e7b716c4c87ddbdbeb32e75adc4d31df3b106caac4f027cb544084c9bbe3a5"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0039/20260717T094050.474914Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "a1398628-aa60-40a9-9de5-3fd788b241d7",
+      "run_status": "complete",
+      "seed": 39
+    },
+    {
+      "file_sha256": {
+        "config.json": "03b444268709d549b7235b887dfd2a2d4262f1d425f3ca4c4a34f76854ca4fef",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "17e2fda8bfb1aec01f66ef980595465cd80efc0cb0063d79b105f46dd89832cb",
+        "metrics.jsonl": "8ab23115a09bd6fbd655472f42aefb2411cf04c196915cccbbb5bafced6d057c",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "20566faa9899614c35ff8ee9e9a1d29007996bbc73cf73d94db1f4db4bee899d"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0040/20260717T094050.434832Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "96f32572-2485-4964-9d06-5828f6cf1936",
+      "run_status": "complete",
+      "seed": 40
+    },
+    {
+      "file_sha256": {
+        "config.json": "27a231302ccc03ce862188d7c15ad2dc2aa534cf6769265e4f5ed371906f778d",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "74cbd596f16c83cbec703d41f40010bf24ee0c0af59b32e1b308c8854d58424c",
+        "metrics.jsonl": "744e37fc2e09eb889c5840043c852f0ec6b320e0aed448bf78cb2b71be8c388c",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "5093eac73d09df5ed8b08efabebab3063884b6e2a84d563340887e5425e70396"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0041/20260717T094050.361023Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "40f7a9d1-e19e-4a79-9dc7-46bf7de50d31",
+      "run_status": "complete",
+      "seed": 41
+    },
+    {
+      "file_sha256": {
+        "config.json": "6aacba0820c44e45d2c5f9adc7d8018552580302ec4cef201c75a10cf279628c",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "32ec532e2df590ce19dc31cc4fe88023a800835426b770dab88cf82edee3d78e",
+        "metrics.jsonl": "c54ea6d024f3ce8d5b851aad720ada142cef884e14ad96686cd598210c9ac927",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "9e8e9caf1206d087a8727f258915418a4cb8d48dba01c634b2d8c459b8fbbcbe"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0042/20260717T094050.507163Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "ce94933f-fb13-4cba-854d-74b07721f8b4",
+      "run_status": "complete",
+      "seed": 42
+    },
+    {
+      "file_sha256": {
+        "config.json": "9db3b5ed309217209e779f2ae4c7564ebe6a6eba3ecc2ee206af3508a2a1ec55",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "ed0187cb84db67b09a63333790f5ec59276cb2a97c5c7e2e6f5867da641d58f0",
+        "metrics.jsonl": "be211d5d000002ddddbfb22412a0bd82f137022c442bf72a9e9cc5290b8f9353",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "a5c8e9e7851fa8fee1ae43c2d6c0f6f2c5bb90ba361b9420d844ca839487609c"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0043/20260717T094050.425929Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "05503a0f-b443-4ac1-814f-218c85f63acf",
+      "run_status": "complete",
+      "seed": 43
+    },
+    {
+      "file_sha256": {
+        "config.json": "2b4d6ccbb44846b2d3a39e1c6baefbf302a0f0c0aed6099c9dc6f8be88385c9d",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "0bc16db2d3c0c4808a92b0b5ab1ee06bde52cbf36045a32e14e9f1a45651fdc1",
+        "metrics.jsonl": "78bb6dec2759d557bf025fda03ff7aa9f25d66336ed71b66ad38c3495bc1be29",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "df70e67b8399bb8d0f59f7e2093140565f5b2119d9d38f923b98a005f71400dc"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0044/20260717T094050.483258Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "d1318e3f-bc96-49bc-b14c-e25f0b96bb70",
+      "run_status": "complete",
+      "seed": 44
+    },
+    {
+      "file_sha256": {
+        "config.json": "d98ac76b1ac1b9dcdd818df6e732541919af557e2d10348bf793a0f57afcf7d0",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "d2bbb090ed5e403f267fa8f216735a85e8c3d0c5f5e00b9e055b317fd7670cf0",
+        "metrics.jsonl": "b438484c4902bb1c65edc9c15eb52e9e424ecac56bb5e90848e4579dbf851aa2",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f506c50a2eccd25c90940f6091b1a75d942929feaf28aa8e330b10ce6ce71adb"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0045/20260717T094050.249469Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "de3c1a53-92b7-4ffa-b948-335b4870cdfd",
+      "run_status": "complete",
+      "seed": 45
+    },
+    {
+      "file_sha256": {
+        "config.json": "f39a19912283c0eace3c9194a24a20cec85fcbe5089e1f15e5ee81af8a47b0b6",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "b4e13f31413ea054df00f1bb77f0e5acb024c4911bab8f7f38a914a87ccecd18",
+        "metrics.jsonl": "b8138097e93a1cdd2f4e731fd02241cfe858331a4d4c38666bb9336761386cbf",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "c43fe3e4c58e9ef77056404855f22c037408965dbd0104247365caf6e875bf9d"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0046/20260717T094050.448906Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "01fc12ca-7936-4ba5-a02b-f80e5d0e431d",
+      "run_status": "complete",
+      "seed": 46
+    },
+    {
+      "file_sha256": {
+        "config.json": "147f3e8cfcc2d862f92879e0691324b9c83522181818715c0b9edcc9d710f0a2",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "bdaece58d0c2da4111312a60ebd3328854a9531ea83417466f892eefa1b53b00",
+        "metrics.jsonl": "f337083f0d8fa767e028193812b8a168816508a6fd25c7b7d95c85b28cf961c9",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "72c8835539a59dd9ff93709e28071b8dd466a9f297f4f584dedb55c713e3878d"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0047/20260717T094050.199658Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "dc19b285-1cba-4818-ae86-359dc32620c3",
+      "run_status": "complete",
+      "seed": 47
+    },
+    {
+      "file_sha256": {
+        "config.json": "ad44606f819bf494b1d00fee3215c257f4b94dbda89964a62a9600c1712f28de",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "44718f89b5c7d4c48082d51702eb61ec8500fe584543bb48a2c4e8a5ebd1086e",
+        "metrics.jsonl": "fe2440061fb289bba00bb8e0ddb0ae466876587feb6e367eeef6f04d259a89de",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "5e01e998a2919956a33dc000346f7bf3d9ddb7f37f5bf77b377ab267c6186632"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0048/20260717T094050.144358Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "e705c95e-32df-405d-b07f-b86b623b4237",
+      "run_status": "complete",
+      "seed": 48
+    },
+    {
+      "file_sha256": {
+        "config.json": "b8f5f53ebcd067f933874e273d1d2ca611937d269ee040136190b15b73cebda4",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "1166d9d478da1e084b720c7ca28b689e798205ad43e4ae85681234ecbcf2d2cc",
+        "metrics.jsonl": "7f6488fbfe60c9ccc10b251e705b4584e4f66a8f1281bd533a70e37e01ce1971",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "ee31f4b878b74816c5047471debf26277717bcf4a152baf1e4ffb0ac03219eb4"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0049/20260717T094050.267291Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "2e0d56e4-8d4a-409b-b0e2-84826e24c4bc",
+      "run_status": "complete",
+      "seed": 49
+    },
+    {
+      "file_sha256": {
+        "config.json": "f02df202df353d242a8fd99d73c37c9fecdae0eabb4d1fdfae84c3563234b815",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "c9e982f03ca6045cfa0a6d9575311486c0709e715cf1bbd5c26e3cda0835ac5a",
+        "metrics.jsonl": "d6eb0d4a4bed37839e580134ce982fae7f58f95da2f31c49891390395aa42ca7",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f428d3aa84a4d0bb20603963b5445fe091a385628381352c84ac505d0e4b8357"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0050/20260717T094050.230570Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "77ee121b-33f3-408e-8046-e1b4eef4cd17",
+      "run_status": "complete",
+      "seed": 50
+    },
+    {
+      "file_sha256": {
+        "config.json": "ca49a000a056761c1fef445400ba9adb494286adc00123cc72ef38035caebe2e",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "cead9aac56cb25ab90d040fa287c1182af2f569d05471212edeeea3919414d71",
+        "metrics.jsonl": "ffe17f67d3081516e6fc0722c1553cc06b77058453b9ba1260189d5bc1161e27",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "afc0a73bbd60d28ced434cfdec6162dac3559536953314497ce5011fec2e6a67"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0051/20260717T094050.305876Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "8e2516b1-79b7-4133-8850-f77c6d53b672",
+      "run_status": "complete",
+      "seed": 51
+    },
+    {
+      "file_sha256": {
+        "config.json": "2dcd184480c571de75b257c8228bb80d190cef165825e48b3869717e51974325",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "0023196520ad4ca04ad7716b30cd03598d592aff2317232738425e8a6e102239",
+        "metrics.jsonl": "59cd850abd544e7c03ac3df3539a0fbff74165d9a30032fc4d02dadb94eaaa21",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "adbdd8c75daf5f5d262e3c5033ce1c42065dc1b28500c9964f5830e464897ab9"
+      },
+      "observed_complete_rows": 439,
+      "observed_failed_rows": 1,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0052/20260717T094050.033977Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "f4b6a1a1-863e-4fad-b32b-a465f4a48650",
+      "run_status": "complete_with_failures",
+      "seed": 52
+    },
+    {
+      "file_sha256": {
+        "config.json": "f508efa23b1764c3dfbb53d35b73d82f5efb760adc468643bcecb7e87be47906",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "5b1ac6a06ef5cc5b47fd9b4a31748ca18cbf2e59a71ed14075fdb6f6cd0554b0",
+        "metrics.jsonl": "356edd73c89c973e5449ff99f58d3227b75c5b9e47fe65306893e285f226ca07",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "e79d925641ef3ded87da0b2793aec05d8b5aed209bff41f5f962e7c3169b2c87"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0053/20260717T094050.394550Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "6d49f21b-52da-4dc0-bb8c-56dd506ce071",
+      "run_status": "complete",
+      "seed": 53
+    },
+    {
+      "file_sha256": {
+        "config.json": "24c66e0a4053eb667ec72ff248d2b2b0b422f27a1835cfeceef5ecbe81551787",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "3cd948a76aa344e5406dae93e25124b9b7b00103ea1a4b0f0f10f769db954b0b",
+        "metrics.jsonl": "0ff785c36c4690e2a5e6b60416904f0f56486c3af4360f28df6eca816e2bf4ec",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "399eb61dd947196f751e65d24234ea40039c0b91c33170b52b2571f4bd68e50c"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0054/20260717T094050.452612Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "8c92b324-6878-4c87-9ed7-4fc2d9ef6487",
+      "run_status": "complete",
+      "seed": 54
+    },
+    {
+      "file_sha256": {
+        "config.json": "8f742e84dfaf013e6911cf85e497cd6f6be4a6bde43c9cd3037820944913da4c",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "bc3e9e5e27f6d1981db86460d747ef00e0bd9efa379d676d5e4366f117c93707",
+        "metrics.jsonl": "4b3c64c052694ebfa9c0259ee83f9e853c9e8b8d517c3cdcc95704f5401788b3",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "a1d999dbc959f61e85984cbd5ed9506d47a2ba57d86a9edac786f1eed41889b3"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0055/20260717T094050.294197Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "6d259e37-1f68-44c4-9413-8af50b384f8a",
+      "run_status": "complete",
+      "seed": 55
+    },
+    {
+      "file_sha256": {
+        "config.json": "f6cfc5321a764039d2c6a979975a2b2addf41b379b1c2f254aaa8276e8bc2db4",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "8c781b0fe1c81fee1d7e40afa7031e1c088e63659d48367cf2d7b15055b51c92",
+        "metrics.jsonl": "15a2b31a328fb4df0bc99abd73d83f862ab8912b0c464d3a2a704048c875b42e",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "0a4a52434266c409bc72fbac2d2b0f65685f1e02c05e9a7b44bf2fb5c586eef6"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0056/20260717T094050.080215Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "1049a51f-6ff0-452a-b392-ec28bba00340",
+      "run_status": "complete",
+      "seed": 56
+    },
+    {
+      "file_sha256": {
+        "config.json": "2bc353f42d85e3b07e1d7082edd79e93579a94473857c062733d0a345a8e70c5",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "1e0500375e902f6d579d078b8815efd5c3a5b67de13897f5e894b06fc7a1bdea",
+        "metrics.jsonl": "068e1fb48d7c858fc2a92a73735edc00136589738454ebad6cfb8c2321b545ee",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "b763f0763429ae605f45cf265a144bec81ae6866a934f99b611b5fddf3e4cf54"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0057/20260717T094050.176596Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "b7beb231-36f4-4caf-8f0d-66211652b332",
+      "run_status": "complete",
+      "seed": 57
+    },
+    {
+      "file_sha256": {
+        "config.json": "1133c6c82ce3541edfdf4f584a2cb3a80b8f854f3d3c71e22043c2a8828635ed",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "ee43e40f175ddac1914d33eedbe8bef7092e8a004e35e2abcd36114a72cdb926",
+        "metrics.jsonl": "356f496c683ca2887ac390eb3de6775397b8b85612587184dd27428510c99559",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "731ca12a27c11cb6fd9690a36db2fc5c86a1af41c2934c4e08c337dbd86488e5"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0058/20260717T094050.426252Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "3205a22a-dba5-4149-a1b6-adb11565e20b",
+      "run_status": "complete",
+      "seed": 58
+    },
+    {
+      "file_sha256": {
+        "config.json": "a287d156a681fe9d511d3501a244a969b016337ee390ed0133e3f939be28580b",
+        "environment.json": "a6aaa8cd328153cf160f5fe3063e6b29f6f925090183df5aaaebeea26ea6cb48",
+        "manifest.json": "d4c88b7de5b24b623be202c375348231f8f5309c70c46daf004825c42cdb590d",
+        "metrics.jsonl": "695f7efd9b5afabf22b555ab49f6439ed37b7b7c9dfe958a2d770ea9c1f89890",
+        "planned_conditions.json": "66c5780603b5f91293e0735097e4c810dd94b434acf841851fdfbd6f6e2934cf",
+        "status.json": "f8691006db80a8f616bd7b0f383abd11130e3e29d5dca9d2af1cfeb25b05f994"
+      },
+      "observed_complete_rows": 440,
+      "observed_failed_rows": 0,
+      "observed_invalid_rows": 0,
+      "observed_row_count": 440,
+      "path": "/home/spco/sow_linear/exp28_source_v3_e650dd1/runs/exp28_exp26_independent_source_panel/seed_0059/20260717T094050.178365Z_exp28-exp26-independent-source-v1",
+      "planned_coverage_valid": true,
+      "run_id": "1253dd84-387b-4704-b504-4b76bb8f3be6",
+      "run_status": "complete",
+      "seed": 59
+    }
+  ],
+  "conclusion": "inconclusive",
+  "coverage": {
+    "all_effective_dynamics_stable": false,
+    "all_failures_retained": true,
+    "all_functional_budgets_valid": false,
+    "cartesian_complete": true,
+    "expected_generators_per_seed": 88,
+    "expected_modes_per_generator": 5,
+    "expected_row_count": 13200,
+    "expected_rows_per_seed": 440,
+    "expected_seed_count": 30,
+    "expected_seeds": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59
+    ],
+    "missing_seeds": [],
+    "observed_row_count": 13200,
+    "observed_seed_count": 30,
+    "observed_seeds": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59
+    ],
+    "planned_coverage_complete": true,
+    "row_count_complete": true,
+    "row_status_counts": {
+      "complete": 13199,
+      "failed": 1,
+      "invalid": 0
+    },
+    "source_panel_valid": false,
+    "terminal_attempts_complete": true
+  },
+  "evidence_role": "independent_test_source_only",
+  "experiment": "exp28_exp26_independent_source_panel",
+  "profile": "independent_test",
+  "raw_metrics_file": "raw_metrics.jsonl",
+  "raw_metrics_row_count": 13200,
+  "raw_metrics_sha256": "55e825667f003d5f80b489eb13cdecb57dcb4a40aab10b0c68250e69b37632fe",
+  "reason": "source-only independent panel; downstream inference is separately preregistered",
+  "receipt_payload_sha256": "816ce6f72a5bd4d02b3f18eda06fc1d280de0e0d9d90f75becbcbc93ccc10084",
+  "registered_config_file_sha256": "4e73a172d14982a46ec0a09be27f5b2475bcc1e65b8c4165cb7c6c0f71301357",
+  "registered_config_sha256": "4e73f217b265c68efa4bfde7d8463afa8ffe2d47a0c7b0179a4713f761da95e1",
+  "run_provenance": {
+    "evidence_role": "independent_test_source_only",
+    "independent_config_file_sha256": "4e73a172d14982a46ec0a09be27f5b2475bcc1e65b8c4165cb7c6c0f71301357",
+    "independent_config_sha256": "4e73f217b265c68efa4bfde7d8463afa8ffe2d47a0c7b0179a4713f761da95e1",
+    "run_git": {
+      "commit": "e650dd17554d62124f714e52a1ab7d171fa3f2b2",
+      "dirty": false,
+      "tree": "30d7939386c4ec218c5b74ef92e35f645b571224"
+    },
+    "run_label": "exp28-exp26-independent-source-v1",
+    "runtime_versions": {
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "python": "3.11.15",
+      "scikit_learn": "1.8.0",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6"
+    },
+    "schema_version": "exp28_independent_source_evidence_v1",
+    "source_contract_sha256": "9b77a02ebcfb05cde565c3e9fadbdfcb87bf6136aeb4273c8fdc40234d7654c5",
+    "source_exp26_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_exp26_config_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_exp26_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_exp26_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_exp26_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "standalone_inference_permitted": false
+  },
+  "schema_version": "exp28_independent_source_package_v1",
+  "source_contract": {
+    "budget_policy": {
+      "frozen_max_scale": 128.0,
+      "independent_panel_refit_permitted": false,
+      "selection_scope": "exp26_seeds_0_29_training_blocks_only",
+      "source_required_scale_max": 90.09208739042293
+    },
+    "critical_file_sha256": {
+      "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+      "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+      "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+      "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+      "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+    },
+    "source_config_canonical_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_config_relative_path": "configs/formal/exp26_actuator_phase_diagram.json",
+    "source_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_preflight_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_preflight_git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+    "source_preflight_git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+    "source_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "source_preflight_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/preflight",
+    "source_preflight_schema": "exp26_budget_preflight_v2_observed_bound",
+    "source_published_manifest_file_sha256": "31808a5b6ab773a8f63d738f7a5da19cc86a56ed0a9891f666f16b0f07f976b2",
+    "source_published_manifest_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/MANIFEST.sha256"
+  },
+  "source_contract_sha256": "9b77a02ebcfb05cde565c3e9fadbdfcb87bf6136aeb4273c8fdc40234d7654c5",
+  "standalone_inference_performed": false,
+  "standalone_inference_permitted": false
+}

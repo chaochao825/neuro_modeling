@@ -1,0 +1,157 @@
+{
+  "profile": "independent_test",
+  "dev_only": false,
+  "protocol_version": "exp28_exp26_independent_source_v1_ceiling_amendment_1",
+  "required_run_label": "exp28-exp26-independent-source-v1-ceiling-amendment-1",
+  "evidence_role": "independent_test_source_only",
+  "standalone_inference_permitted": false,
+  "seeds": [
+    30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+    40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+    50, 51, 52, 53, 54, 55, 56, 57, 58, 59
+  ],
+  "training_algorithm": "train_only_closed_form_task_matched_actuators",
+  "used_autograd": false,
+  "used_bptt": false,
+  "protocol_amendment": {
+    "amendment_id": "exp28_ceiling_reachability_amendment_1",
+    "amendment_status": "transparent_post_hoc_protocol_amendment",
+    "amendment_scope": "independent_test_functional_budget_ceiling_only",
+    "trigger_class": "reachability_only",
+    "decision_rule": "next_power_of_two_strictly_above_previous_ceiling",
+    "previous_max_scale": 128.0,
+    "amended_max_scale": 256.0,
+    "performance_metrics_inspected": true,
+    "performance_metrics_inspection_timing": "after_deterministic_amendment_decision_draft",
+    "performance_metrics_used_for_amendment": false,
+    "confirmatory_independence_restored": false,
+    "selective_rerun_permitted": false,
+    "further_ceiling_amendments_permitted": false,
+    "rerun_scope": "all_30_seeds_x_88_generators_x_5_modes",
+    "trigger_evidence": {
+      "source_package_locator": "results/exp28_independent_source_ceiling128_invalid_v3_e650dd1",
+      "source_package_archive_file": "exp28_source_v3_e650dd1_invalid_package.tar.gz",
+      "source_package_archive_sha256": "107039999aaa271d27aafd97746d74e76eb341be15247d4a84994a884a7d7c10",
+      "source_panel_receipt_file_sha256": "d01352232ac22d35153ebd74e4916bbb8e9b598ddcb622b269fa73d6733be96d",
+      "source_panel_receipt_payload_sha256": "816ce6f72a5bd4d02b3f18eda06fc1d280de0e0d9d90f75becbcbc93ccc10084",
+      "source_panel_conclusion_file_sha256": "07ea53eb824d77f1d53699f73d1cc158b038c735fb0e67c3cf68833716660ff0",
+      "source_panel_raw_metrics_sha256": "55e825667f003d5f80b489eb13cdecb57dcb4a40aab10b0c68250e69b37632fe",
+      "run_git_commit": "e650dd17554d62124f714e52a1ab7d171fa3f2b2",
+      "run_git_tree": "30d7939386c4ec218c5b74ef92e35f645b571224",
+      "observed_row_count": 13200,
+      "observed_complete_rows": 13199,
+      "observed_failed_rows": 1,
+      "failing_cell": {
+        "seed": 52,
+        "generator_id": "d65464a1a0917550a226",
+        "actuator_mode": "routing",
+        "alpha": 1.0,
+        "transition_rank": 1,
+        "input_rank": 2,
+        "delay": 12,
+        "noise_std": 0.3,
+        "error_type": "ActuatorFitError",
+        "error": "functional-budget scale is non-finite or exceeds max_scale"
+      }
+    },
+    "unchanged_components": [
+      "meta_source",
+      "generator_manifest",
+      "task",
+      "carrier",
+      "noise",
+      "trial_order",
+      "actuator_modes",
+      "performance_endpoints",
+      "performance_acceptance_criteria"
+    ]
+  },
+  "source_binding": {
+    "source_config_relative_path": "configs/formal/exp26_actuator_phase_diagram.json",
+    "source_config_file_sha256": "50add2a0b3ab18a449f5a2090d52b31cf3d38b78ea209e0967acb9c48a366b63",
+    "source_config_canonical_sha256": "07ad3f16d9de6b5906155d95f215e9434e478ca992fd023adfabcd21a0005ecf",
+    "source_manifest_sha256": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "source_preflight_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/preflight",
+    "source_preflight_receipt_sha256": "bad665691233c9611fcdcce897c642d517a938b78adbabadee783c5e8cb1a671",
+    "source_preflight_schema": "exp26_budget_preflight_v2_observed_bound",
+    "source_preflight_critical_code_sha256": "7c593319af7e456ba6a8754965a90b6390da57994f28ccc23dcf93713a10157d",
+    "source_preflight_git_commit": "e08beaf9f51aacaaa80d42b2755c60d4080364bb",
+    "source_preflight_git_tree": "c91f11863a654c7588b0d7bde5eb1e1f43e5c774",
+    "source_published_manifest_relative_path": "results/exp26_actuator_matching_formal_v2_e08beaf/MANIFEST.sha256",
+    "source_published_manifest_file_sha256": "31808a5b6ab773a8f63d738f7a5da19cc86a56ed0a9891f666f16b0f07f976b2",
+    "critical_file_sha256": {
+      "experiments/exp26_actuator_phase_diagram.py": "9b26916a19afd0f79d705379db58daaa556468f9de7b1f2e78eabc0b3121bd53",
+      "experiments/exp26_formal_budget_preflight.py": "e7af5bf8312cc48a271a6084b0f227df1356384222fb6533a8cf84bddccc682b",
+      "src/analysis/actuator_manifest.py": "f33fba4f56b191b720f54cff11239ad6120f44e2ca8e9d33fe065273ef78dfbe",
+      "src/models/task_matched_actuators.py": "3bb44a3843403e58625222eb9cc1b79f2bab59dd2ea3d4a9de07b7d538caa417",
+      "src/tasks/actuator_matching.py": "27c9edc33593fa5487e0f5c649b1a650b78a593236018797d44fe87543ac8a30"
+    },
+    "budget_policy": {
+      "selection_scope": "exp26_seeds_0_29_training_blocks_only",
+      "independent_panel_refit_permitted": false,
+      "frozen_max_scale": 128.0,
+      "source_required_scale_max": 90.09208739042293
+    }
+  },
+  "runtime_policy": {
+    "python_major_minor": "3.11",
+    "required_distributions": [
+      "numpy",
+      "scipy",
+      "pandas",
+      "scikit_learn",
+      "statsmodels"
+    ],
+    "exact_match_across_seeds": true
+  },
+  "manifest": {
+    "selection_seed": 2601,
+    "per_alpha_per_split": 4,
+    "expected_hash": "a1c17a1e88c731f6678760865cf51d7236ae771bf839645c401e5cff8798ebfa",
+    "grid": {
+      "alpha": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "transition_rank": [1, 2, 4, 8],
+      "input_rank": [1, 2, 4],
+      "delay": [0, 4, 12, 24],
+      "noise_std": [0.1, 0.3, 0.6, 1.0]
+    }
+  },
+  "carrier": {
+    "n_neurons": 128,
+    "n_inputs": 4,
+    "n_outputs": 1,
+    "inhibitory_fraction": 0.2,
+    "spectral_radius": 0.65,
+    "input_scale": 0.3
+  },
+  "task": {
+    "n_train_blocks": 12,
+    "n_validation_blocks": 4,
+    "n_test_blocks": 8,
+    "trials_per_block": 24,
+    "input_steps": 4,
+    "input_std": 1.0,
+    "delta_a_log10_range": [-1.2, -0.2],
+    "delta_b_log10_range": [-1.2, -0.2],
+    "stability_limit": 0.95
+  },
+  "actuator": {
+    "rank_a_capacity": 4,
+    "rank_b_capacity": 4,
+    "ridge": 1e-6,
+    "max_scale": 256.0,
+    "degeneracy_tolerance": 1e-12,
+    "budget_relative_tolerance": 1e-8,
+    "context_center_tolerance": 1e-12
+  },
+  "analysis": {
+    "readout_ridge": 1.0,
+    "rank_rtol": 1e-9,
+    "support_rtol": 1e-9,
+    "cross_relative_tolerance": 0.05,
+    "tie_margin": 0.01,
+    "bootstrap_samples": 20000,
+    "permutation_samples": 100000,
+    "statistics_seed": 2601
+  }
+}
