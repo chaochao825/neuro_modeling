@@ -5,3 +5,8 @@ selector_input,explicit memory demand,executed action plus scalar reward only,fa
 gain,fit per mode and demand,no gain fit,all outputs must have matched unit magnitude
 shuffled_control,value permutation with matched write norms,identical writes/state plus query shift,specificity must exceed preregistered margin
 carrier,identity-calibrated high-rank transport,absent and no carrier claim,do not scale N until carrier contributes held-out utility
+stream,block-reset selector,persistent HMM stream,no reset or switch-time input permitted
+feedback,64 labelled probes per 128-trial block,exact nested fractions from 1/2 to 1/16 with delays,full-stream score must charge exploration and adaptation
+belief,terminal sample-average arm choice,two retained action values with one-dimensional action-control coordinate,policy probability is not a calibrated context posterior
+credit_control,matched random deployment,reward credited to opposite action,opposite-eligibility intervention is not a random shuffle or matched-budget claim
+timescale_phase,not_tested,lambda_feedback_per_dwell plus chi_environment_to_memory plus delay_staleness,fit frozen response coefficients within each seed

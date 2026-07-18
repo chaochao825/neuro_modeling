@@ -1,0 +1,114 @@
+{
+  "existing_claim_remains": "oppose_current_drive_gain_axis_rule_and_budget_combination",
+  "experiment": "exp23_failure_probe",
+  "formal_audit": {
+    "current": {
+      "complete_grid": true,
+      "formal_ready": true,
+      "functional_budget_ready": true,
+      "gate_ready": true,
+      "local_minus_random_ci": [
+        -0.007590691529495358,
+        0.009653167643759003
+      ],
+      "local_minus_random_mean": 0.000922473625996482,
+      "mechanism_audit_ready": true,
+      "registered_component_opposed": true,
+      "registered_threshold": 0.03
+    },
+    "delayed": {
+      "complete_grid": true,
+      "formal_ready": true,
+      "functional_budget_ready": true,
+      "gate_ready": true,
+      "local_minus_random_ci": [
+        -0.023020937640588136,
+        0.0009509617886107992
+      ],
+      "local_minus_random_mean": -0.010189191128376828,
+      "mechanism_audit_ready": true,
+      "registered_component_opposed": true,
+      "registered_threshold": 0.03
+    }
+  },
+  "formal_eligibility_reverified": true,
+  "general_local_learning_conclusion": "inconclusive",
+  "n_seeds": 30,
+  "probe_classification": "limited_tested_axis_headroom_and_matched_vs_natural_rescale_sensitive",
+  "registered_mcid": 0.03,
+  "registered_opposed_component_reverified": true,
+  "source_archive_sha256": "20f0ef9229ddbedadf634506137df5da4f73c48e7962c934fb6d600e4cb33c40",
+  "source_experiment": "exp23_closed_loop_local_controller",
+  "source_rows": 360,
+  "statistics_unit": "seed",
+  "task_summary": {
+    "current": {
+      "bptt_axis_only_max_axis_rescale_ratio": 7.2123045632594875,
+      "bptt_axis_only_median_axis_rescale_ratio": 0.148873261697845,
+      "bptt_axis_only_min_axis_rescale_ratio": 0.09887759997696596,
+      "bptt_matched_gain": 0.0008000363642680086,
+      "bptt_natural_ci_upper_below_registered_mcid": true,
+      "bptt_natural_gain": 0.001879508149981705,
+      "bptt_natural_gain_ci": [
+        -0.010308365823060023,
+        0.012510049711876782
+      ],
+      "cosine_gain_spearman": 0.184032673079932,
+      "exact_forward_sensitivity_max_axis_rescale_ratio": 3.429764220162636,
+      "exact_forward_sensitivity_median_axis_rescale_ratio": 1.7410127799967818,
+      "exact_forward_sensitivity_min_axis_rescale_ratio": 0.9379928660750559,
+      "exact_matched_gain": 0.0016130015972977215,
+      "exact_natural_gain": 1.3939378643353557e-05,
+      "exact_natural_gain_ci": [
+        -0.005687803649300212,
+        0.005186930212592374
+      ],
+      "frozen_balanced_accuracy": 0.8856661506172755,
+      "local_eprop_max_axis_rescale_ratio": 5.745547437985699,
+      "local_eprop_median_axis_rescale_ratio": 2.8620141926032794,
+      "local_eprop_min_axis_rescale_ratio": 1.3480561572012542,
+      "local_matched_gain": -0.00125944217094535,
+      "local_matched_gain_ci": [
+        -0.008557742443020272,
+        0.005991582697824587
+      ],
+      "local_natural_gain": -0.0010068870778193555,
+      "local_natural_positive_seed_fraction": 0.26666666666666666,
+      "local_test_loss_change": -0.015745150479013228
+    },
+    "delayed": {
+      "bptt_axis_only_max_axis_rescale_ratio": 7.396946400856796,
+      "bptt_axis_only_median_axis_rescale_ratio": 0.10938802695689878,
+      "bptt_axis_only_min_axis_rescale_ratio": 0.10095368336570132,
+      "bptt_matched_gain": 0.004040532970836086,
+      "bptt_natural_ci_upper_below_registered_mcid": true,
+      "bptt_natural_gain": 0.017960755526344303,
+      "bptt_natural_gain_ci": [
+        0.011623418514153666,
+        0.024440504149654464
+      ],
+      "cosine_gain_spearman": -0.15812927399251678,
+      "exact_forward_sensitivity_max_axis_rescale_ratio": 35.3299912752956,
+      "exact_forward_sensitivity_median_axis_rescale_ratio": 11.261673181487218,
+      "exact_forward_sensitivity_min_axis_rescale_ratio": 3.957735164267854,
+      "exact_matched_gain": -0.00608731290499942,
+      "exact_natural_gain": 0.0019369571887735693,
+      "exact_natural_gain_ci": [
+        0.0005601799363965617,
+        0.0033813933680488925
+      ],
+      "frozen_balanced_accuracy": 0.7801117012645122,
+      "local_eprop_max_axis_rescale_ratio": 181.152919543678,
+      "local_eprop_median_axis_rescale_ratio": 83.40759841078028,
+      "local_eprop_min_axis_rescale_ratio": 14.238970403087393,
+      "local_matched_gain": -0.01133270393335493,
+      "local_matched_gain_ci": [
+        -0.023051153929451222,
+        -0.0013182269298413394
+      ],
+      "local_natural_gain": 0.0005561735261401542,
+      "local_natural_positive_seed_fraction": 0.06666666666666667,
+      "local_test_loss_change": 0.002335962411771582
+    }
+  }
+}

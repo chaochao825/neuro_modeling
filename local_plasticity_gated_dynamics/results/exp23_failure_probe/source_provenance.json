@@ -1,0 +1,13 @@
+{
+  "analysis_script": "E:\\Codex_work\\ssh_experiment\\neuro_modeling_actuator_matching_work\\local_plasticity_gated_dynamics\\scripts\\probe_exp23_failure.py",
+  "analysis_script_sha256": "962763bb41ba7d4791957a442c09f38bc99d4b81467a39c1cd9b3f48b3e5e4ec",
+  "expected_archive_sha256": "20f0ef9229ddbedadf634506137df5da4f73c48e7962c934fb6d600e4cb33c40",
+  "formal_config_location_informational": "E:\\Codex_work\\ssh_experiment\\neuro_modeling_actuator_matching_work\\local_plasticity_gated_dynamics\\configs\\formal\\exp23_closed_loop_local_controller.json",
+  "formal_config_package_path": "source_formal_config.json",
+  "formal_config_sha256": "c708be09a4fd83541fb0b20db97966ed37f56ecdd64e6ee966d10bf20f1e9966",
+  "metric_rows": 360,
+  "metric_seed_count": 30,
+  "source_archive_location_informational": "E:\\Codex_work\\ssh_experiment\\artifacts\\formal_f684674_exp23_v2_final_results_236.tar.gz",
+  "source_archive_package_path": "source_formal_v2_archive.tar.gz",
+  "source_archive_sha256": "20f0ef9229ddbedadf634506137df5da4f73c48e7962c934fb6d600e4cb33c40"
+}

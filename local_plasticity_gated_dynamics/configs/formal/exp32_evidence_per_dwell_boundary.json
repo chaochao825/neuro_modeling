@@ -1,0 +1,120 @@
+{
+  "profile": "formal",
+  "formal_authorized": true,
+  "protocol_version": "exp32_persistent_sparse_reward_v1",
+  "analysis_protocol_version": "exp32_feedback_memory_timescale_phase_v2",
+  "formal_authorization_receipt": "results/exp32_persistent_sparse_feedback_smoke_v1_failed/v2_transition_authorization.json",
+  "formal_authorization_receipt_sha256": "4c979bbb1b42d27560ea8a7777dae6b9fed2f9f6ea413db4e28ef6ef051e0d2d",
+  "authorized_formal_payload_sha256": "c3819977a03f7a87524b81f7d4fe585933ea74e0f1d81dae74f7b998796cdea8",
+  "development_source": "failed preregistered v1 smoke seeds 9300-9304; full grid used only to formulate this new independent two-timescale claim",
+  "seeds": [
+    32000,
+    32001,
+    32002,
+    32003,
+    32004,
+    32005,
+    32006,
+    32007,
+    32008,
+    32009,
+    32010,
+    32011,
+    32012,
+    32013,
+    32014,
+    32015,
+    32016,
+    32017,
+    32018,
+    32019,
+    32020,
+    32021,
+    32022,
+    32023,
+    32024,
+    32025,
+    32026,
+    32027,
+    32028,
+    32029
+  ],
+  "training_algorithm": "persistent_action_eligibility_times_executed_scalar_reward_prediction_error",
+  "used_autograd": false,
+  "used_bptt": false,
+  "task": {
+    "n_trials": 4096,
+    "key_dim": 16,
+    "direct_reliabilities": [
+      0.55,
+      0.95
+    ],
+    "load_values": [
+      8,
+      24
+    ],
+    "distractor_write_values": [
+      8,
+      48
+    ],
+    "distractor_strength": 1.0,
+    "hazards": [
+      0.01,
+      0.02,
+      0.04
+    ],
+    "feedback_fractions": [
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "feedback_delays": [
+      0,
+      4,
+      16
+    ]
+  },
+  "selector": {
+    "alpha": 0.3,
+    "retention": 0.98,
+    "temperature": 0.08,
+    "q_prior": 0.5,
+    "cumulative_temperature": 0.08,
+    "bayes_temperature": 0.08
+  },
+  "analysis": {
+    "claim_family": "feedback_memory_timescale_phase",
+    "primary_hazard": 0.01,
+    "primary_feedback_fraction": 0.125,
+    "primary_feedback_delay": 4,
+    "primary_mcid": 0.02,
+    "credit_specificity_mcid": 0.02,
+    "evidence_slope_mcid": 0.005,
+    "iso_lambda_values": [
+      6.25,
+      12.5
+    ],
+    "iso_lambda_slow_hazard": 0.01,
+    "iso_lambda_fast_hazard": 0.04,
+    "timescale_structure_mcid": 0.02,
+    "delay_probe_hazard": 0.02,
+    "delay_probe_feedback_fractions": [
+      0.25,
+      0.5
+    ],
+    "delay_probe_short": 0,
+    "delay_probe_long": 16,
+    "oracle_gain_retention_fraction": 0.25,
+    "minimum_positive_seed_fraction": 0.8,
+    "bootstrap_samples": 100000,
+    "permutation_samples": 100000,
+    "statistics_seed": 32033,
+    "holm_family": [
+      "persistent_over_train_fixed",
+      "persistent_over_opposite_eligibility",
+      "evidence_response_slope"
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "analysis": {
+    "credit_specificity_mcid": 0.02,
+    "minimum_positive_seed_fraction": 0.8,
+    "oracle_gain_retention_fraction": 0.2,
+    "primary_feedback_delay": 4,
+    "primary_feedback_fraction": 0.125,
+    "primary_hazard": 0.05,
+    "primary_mcid": 0.02
+  },
+  "evidence_provenance": {
+    "critical_file_sha256": {
+      "experiments/exp32_persistent_sparse_feedback.py": "ea2e62d62ae52d1ac35c04d1843f9d3c6b0563ea8a6d6cd0187b150e0d86b586",
+      "figures/exp32_persistent_sparse_feedback_plot.py": "fe72ab20ff10273544fadae5480b1e30b84f45e3e36fd86036e0fbf24d07900e",
+      "scripts/summarize_exp32.py": "72a434e0f27d7d4355f8e22b5316e56773f8dfbcb0d778a673f4183d58ee2570",
+      "src/analysis/sparse_feedback_metrics.py": "8da6b6339d03828521e8b809c954438156a9dc6a02a8f671129ddb5e5d8a1a22",
+      "src/models/capacity_limited_associative_actuator.py": "2e488595f6d3fd5991dbe2d178546b0700ce63dddf37088b78952dbe78339134",
+      "src/plasticity/sparse_reward_belief.py": "5685320d3ca432a610f3b008faf95d0c7abbd5e50c146da0f4b5b0d82afca869",
+      "src/tasks/hidden_reliability_association.py": "e465736701d9c8c03fe80bb92058e68dddcfb5cb539bc53aea292047fd28534e",
+      "src/tasks/nonstationary_actuator_stream.py": "cfb494c754533e3e204a98f1e8c2f583f660fd1f9e00b4ae57f02e181c827a39"
+    },
+    "git": {
+      "commit": "ad1d66b00aab8d23d8216bacb926a625c081a70d",
+      "dirty": true,
+      "tree": "e62567dfc305bdb315ca278ccb02a84a8a1deeec"
+    },
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "schema_version": "exp32_evidence_v1",
+    "source_config_sha256": "0e33311455dc4023f33c797fb1b81a47e23348b8a2fe8a6c0515270e38abccdd"
+  },
+  "experiment": "exp32_persistent_sparse_feedback",
+  "profile": "smoke",
+  "protocol_version": "exp32_persistent_sparse_reward_v1",
+  "run_label": "exp32_smoke_v1",
+  "seed": 9301,
+  "seeds": [
+    9300,
+    9301,
+    9302,
+    9303,
+    9304
+  ],
+  "selector": {
+    "alpha": 0.3,
+    "bayes_temperature": 0.08,
+    "cumulative_temperature": 0.08,
+    "q_prior": 0.5,
+    "retention": 0.98,
+    "temperature": 0.08
+  },
+  "task": {
+    "direct_reliabilities": [
+      0.55,
+      0.95
+    ],
+    "distractor_strength": 1.0,
+    "distractor_write_values": [
+      8,
+      48
+    ],
+    "feedback_delays": [
+      0,
+      4,
+      16
+    ],
+    "feedback_fractions": [
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "hazards": [
+      0.01,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "key_dim": 16,
+    "load_values": [
+      8,
+      24
+    ],
+    "n_trials": 2048
+  },
+  "training_algorithm": "persistent_action_eligibility_times_executed_scalar_reward_prediction_error",
+  "used_autograd": false,
+  "used_bptt": false
+}

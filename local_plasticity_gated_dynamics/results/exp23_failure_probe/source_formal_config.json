@@ -1,0 +1,123 @@
+{
+  "profile": "formal",
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+  "cue_reliability": 0.85,
+  "context_hazard": 0.05,
+  "task": {
+    "n_episodes": 16,
+    "trials_per_episode": 30,
+    "dt_ms": 50,
+    "cue_ms": 50,
+    "sensory_ms": 200,
+    "delay_ms": 100,
+    "response_ms": 50,
+    "coherence_values": [-0.5, -0.25, 0.25, 0.5],
+    "sensory_noise_std": 1.0,
+    "input_scale": 1.0,
+    "response_target": "choice"
+  },
+  "outer_test_fraction": 0.25,
+  "validation_fraction": 0.25,
+  "network": {
+    "n_units": 64,
+    "excitatory_fraction": 0.8,
+    "connection_probability": 0.2,
+    "tau_e": 100.0,
+    "tau_i": 50.0,
+    "dt": 50.0,
+    "bulk_gain": 0.7,
+    "inhibitory_gain": 1.2,
+    "input_scale": 0.8,
+    "activation": "rectified_tanh",
+    "normalize_fan_in_after_update": true
+  },
+  "integration_substeps": 1,
+  "trial_batch_size": 128,
+  "readout_alpha": 1.0,
+  "controller": {
+    "learning_rate": 0.03,
+    "n_passes": 2,
+    "axis_l2": 0.001,
+    "rate_penalty": 0.001,
+    "gain_min": 0.5,
+    "gain_max": 1.5,
+    "max_update_l2": 0.08,
+    "max_state_displacement": 0.10,
+    "matched_dev_state_displacement": 0.001,
+    "matched_dev_rate_displacement_limit": 0.002,
+    "matched_dev_gain_displacement_limit_per_unit": 0.020,
+    "functional_budget_calibration": "formal_v2_fixed_common_target_from_v1_dev_reachability_only_without_behavior_or_test_tuning",
+    "functional_budget_protocol_revision": "formal_v2_outcome_blind_feasibility_calibration",
+    "functional_budget_calibration_source_commit": "8076100b355d33fd976778e5e4e99f86b60f11f5",
+    "functional_budget_calibration_source_archive_sha256": "a2387bfa3400405f5265530ad9864dbda321bf1cffbe2407d014500f92c07774",
+    "functional_budget_calibration_source_minimum_reachable_state_displacement": 0.0012997392545248305,
+    "functional_budget_calibration_safety_fraction": 0.90,
+    "functional_budget_calibration_safe_limit": 0.0011697653290723474,
+    "functional_budget_calibration_selection_rule": "fixed target 0.001 rounded down below 90 percent of the minimum v1 dev reachable state displacement across all seeds tasks and nonfrozen conditions",
+    "functional_budget_calibration_field_whitelist": [
+      "task_variant",
+      "condition",
+      "functional_budget_achieved",
+      "functional_budget_scale",
+      "functional_budget_maximum_scale",
+      "functional_budget_gain_min_dev_observed",
+      "functional_budget_gain_max_dev_observed"
+    ],
+    "functional_budget_calibration_behavior_or_test_fields_used": [],
+    "functional_match_relative_tolerance": 0.02,
+    "functional_match_absolute_tolerance": 1e-8,
+    "functional_match_max_iterations": 60,
+    "cross_condition_state_relative_mismatch_tolerance": 0.05,
+    "cross_condition_rate_envelope_mismatch_tolerance": 0.75,
+    "cross_condition_gain_envelope_mismatch_tolerance": 0.75,
+    "max_backtracks": 12,
+    "criterion": 0.80,
+    "criterion_window": 2,
+    "post_switch_trials": 3
+  },
+  "off_policy": {
+    "learning_rate": 1000.0,
+    "tau_eligibility_steps": 3.0,
+    "error_clip": 2.0,
+    "total_budget": 0.20,
+    "budget_norm": "l1",
+    "budget_tolerance": 1e-9
+  },
+  "bptt_optimizer": {
+    "learning_rates": [0.001, 0.003, 0.01, 0.03],
+    "max_steps": 100,
+    "patience": 20,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-8
+  },
+  "md_gate": {
+    "learning_rate": 0.03,
+    "inverse_temperature": 1.2,
+    "pseudocount": 0.05,
+    "n_passes": 2
+  },
+  "ood_cells": [
+    {
+      "cue_reliability": 0.55,
+      "context_hazard": 0.01
+    },
+    {
+      "cue_reliability": 0.70,
+      "context_hazard": 0.20
+    },
+    {
+      "cue_reliability": 1.0,
+      "context_hazard": 0.10
+    }
+  ],
+  "registered_claim_thresholds": {
+    "minimum_gate_identifiable_fraction": 0.90,
+    "minimum_mean_absolute_signed_belief": 0.10,
+    "minimum_local_gain_vs_frozen": 0.03,
+    "minimum_local_gain_vs_random": 0.03,
+    "minimum_fraction_of_bptt_axis_gain": 0.60,
+    "minimum_median_update_cosine": 0.0,
+    "minimum_formal_seeds": 30
+  }
+}

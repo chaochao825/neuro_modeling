@@ -1,0 +1,36 @@
+{
+  "profile": "smoke",
+  "protocol_version": "exp32_persistent_sparse_reward_v1",
+  "seeds": [9300, 9301, 9302, 9303, 9304],
+  "training_algorithm": "persistent_action_eligibility_times_executed_scalar_reward_prediction_error",
+  "used_autograd": false,
+  "used_bptt": false,
+  "task": {
+    "n_trials": 2048,
+    "key_dim": 16,
+    "direct_reliabilities": [0.55, 0.95],
+    "load_values": [8, 24],
+    "distractor_write_values": [8, 48],
+    "distractor_strength": 1.0,
+    "hazards": [0.01, 0.05, 0.10, 0.20],
+    "feedback_fractions": [0.5, 0.25, 0.125, 0.0625],
+    "feedback_delays": [0, 4, 16]
+  },
+  "selector": {
+    "alpha": 0.30,
+    "retention": 0.98,
+    "temperature": 0.08,
+    "q_prior": 0.5,
+    "cumulative_temperature": 0.08,
+    "bayes_temperature": 0.08
+  },
+  "analysis": {
+    "primary_hazard": 0.05,
+    "primary_feedback_fraction": 0.125,
+    "primary_feedback_delay": 4,
+    "primary_mcid": 0.02,
+    "credit_specificity_mcid": 0.02,
+    "oracle_gain_retention_fraction": 0.20,
+    "minimum_positive_seed_fraction": 0.80
+  }
+}

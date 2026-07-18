@@ -6,3 +6,10 @@ exp31,train_fixed_best,primary_comparator,training blocks only,false,false,one g
 exp31,matched_probe_random,exploration_control,random tape,false,false,same probe schedule without reward use
 exp31,reward_only_local,main_method,executed scalar probe rewards,false,false,local within-block actuator selection
 exp31,oracle_hidden_train_map,upper_bound,training blocks plus true test context,true,false,oracle only and not a deployable method
+exp32,train_fixed_best,primary_comparator,independent train potential outcomes,false,false,one global immutable actuator
+exp32,matched_random,lower_control,random action tape,false,false,no use of observed reward
+exp32,cumulative_sample_average,history_kernel,executed sparse delayed rewards,false,false,no forgetting across hidden switches
+exp32,credit_shuffled_local,opposite_eligibility_intervention,executed sparse delayed rewards credited to opposite action,false,false,legacy identifier is not a temporal or random shuffle
+exp32,no_feedback_local,negative_control,no rewards,false,false,matched local state and action sampler without feedback
+exp32,bayes_reward_filter,supervised_model_based_comparator,train state labels and both train potential outcomes plus executed sparse delayed rewards,false,false,known registered hazard but no true test state
+exp32,oracle_hidden_state,upper_bound,train emission table plus true test state,true,false,oracle only and not deployable

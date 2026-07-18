@@ -5,3 +5,6 @@ exp29,confirmatory,30,seed,independent_source_split,local selector minus fixed,c
 exp30,smoke,5,seed,block,demand-matched minus fixed,never_formalized,inconclusive_positive_control
 exp31,smoke,5,seed,whole_block,reward-only minus train-fixed full-block accuracy,preregistered_exp31_hidden_reward_v1,scale_authorized_5_of_5
 exp31,formal,30,seed,whole_block,reward-only minus train-fixed full-block accuracy,passed_smoke_then_one_shot_formal,support_narrow_hidden_reward_selector
+exp32,smoke,5,seed,continuous_HMM_stream,persistent local minus train-fixed full-stream accuracy,preregistered_exp32_persistent_sparse_reward_v1,scale_not_authorized_primary_failed
+exp32,formal,30,seed,continuous_HMM_stream,persistent local minus train-fixed full-stream accuracy,requires_exp32_smoke_gate,blocked_fail_closed
+exp32_v2,formal,30,seed,continuous_HMM_stream,local replication plus evidence slope and iso-lambda timescale structure,independent_transition_receipt_and_new_seeds,authorized_pending_execution

@@ -1,0 +1,10 @@
+{
+  "condition_failures": 0,
+  "condition_invalid": 0,
+  "duration_seconds": 5.368202,
+  "ended_at": "2026-07-18T07:28:16.186620+00:00",
+  "run_label": "exp32_smoke_v1",
+  "seed": 9302,
+  "started_at": "2026-07-18T07:28:10.818418+00:00",
+  "status": "complete"
+}

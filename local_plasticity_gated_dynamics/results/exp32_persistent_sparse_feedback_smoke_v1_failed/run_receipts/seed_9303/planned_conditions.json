@@ -1,0 +1,3458 @@
+[
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 0,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 1,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 2,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 3,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 4,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 5,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 6,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 7,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 8,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 9,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 10,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 11,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 12,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 13,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 14,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 15,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 16,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 17,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 18,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 19,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 20,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 21,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 22,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 23,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 24,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 25,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 26,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 27,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 28,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 29,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 30,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 31,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 32,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 33,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 34,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 35,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 36,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 37,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 38,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 39,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 40,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 41,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 42,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 43,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 44,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 45,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 46,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 47,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 48,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 49,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 50,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 51,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 52,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 53,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 54,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 55,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 56,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 57,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 58,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 59,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 60,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 61,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 62,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 63,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 64,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 65,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 66,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 67,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 68,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 69,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 70,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 71,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 72,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 73,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 74,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 75,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 76,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 77,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 78,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 79,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 80,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 81,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 82,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 83,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 84,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 85,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 86,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 87,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 88,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 89,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 90,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 91,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 92,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 93,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 94,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 95,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.01,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 96,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 97,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 98,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 99,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 100,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 101,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 102,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 103,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 104,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 105,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 106,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 107,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 108,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 109,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 110,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 111,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 112,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 113,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 114,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 115,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 116,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 117,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 118,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 119,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 120,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 121,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 122,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 123,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 124,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 125,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 126,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 127,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 128,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 129,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 130,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 131,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 132,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 133,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 134,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 135,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 136,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 137,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 138,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 139,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 140,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 141,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 142,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 143,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 144,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 145,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 146,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 147,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 148,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 149,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 150,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 151,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 152,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 153,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 154,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 155,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 156,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 157,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 158,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 159,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 160,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 161,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 162,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 163,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 164,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 165,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 166,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 167,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 168,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 169,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 170,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 171,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 172,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 173,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 174,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 175,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 176,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 177,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 178,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 179,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 180,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 181,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 182,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 183,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 184,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 185,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 186,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 187,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 188,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 189,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 190,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 191,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.05,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 192,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 193,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 194,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 195,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 196,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 197,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 198,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 199,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 200,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 201,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 202,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 203,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 204,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 205,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 206,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 207,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 208,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 209,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 210,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 211,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 212,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 213,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 214,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 215,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 216,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 217,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 218,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 219,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 220,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 221,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 222,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 223,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 224,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 225,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 226,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 227,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 228,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 229,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 230,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 231,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 232,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 233,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 234,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 235,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 236,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 237,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 238,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 239,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 240,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 241,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 242,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 243,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 244,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 245,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 246,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 247,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 248,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 249,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 250,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 251,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 252,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 253,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 254,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 255,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 256,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 257,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 258,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 259,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 260,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 261,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 262,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 263,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 264,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 265,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 266,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 267,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 268,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 269,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 270,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 271,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 272,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 273,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 274,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 275,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 276,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 277,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 278,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 279,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 280,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 281,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 282,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 283,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 284,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 285,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 286,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 287,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.1,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 288,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 289,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 290,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 291,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 292,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 293,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 294,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 295,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 296,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 297,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 298,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 299,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 300,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 301,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 302,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 303,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 304,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 305,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 306,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 307,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 308,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 309,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 310,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 311,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.5,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 312,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 313,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 314,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 315,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 316,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 317,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 318,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 319,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 320,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 321,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 322,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 323,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 324,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 325,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 326,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 327,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 328,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 329,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 330,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 331,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 332,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 333,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 334,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 335,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.25,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 336,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 337,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 338,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 339,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 340,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 341,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 342,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 343,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 344,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 345,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 346,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 347,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 348,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 349,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 350,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 351,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 352,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 353,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 354,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 355,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 356,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 357,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 358,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 359,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.125,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 360,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 361,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 362,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 363,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 364,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 365,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 366,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 367,
+    "feedback_delay": 0,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 368,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 369,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 370,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 371,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 372,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 373,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 374,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 375,
+    "feedback_delay": 4,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  },
+  {
+    "condition": "train_fixed_best",
+    "condition_index": 376,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "train_fixed_best"
+  },
+  {
+    "condition": "matched_random",
+    "condition_index": 377,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "matched_random"
+  },
+  {
+    "condition": "cumulative_sample_average",
+    "condition_index": 378,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "cumulative_sample_average"
+  },
+  {
+    "condition": "persistent_rpe_local",
+    "condition_index": 379,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "persistent_rpe_local"
+  },
+  {
+    "condition": "credit_shuffled_local",
+    "condition_index": 380,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "credit_shuffled_local"
+  },
+  {
+    "condition": "no_feedback_local",
+    "condition_index": 381,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "no_feedback_local"
+  },
+  {
+    "condition": "bayes_reward_filter",
+    "condition_index": 382,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "bayes_reward_filter"
+  },
+  {
+    "condition": "oracle_hidden_state",
+    "condition_index": 383,
+    "feedback_delay": 16,
+    "feedback_fraction": 0.0625,
+    "hazard": 0.2,
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "selector_mode": "oracle_hidden_state"
+  }
+]
