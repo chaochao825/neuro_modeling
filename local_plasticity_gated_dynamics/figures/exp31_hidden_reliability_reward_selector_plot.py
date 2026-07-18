@@ -30,10 +30,14 @@ DISPLAY = {
 def plot_exp31(output_dir: Path) -> tuple[Path, Path]:
     conditions_path = output_dir / "conditions.csv"
     seeds_path = output_dir / "seed_summary.csv"
-    if not conditions_path.exists() or not seeds_path.exists():
-        raise FileNotFoundError("Exp31 conditions.csv and seed_summary.csv are required")
+    raw_path = output_dir / "raw_metrics.csv.gz"
+    if not conditions_path.exists() or not seeds_path.exists() or not raw_path.exists():
+        raise FileNotFoundError(
+            "Exp31 conditions.csv, seed_summary.csv, and raw_metrics.csv.gz are required"
+        )
     conditions = pd.read_csv(conditions_path)
     seeds = pd.read_csv(seeds_path)
+    raw = pd.read_csv(raw_path)
     setup_style()
     fig, axes = plt.subplots(2, 2, figsize=(8.4, 6.3))
 
@@ -59,15 +63,24 @@ def plot_exp31(output_dir: Path) -> tuple[Path, Path]:
     axes[0, 0].set_xlabel("Interference pressure, $(L-1+D)/d$")
     axes[0, 0].set_ylabel("Memory minus routing accuracy")
 
-    memory = conditions[conditions["actuator_mode"] == "fixed_associative"]
-    for index, reliability in enumerate(sorted(memory["direct_reliability"].unique())):
+    memory = raw[raw["actuator_mode"] == "fixed_associative"]
+    seed_pressure = (
+        memory.groupby(
+            ["seed", "direct_reliability", "interference_pressure"],
+            as_index=False,
+        )["full_block_accuracy"]
+        .mean()
+    )
+    for index, reliability in enumerate(
+        sorted(seed_pressure["direct_reliability"].unique())
+    ):
         frame = (
-            memory[memory["direct_reliability"] == reliability]
+            seed_pressure[seed_pressure["direct_reliability"] == reliability]
             .groupby("interference_pressure", as_index=False)
             .agg(
-                mean=("mean_full_accuracy", "mean"),
-                sd=("mean_full_accuracy", "std"),
-                n=("n_seeds", "max"),
+                mean=("full_block_accuracy", "mean"),
+                sd=("full_block_accuracy", "std"),
+                n=("seed", "nunique"),
             )
             .sort_values("interference_pressure")
         )
@@ -145,7 +158,7 @@ def plot_exp31(output_dir: Path) -> tuple[Path, Path]:
     axes[1, 1].set_ylabel("Seed-level paired contrast")
 
     for label, ax in zip("abcd", axes.flat, strict=True):
-        ax.text(-0.16, 1.06, label, transform=ax.transAxes, fontweight="bold")
+        ax.text(-0.08, 1.06, label, transform=ax.transAxes, fontweight="bold")
     fig.tight_layout(w_pad=1.8, h_pad=2.0)
     save_figure(fig, "exp31_hidden_reliability_reward_selector", output_dir)
     plt.close(fig)

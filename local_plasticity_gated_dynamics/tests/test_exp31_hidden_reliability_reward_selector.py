@@ -110,6 +110,9 @@ def test_one_exp31_seed_is_paired_reward_only_and_failure_preserving(
     output.mkdir()
     conditions.to_csv(output / "conditions.csv", index=False)
     seeds.to_csv(output / "seed_summary.csv", index=False)
+    records.to_csv(
+        output / "raw_metrics.csv.gz", index=False, compression="gzip"
+    )
     png, pdf = plot_exp31(output)
     assert png.stat().st_size > 10_000
     assert pdf.stat().st_size > 1_000

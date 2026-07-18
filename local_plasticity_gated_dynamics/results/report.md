@@ -83,3 +83,34 @@ the implemented local-eprop rule; it does not reject all budgets or all local ru
 target was selected without behavior, loss, test, or OOD fields from the retained v1
 development-reachability receipt. Exact config matching excludes the superseded 0.002 attempts
 from v2 inference while leaving their raw artifacts intact.
+
+## Exp31 formal update: hidden demand with executed-reward-only learning
+
+Exp31 removes the strongest Exp30 shortcuts: the target is one queried random
+value rather than an explicit routing/memory mixture; dense keys create natural
+capacity limits; no mode-by-demand gain is fitted; and the local selector sees
+only the scalar reward from the actuator it executed. The primary endpoint
+charges the complete forced-exploration prefix.
+
+| claim | estimate | 95% seed-bootstrap CI | Holm p | conclusion |
+| --- | ---: | ---: | ---: | --- |
+| reward-only local minus train-fixed full-block accuracy | +0.04721 | [0.04591, 0.04853] | 0.000040 | support |
+| hidden-reliability crossover | +0.39609 | [0.38594, 0.40608] | 0.000040 | support |
+| associative minus identical-write query-shuffled | +0.34670 | [0.34010, 0.35330] | 0.000040 | support |
+| 25% oracle-gain retention margin | +0.02229 | [0.02122, 0.02338] | 0.000040 | support |
+
+All 30 formal seeds and all 22,680 registered condition rows completed. Mean
+selector choice accuracy was 0.9497; mean oracle gain retained was 0.4732;
+query-shuffled accuracy was 0.4993; and associative accuracy decreased with
+interference pressure (mean seed Spearman -0.9708).
+
+The joint Exp31 conclusion is **support**, but only for a synthetic two-actuator
+controller-identifiability claim. Exp31 contains no participating high-rank E/I
+carrier, no neural recordings, and no strong task-model baseline. The
+controller also receives labels on 64/128 trials, resets at every block, and
+selects between only two fixed motifs. It therefore
+does not yet support the full Actuator Matching Principle. The next
+high-information experiment is to place the frozen motifs and reward-only
+controller inside a genuinely participating stable E/I carrier, then test
+closure, normal perturbation decay, and held-out utility before scaling neuron
+count or moving to real block-switching data.

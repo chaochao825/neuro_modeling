@@ -1,0 +1,19 @@
+{
+  "schema_version": "exp31_figure_amendment_v1",
+  "generated_at_utc": "2026-07-18T06:04:02Z",
+  "correction_type": "posthoc_statistical_presentation_only",
+  "reason": "Independent review found that panel b used condition-level dispersion rather than seed-level SEM. The amended plot aggregates raw block rows to seed by pressure before computing uncertainty.",
+  "formal_run_commit": "9b068056a0c73806665d1c4792f59f4c6f59bbc9",
+  "formal_run_tree": "cfca8323fa41de2b1bb259d4d6b4cdcfc5d4db27",
+  "formal_run_plot_script_sha256": "9b2bc6c150d720f92569e2a0bb2d20e19897db363e3a2ef2c34c7a79b73a2676",
+  "amended_plot_script_sha256": "8f3f8660f1c9fbd70a2af19c9250a2c33619f77adb563bc21f5a4a09f5e80d91",
+  "raw_metrics_sha256": "2f0b06a563e7503626fd8855eee280fe27117aad2282262a2f2b98d10e5e5367",
+  "conditions_sha256": "0e5d4b58732a3baacf1490a49695992e07775c907511dcca733babec0f6f0225",
+  "seed_summary_sha256": "00bb323686597e709339c607336c53891aae2d2d2ee18242c70dec4f7b5cff94",
+  "amended_png_sha256": "2533584fb8ca29c267b7bc62e339fc1d60fc3ba20c1ef36b5b63a785fd7e1e59",
+  "amended_pdf_sha256": "257ff306b3954d397aecfc336d53d1ddce938d66e79ec42dc20c0336cc9371a7",
+  "raw_metrics_changed": false,
+  "summary_statistics_changed": false,
+  "formal_inference_changed": false,
+  "independent_review_triggered": true
+}
