@@ -114,3 +114,40 @@ high-information experiment is to place the frozen motifs and reward-only
 controller inside a genuinely participating stable E/I carrier, then test
 closure, normal perturbation decay, and held-out utility before scaling neuron
 count or moving to real block-switching data.
+
+## Exp32 formal update: persistent reward-only control without block reset
+
+The preregistered Exp32-v1 smoke primary failed at hazard 0.05, feedback 1/8
+and delay 4: local minus train-fixed was only +0.00352 and only 3/5 seeds were
+positive. That failure, all 1,920 rows, and every run receipt remain published;
+the v1 formal launch stayed unauthorized.
+
+An independently seeded v2 panel then tested a new feedback--memory-timescale
+claim without changing the controller. All 30 seeds and all 10,800 planned
+rows completed from clean commit `49aaaf3`. At the frozen slow-switch primary
+cell, persistent local control exceeded train-fixed by +0.04349 (95% seed
+bootstrap CI +0.03446 to +0.05289; 28/30 positive), exceeded opposite-action
+eligibility by +0.08241 (CI +0.07667 to +0.08779), and had a +0.01011 accuracy
+response per doubling of expected feedback per dwell (CI +0.00962 to +0.01062).
+All three passed their 0.02/0.02/0.005 MCIDs and Holm correction, so the bounded
+main-controller claim is **support**.
+
+The stronger phase-diagram claim did not pass. On two exact iso-lambda lines,
+the preregistered slow-minus-fast effect was +0.01195 (CI +0.00320 to +0.02089),
+below the 0.02 structural MCID with one-sided p=0.955. That layer is
+**inconclusive**, so the registered joint Exp32 result is also
+**inconclusive**. The opposite-credit intervention is not update-budget
+matched (mean L1 ratio 1.215), the controller's scores are action-policy
+proxies rather than calibrated context posteriors, and neither an E/I carrier
+nor neural data participates in Exp32.
+
+The fixed Exp23 probe further narrows the earlier negative result: delayed
+local gain was -0.01133 under matched state displacement but +0.00056 at its
+natural scale, while the matching procedure amplified the local axis by a
+median 83.4x. Natural-scale delayed BPTT gained +0.01796 (CI +0.01162 to
++0.02444), still below the local endpoint's 0.03 MCID. This opposes only the
+tested drive-gain axis, local rule and matching protocol; it does not oppose
+local learning in general.
+
+See `results/actuator_matching_critical_audit_20260718.md` for the consolidated
+support/oppose/inconclusive ledger, frontier comparison and next scale gate.

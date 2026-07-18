@@ -17,6 +17,14 @@ principle remain open. See
 [the evidence ledger](docs/actuator_matching_principle.md) for exact claims and
 non-claims.
 
+Exp32 now adds a 30-seed continuous-HMM test with no block reset. Its
+executed-reward-only controller supports the bounded main claim in a
+slow-switch regime, but the independently registered iso-lambda timescale
+structure remains inconclusive; therefore the joint Exp32 phase claim is not
+promoted. See the [critical audit](results/actuator_matching_critical_audit_20260718.md),
+[protocol](docs/exp32_evidence_per_dwell_boundary_protocol.md), and
+[formal evidence](results/exp32_feedback_memory_timescale_phase_v2/report.md).
+
 The scientific protocol is intentionally falsifiable. Every core claim is
 classified as `support`, `oppose`, or `inconclusive`; failed seeds and missing
 external-data runs are retained as first-class results.

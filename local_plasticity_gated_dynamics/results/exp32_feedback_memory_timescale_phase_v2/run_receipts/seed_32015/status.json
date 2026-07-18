@@ -1,0 +1,10 @@
+{
+  "condition_failures": 0,
+  "condition_invalid": 0,
+  "duration_seconds": 47.584203,
+  "ended_at": "2026-07-18T09:21:04.436514+00:00",
+  "run_label": "exp32_phase_v2_formal",
+  "seed": 32015,
+  "started_at": "2026-07-18T09:20:16.852311+00:00",
+  "status": "complete"
+}

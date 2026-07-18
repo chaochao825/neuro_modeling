@@ -1,0 +1,148 @@
+{
+  "analysis": {
+    "bootstrap_samples": 100000,
+    "claim_family": "feedback_memory_timescale_phase",
+    "credit_specificity_mcid": 0.02,
+    "delay_probe_feedback_fractions": [
+      0.25,
+      0.5
+    ],
+    "delay_probe_hazard": 0.02,
+    "delay_probe_long": 16,
+    "delay_probe_short": 0,
+    "evidence_slope_mcid": 0.005,
+    "holm_family": [
+      "persistent_over_train_fixed",
+      "persistent_over_opposite_eligibility",
+      "evidence_response_slope"
+    ],
+    "iso_lambda_fast_hazard": 0.04,
+    "iso_lambda_slow_hazard": 0.01,
+    "iso_lambda_values": [
+      6.25,
+      12.5
+    ],
+    "minimum_positive_seed_fraction": 0.8,
+    "oracle_gain_retention_fraction": 0.25,
+    "permutation_samples": 100000,
+    "primary_feedback_delay": 4,
+    "primary_feedback_fraction": 0.125,
+    "primary_hazard": 0.01,
+    "primary_mcid": 0.02,
+    "statistics_seed": 32033,
+    "timescale_structure_mcid": 0.02
+  },
+  "analysis_protocol_version": "exp32_feedback_memory_timescale_phase_v2",
+  "authorized_formal_payload_sha256": "c3819977a03f7a87524b81f7d4fe585933ea74e0f1d81dae74f7b998796cdea8",
+  "development_source": "failed preregistered v1 smoke seeds 9300-9304; full grid used only to formulate this new independent two-timescale claim",
+  "evidence_provenance": {
+    "critical_file_sha256": {
+      "experiments/common.py": "476ae9b4b93b9e31861962fbf2b2830f7d7ddbccc1ebdacba7be39a85c8cf6d3",
+      "experiments/exp32_persistent_sparse_feedback.py": "31a4106071e406fd3f73bb8d5434d2d14a1792d50fa566e84797fbb0bd640058",
+      "figures/exp32_persistent_sparse_feedback_plot.py": "09f624414f1bb860332f97c60249264cc62de599083359fb63b2c948950c5c7e",
+      "scripts/summarize_exp32.py": "1ab140bfd08289b753080f0e848cfdae0091e0653cda740ddcf93712878bd118",
+      "src/analysis/hidden_selector_metrics.py": "f0a9d814d299f607e6329fe4f3588bf295976499d5a1d10db27b3ab634229e05",
+      "src/analysis/sparse_feedback_metrics.py": "7ace53c895819ba7b8c92262fd81fc01c88e9d42da4a3e191af2fd4971d96036",
+      "src/models/capacity_limited_associative_actuator.py": "2e488595f6d3fd5991dbe2d178546b0700ce63dddf37088b78952dbe78339134",
+      "src/plasticity/sparse_reward_belief.py": "61355b3462c1745ce1c2ff94e722599e0bf7efd6f764cd0eeb04721d48e86bc3",
+      "src/tasks/hidden_reliability_association.py": "e465736701d9c8c03fe80bb92058e68dddcfb5cb539bc53aea292047fd28534e",
+      "src/tasks/nonstationary_actuator_stream.py": "1808d46bf2d5c59d9de816e57eb93d0fc4fc53fe0cdfd4d5be4c03e7a50ab900",
+      "src/utils/artifacts.py": "6bd95f938acc7737448a3dc74c40ceb1e823405684e7e7df547040401e3122bb",
+      "src/utils/reproducibility.py": "a21a453f18c1e2a4da6943cffffc3d6d11f5594d1120bb21d1e6a73eea0ad0b0"
+    },
+    "formal_authorization_receipt_sha256": "4c979bbb1b42d27560ea8a7777dae6b9fed2f9f6ea413db4e28ef6ef051e0d2d",
+    "git": {
+      "commit": "49aaaf3d32ac8b5e95cf5ee89726aaf359766eec",
+      "dirty": false,
+      "tree": "20905bfa7691a04decb1960911751ed3ee6e5fd2"
+    },
+    "protocol_version": "exp32_persistent_sparse_reward_v1",
+    "schema_version": "exp32_evidence_v2",
+    "source_config_sha256": "003e40872503ca114c7e1cc52aa75114571d49d421ff5836516beae6e2ee3f54"
+  },
+  "experiment": "exp32_persistent_sparse_feedback",
+  "formal_authorization_receipt": "results/exp32_persistent_sparse_feedback_smoke_v1_failed/v2_transition_authorization.json",
+  "formal_authorization_receipt_sha256": "4c979bbb1b42d27560ea8a7777dae6b9fed2f9f6ea413db4e28ef6ef051e0d2d",
+  "formal_authorized": true,
+  "profile": "formal",
+  "protocol_version": "exp32_persistent_sparse_reward_v1",
+  "run_label": "exp32_phase_v2_formal",
+  "seed": 32018,
+  "seeds": [
+    32000,
+    32001,
+    32002,
+    32003,
+    32004,
+    32005,
+    32006,
+    32007,
+    32008,
+    32009,
+    32010,
+    32011,
+    32012,
+    32013,
+    32014,
+    32015,
+    32016,
+    32017,
+    32018,
+    32019,
+    32020,
+    32021,
+    32022,
+    32023,
+    32024,
+    32025,
+    32026,
+    32027,
+    32028,
+    32029
+  ],
+  "selector": {
+    "alpha": 0.3,
+    "bayes_temperature": 0.08,
+    "cumulative_temperature": 0.08,
+    "q_prior": 0.5,
+    "retention": 0.98,
+    "temperature": 0.08
+  },
+  "task": {
+    "direct_reliabilities": [
+      0.55,
+      0.95
+    ],
+    "distractor_strength": 1.0,
+    "distractor_write_values": [
+      8,
+      48
+    ],
+    "feedback_delays": [
+      0,
+      4,
+      16
+    ],
+    "feedback_fractions": [
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "hazards": [
+      0.01,
+      0.02,
+      0.04
+    ],
+    "key_dim": 16,
+    "load_values": [
+      8,
+      24
+    ],
+    "n_trials": 4096
+  },
+  "training_algorithm": "persistent_action_eligibility_times_executed_scalar_reward_prediction_error",
+  "used_autograd": false,
+  "used_bptt": false
+}
