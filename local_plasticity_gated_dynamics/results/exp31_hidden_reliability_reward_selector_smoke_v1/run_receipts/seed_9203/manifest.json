@@ -1,0 +1,35 @@
+{
+  "condition_failures": 0,
+  "condition_invalid": 0,
+  "ended_at": "2026-07-18T05:34:07.962037+00:00",
+  "evidence_provenance": {
+    "critical_file_sha256": {
+      "experiments/exp31_hidden_reliability_reward_selector.py": "da61adf4df45261662eb43e25479d51ec8586888f0e2842df12d760a16b16233",
+      "figures/exp31_hidden_reliability_reward_selector_plot.py": "9b2bc6c150d720f92569e2a0bb2d20e19897db363e3a2ef2c34c7a79b73a2676",
+      "scripts/summarize_exp31.py": "dbc5cd17611c850586ef47830304c75bdec7e239a4959ed128ad8be6250abde7",
+      "src/analysis/hidden_selector_metrics.py": "f0a9d814d299f607e6329fe4f3588bf295976499d5a1d10db27b3ab634229e05",
+      "src/models/capacity_limited_associative_actuator.py": "2e488595f6d3fd5991dbe2d178546b0700ce63dddf37088b78952dbe78339134",
+      "src/plasticity/reward_only_selector.py": "a63db7700532f7a2c458c8b5c9b8670c9bce22fc7f1f5fb8cdba3bd993452ce6",
+      "src/tasks/hidden_reliability_association.py": "e465736701d9c8c03fe80bb92058e68dddcfb5cb539bc53aea292047fd28534e"
+    },
+    "git": {
+      "commit": "4dde5c625e06f16e24db823dba4bc7537020528c",
+      "dirty": false,
+      "tree": "5d0e77c87438578456745f7f5ec16dadbc7f0bdb"
+    },
+    "protocol_version": "exp31_hidden_reward_v1",
+    "schema_version": "exp31_evidence_v1",
+    "source_config_sha256": "2bda59252fad5578fc662e419c6b67c060aa0164bf1c99579ac6ceb7d736df32"
+  },
+  "experiment": "exp31_hidden_reliability_reward_selector",
+  "parent_checkpoint": null,
+  "profile": "smoke",
+  "run_id": "24e6e561-e396-4f4f-873d-e00bb1576c88",
+  "run_label": "exp31_smoke_v1_4dde5c6",
+  "schema_version": "1.0",
+  "seed": 9203,
+  "started_at": "2026-07-18T05:34:07.161547+00:00",
+  "status": "complete",
+  "training_algorithm": "local_action_eligibility_times_executed_scalar_reward_prediction_error",
+  "used_autograd": false
+}

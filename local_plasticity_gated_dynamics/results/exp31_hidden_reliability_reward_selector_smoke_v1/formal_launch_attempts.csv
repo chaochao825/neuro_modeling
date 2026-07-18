@@ -1,0 +1,2 @@
+attempted_at_utc,run_label,status,failure_stage,reason,source_commit
+2026-07-18T05:35:20Z,exp31_formal_v1_4dde5c6,failed,clean_tree_preflight,smoke evidence bundle was untracked so formal clean-tree guard refused launch,4dde5c625e06f16e24db823dba4bc7537020528c

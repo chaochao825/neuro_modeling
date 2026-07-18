@@ -1,0 +1,23 @@
+{
+  "both_winners_seed_fraction": 1.0,
+  "claim_classification": "inconclusive",
+  "experiment": "exp31_hidden_reliability_reward_selector",
+  "feedback_access_audit_passed": true,
+  "fixed_best_mean_accuracy": 0.75,
+  "high_rank_carrier_claimed": false,
+  "mean_associative_query_specificity": 0.3497395833333333,
+  "mean_memory_pressure_spearman": -0.9820963923823118,
+  "mean_oracle_gain_retained": 0.45272209338909264,
+  "mean_oracle_opportunity": 0.09765625,
+  "mean_reliability_crossover": 0.4169270833333334,
+  "mean_reward_only_minus_fixed": 0.044256365740740745,
+  "mean_reward_only_minus_random": 0.044357638888888905,
+  "mean_selector_choice_accuracy": 0.9425925925925925,
+  "n_seeds": 5,
+  "panel_complete": true,
+  "positive_seed_fraction": 1.0,
+  "profile": "smoke",
+  "query_shuffled_mean_accuracy": 0.4979311342592593,
+  "scale_decision": "scale-authorized",
+  "strong_baseline_claimed": false
+}
