@@ -1,0 +1,7 @@
+experiment,profile,seeds,independent_unit,split_unit,primary_endpoint,scale_gate,status
+exp23,formal,30,seed,block,local minus frozen held-out utility,not_applicable,oppose_current_rule
+exp26,formal,30,seed,task_generator,descriptor-to-actuator discrimination,completed,support_narrow_synthetic
+exp29,confirmatory,30,seed,independent_source_split,local selector minus fixed,completed,support_descriptor_selector
+exp30,smoke,5,seed,block,demand-matched minus fixed,never_formalized,inconclusive_positive_control
+exp31,smoke,5,seed,whole_block,reward-only minus train-fixed full-block accuracy,preregistered_exp31_hidden_reward_v1,pending
+exp31,formal,30,seed,whole_block,reward-only minus train-fixed full-block accuracy,only_after_smoke,frozen_pending_gate

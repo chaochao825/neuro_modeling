@@ -1,0 +1,7 @@
+component,exp30_status,exp31_status,falsification
+target,explicit direct-memory mixture,one queried random value,reject shortcut if target depends algebraically on actuator weights
+memory_keys,one-hot exact retrieval,dense bipolar capacity-limited,retrieval must decline with preregistered pressure
+selector_input,explicit memory demand,executed action plus scalar reward only,fail if context descriptor or unexecuted reward enters API
+gain,fit per mode and demand,no gain fit,all outputs must have matched unit magnitude
+shuffled_control,value permutation with matched write norms,identical writes/state plus query shift,specificity must exceed preregistered margin
+carrier,identity-calibrated high-rank transport,absent and no carrier claim,do not scale N until carrier contributes held-out utility

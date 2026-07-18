@@ -1,0 +1,8 @@
+experiment,baseline,role,selection_data,test_context_access,counterfactual_reward_access,claim_scope
+exp31,fixed_routing,lower_control,none,false,false,one immutable input-routing motif
+exp31,fixed_associative,lower_control,none,false,false,one immutable associative motif
+exp31,associative_query_shuffled,mechanism_control,none,false,false,identical writes and state with broken content address
+exp31,train_fixed_best,primary_comparator,training blocks only,false,false,one global actuator frozen before test
+exp31,matched_probe_random,exploration_control,random tape,false,false,same probe schedule without reward use
+exp31,reward_only_local,main_method,executed scalar probe rewards,false,false,local within-block actuator selection
+exp31,oracle_hidden_train_map,upper_bound,training blocks plus true test context,true,false,oracle only and not a deployable method
