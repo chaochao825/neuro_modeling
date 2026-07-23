@@ -122,5 +122,9 @@ def test_exp34_retains_all_causal_interventions(tmp_path: Path) -> None:
 
 def test_exp34_formal_receipt_is_hash_bound_and_fail_closed() -> None:
     config = load_json_config("configs/formal/exp34_orbit_causal_consensus.json")
+    assert config["formal_authorized"] is True
+    config["formal_authorized"] = False
+    config["authorization_receipt"] = ""
+    config["authorization_receipt_sha256"] = ""
     with pytest.raises(ValueError, match="without authorization"):
         _validate_config(config)

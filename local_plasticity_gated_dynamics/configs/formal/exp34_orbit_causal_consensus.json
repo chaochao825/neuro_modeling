@@ -1,9 +1,9 @@
 {
   "profile": "formal",
-  "formal_authorized": false,
-  "authorization_reason": "fail-closed until v3 validation rebinds the official short-video exclusion and coverage audit",
-  "authorization_receipt": "",
-  "authorization_receipt_sha256": "",
+  "formal_authorized": true,
+  "authorization_reason": "v3 validation passed after binding official short-video exclusion and strict full-coverage audit",
+  "authorization_receipt": "results/exp34_orbit_causal_consensus_smoke_v5_official_video_exclusion/scale_authorization.json",
+  "authorization_receipt_sha256": "66b7a4e64acf1b0a1962f7c3f36da2b9ca5118c008c5f4deb2b648ea0e9df708",
   "protocol_version": "exp34_orbit_causal_consensus_v3_official_video_exclusion",
   "seeds": [13400, 13401, 13402, 13403, 13404],
   "training_algorithm": "causal_label_free_count_belief",
