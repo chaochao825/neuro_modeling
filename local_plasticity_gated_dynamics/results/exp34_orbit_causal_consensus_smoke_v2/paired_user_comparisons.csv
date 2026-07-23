@@ -1,0 +1,4 @@
+method,comparator,n_users,mean_difference,ci_low,ci_high,positive_users,sign_flip_pvalue,holm_adjusted_pvalue
+causal_consensus,selection_fixed_best,2,0.09682777777777779,0.052722222222222226,0.14093333333333335,2,0.5,1.0
+causal_consensus,memoryless_consensus,2,0.09682777777777779,0.052722222222222226,0.14093333333333335,2,0.5,1.0
+causal_consensus,delayed_consensus,2,0.042077777777777714,0.04126666666666656,0.042888888888888865,2,0.5,1.0

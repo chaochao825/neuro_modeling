@@ -1,9 +1,9 @@
 {
   "profile": "formal",
-  "formal_authorized": false,
-  "authorization_reason": "fail-closed until Exp34 validation artifacts pass the scale gate",
-  "authorization_receipt": "",
-  "authorization_receipt_sha256": "",
+  "formal_authorized": true,
+  "authorization_reason": "Exp34 validation scale gate passed on 3 seeds and 2 held-out development users; test users remain untouched",
+  "authorization_receipt": "results/exp34_orbit_causal_consensus_smoke_v2/scale_authorization.json",
+  "authorization_receipt_sha256": "423062945c612a304e5e3e9305e806814600aae7570cfd10d8dcc0e9bf7ee571",
   "protocol_version": "exp34_orbit_causal_consensus_v1",
   "seeds": [13400, 13401, 13402, 13403, 13404],
   "training_algorithm": "causal_label_free_count_belief",

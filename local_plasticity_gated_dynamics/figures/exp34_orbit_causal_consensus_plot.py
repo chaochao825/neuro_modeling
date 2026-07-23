@@ -164,6 +164,16 @@ def make_figure(
         .mean()
         .set_index("condition")
     )
+    label_offsets = {
+        "prototype": (4, 2),
+        "gain": (4, 2),
+        "delta": (4, 2),
+        "temporal": (4, -12),
+        "selection_fixed_best": (4, 5),
+        "memoryless_consensus": (4, 2),
+        "delayed_consensus": (4, 2),
+        "causal_consensus": (4, 2),
+    }
     for condition in METHOD_ORDER[:-1]:
         row = cost_frame.loc[condition]
         ax.scatter(
@@ -177,7 +187,7 @@ def make_figure(
         ax.annotate(
             METHOD_LABELS[METHOD_ORDER.index(condition)],
             (float(row["mean_event_l1"]), 100.0 * float(row["frame_accuracy"])),
-            xytext=(3, 2),
+            xytext=label_offsets[condition],
             textcoords="offset points",
             fontsize=7,
         )

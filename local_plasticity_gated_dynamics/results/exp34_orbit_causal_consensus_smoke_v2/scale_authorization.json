@@ -1,0 +1,56 @@
+{
+  "authorized": true,
+  "development_run_manifest_sha256": "f3d360332ce22d8ad888fc9c5c2733cf0b2a627c5146cc4a01c9c150623e59b7",
+  "development_summary_sha256": "f3c1342e83a69c2a48793b5e098c72fc1f5e37d6e8ae3ee7c8099ad6f1f18f3e",
+  "formal_config_fingerprint": "1052a372377c6fd3398ed2aa8834cab659c97ac04f12c8cdd4ede83145ce59c4",
+  "implementation_sha256": {
+    "experiments/exp34_orbit_causal_consensus.py": "85b023aa890ec7b983ab992985e7662e2b6345721aa9a63fcaf073e6ca890558",
+    "src/analysis/orbit_streaming_metrics.py": "ef485e6f676c9acd9904ff14cef55e40d4077338c59372b63b43d4261ea9faaf",
+    "src/data/orbit_streaming.py": "289900535f1f1c2219aec7254a21349d65c20ba2fbcd0f389f6878b2a026a8bb",
+    "src/models/causal_consensus_gate.py": "e17884d85d021fa7700b79790dfb491d5f61dafe56be49d1ceb59fc8397f4742",
+    "src/models/streaming_fewshot_actuators.py": "47dd3cc635f85ace805fc2865211486835a848f86555dab4561412ddcfbe9d10"
+  },
+  "n_development_seeds": 3,
+  "n_development_users": 2,
+  "protocol_version": "exp34_orbit_causal_consensus_v1",
+  "receipt_sha256": "423062945c612a304e5e3e9305e806814600aae7570cfd10d8dcc0e9bf7ee571",
+  "registered_gate_results": {
+    "comparisons": [
+      {
+        "ci_high": 0.14093333333333335,
+        "ci_low": 0.052722222222222226,
+        "comparator": "selection_fixed_best",
+        "mean_difference": 0.09682777777777779,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      },
+      {
+        "ci_high": 0.14093333333333335,
+        "ci_low": 0.052722222222222226,
+        "comparator": "memoryless_consensus",
+        "mean_difference": 0.09682777777777779,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      },
+      {
+        "ci_high": 0.042888888888888865,
+        "ci_low": 0.04126666666666656,
+        "comparator": "delayed_consensus",
+        "mean_difference": 0.042077777777777714,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      }
+    ],
+    "minimum_accuracy_gain": 0.005,
+    "minimum_retained_oracle_headroom": 0.2,
+    "observed_retained_oracle_headroom": 0.912608650120432
+  },
+  "scale_decision": "scale-authorized",
+  "schema": "exp34_formal_scale_authorization_v1"
+}

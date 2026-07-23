@@ -33,3 +33,18 @@ consensus to beat both the validation-selected fixed actuator and the
 memoryless intervention under Holm correction. A validation result is always
 `inconclusive`, but may authorize scale if its effect and retained oracle
 headroom clear their registered thresholds.
+
+## Frozen development result and scale decision
+
+The three-seed development panel completed on the two held-out validation
+users. Causal consensus reached 0.7388 mean task-video accuracy versus 0.6419
+for both the validation-selected fixed temporal actuator and the memoryless
+intervention: a +0.0968 difference (user bootstrap interval +0.0527 to
++0.1409). Delaying belief updates by eight frames reduced the gain to +0.0421,
+and the gate retained 91.3% of the available per-frame oracle headroom. Both
+users improved in all three registered comparisons.
+
+This panel is **inconclusive** because it has only two development users and
+its exact sign-flip p-values are 0.5. It nevertheless passed the predeclared
+scale gate. The hash-bound authorization receipt is saved with the development
+artifacts, so formal evaluation can run once on all 17 untouched test users.
