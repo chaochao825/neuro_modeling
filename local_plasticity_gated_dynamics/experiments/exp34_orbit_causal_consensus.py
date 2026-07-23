@@ -198,6 +198,11 @@ def _validate_config(config: Mapping[str, Any]) -> None:
             raise ValueError(f"{name} must be a positive integer")
     if not isinstance(config.get("cache_features_in_memory", False), bool):
         raise ValueError("cache_features_in_memory must be boolean")
+    fallback_root = config.get("feature_root")
+    for name in ("selection_feature_root", "eval_feature_root"):
+        value = config.get(name, fallback_root)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"{name} must be a non-empty path")
     if config.get("selection_split") not in {"train", "validation"}:
         raise ValueError("selection_split must be train or validation")
     if config.get("eval_split") not in {"validation", "test"}:
@@ -419,9 +424,15 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
     split_path = Path(str(config["official_splits_path"]))
     if not split_path.is_absolute():
         split_path = PROJECT_ROOT / split_path
-    feature_root = Path(str(config["feature_root"])).expanduser()
+    fallback_root = config.get("feature_root")
+    selection_feature_root = Path(
+        str(config.get("selection_feature_root", fallback_root))
+    ).expanduser()
+    eval_feature_root = Path(
+        str(config.get("eval_feature_root", fallback_root))
+    ).expanduser()
     selection_store = OrbitFeatureStore(
-        feature_root,
+        selection_feature_root,
         split=str(config["selection_split"]),
         official_splits_path=split_path,
         require_complete_split=bool(
@@ -429,11 +440,14 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         ),
         cache_videos=bool(config.get("cache_features_in_memory", False)),
     )
-    if config["selection_split"] == config["eval_split"]:
+    if (
+        config["selection_split"] == config["eval_split"]
+        and selection_feature_root.resolve() == eval_feature_root.resolve()
+    ):
         eval_store = selection_store
     else:
         eval_store = OrbitFeatureStore(
-            feature_root,
+            eval_feature_root,
             split=str(config["eval_split"]),
             official_splits_path=split_path,
             require_complete_split=bool(
@@ -606,7 +620,9 @@ def main() -> None:
     args = parser.parse_args()
     config = load_json_config(args.config)
     if args.feature_root is not None:
-        config["feature_root"] = str(Path(args.feature_root).expanduser().resolve())
+        override = str(Path(args.feature_root).expanduser().resolve())
+        config["selection_feature_root"] = override
+        config["eval_feature_root"] = override
     seeds = seed_list(args.seeds if args.seeds is not None else config["seeds"])
     for seed in seeds:
         print(run_seed(config, seed=seed, results_root=args.results_root))

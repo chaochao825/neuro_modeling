@@ -54,5 +54,5 @@ was evaluated.
 The active protocol is
 `exp34_orbit_causal_consensus_v2_support_annotation_safe`. It makes all clean
 frames support-eligible, uses object-presence filtering only for clutter query,
-stores features in a new cache root, and requires a new validation scale
+stores validation and test features in separate cache roots, and requires a new validation scale
 receipt before the untouched 17-user formal endpoint can unlock.
