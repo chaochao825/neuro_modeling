@@ -9,7 +9,7 @@ a low-dimensional belief/reward controller selects the actuator appropriate to
 the current demand.
 
 The repository now contains a coherent synthetic chain for this narrower
-claim, plus explicit unresolved endpoints. It still does **not**
+claim, plus explicit negative and unresolved results. It still does **not**
 establish a participating high-rank E/I carrier, a thalamic biological identity,
 or an advantage on multi-session neural activity.
 
@@ -19,10 +19,39 @@ or an advantage on multi-session neural activity.
 | Executed scalar reward can learn a reusable two-actuator selector in reset blocks | Exp31, 30 seeds | support |
 | The same controller persists through a continuous hidden HMM without reset in a slow-switch regime | Exp32 main layer, 30 independent seeds | support |
 | Feedback-per-dwell plus controller/environment timescale mismatch explains the registered phase structure | Exp32 iso-lambda layer | inconclusive |
+| The Exp23 multiplicative total-drive axis and state-displacement-matched local rule improve behavior | Exp23 formal-v2 and fixed probe | oppose |
 | Shared gated dynamics beat common dynamics on canonical multi-animal neural data | Exp25 | inconclusive; canonical neural bundle absent |
 | The controller acts through a participating stable Dale E/I carrier | not tested by Exp31/32 | inconclusive |
 
-## Exp32 v2: controller support and unresolved phase structure
+## What changed after probing failures
+
+### Exp23: a bounded negative result, not a universal rejection
+
+The immutable 30-seed archive was reanalysed without rerunning or selecting
+seeds. In the delayed task, local balanced-accuracy gain over frozen was
+`-0.01133` under the matched state-displacement budget but only `+0.00056` at
+the learned axis's natural scale. Matching amplified that local direction by a
+median `83.4x`. Natural-scale delayed BPTT achieved `+0.01796` with a 95% seed
+bootstrap CI `[+0.01162,+0.02444]`; exact forward sensitivity achieved
+`+0.00194` with CI `[+0.00056,+0.00338]`.
+
+This supports two criticisms. First, the selected axis has limited behavioral
+headroom under the tested optimizer and protocol. Second, matching one scalar
+state-displacement target can greatly amplify a weak direction and is not a
+neutral proxy for functional plasticity. The registered `oppose` conclusion
+therefore applies only to this drive-gain axis, rule and budget construction.
+
+### Exp32 v1: retain the failure, then ask a different question
+
+The original primary cell (`hazard=.05`, `feedback=.125`, `delay=4`) produced
+only `+0.00352` local-minus-fixed accuracy and 3/5 positive seeds. It failed the
+scale gate; its formal config remains unauthorized. The complete development
+grid suggested that observability and memory timescale, rather than a scalar
+feedback threshold, were the informative axes. That observation was used only
+to freeze a new protocol and disjoint seeds `32000--32029`; the controller was
+not retuned.
+
+### Exp32 v2: controller support, phase structure unresolved
 
 All 30 seeds and 10,800 rows completed from clean commit `49aaaf3`.
 
@@ -107,7 +136,3 @@ expansion:
 Scaling neuron count alone is not informative. The next claim must be earned by
 the carrier participating in computation and by improving held-out behavior or
 prediction, not merely by producing a low matrix rank.
-
-The rejected Exp23 mechanism and the abandoned Exp32-v1 configuration are
-preserved, with their original quantitative discussion, in
-[`history/actuator_matching_critical_audit_20260718.md`](history/actuator_matching_critical_audit_20260718.md).

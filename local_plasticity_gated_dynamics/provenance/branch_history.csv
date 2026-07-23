@@ -1,0 +1,11 @@
+branch,tip_sha,tip_date,relationship_to_current,commits_added_after_tip,disposition,scope,snapshot_path
+agent/exp26-actuator-matching,27b01cc3ba468d051056c58857cb944b2505eae6,2026-07-18T17:31:04+08:00,current_base,0,current_source,Exp23-32 actuator matching and persistent sparse-feedback evidence,
+agent/belief-ei-block-switch,2e5d806194ac5bccda8f163824c0acc6b4296d6d,2026-07-17T04:40:51+08:00,ancestor,22,historical_snapshot,Exp19-25 belief E/I block switching and formal controller evidence,results/history/branch_snapshots/belief-ei-block-switch
+agent/effective-control-p0,49d4c1f98c07744984b909c1e46dfe9572408bf2,2026-07-11T11:22:38+08:00,ancestor,76,historical_snapshot,P0 paired mechanism audit and P1 rank-stage validation,results/history/branch_snapshots/effective-control-p0
+agent/ei-realdata-system,3ab77b7357cfae5aa966903fce4e14f6389f8e90,2026-07-13T22:25:27+08:00,ancestor,50,historical_snapshot,E/I bridge real-behavior and structured-reasoning integration,results/history/branch_snapshots/ei-realdata-system
+agent/exp16-learning-retry,cf22074014b860cbab7189a30543aa7ceb714b1d,2026-07-15T07:57:21+08:00,ancestor,40,historical_snapshot,Tiny recursive Sudoku retry,results/history/branch_snapshots/exp16-learning-retry
+agent/exp18-arc-recursive,f4255ebb896abb2ccc4dabbe3da4a4a42ad502fd,2026-07-15T17:36:57+08:00,ancestor,37,historical_snapshot,ARC recursive baseline and canaries,results/history/branch_snapshots/exp18-arc-recursive
+agent/hidden-context-p2,d194461ae5ae1770dcdc0065b12ac631266261f8,2026-07-11T15:42:55+08:00,ancestor,72,historical_snapshot,Hidden-HMM belief gate and causal intervention audit,results/history/branch_snapshots/hidden-context-p2
+agent/integrated-tiny-hrm,a2287aabec403d2786b83b6c193236d127b7b512,2026-07-15T06:22:10+08:00,ancestor,45,historical_snapshot,Integrated tiny recursive reasoning prototype,results/history/branch_snapshots/integrated-tiny-hrm
+agent/real-lowdim-validation,71f980bbf2a93872e5e2ad47b866f0aaec67d396,2026-07-11T03:48:38+08:00,ancestor,83,historical_snapshot,Original low-dimensional feedback and early real-data validation,results/history/branch_snapshots/real-lowdim-validation
+main,70f749d6e85a79452806257ac79a66551920dc14,2026-07-15T17:37:23+08:00,ancestor,36,historical_snapshot,Mainline through recursive ARC canaries,results/history/branch_snapshots/main

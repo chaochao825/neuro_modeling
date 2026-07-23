@@ -1,14 +1,5 @@
 # Exp23-25 formal evidence summary
 
-> **Legacy mixed aggregate.** This file is retained byte-for-byte at the claim
-> level because it was the published Exp23--25 report and later received Exp31
-> and Exp32 appendices. It is not the current evidence surface. Exp23 and its
-> rejected gain-axis rule are classified only as historical. Use
-> [`current/README.md`](current/README.md) and
-> [`current/claims.csv`](current/claims.csv) for active evidence, or
-> [`history/README.md`](history/README.md) and
-> [`history/claims.csv`](history/claims.csv) for superseded and failed work.
-
 This report is fail-closed. It reads only attempts whose saved `config.json` declares `profile=formal`; smoke and pilot attempts are ignored even when their numerical metrics are favorable.
 
 Every registered condition is represented in `summary.csv`. Missing, failed, and invalid cells are retained and prevent formal support in the affected AND gate.
@@ -92,71 +83,3 @@ the implemented local-eprop rule; it does not reject all budgets or all local ru
 target was selected without behavior, loss, test, or OOD fields from the retained v1
 development-reachability receipt. Exact config matching excludes the superseded 0.002 attempts
 from v2 inference while leaving their raw artifacts intact.
-
-## Exp31 formal update: hidden demand with executed-reward-only learning
-
-Exp31 removes the strongest Exp30 shortcuts: the target is one queried random
-value rather than an explicit routing/memory mixture; dense keys create natural
-capacity limits; no mode-by-demand gain is fitted; and the local selector sees
-only the scalar reward from the actuator it executed. The primary endpoint
-charges the complete forced-exploration prefix.
-
-| claim | estimate | 95% seed-bootstrap CI | Holm p | conclusion |
-| --- | ---: | ---: | ---: | --- |
-| reward-only local minus train-fixed full-block accuracy | +0.04721 | [0.04591, 0.04853] | 0.000040 | support |
-| hidden-reliability crossover | +0.39609 | [0.38594, 0.40608] | 0.000040 | support |
-| associative minus identical-write query-shuffled | +0.34670 | [0.34010, 0.35330] | 0.000040 | support |
-| 25% oracle-gain retention margin | +0.02229 | [0.02122, 0.02338] | 0.000040 | support |
-
-All 30 formal seeds and all 22,680 registered condition rows completed. Mean
-selector choice accuracy was 0.9497; mean oracle gain retained was 0.4732;
-query-shuffled accuracy was 0.4993; and associative accuracy decreased with
-interference pressure (mean seed Spearman -0.9708).
-
-The joint Exp31 conclusion is **support**, but only for a synthetic two-actuator
-controller-identifiability claim. Exp31 contains no participating high-rank E/I
-carrier, no neural recordings, and no strong task-model baseline. The
-controller also receives labels on 64/128 trials, resets at every block, and
-selects between only two fixed motifs. It therefore
-does not yet support the full Actuator Matching Principle. The next
-high-information experiment is to place the frozen motifs and reward-only
-controller inside a genuinely participating stable E/I carrier, then test
-closure, normal perturbation decay, and held-out utility before scaling neuron
-count or moving to real block-switching data.
-
-## Exp32 formal update: persistent reward-only control without block reset
-
-The preregistered Exp32-v1 smoke primary failed at hazard 0.05, feedback 1/8
-and delay 4: local minus train-fixed was only +0.00352 and only 3/5 seeds were
-positive. That failure, all 1,920 rows, and every run receipt remain published;
-the v1 formal launch stayed unauthorized.
-
-An independently seeded v2 panel then tested a new feedback--memory-timescale
-claim without changing the controller. All 30 seeds and all 10,800 planned
-rows completed from clean commit `49aaaf3`. At the frozen slow-switch primary
-cell, persistent local control exceeded train-fixed by +0.04349 (95% seed
-bootstrap CI +0.03446 to +0.05289; 28/30 positive), exceeded opposite-action
-eligibility by +0.08241 (CI +0.07667 to +0.08779), and had a +0.01011 accuracy
-response per doubling of expected feedback per dwell (CI +0.00962 to +0.01062).
-All three passed their 0.02/0.02/0.005 MCIDs and Holm correction, so the bounded
-main-controller claim is **support**.
-
-The stronger phase-diagram claim did not pass. On two exact iso-lambda lines,
-the preregistered slow-minus-fast effect was +0.01195 (CI +0.00320 to +0.02089),
-below the 0.02 structural MCID with one-sided p=0.955. That layer is
-**inconclusive**, so the registered joint Exp32 result is also
-**inconclusive**. The opposite-credit intervention is not update-budget
-matched (mean L1 ratio 1.215), the controller's scores are action-policy
-proxies rather than calibrated context posteriors, and neither an E/I carrier
-nor neural data participates in Exp32.
-
-The fixed Exp23 probe further narrows the earlier negative result: delayed
-local gain was -0.01133 under matched state displacement but +0.00056 at its
-natural scale, while the matching procedure amplified the local axis by a
-median 83.4x. Natural-scale delayed BPTT gained +0.01796 (CI +0.01162 to
-+0.02444), still below the local endpoint's 0.03 MCID. This opposes only the
-tested drive-gain axis, local rule and matching protocol; it does not oppose
-local learning in general.
-
-See `results/actuator_matching_critical_audit_20260718.md` for the consolidated
-support/oppose/inconclusive ledger, frontier comparison and next scale gate.

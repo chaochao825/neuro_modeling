@@ -1,0 +1,2 @@
+branch,tip_sha,path,blob_sha,bytes,retention
+agent/real-lowdim-validation,71f980bbf2a93872e5e2ad47b866f0aaec67d396,results/raw_metrics.csv,ca8070885cfcec2e72b0db5dd2dc9aeddc633162,29417930,Retained in ancestor Git history; omitted from the tip tree because aggregate raw metrics are ignored

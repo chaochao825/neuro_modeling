@@ -40,48 +40,48 @@ fixed actuator; low matrix rank alone is not evidence.
 
 | Component | Current evidence | Classification |
 |---|---|---|
+| High-rank physical updates can coexist with low-dimensional credit | Exp08 rank-stage audit | support for the revised mechanism framing |
+| Hidden belief can be inferred without true-context access | Exp09 hidden-HMM gate; Exp11 real IBL behavior is mixed | support in synthetic data; bounded real-behavior evidence |
+| Belief modulates effective dynamics on a frozen high-rank E/I receiver | Exp10 bridge and Exp21 full-trajectory audit | support with fixed receiver and scoped closure endpoints |
 | Input-versus-internal demand predicts actuator-family advantage | Exp26, 30 independent seeds; held-out demand AUROC 0.9467 and Spearman 0.7605 | support for the synthetic special case |
 | Low-dimensional task-descriptor selector improves over one fixed family | Exp29 independent one-shot confirmation; local-minus-fixed utility +0.1003, 95% CI [0.0954, 0.1047] | support for task-matched family policies |
-| Associative demand produces routing-to-memory crossover | Exp30 constructed positive-control panel; 5/5 positive seeds, mean demand/advantage Spearman 1.0 | sanity trend-positive, formally inconclusive |
-| Fixed motif parameters generalize broadly across unrelated tasks | Exp30 fixes its analytic motifs across the demand sweep, but Exp26/29 fit task-specific family policies | inconclusive |
-| Selector infers demand from observations or scalar reward | Current selector receives prospective descriptors and candidate utilities | inconclusive / planned |
-| Real neural or natural-task validation of the complete principle | Existing Exp25 and multi-session neural comparisons do not support this chain | inconclusive |
+| Executed scalar reward selects fixed motifs under hidden reliability | Exp31, 30 seeds; local-minus-fixed accuracy +0.0472, 95% CI [0.0459, 0.0485] | support for a reset-block two-actuator controller |
+| Reward belief persists in a continuous hidden stream | Exp32 main cell; local-minus-fixed +0.0435, 95% CI [0.0345, 0.0529] | support for the bounded slow-switch endpoint |
+| Performance follows the registered feedback-memory timescale structure | Exp32 iso-lambda effect +0.0119, below the 0.02 MCID | inconclusive; the Exp32 joint claim is not promoted |
+| Participating E/I carrier improves Exp31/32 behavior | Exp31/32 use fixed motifs without a participating E/I carrier | inconclusive / untested |
+| Shared model wins on multi-animal neural data | Exp25 fails closed because eligible canonical neural inputs are absent | inconclusive / open |
 
 The full Actuator Matching Principle is therefore **partially supported but
-formally inconclusive**. The immutable Exp26 and Exp29 evidence packages are not
-rewritten by the Exp30 extension.
+formally inconclusive**. The synthetic family-matching and bounded reward-only
+controller layers support. Carrier participation, broad motif reuse, and real
+neural generalization remain unverified.
 
-## Trend-first expansion
+## Evidence boundary
 
-Exp30 adds a positive-control sanity test for the associative-memory axis
-without introducing a broad baseline race. It uses one frozen high-rank
-Dale-compatible carrier and one fixed scalar readout. The carrier bridge is
-calibrated to transmit a scalar identity, so its high-rank dynamics do not
-solve the task. A direct cue and a trial-local key--value retrieval are mixed by a
-registered memory-demand coordinate. Routing, a one-dimensional compressive
-state, associative outer-product memory, and a key--value-shuffled causal
-control share trials, noise, carrier, and readout. Each mode/demand cell gets a
-training-only gain that matches query-output RMS. This is not a matched
-write/state/energy budget across all actuator families; only associative and
-shuffled memory have exactly matched write L1/L2.
+Current and historical evidence are intentionally disjoint. The
+[current registry](../results/current/README.md) contains only still-active
+foundations, core experiments, and open endpoints. The
+[historical registry](../results/history/README.md) contains the original
+physical-low-rank interpretation, the rejected rate-matched phase gate, the
+failed Exp23 local gain-axis combination, HRM/ARC/Sudoku explorations, and
+development panels superseded by independent confirmation.
 
-The five development seeds passed the registered trend gate. This licenses a
-larger delay/load/demand sweep; it does not license a formal support claim. The
-next scale step should retain only minimal mechanism controls: frozen, fixed
-single actuator, shuffled memory, demand-matched oracle, and eventually a
-learned observation-only selector. GRU/BPTT or sequence-model comparisons can
-be added after the crossover and selector effects are stable at formal scale.
+This separation changes no original statistic. In particular, a historical
+positive result remains positive in its archived report, but it no longer
+supports the current theory. Failed cells and inconclusive attempts remain
+hash-bound and auditable.
 
 ## Non-claims
 
-- Exp30 is a constructed capability test, not a real-data result or a strong
-  sequence-model benchmark.
-- Because the target is the registered sum of a direct and a retrievable
-  component, the crossover is a pipeline sanity check, not independent
-  evidence that the carrier discovers the decomposition.
-- Its matched selector reads the explicit demand coordinate; it is neither a
-  hidden-belief estimator nor a locally learned four-actuator controller.
-- The associative state is reset between trials and does not provide arbitrary
-  long-history exact recall.
+- Exp29 uses prospective generator descriptors and a full candidate-utility
+  teacher; it is not a reward-only or observation-only result.
+- Exp31 selects only two fixed synthetic motifs and resets its controller at
+  block boundaries.
+- Exp32 removes block resets but its action values are policy proxies rather
+  than calibrated context posteriors; its opposite-credit intervention is not
+  update-budget matched.
+- Exp31/32 do not contain a participating high-rank E/I carrier.
+- The current shared neural model has not beaten common dynamics across the
+  required animals and sessions.
 - The current results do not show end-to-end SOTA, universal network reuse,
   replacement of KV cache, or a complete biological implementation.
