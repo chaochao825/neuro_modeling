@@ -99,6 +99,8 @@ sizes, boundaries, and scale priorities.
 - `provenance/`: authoritative experiment/branch/object registries.
 - `scripts/build_evidence_views.py`: validates provenance and deterministically
   regenerates the two evidence views.
+- `scripts/audit_branch_reachability.py`: proves that every deleted branch tip
+  is reachable from the consolidation commit and audits later-deleted files.
 
 ## Reproduce the consolidated state
 
@@ -109,10 +111,12 @@ tests:
 ./scripts/bootstrap_windows.ps1
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe scripts\build_evidence_views.py
+.\.venv\Scripts\python.exe scripts\audit_branch_reachability.py
 git diff --exit-code -- results\current results\history\README.md `
   results\history\experiments.csv results\history\branches.csv `
   results\history\claims.csv results\history\git_objects.csv `
-  results\history\snapshot_manifest.csv
+  results\history\snapshot_manifest.csv `
+  results\history\branch_reachability.csv
 ```
 
 Formal experiment commands and immutable package-specific receipts are kept in

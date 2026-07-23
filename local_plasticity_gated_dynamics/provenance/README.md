@@ -4,8 +4,14 @@
 implemented experiment ID. `branch_history.csv` records the remote branch tips
 audited on 2026-07-23 against `agent/exp26-actuator-matching`.
 `historical_git_objects.csv` binds the only tracked result file present at an
-ancestor tip but absent from the current tip; its 29 MB blob remains reachable
-through the ancestor commit and is not duplicated in the checkout.
+ancestor tip but absent from the current tip. Its 29 MB content is materialized
+as a compressed historical archive; validation recomputes the Git blob SHA from
+the decompressed bytes.
+
+`consolidation_receipt.json` records the main fast-forward and deleted remote
+branch names. `scripts/audit_branch_reachability.py` rechecks every recorded tip
+against that consolidation commit and rebuilds
+`results/history/branch_reachability.csv`.
 
 The disposition is intentionally independent of the numerical conclusion:
 

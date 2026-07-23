@@ -45,6 +45,8 @@ def test_every_ancestor_branch_has_a_hash_bound_snapshot() -> None:
     assert [(row["path"], row["bytes"]) for row in objects] == [
         ("results/raw_metrics.csv", "29417930")
     ]
+    assert objects[0]["archive_format"] == "tar.gz"
+    assert (PROJECT_ROOT / objects[0]["materialized_path"]).is_file()
 
 
 def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
@@ -67,7 +69,7 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
         "r", encoding="utf-8", newline=""
     ) as handle:
         manifest = list(csv.DictReader(handle))
-    assert len(manifest) == 29
+    assert len(manifest) == 30
     assert all(len(row["sha256"]) == 64 and int(row["bytes"]) > 0 for row in manifest)
 
     with (tmp_path / "current" / "claims.csv").open(
@@ -88,3 +90,17 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
     ) as handle:
         foundation_claims = list(csv.DictReader(handle))
     assert {row["experiment"] for row in foundation_claims} == {"exp08", "exp09"}
+
+
+def test_deleted_branch_tips_are_fully_reachable_and_materialized() -> None:
+    with (PROJECT_ROOT / "results" / "history" / "branch_reachability.csv").open(
+        "r", encoding="utf-8", newline=""
+    ) as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 10
+    assert all(row["reachable"] == "true" for row in rows)
+    assert all(row["unique_commits"] == "0" for row in rows)
+    deleted = [row for row in rows if row["deleted_path_count"] != "0"]
+    assert len(deleted) == 1
+    assert deleted[0]["branch"] == "agent/real-lowdim-validation"
+    assert deleted[0]["materialization_status"] == "materialized_archive"

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-07-23",
+  "remote": "git@github.com:chaochao825/neuro_modeling.git",
+  "main_fast_forward_from": "70f749d6e85a79452806257ac79a66551920dc14",
+  "consolidation_commit": "13495481dd107f15251f11c28fd458d0f82e2900",
+  "deleted_remote_branches": [
+    "agent/belief-ei-block-switch",
+    "agent/consolidated-history",
+    "agent/effective-control-p0",
+    "agent/ei-realdata-system",
+    "agent/exp16-learning-retry",
+    "agent/exp18-arc-recursive",
+    "agent/exp26-actuator-matching",
+    "agent/hidden-context-p2",
+    "agent/integrated-tiny-hrm",
+    "agent/real-lowdim-validation"
+  ],
+  "expected_remote_heads_after_cleanup": [
+    "main"
+  ]
+}

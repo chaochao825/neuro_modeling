@@ -11,7 +11,10 @@ snapshots preserve each ancestor branch's README, report, and summary without
 rewriting their original claims. `snapshot_manifest.csv` binds those files by
 SHA-256. No failed or negative result was deleted.
 The only ancestor-tip result absent from the current tree is indexed
-in `git_objects.csv` by commit and blob SHA instead of being duplicated.
+in `git_objects.csv` and materialized as a compressed historical archive
+whose decompressed bytes are checked against the original Git blob SHA.
+`branch_reachability.csv` is the executable audit receipt showing that
+every deleted branch tip contributes zero commits outside consolidated main.
 
 `claims.csv` retains every historical row found in the legacy mixed
 aggregate, including all failed Exp23 controller rows.

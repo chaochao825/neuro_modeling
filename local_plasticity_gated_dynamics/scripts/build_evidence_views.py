@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import re
+import tarfile
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -30,7 +31,17 @@ BRANCH_FIELDS = (
     "scope",
     "snapshot_path",
 )
-GIT_OBJECT_FIELDS = ("branch", "tip_sha", "path", "blob_sha", "bytes", "retention")
+GIT_OBJECT_FIELDS = (
+    "branch",
+    "tip_sha",
+    "path",
+    "blob_sha",
+    "bytes",
+    "materialized_path",
+    "archive_member",
+    "archive_format",
+    "retention",
+)
 CURRENT_DISPOSITIONS = {"current_core", "current_foundation", "current_open"}
 ALLOWED_DISPOSITIONS = CURRENT_DISPOSITIONS | {"historical_only"}
 ALLOWED_CONCLUSIONS = {"support", "oppose", "inconclusive", "mixed"}
@@ -125,7 +136,7 @@ def load_branch_history(project_root: Path) -> list[dict[str, str]]:
 
 
 def load_historical_git_objects(project_root: Path) -> list[dict[str, str]]:
-    """Load objects retained by Git history instead of duplicating large files."""
+    """Validate historical-only Git objects and their materialized archives."""
 
     rows = _read_csv(
         project_root / "provenance" / "historical_git_objects.csv",
@@ -141,6 +152,23 @@ def load_historical_git_objects(project_root: Path) -> list[dict[str, str]]:
             raise ValueError(f"invalid blob SHA: {row['blob_sha']}")
         if int(row["bytes"]) <= 0:
             raise ValueError(f"invalid object byte count: {row['bytes']}")
+        archive_path = (project_root / row["materialized_path"]).resolve()
+        if project_root not in archive_path.parents or not archive_path.is_file():
+            raise ValueError(f"missing materialized historical object: {archive_path}")
+        if row["archive_format"] != "tar.gz":
+            raise ValueError(f"unsupported historical archive format: {row['archive_format']}")
+        with tarfile.open(archive_path, mode="r:gz") as archive:
+            member = archive.getmember(row["archive_member"])
+            if not member.isfile() or member.size != int(row["bytes"]):
+                raise ValueError(f"historical archive member mismatch: {row['archive_member']}")
+            source = archive.extractfile(member)
+            if source is None:
+                raise ValueError(f"cannot read historical archive member: {row['archive_member']}")
+            digest = hashlib.sha1(f"blob {member.size}\0".encode("ascii"))
+            while chunk := source.read(1024 * 1024):
+                digest.update(chunk)
+        if digest.hexdigest() != row["blob_sha"]:
+            raise ValueError(f"materialized archive does not match Git blob: {archive_path}")
     return rows
 
 
@@ -335,7 +363,10 @@ def build_views(project_root: Path, output_root: Path | None = None) -> None:
         "rewriting their original claims. `snapshot_manifest.csv` binds those files by",
         "SHA-256. No failed or negative result was deleted.",
         "The only ancestor-tip result absent from the current tree is indexed",
-        "in `git_objects.csv` by commit and blob SHA instead of being duplicated.",
+        "in `git_objects.csv` and materialized as a compressed historical archive",
+        "whose decompressed bytes are checked against the original Git blob SHA.",
+        "`branch_reachability.csv` is the executable audit receipt showing that",
+        "every deleted branch tip contributes zero commits outside consolidated main.",
         "",
         "`claims.csv` retains every historical row found in the legacy mixed",
         "aggregate, including all failed Exp23 controller rows.",

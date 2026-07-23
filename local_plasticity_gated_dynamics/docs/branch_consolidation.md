@@ -13,8 +13,8 @@ The consolidation instead fixes the evidence layer:
 2. generated current and historical views are exhaustive and disjoint;
 3. every ancestor branch has an exact README/report/summary snapshot;
 4. snapshot hashes make later accidental rewriting detectable;
-5. the sole ancestor-tip result file deleted later is bound by commit and blob
-   SHA rather than duplicated as a 29 MB checkout artifact;
+5. the sole ancestor-tip result file deleted later is materialized as a
+   compressed archive and verified against its original Git blob SHA;
 6. tests prevent abandoned or refuted methods from re-entering the current
    presentation surface.
 
@@ -56,5 +56,12 @@ The exact branch tips, dates, scopes, and distances to the audited base are in
 `results/history/branch_snapshots/`; the generated
 `results/history/snapshot_manifest.csv` records SHA-256 and byte count. The one
 later-deleted artifact, `results/raw_metrics.csv` from
-`agent/real-lowdim-validation`, remains reachable at its ancestor tip and is
-indexed by commit/blob SHA in `results/history/git_objects.csv`.
+`agent/real-lowdim-validation`, is preserved as
+`results/history/branch_snapshots/real-lowdim-validation/raw_metrics.csv.tar.gz`
+and indexed by commit/blob SHA in `results/history/git_objects.csv`.
+
+After the consolidation commit was fast-forwarded to `main`, all ten redundant
+remote `agent/*` references were deleted. `provenance/consolidation_receipt.json`
+records that operation. Branch deletion removed names only: the audit in
+`results/history/branch_reachability.csv` shows zero commits outside the
+consolidated main history for every recorded tip.
