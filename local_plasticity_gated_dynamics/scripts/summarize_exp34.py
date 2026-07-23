@@ -473,7 +473,14 @@ def main() -> None:
     headroom_user = payload["headroom_user"]
     summary = payload["summary"]
     summary["coverage"] = coverage
-    raw.to_csv(output / "raw_video_panel.csv", index=False)
+    if str(config["profile"]) == "formal":
+        raw.to_csv(
+            output / "raw_video_panel.csv.gz",
+            index=False,
+            compression={"method": "gzip", "compresslevel": 9, "mtime": 0},
+        )
+    else:
+        raw.to_csv(output / "raw_video_panel.csv", index=False)
     diagnostics.to_csv(output / "headroom_panel.csv", index=False)
     user_panel.to_csv(output / "user_panel.csv", index=False)
     headroom_user.to_csv(output / "headroom_user.csv", index=False)

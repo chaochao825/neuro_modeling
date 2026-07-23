@@ -1,0 +1,87 @@
+{
+  "algorithmic_seed_handling": "averaged within user",
+  "claim_classification": "support",
+  "claim_reason": "registered test-user task and causal-memory gates passed",
+  "comparisons": [
+    {
+      "ci_high": 0.04303120614281711,
+      "ci_low": 0.01499576506554497,
+      "comparator": "selection_fixed_best",
+      "mean_difference": 0.02861838518967966,
+      "method": "causal_consensus",
+      "n_users": 15,
+      "positive_users": 14,
+      "sign_flip_pvalue": 0.00146484375
+    },
+    {
+      "ci_high": 0.02546459885631041,
+      "ci_low": 0.002443946948605631,
+      "comparator": "memoryless_consensus",
+      "mean_difference": 0.01399775449431423,
+      "method": "causal_consensus",
+      "n_users": 15,
+      "positive_users": 10,
+      "sign_flip_pvalue": 0.0380859375
+    },
+    {
+      "ci_high": 0.034942695273993775,
+      "ci_low": 0.01450046303394377,
+      "comparator": "instantaneous_majority",
+      "mean_difference": 0.024244183185941546,
+      "method": "causal_consensus",
+      "n_users": 15,
+      "positive_users": 14,
+      "sign_flip_pvalue": 0.0001220703125
+    },
+    {
+      "ci_high": 0.008589963286673632,
+      "ci_low": 0.004083898211646842,
+      "comparator": "delayed_consensus",
+      "mean_difference": 0.006371995377791362,
+      "method": "causal_consensus",
+      "n_users": 15,
+      "positive_users": 13,
+      "sign_flip_pvalue": 0.0003662109375
+    }
+  ],
+  "condition_user_mean_accuracy": {
+    "causal_consensus": 0.7314632538716742,
+    "delayed_consensus": 0.7250912584938829,
+    "delta": 0.650375212586522,
+    "gain": 0.7028448686819946,
+    "instantaneous_majority": 0.7072190706857328,
+    "memoryless_consensus": 0.71746549937736,
+    "oracle_per_frame": 0.7788910367617924,
+    "prototype": 0.6966902370149596,
+    "selection_fixed_best": 0.7028448686819946,
+    "temporal": 0.71746549937736
+  },
+  "experiment": "exp34_orbit_causal_consensus",
+  "holm_adjusted_pvalues": [
+    0.0029296875,
+    0.0380859375,
+    0.00048828125,
+    0.0010986328125
+  ],
+  "mean_action_disagreement": 0.2937182023279172,
+  "mean_oracle_headroom": 0.051635241104760254,
+  "n_seeds": 5,
+  "n_users": 15,
+  "official_task_video_mean_accuracy": {
+    "causal_consensus": 0.7378664405451256,
+    "delayed_consensus": 0.7313673634538669,
+    "delta": 0.6613055652714069,
+    "gain": 0.7095884363724819,
+    "instantaneous_majority": 0.7131924247226481,
+    "memoryless_consensus": 0.7218072388543281,
+    "oracle_per_frame": 0.7854288953083594,
+    "prototype": 0.7034346450139406,
+    "selection_fixed_best": 0.7095884363724819,
+    "temporal": 0.7218072388543281
+  },
+  "profile": "formal",
+  "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
+  "retained_oracle_headroom_fraction": 0.5542413393910023,
+  "scale_decision": "not-applicable",
+  "statistical_unit": "user"
+}

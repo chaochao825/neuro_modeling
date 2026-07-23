@@ -172,10 +172,10 @@ def make_figure(
         "prototype": (4, 2),
         "gain": (4, 2),
         "delta": (4, 2),
-        "temporal": (4, -12),
-        "selection_fixed_best": (4, 5),
-        "memoryless_consensus": (4, 2),
-        "instantaneous_majority": (4, -12),
+        "temporal": (4, -14),
+        "selection_fixed_best": (4, 7),
+        "memoryless_consensus": (8, 7),
+        "instantaneous_majority": (8, -14),
         "delayed_consensus": (4, 2),
         "causal_consensus": (4, 2),
     }
@@ -217,10 +217,15 @@ def main() -> None:
     args = parser.parse_args()
     root = Path(args.summary_dir).expanduser().resolve()
     output = Path(args.output).expanduser().resolve()
+    raw_path = root / "raw_video_panel.csv"
+    if not raw_path.is_file():
+        raw_path = root / "raw_video_panel.csv.gz"
+    if not raw_path.is_file():
+        raise FileNotFoundError("Exp34 summary lacks raw video panel")
     figure = make_figure(
         pd.read_csv(root / "user_panel.csv"),
         pd.read_csv(root / "headroom_panel.csv"),
-        pd.read_csv(root / "raw_video_panel.csv"),
+        pd.read_csv(raw_path),
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=300, bbox_inches="tight")

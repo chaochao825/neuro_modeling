@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
 from experiments.exp34_orbit_causal_consensus import formal_config_fingerprint
 from figures.exp34_orbit_causal_consensus_plot import make_figure
-from scripts.summarize_exp34 import build_authorization_receipt, summarize_panel
+from scripts.summarize_exp34 import (
+    build_authorization_receipt,
+    load_panel,
+    summarize_panel,
+)
 
 
 CONDITIONS = (
@@ -157,3 +163,76 @@ def test_exp34_plot_is_bound_to_accuracy_cost_and_interventions() -> None:
     )
     figure = make_figure(user_panel, headroom, raw)
     assert len(figure.axes) == 4
+
+
+def test_exp34_loader_blocks_any_failed_condition_or_missing_coverage(
+    tmp_path: Path,
+) -> None:
+    run = tmp_path / "run"
+    run.mkdir()
+    (run / "status.json").write_text(
+        '{"seed": 1, "status": "complete", "condition_failures": 0, '
+        '"condition_invalid": 0}\n',
+        encoding="utf-8",
+    )
+    (run / "manifest.json").write_text(
+        '{"profile": "smoke", "run_label": "smoke"}\n', encoding="utf-8"
+    )
+    (run / "config.json").write_text(
+        '{"profile": "smoke", "protocol_version": '
+        '"exp34_orbit_causal_consensus_v3_official_video_exclusion"}\n',
+        encoding="utf-8",
+    )
+    rows = []
+    for condition in CONDITIONS:
+        rows.append(
+            {
+                "user_id": "u0",
+                "task_index": 0,
+                "video_id": "v0",
+                "condition": condition,
+                "frame_accuracy": 0.5,
+                "status": "complete",
+                "episode_fingerprint": "episode",
+                "trace_fingerprint": "trace",
+            }
+        )
+    pd.DataFrame(rows).to_csv(run / "raw_video_metrics.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "user_id": "u0",
+                "task_index": 0,
+                "oracle_gain": 0.1,
+                "action_disagreement": 0.2,
+                "excluded_query_video_ids": "[]",
+            }
+        ]
+    ).to_csv(run / "actuator_headroom.csv", index=False)
+    config = {
+        "profile": "smoke",
+        "seeds": [1],
+        "eval_user_ids": ["u0"],
+        "eval_split": "validation",
+        "official_splits_path": "unused.json",
+        "n_eval_tasks_per_user": 1,
+    }
+    _, _, _, coverage = load_panel([run], config=config)
+    assert coverage["complete"] is True
+
+    (run / "status.json").write_text(
+        '{"seed": 1, "status": "complete_with_failures", '
+        '"condition_failures": 1, "condition_invalid": 0}\n',
+        encoding="utf-8",
+    )
+    with np.testing.assert_raises_regex(RuntimeError, "formal inference is blocked"):
+        load_panel([run], config=config)
+
+    (run / "status.json").write_text(
+        '{"seed": 1, "status": "complete", "condition_failures": 0, '
+        '"condition_invalid": 0}\n',
+        encoding="utf-8",
+    )
+    config["n_eval_tasks_per_user"] = 2
+    with np.testing.assert_raises_regex(RuntimeError, "coverage is incomplete"):
+        load_panel([run], config=config)
