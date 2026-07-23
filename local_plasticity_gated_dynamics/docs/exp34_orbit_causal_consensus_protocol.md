@@ -22,17 +22,19 @@ efficiency.
 
 Development selects one fixed-actuator comparator on four validation users and
 evaluates two disjoint validation users. It compares four fixed motifs,
-selection-fixed, causal consensus, a count-reset-every-frame intervention, an
-eight-frame delayed update, and a label oracle. The formal configuration is
+selection-fixed, a state-free instantaneous majority ensemble, causal
+consensus, a count-reset-every-frame intervention, an eight-frame delayed
+update, and a label oracle. The formal configuration is
 fail-closed; after authorization it selects the fixed comparator on all six
 validation users and evaluates 50 tasks for each of 17 untouched test users.
 
 Inference first averages frames within task/video, repeated algorithmic seeds
 within user, and finally uses user as the independent unit. Support requires
-consensus to beat both the validation-selected fixed actuator and the
-memoryless intervention under Holm correction. A validation result is always
-`inconclusive`, but may authorize scale if its effect and retained oracle
-headroom clear their registered thresholds.
+consensus to beat the validation-selected fixed actuator, state-free
+instantaneous majority, memoryless reset, and delayed-state interventions
+under one Holm family. A validation result is always `inconclusive`, but may
+authorize scale if its effect and retained oracle headroom clear their
+registered thresholds.
 
 ## Invalidated v1 development result
 

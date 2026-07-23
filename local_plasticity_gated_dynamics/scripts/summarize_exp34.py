@@ -37,6 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COMPARATORS = (
     "selection_fixed_best",
     "memoryless_consensus",
+    "instantaneous_majority",
     "delayed_consensus",
 )
 
@@ -207,16 +208,18 @@ def summarize_panel(
     )
     mean_headroom = float(headroom_user["oracle_gain"].mean())
     mean_disagreement = float(headroom_user["action_disagreement"].mean())
-    fixed, memoryless, delayed = comparisons
+    fixed, memoryless, majority, delayed = comparisons
     retained = fixed.mean_difference / mean_headroom if mean_headroom > 0.0 else 0.0
     minimum_gain = float(analysis["minimum_accuracy_gain"])
     minimum_retained = float(analysis["minimum_retained_oracle_headroom"])
     causal_gate = bool(
         fixed.mean_difference >= minimum_gain
         and memoryless.mean_difference > 0.0
+        and majority.mean_difference > 0.0
         and delayed.mean_difference > 0.0
         and fixed.ci_low > 0.0
         and memoryless.ci_low > 0.0
+        and majority.ci_low > 0.0
         and delayed.ci_low > 0.0
         and retained >= minimum_retained
         and mean_disagreement > 0.0
@@ -230,8 +233,12 @@ def summarize_panel(
         significance = bool(
             adjusted[0] <= 0.05
             and adjusted[1] <= 0.05
+            and adjusted[2] <= 0.05
+            and adjusted[3] <= 0.05
             and fixed.ci_low > 0.0
             and memoryless.ci_low > 0.0
+            and majority.ci_low > 0.0
+            and delayed.ci_low > 0.0
         )
         if (
             fixed.mean_difference >= minimum_gain
@@ -240,7 +247,12 @@ def summarize_panel(
         ):
             conclusion = "support"
             reason = "registered test-user task and causal-memory gates passed"
-        elif fixed.ci_high < minimum_gain or memoryless.ci_high <= 0.0:
+        elif (
+            fixed.ci_high < minimum_gain
+            or memoryless.ci_high <= 0.0
+            or majority.ci_high <= 0.0
+            or delayed.ci_high <= 0.0
+        ):
             conclusion = "oppose"
             reason = "registered test-user task or causal-memory effect was absent"
         else:

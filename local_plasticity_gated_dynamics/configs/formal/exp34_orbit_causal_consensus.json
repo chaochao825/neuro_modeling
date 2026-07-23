@@ -57,6 +57,7 @@
     "holm_family": [
       "consensus_over_selection_fixed",
       "consensus_over_memoryless",
+      "consensus_over_instantaneous_majority",
       "consensus_over_delayed"
     ]
   }

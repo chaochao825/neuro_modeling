@@ -5,6 +5,7 @@ import numpy as np
 from src.models.causal_consensus_gate import (
     CausalConsensusConfig,
     CausalConsensusGate,
+    instantaneous_majority_predictions,
 )
 
 
@@ -66,3 +67,23 @@ def test_delayed_gate_cannot_use_an_observation_before_it_arrives() -> None:
     trace = gate.trace(predictions, video_ids=["v"] * 3)
     assert np.array_equal(trace.count_state_l1, [0.0, 0.0, 2.0])
     assert np.array_equal(trace.actions[:2], [0, 0])
+
+
+def test_instantaneous_majority_is_state_free_and_uses_frozen_tie_order() -> None:
+    predictions = np.asarray(
+        [
+            [0, 0, 1, 2],
+            [0, 1, 2, 3],
+            [2, 1, 2, 1],
+        ],
+        dtype=np.int64,
+    )
+    output, actions = instantaneous_majority_predictions(
+        predictions,
+        n_classes=4,
+        tie_break_order=(3, 1, 0, 2),
+    )
+    assert np.array_equal(output, [0, 3, 1])
+    assert np.array_equal(actions, [1, 3, 3])
+    assert output.flags.writeable is False
+    assert actions.flags.writeable is False

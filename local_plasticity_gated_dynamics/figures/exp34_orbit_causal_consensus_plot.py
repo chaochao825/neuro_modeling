@@ -21,6 +21,7 @@ METHOD_ORDER = (
     "temporal",
     "selection_fixed_best",
     "memoryless_consensus",
+    "instantaneous_majority",
     "delayed_consensus",
     "causal_consensus",
     "oracle_per_frame",
@@ -32,6 +33,7 @@ METHOD_LABELS = (
     "Temporal",
     "Val-fixed",
     "Memoryless",
+    "Majority",
     "Delayed",
     "Causal",
     "Oracle",
@@ -43,6 +45,7 @@ COLORS = {
     "temporal": "#F58518",
     "selection_fixed_best": "#9D755D",
     "memoryless_consensus": "#B279A2",
+    "instantaneous_majority": "#76B7B2",
     "delayed_consensus": "#FF9DA6",
     "causal_consensus": "#E45756",
     "oracle_per_frame": "#BAB0AC",
@@ -80,7 +83,7 @@ def make_figure(
     if not {"condition", "frame_accuracy", "mean_event_l1"} <= set(raw.columns):
         raise ValueError("raw panel lacks required columns")
     _style()
-    fig, axes = plt.subplots(2, 2, figsize=(9.2, 6.8))
+    fig, axes = plt.subplots(2, 2, figsize=(9.8, 6.8))
     wide = user_panel.pivot(
         index="user_id", columns="condition", values="user_video_mean_accuracy"
     )
@@ -115,6 +118,7 @@ def make_figure(
     comparisons = (
         ("selection_fixed_best", "Val-fixed"),
         ("memoryless_consensus", "Memoryless"),
+        ("instantaneous_majority", "Majority"),
         ("delayed_consensus", "Delayed"),
     )
     causal = wide["causal_consensus"]
@@ -130,7 +134,7 @@ def make_figure(
         )
         ax.hlines(float(difference.mean()), x - 0.22, x + 0.22, color="black", lw=2)
     ax.axhline(0.0, color="#777777", linewidth=0.8, linestyle="--")
-    ax.set_xticks(np.arange(3), [item[1] for item in comparisons])
+    ax.set_xticks(np.arange(len(comparisons)), [item[1] for item in comparisons])
     ax.set_ylabel("Causal-consensus gain (pp)")
     ax.text(-0.15, 1.04, "b", transform=ax.transAxes, fontweight="bold")
 
@@ -171,6 +175,7 @@ def make_figure(
         "temporal": (4, -12),
         "selection_fixed_best": (4, 5),
         "memoryless_consensus": (4, 2),
+        "instantaneous_majority": (4, -12),
         "delayed_consensus": (4, 2),
         "causal_consensus": (4, 2),
     }

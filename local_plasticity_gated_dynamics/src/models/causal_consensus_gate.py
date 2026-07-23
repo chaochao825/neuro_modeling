@@ -26,6 +26,38 @@ def _readonly(value: ArrayLike, *, dtype: np.dtype | type) -> np.ndarray:
     return result
 
 
+def instantaneous_majority_predictions(
+    action_predictions: ArrayLike,
+    *,
+    n_classes: int,
+    tie_break_order: tuple[int, ...],
+) -> tuple[IntArray, IntArray]:
+    """Return a label-free, state-free full-bank ensemble control."""
+
+    raw = np.asarray(action_predictions)
+    if raw.dtype.kind not in {"i", "u"} or raw.ndim != 2 or raw.shape[0] == 0:
+        raise ValueError("action_predictions must be a non-empty integer matrix")
+    predictions = np.asarray(raw, dtype=np.int64)
+    n_actions = predictions.shape[1]
+    if n_actions < 2 or set(tie_break_order) != set(range(n_actions)):
+        raise ValueError("tie_break_order must be a permutation of all actions")
+    if n_classes < 2 or np.any(predictions < 0) or np.any(predictions >= n_classes):
+        raise ValueError("action predictions fall outside the class range")
+    output = np.empty(predictions.shape[0], dtype=np.int64)
+    actions = np.empty(predictions.shape[0], dtype=np.int64)
+    for index, row in enumerate(predictions):
+        counts = np.bincount(row, minlength=n_classes)
+        tied_classes = set(np.flatnonzero(counts == counts.max()).tolist())
+        action = next(
+            candidate
+            for candidate in tie_break_order
+            if int(row[candidate]) in tied_classes
+        )
+        actions[index] = action
+        output[index] = row[action]
+    return _readonly(output, dtype=np.int64), _readonly(actions, dtype=np.int64)
+
+
 @dataclass(frozen=True, slots=True)
 class CausalConsensusConfig:
     retention: float = 1.0

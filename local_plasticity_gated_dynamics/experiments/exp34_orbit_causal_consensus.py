@@ -37,6 +37,7 @@ from src.data.orbit_streaming import (
 from src.models.causal_consensus_gate import (
     CausalConsensusConfig,
     CausalConsensusGate,
+    instantaneous_majority_predictions,
 )
 from src.models.streaming_fewshot_actuators import (
     ACTUATOR_NAMES,
@@ -74,6 +75,7 @@ IMPLEMENTATION_PATHS = (
 EVALUATION_CONDITIONS = (
     *ACTUATOR_NAMES,
     "selection_fixed_best",
+    "instantaneous_majority",
     "causal_consensus",
     "memoryless_consensus",
     "delayed_consensus",
@@ -368,6 +370,19 @@ def _condition_output(
             )
         predictions, actions, costs, state = _gate_output(episode, trace, gate_config)
         return predictions, actions, costs, state, "full_actuator_bank"
+    elif condition == "instantaneous_majority":
+        predictions, actions = instantaneous_majority_predictions(
+            trace.predictions,
+            n_classes=episode.n_classes,
+            tie_break_order=_gate_config(config).tie_break_order,
+        )
+        return (
+            predictions,
+            actions,
+            np.sum(trace.action_event_l1, axis=1),
+            np.zeros(n, dtype=np.float64),
+            "full_actuator_bank",
+        )
     elif condition == "oracle_per_frame":
         correct = trace.predictions == episode.query_labels[:, None]
         actions = np.where(
@@ -573,7 +588,12 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         bootstrap = int(config["analysis"].get("bootstrap_samples", 20_000))
         inference = []
         for index, comparator in enumerate(
-            ("selection_fixed_best", "memoryless_consensus", "delayed_consensus")
+            (
+                "selection_fixed_best",
+                "memoryless_consensus",
+                "instantaneous_majority",
+                "delayed_consensus",
+            )
         ):
             inference.append(
                 paired_user_inference(
@@ -588,6 +608,9 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         headroom = float(diagnostic_frame["oracle_gain"].mean())
         fixed_gain = float(means["causal_consensus"] - means["selection_fixed_best"])
         memory_gain = float(means["causal_consensus"] - means["memoryless_consensus"])
+        majority_gain = float(
+            means["causal_consensus"] - means["instantaneous_majority"]
+        )
         retained = fixed_gain / headroom if headroom > 0.0 else 0.0
         profile = str(config["profile"])
         conclusion = "inconclusive"
@@ -597,12 +620,17 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             support = bool(
                 fixed_gain >= minimum
                 and memory_gain > 0.0
+                and majority_gain > 0.0
                 and retained
                 >= float(config["analysis"]["minimum_retained_oracle_headroom"])
                 and inference[0].ci_low > 0.0
                 and inference[1].ci_low > 0.0
+                and inference[2].ci_low > 0.0
+                and inference[3].ci_low > 0.0
                 and adjusted[0] <= 0.05
                 and adjusted[1] <= 0.05
+                and adjusted[2] <= 0.05
+                and adjusted[3] <= 0.05
             )
             if support:
                 conclusion = "support"
@@ -622,6 +650,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             "official_task_video_mean_accuracy": official_means,
             "consensus_gain_over_selection_fixed": fixed_gain,
             "consensus_gain_over_memoryless": memory_gain,
+            "consensus_gain_over_instantaneous_majority": majority_gain,
             "mean_oracle_headroom": headroom,
             "retained_oracle_headroom_fraction": retained,
             "mean_action_disagreement": float(

@@ -14,6 +14,7 @@ CONDITIONS = (
     "delta",
     "temporal",
     "selection_fixed_best",
+    "instantaneous_majority",
     "causal_consensus",
     "memoryless_consensus",
     "delayed_consensus",
@@ -28,6 +29,7 @@ def _raw_panel() -> pd.DataFrame:
         "delta": 0.58,
         "temporal": 0.64,
         "selection_fixed_best": 0.64,
+        "instantaneous_majority": 0.67,
         "causal_consensus": 0.74,
         "memoryless_consensus": 0.65,
         "delayed_consensus": 0.70,
@@ -45,7 +47,12 @@ def _raw_panel() -> pd.DataFrame:
                         "video_id": f"v{user_number}",
                         "condition": condition,
                         "frame_accuracy": values[condition] + 0.005 * user_number,
-                        "mean_event_l1": 4.0 if "consensus" in condition else 1.0,
+                        "mean_event_l1": (
+                            4.0
+                            if "consensus" in condition
+                            or condition == "instantaneous_majority"
+                            else 1.0
+                        ),
                     }
                 )
     return pd.DataFrame(rows)
