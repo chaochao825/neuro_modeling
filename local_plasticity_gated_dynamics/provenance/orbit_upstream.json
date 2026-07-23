@@ -1,0 +1,26 @@
+{
+  "dataset_name": "ORBIT: A Real-World Few-Shot Dataset for Teachable Object Recognition",
+  "dataset_doi": "10.25383/city.14294597",
+  "dataset_license": "CC BY 4.0",
+  "upstream_repository": "https://github.com/microsoft/ORBIT-Dataset",
+  "upstream_commit": "4ef170261699af1e7abf30ea145855cb87abb80e",
+  "upstream_code_license": "MIT",
+  "verified_at": "2026-07-24",
+  "archives": {
+    "validation_224.zip": {
+      "figshare_file_id": 28368351,
+      "bytes": 4149104308,
+      "md5": "6e6301b319d16034b95b28b101f37003"
+    },
+    "test_224.zip": {
+      "figshare_file_id": 28368072,
+      "bytes": 16432259857,
+      "md5": "56235be80515a0c160c9a94d5273aeb6"
+    },
+    "train_224.zip": {
+      "figshare_file_id": 28368339,
+      "bytes": 31811023267,
+      "md5": "ffb504f8c35cec242232d25544d87cdb"
+    }
+  }
+}

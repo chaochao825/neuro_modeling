@@ -1,0 +1,5 @@
+innovation_id,claim_id,issue_id,artifact_path,what_to_verify,status,notes
+I1,C0,E33-REAL,brief/evidence-matrix.csv,Paired held-out user gain over globally fixed motif,planned,Official ORBIT endpoint
+I1,C1,E33-INT,notes/design/orbit_experiment_matrix.csv,Mechanism-specific intervention directions,planned,Holm-corrected family
+I1,C3,E33-SHOT,notes/design/orbit_experiment_matrix.csv,Very-low-shot accuracy versus personalization cost,planned,Same support tape
+I3,C2,E34-EI,notes/design/orbit_experiment_matrix.csv,Carrier gain retention closure and normal contraction,deferred,Scale only after C0 headroom

@@ -1,0 +1,50 @@
+{
+  "profile": "smoke",
+  "protocol_version": "exp33_orbit_causal_cluve_v1",
+  "seeds": [3300, 3301, 3302],
+  "training_algorithm": "executed_reward_only_contextual_bandit",
+  "used_autograd": false,
+  "used_bptt": false,
+  "feature_root": "/home/spco/data/orbit_features_efficientnet_b0",
+  "official_splits_path": "data/orbit_official_splits.json",
+  "fit_split": "validation",
+  "eval_split": "validation",
+  "fit_user_ids": ["P867", "P579", "P235", "P778"],
+  "eval_user_ids": ["P189", "P194"],
+  "require_complete_fit_split": true,
+  "require_complete_eval_split": true,
+  "n_fit_tasks_per_user": 3,
+  "n_eval_tasks_per_user": 5,
+  "training_frame_stride": 3,
+  "sampling": {
+    "support_stride": 30,
+    "max_support_frames_per_video": 100,
+    "query_frames_per_video": 100,
+    "min_query_frames_per_video": 50,
+    "max_frames_per_video": 1000,
+    "support_video_limit": null
+  },
+  "actuators": {
+    "norm_floor": 1e-08,
+    "variance_floor": 0.0001,
+    "gain_min": 0.25,
+    "gain_max": 4.0,
+    "delta_beta": 0.5,
+    "delta_passes": 2,
+    "temporal_retention": 0.85,
+    "score_temperature": 10.0
+  },
+  "controller": {
+    "learning_rate": 0.03,
+    "eligibility_retention": 0.0,
+    "belief_retention": 0.5,
+    "epsilon": 0.1,
+    "weight_decay": 0.0001,
+    "initial_reward_logit": 0.0
+  },
+  "analysis": {
+    "minimum_accuracy_gain": 0.005,
+    "minimum_oracle_headroom": 0.01,
+    "minimum_action_disagreement": 0.05
+  }
+}

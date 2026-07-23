@@ -21,6 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 ibl = ["ONE-api>=3,<4", "ibllib>=3.3"]
+orbit = ["torchvision>=0.22,<0.23", "pillow>=10"]
 dev = ["pytest>=8", "pytest-cov>=5"]
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,66 @@
+primary_claim:
+  id: C0
+  statement: >-
+    On held-out ORBIT users, a low-dimensional causal controller trained from
+    executed-action rewards on training users can select among reusable
+    routing, associative-memory, and temporal-dynamics motifs and outperform
+    the best globally fixed motif under the same frozen encoder, frame tape,
+    support set, and personalization budget.
+  novelty_type: new-method
+  gap_evidence: >-
+    ORBIT work establishes strong prototype, meta-learning, sampling, and
+    parameter-efficient adaptation baselines, while fast-weight and state-space
+    work establishes powerful individual memory mechanisms. The verified
+    literature snapshot did not identify an ORBIT evaluation that learns a
+    low-dimensional, reward-trained policy for choosing among qualitatively
+    different reusable computation mechanisms under causal query constraints.
+
+secondary_claims:
+  - id: C1
+    statement: >-
+      Any aggregate gain is mechanism-specific: routing/gain helps observable
+      support-query mismatch, fast memory helps low-shot binding, and temporal
+      dynamics helps transient query degradation; targeted clamp and shuffle
+      interventions remove the corresponding stratum-specific benefit.
+    supports_primary: true
+  - id: C2
+    statement: >-
+      A fixed high-rank Dale E/I carrier can realize the selected effective
+      computation while retaining at least 90% of the score-space controller's
+      held-out gain, with low latent closure error and decaying normal
+      perturbations.
+    supports_primary: false
+  - id: C3
+    statement: >-
+      The controller provides a better accuracy-versus-personalization-cost
+      trade-off than per-user gradient adaptation at very low support counts.
+    supports_primary: true
+
+non_claims:
+  - The method is not claimed to train a visual foundation model locally.
+  - The method is not claimed to replace Transformers, Mamba, or Gated DeltaNet on general sequence modelling.
+  - Low effective control dimension is not evidence of low physical recurrent matrix rank.
+  - The standard ORBIT result is not an open-set result unless an explicitly registered unknown-object track is run.
+  - The E/I carrier is not called biologically realistic solely because it obeys Dale signs.
+
+risk_factors:
+  - description: A strong frozen encoder and cosine prototypes may leave no useful actuator-selection headroom.
+    mitigation: Report oracle headroom before scaling; classify a zero-headroom result as oppose rather than tuning around it.
+  - description: Actuator outputs may be too correlated for a selector gain to identify mechanisms.
+    mitigation: Measure action disagreement and per-user oracle gain; require targeted intervention effects, not only aggregate accuracy.
+  - description: Randomly sampled ORBIT query frames may weaken temporal continuity.
+    mitigation: Preserve original frame order, record temporal gaps, and report the official random-frame endpoint separately from a preregistered contiguous causal stress track.
+  - description: User-level sample size is limited to 17 official test users.
+    mitigation: Use paired user-level bootstrap intervals and permutation tests; never treat frames as independent replicates.
+  - description: A participating E/I carrier may reduce task accuracy without adding explanatory value.
+    mitigation: Keep score-space performance primary and enforce a predeclared 90% gain-retention gate before mechanistic claims.
+
+likely_reviewer_objections:
+  - objection: The gain is only a better visual backbone or a different frame sampler.
+    preemptive_response: Pair encoder weights, sampled support/query frames, preprocessing, and query order across all rerun baselines; label paper-reported numbers separately.
+  - objection: The selector sees true task demand or counterfactual action rewards.
+    preemptive_response: Audit the API and logs so the main selector observes only causal diagnostics, its sampled action, and that action's training reward; oracle and supervised policies are labelled upper bounds.
+  - objection: Temporal smoothing alone explains the result.
+    preemptive_response: Include fixed temporal, memory-only, routing-only, fixed-best, and selector-shuffled controls plus mechanism-stratified interventions.
+  - objection: A low-dimensional controller is merely low matrix rank.
+    preemptive_response: Report controller dimension, effective Jacobian changes, raw carrier rank, closure error, and normal perturbation decay separately.
