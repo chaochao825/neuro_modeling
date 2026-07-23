@@ -31,6 +31,7 @@ from src.analysis.orbit_streaming_metrics import (
     paired_user_inference,
     reduce_to_user_accuracy,
 )
+from src.data.orbit_streaming import load_official_orbit_splits
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -92,7 +93,7 @@ def eligible_run_dirs(
 
 def load_panel(
     run_dirs: Iterable[Path], *, config: Mapping[str, Any]
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     raw_frames: list[pd.DataFrame] = []
     diagnostics: list[pd.DataFrame] = []
     manifests: list[dict[str, object]] = []
@@ -105,6 +106,12 @@ def load_panel(
         if observed_config.get("profile") != config.get("profile"):
             raise RuntimeError(f"{path} has a different profile")
         seed = int(status["seed"])
+        if int(status.get("condition_failures", 0)) != 0 or int(
+            status.get("condition_invalid", 0)
+        ) != 0:
+            raise RuntimeError(
+                f"{path} has failed or invalid conditions; formal inference is blocked"
+            )
         raw = pd.read_csv(path / "raw_video_metrics.csv")
         required = {
             "user_id",
@@ -141,6 +148,42 @@ def load_panel(
             }
         )
     panel = pd.concat(raw_frames, ignore_index=True)
+    diagnostic_panel = pd.concat(diagnostics, ignore_index=True)
+    requested = tuple(map(str, config.get("eval_user_ids", [])))
+    if requested:
+        expected_users = set(requested)
+    else:
+        split_path = Path(str(config["official_splits_path"]))
+        if not split_path.is_absolute():
+            split_path = PROJECT_ROOT / split_path
+        expected_users = set(
+            load_official_orbit_splits(split_path)[str(config["eval_split"])]
+        )
+    expected_seeds = set(seed_list(config["seeds"]))
+    expected_tasks = set(range(int(config["n_eval_tasks_per_user"])))
+    expected_pairs = {
+        (seed, user_id, task_index)
+        for seed in expected_seeds
+        for user_id in expected_users
+        for task_index in expected_tasks
+    }
+    observed_pairs = set(
+        panel[["seed", "user_id", "task_index"]].itertuples(index=False, name=None)
+    )
+    diagnostic_pairs = set(
+        diagnostic_panel[["seed", "user_id", "task_index"]].itertuples(
+            index=False, name=None
+        )
+    )
+    if observed_pairs != expected_pairs or diagnostic_pairs != expected_pairs:
+        raise RuntimeError(
+            "Exp34 user/task coverage is incomplete; formal inference is blocked"
+        )
+    condition_counts = panel.groupby(
+        ["seed", "user_id", "task_index", "video_id"], sort=False
+    )["condition"].nunique()
+    if not condition_counts.eq(len(EVALUATION_CONDITIONS)).all():
+        raise RuntimeError("Exp34 task/video condition coverage is incomplete")
     tape_groups = panel.groupby(["seed", "user_id", "task_index", "video_id"])
     if tape_groups["episode_fingerprint"].nunique().max() != 1:
         raise RuntimeError("Exp34 conditions do not share the same episode tape")
@@ -148,8 +191,24 @@ def load_panel(
         raise RuntimeError("Exp34 conditions do not share the same actuator trace")
     return (
         panel,
-        pd.concat(diagnostics, ignore_index=True),
+        diagnostic_panel,
         pd.DataFrame(manifests).sort_values("seed"),
+        {
+            "complete": True,
+            "expected_users": len(expected_users),
+            "observed_users": int(panel["user_id"].nunique()),
+            "expected_seeds": len(expected_seeds),
+            "observed_seeds": int(panel["seed"].nunique()),
+            "expected_user_tasks": len(expected_pairs),
+            "observed_user_tasks": len(observed_pairs),
+            "excluded_query_videos": sorted(
+                {
+                    video_id
+                    for value in diagnostic_panel["excluded_query_video_ids"]
+                    for video_id in json.loads(str(value))
+                }
+            ),
+        },
     )
 
 
@@ -337,6 +396,13 @@ def _report(summary: Mapping[str, Any]) -> str:
         f"- Profile: `{summary['profile']}`",
         f"- Users (statistical unit): {summary['n_users']}",
         f"- Algorithmic seeds averaged within user: {summary['n_seeds']}",
+        "- Coverage: "
+        f"{summary['coverage']['observed_users']}/"
+        f"{summary['coverage']['expected_users']} users and "
+        f"{summary['coverage']['observed_user_tasks']}/"
+        f"{summary['coverage']['expected_user_tasks']} seed-user-tasks",
+        "- Officially excluded short query videos: "
+        f"{len(summary['coverage']['excluded_query_videos'])}",
         f"- Scale decision: **{summary['scale_decision']}**",
         f"- Claim classification: **{summary['claim_classification']}**",
         "",
@@ -401,11 +467,12 @@ def main() -> None:
         seeds=seed_list(config["seeds"]),
         profile=str(config["profile"]),
     )
-    raw, diagnostics, manifest = load_panel(runs, config=config)
+    raw, diagnostics, manifest, coverage = load_panel(runs, config=config)
     comparisons, payload = summarize_panel(raw, diagnostics, config=config)
     user_panel = payload["user_panel"]
     headroom_user = payload["headroom_user"]
     summary = payload["summary"]
+    summary["coverage"] = coverage
     raw.to_csv(output / "raw_video_panel.csv", index=False)
     diagnostics.to_csv(output / "headroom_panel.csv", index=False)
     user_panel.to_csv(output / "user_panel.csv", index=False)

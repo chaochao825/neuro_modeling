@@ -66,7 +66,7 @@ def _config(tmp_path: Path) -> dict[str, object]:
     )
     return {
         "profile": "smoke",
-        "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
+        "protocol_version": "exp34_orbit_causal_consensus_v3_official_video_exclusion",
         "training_algorithm": "causal_label_free_count_belief",
         "used_query_labels": False,
         "used_future_frames": False,

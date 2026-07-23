@@ -186,3 +186,58 @@ def test_clean_support_ignores_cached_object_presence_annotation(
         ),
     )
     assert np.sum(episode.support.labels == 0) == 3
+
+
+def test_query_video_below_official_frame_minimum_is_excluded_not_failed(
+    tmp_path: Path,
+) -> None:
+    root, split_path = _make_store(tmp_path)
+    manifest_path = root / "feature_manifest.csv"
+    manifest = pd.read_csv(manifest_path)
+    source = manifest.loc[
+        (manifest["split"] == "validation")
+        & (manifest["object_name"] == "cup")
+        & (manifest["video_type"] == "clutter")
+    ].iloc[0]
+    valid_id = "validation_user-cup-clutter-valid"
+    valid_relative = Path("validation") / f"{valid_id}.npz"
+    with np.load(root / str(source["feature_path"]), allow_pickle=False) as payload:
+        embeddings = payload["embeddings"]
+        frame_indices = payload["frame_indices"]
+    np.savez_compressed(
+        root / valid_relative,
+        embeddings=embeddings,
+        frame_indices=frame_indices,
+        object_present=np.ones(frame_indices.size, dtype=np.bool_),
+    )
+    extra = source.copy()
+    extra["video_id"] = valid_id
+    extra["feature_path"] = valid_relative.as_posix()
+    extra["source_fingerprint"] = valid_id
+    pd.concat([manifest, extra.to_frame().T], ignore_index=True).to_csv(
+        manifest_path, index=False
+    )
+
+    excluded_id = str(source["video_id"])
+    np.savez_compressed(
+        root / str(source["feature_path"]),
+        embeddings=embeddings,
+        frame_indices=frame_indices,
+        object_present=np.asarray([True] + [False] * (frame_indices.size - 1)),
+    )
+    store = OrbitFeatureStore(root, split="validation", official_splits_path=split_path)
+    episode = store.sample_episode(
+        "validation_user",
+        seed=11,
+        task_index=0,
+        config=OrbitEpisodeSamplingConfig(
+            support_stride=2,
+            max_support_frames_per_video=3,
+            query_frames_per_video=5,
+            min_query_frames_per_video=2,
+            max_frames_per_video=8,
+        ),
+    )
+    assert episode.excluded_query_video_ids == (excluded_id,)
+    assert excluded_id not in set(episode.query_video_ids)
+    assert set(np.unique(episode.query_labels)) == {0, 1}

@@ -108,7 +108,7 @@ def test_exp34_authorization_receipt_is_self_hashed(tmp_path) -> None:
         (root / f"provenance_{split}.json").write_text("{}\n")
     formal = {
         "profile": "formal",
-        "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
+        "protocol_version": "exp34_orbit_causal_consensus_v3_official_video_exclusion",
         "seeds": [1],
         "selection_split": "validation",
         "eval_split": "test",

@@ -1,6 +1,6 @@
 {
   "profile": "smoke",
-  "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
+  "protocol_version": "exp34_orbit_causal_consensus_v3_official_video_exclusion",
   "seeds": [3400, 3401, 3402],
   "training_algorithm": "causal_label_free_count_belief",
   "used_query_labels": false,

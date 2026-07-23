@@ -186,6 +186,7 @@ class OrbitEmbeddingEpisode:
     query_labels: IntArray
     query_video_ids: NDArray[np.str_]
     query_frame_indices: IntArray
+    excluded_query_video_ids: tuple[str, ...] = ()
     fingerprint: str = ""
 
     def __post_init__(self) -> None:
@@ -217,8 +218,13 @@ class OrbitEmbeddingEpisode:
             raise ValueError("every episode class must have support samples")
         if set(np.unique(labels).tolist()) != expected:
             raise ValueError("every episode class must have query samples")
+        excluded = tuple(str(value) for value in self.excluded_query_video_ids)
+        if len(excluded) != len(set(excluded)) or any(not value for value in excluded):
+            raise ValueError("excluded query video ids must be unique and non-empty")
+        if set(excluded) & set(query.video_ids.tolist()):
+            raise ValueError("excluded query videos cannot appear in the query stream")
         fingerprint = self.fingerprint or _hash_payload(
-            "orbit-embedding-episode-v1",
+            "orbit-embedding-episode-v2",
             self.split,
             self.user_id,
             int(self.task_index),
@@ -231,12 +237,14 @@ class OrbitEmbeddingEpisode:
             labels,
             query.video_ids,
             query.frame_indices,
+            excluded,
         )
         object.__setattr__(self, "task_index", int(self.task_index))
         object.__setattr__(self, "query_embeddings", query.embeddings)
         object.__setattr__(self, "query_labels", _readonly(labels, dtype=np.int64))
         object.__setattr__(self, "query_video_ids", query.video_ids)
         object.__setattr__(self, "query_frame_indices", query.frame_indices)
+        object.__setattr__(self, "excluded_query_video_ids", excluded)
         object.__setattr__(self, "fingerprint", fingerprint)
 
     @property
@@ -449,6 +457,7 @@ class OrbitFeatureStore:
         query_labels: list[np.ndarray] = []
         query_video_ids: list[np.ndarray] = []
         query_frame_indices: list[np.ndarray] = []
+        excluded_query_video_ids: list[str] = []
 
         for label, object_name in enumerate(class_names):
             object_rows = user_rows.loc[user_rows["object_name"] == object_name]
@@ -503,9 +512,10 @@ class OrbitFeatureStore:
                 embedding, frame_index, present = self._load_video(row)
                 candidate = np.flatnonzero(present)[: cfg.max_frames_per_video]
                 if candidate.size < cfg.min_query_frames_per_video:
-                    raise ValueError(
-                        f"query video {row['video_id']} has only {candidate.size} valid frames"
-                    )
+                    # The updated official ORBIT protocol excludes this video;
+                    # it does not invalidate the user's other query videos.
+                    excluded_query_video_ids.append(str(row["video_id"]))
+                    continue
                 n_query = min(cfg.query_frames_per_video, candidate.size)
                 rng = np.random.default_rng(
                     derive_orbit_seed(
@@ -546,6 +556,7 @@ class OrbitFeatureStore:
             query_labels=np.concatenate(query_labels),
             query_video_ids=np.concatenate(query_video_ids),
             query_frame_indices=np.concatenate(query_frame_indices),
+            excluded_query_video_ids=tuple(excluded_query_video_ids),
         )
 
 

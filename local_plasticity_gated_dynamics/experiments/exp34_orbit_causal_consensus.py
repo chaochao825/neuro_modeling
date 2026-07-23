@@ -50,7 +50,7 @@ from src.utils.reproducibility import derive_seed
 
 
 EXPERIMENT = "exp34_orbit_causal_consensus"
-PROTOCOL_VERSION = "exp34_orbit_causal_consensus_v2_support_annotation_safe"
+PROTOCOL_VERSION = "exp34_orbit_causal_consensus_v3_official_video_exclusion"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 AUTHORIZATION_SCHEMA = "exp34_formal_scale_authorization_v1"
 AUTHORIZATION_EXCLUDED_CONFIG_KEYS = frozenset(
@@ -458,6 +458,8 @@ def _evaluate_episode(
         "action_disagreement": headroom.action_disagreement,
         "support_write_l1": fitted.write_l1_cost,
         "support_write_l2": fitted.write_l2_cost,
+        "n_excluded_query_videos": len(episode.excluded_query_video_ids),
+        "excluded_query_video_ids": json.dumps(episode.excluded_query_video_ids),
     }
     return pd.concat(rows, ignore_index=True), diagnostic
 
@@ -577,6 +579,15 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             raise RuntimeError("all Exp34 evaluation tasks failed")
         raw = pd.concat(raw_frames, ignore_index=True)
         diagnostic_frame = pd.DataFrame(diagnostics)
+        expected_task_pairs = {
+            (user_id, task_index)
+            for user_id in eval_users
+            for task_index in range(int(config["n_eval_tasks_per_user"]))
+        }
+        observed_task_pairs = set(
+            raw[["user_id", "task_index"]].itertuples(index=False, name=None)
+        )
+        coverage_complete = observed_task_pairs == expected_task_pairs
         raw.to_csv(run.path / "raw_video_metrics.csv", index=False)
         diagnostic_frame.to_csv(run.path / "actuator_headroom.csv", index=False)
         user_rows = reduce_to_user_accuracy(raw)
@@ -618,7 +629,8 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         if profile == "formal":
             minimum = float(config["analysis"]["minimum_accuracy_gain"])
             support = bool(
-                fixed_gain >= minimum
+                coverage_complete
+                and fixed_gain >= minimum
                 and memory_gain > 0.0
                 and majority_gain > 0.0
                 and retained
@@ -635,6 +647,8 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             if support:
                 conclusion = "support"
                 reason = "registered task and causal-memory gates passed"
+            elif not coverage_complete:
+                reason = "formal user/task coverage was incomplete"
             elif inference[0].ci_high < minimum or inference[1].ci_high <= 0.0:
                 conclusion = "oppose"
                 reason = "registered task or causal-memory effect was absent"
@@ -656,6 +670,20 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             "mean_action_disagreement": float(
                 diagnostic_frame["action_disagreement"].mean()
             ),
+            "coverage": {
+                "complete": coverage_complete,
+                "expected_users": len(eval_users),
+                "observed_users": len(set(raw["user_id"])),
+                "expected_user_tasks": len(expected_task_pairs),
+                "observed_user_tasks": len(observed_task_pairs),
+                "excluded_query_videos": sorted(
+                    {
+                        video_id
+                        for value in diagnostic_frame["excluded_query_video_ids"]
+                        for video_id in json.loads(str(value))
+                    }
+                ),
+            },
             "feature_cache": {
                 "selection": selection_store.cache_stats,
                 "evaluation": eval_store.cache_stats,
