@@ -89,7 +89,7 @@ def test_exp34_authorization_receipt_is_self_hashed(tmp_path) -> None:
     manifest_path.write_text("seed\n1\n", encoding="utf-8")
     formal = {
         "profile": "formal",
-        "protocol_version": "exp34_orbit_causal_consensus_v1",
+        "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
         "seeds": [1],
         "analysis": {
             "minimum_accuracy_gain": 0.005,

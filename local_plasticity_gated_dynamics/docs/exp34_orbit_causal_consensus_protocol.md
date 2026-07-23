@@ -34,7 +34,7 @@ memoryless intervention under Holm correction. A validation result is always
 `inconclusive`, but may authorize scale if its effect and retained oracle
 headroom clear their registered thresholds.
 
-## Frozen development result and scale decision
+## Invalidated v1 development result
 
 The three-seed development panel completed on the two held-out validation
 users. Causal consensus reached 0.7388 mean task-video accuracy versus 0.6419
@@ -44,7 +44,15 @@ intervention: a +0.0968 difference (user bootstrap interval +0.0527 to
 and the gate retained 91.3% of the available per-frame oracle headroom. Both
 users improved in all three registered comparisons.
 
-This panel is **inconclusive** because it has only two development users and
-its exact sign-flip p-values are 0.5. It nevertheless passed the predeclared
-scale gate. The hash-bound authorization receipt is saved with the development
-artifacts, so formal evaluation can run once on all 17 untouched test users.
+This panel is **invalid** for protocol authorization. The v1 feature pipeline
+used the `object_not_present_issue` annotation to filter clean support frames,
+whereas ORBIT permits that annotation only for clutter-query sampling and
+forbids extra clean-video annotations during personalization. The artifacts and
+receipt are retained, but the formal launch was stopped before any test user
+was evaluated.
+
+The active protocol is
+`exp34_orbit_causal_consensus_v2_support_annotation_safe`. It makes all clean
+frames support-eligible, uses object-presence filtering only for clutter query,
+stores features in a new cache root, and requires a new validation scale
+receipt before the untouched 17-user formal endpoint can unlock.

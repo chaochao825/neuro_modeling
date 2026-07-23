@@ -478,8 +478,11 @@ class OrbitFeatureStore:
                 )
                 clean = clean.iloc[positions]
             for _, row in clean.iterrows():
-                embedding, frame_index, present = self._load_video(row)
-                candidate = np.flatnonzero(present)[: cfg.max_frames_per_video]
+                embedding, frame_index, _ = self._load_video(row)
+                # Extra annotations for clean videos are forbidden by the
+                # ORBIT personalization protocol.  All clean frames remain
+                # eligible; object-presence filtering is query-only.
+                candidate = np.arange(embedding.shape[0])[: cfg.max_frames_per_video]
                 chosen = candidate[:: cfg.support_stride][
                     : cfg.max_support_frames_per_video
                 ]

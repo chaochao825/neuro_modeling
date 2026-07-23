@@ -49,10 +49,9 @@ The current evidence chain is:
    endpoint, while the stronger registered timescale phase claim remains
    inconclusive.
 8. Exp33/34: real ORBIT video exposed substantial motif headroom but rejected
-   the first cross-user reward-only selector. The failure-driven label-free
-   causal consensus successor improved validation accuracy by +0.0968 over
-   the validation-selected fixed actuator and passed its scale gate; its
-   untouched 17-user formal endpoint remains open.
+   the first cross-user reward-only selector. A first causal-consensus trend
+   was invalidated because clean support used a forbidden frame annotation;
+   the annotation-safe protocol must re-pass validation before test unlocks.
 9. Exp25: the real compositional neural endpoint remains active but correctly
    fails closed because an eligible canonical neural bundle is unavailable.
 
@@ -70,8 +69,8 @@ sizes, boundaries, and scale priorities.
 - The ARC, maze, Sudoku, tiny-HRM, and recursive baseline experiments are
   historical capability probes, not evidence for the active neural theory.
 - Exp31/32 do not yet contain a participating high-rank E/I carrier.
-- Exp34 is not confirmatory until the frozen 17-test-user protocol runs; its
-  two-user validation result authorizes scale but cannot be promoted to support.
+- Exp34 is not confirmatory until the annotation-safe validation gate and the
+  frozen 17-test-user protocol both run.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

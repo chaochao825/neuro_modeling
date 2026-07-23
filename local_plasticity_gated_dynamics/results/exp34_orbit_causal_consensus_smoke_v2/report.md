@@ -1,5 +1,9 @@
 # Exp34 ORBIT causal-consensus report
 
+> **INVALIDATED PROTOCOL:** retained for audit only. This v1 package filtered
+> clean support with a forbidden extra frame annotation. It cannot authorize
+> formal evaluation; see `INVALID_PROTOCOL.md`.
+
 - Profile: `smoke`
 - Users (statistical unit): 2
 - Algorithmic seeds averaged within user: 3

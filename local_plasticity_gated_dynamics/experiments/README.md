@@ -11,9 +11,9 @@ list of current methods. The authoritative machine-readable status is
 - Open fail-closed endpoints: Exp25 for real neural population dynamics and
   Exp34 for causal personalized recognition in real ORBIT videos.
 
-Exp34 passed its registered validation scale gate on two held-out development
-users and is authorized for the frozen 17-test-user endpoint. The validation
-panel remains `inconclusive` and is not confirmatory evidence.
+Exp34's first numerical validation trend is retained but invalidated because
+clean support used a forbidden extra frame annotation. The annotation-safe
+protocol is fail-closed until its replacement validation panel passes.
 
 Exp32 has a mixed conclusion: its bounded main controller endpoint supports,
 but the registered joint timescale phase claim is inconclusive.

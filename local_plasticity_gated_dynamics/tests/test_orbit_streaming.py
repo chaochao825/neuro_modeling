@@ -156,3 +156,33 @@ def test_optional_video_cache_is_immutable_and_reuses_decoding(tmp_path: Path) -
     assert store.cache_stats["videos"] == 4
     assert store.cache_stats["nbytes"] > 0
     assert not first.query_embeddings.flags.writeable
+
+
+def test_clean_support_ignores_cached_object_presence_annotation(
+    tmp_path: Path,
+) -> None:
+    root, split_path = _make_store(tmp_path)
+    path = root / "validation" / "validation_user-cup-clean.npz"
+    with np.load(path, allow_pickle=False) as payload:
+        embeddings = payload["embeddings"]
+        frame_indices = payload["frame_indices"]
+    np.savez_compressed(
+        path,
+        embeddings=embeddings,
+        frame_indices=frame_indices,
+        object_present=np.zeros(frame_indices.size, dtype=np.bool_),
+    )
+    store = OrbitFeatureStore(root, split="validation", official_splits_path=split_path)
+    episode = store.sample_episode(
+        "validation_user",
+        seed=1,
+        task_index=0,
+        config=OrbitEpisodeSamplingConfig(
+            support_stride=2,
+            max_support_frames_per_video=3,
+            query_frames_per_video=4,
+            min_query_frames_per_video=2,
+            max_frames_per_video=8,
+        ),
+    )
+    assert np.sum(episode.support.labels == 0) == 3

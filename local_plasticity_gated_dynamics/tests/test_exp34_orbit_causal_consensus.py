@@ -5,9 +5,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
+from experiments.common import load_json_config
 from experiments.exp34_orbit_causal_consensus import (
     EVALUATION_CONDITIONS,
+    _validate_config,
     run_seed,
 )
 from src.data.orbit_streaming import FEATURE_MANIFEST_COLUMNS
@@ -63,7 +66,7 @@ def _config(tmp_path: Path) -> dict[str, object]:
     )
     return {
         "profile": "smoke",
-        "protocol_version": "exp34_orbit_causal_consensus_v1",
+        "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
         "training_algorithm": "causal_label_free_count_belief",
         "used_query_labels": False,
         "used_future_frames": False,
@@ -115,3 +118,9 @@ def test_exp34_retains_all_causal_interventions(tmp_path: Path) -> None:
     assert summary["feature_cache"]["selection"]["enabled"] is True
     assert summary["feature_cache"]["selection"]["hits"] > 0
     assert (path / "selection_audit.json").is_file()
+
+
+def test_exp34_formal_receipt_is_hash_bound_and_fail_closed() -> None:
+    config = load_json_config("configs/formal/exp34_orbit_causal_consensus.json")
+    with pytest.raises(ValueError, match="without authorization"):
+        _validate_config(config)

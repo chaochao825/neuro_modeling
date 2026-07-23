@@ -124,11 +124,39 @@ def _annotation_mask(
     return np.asarray(present, dtype=np.bool_)
 
 
+def _protocol_object_present_mask(
+    frame_paths: Sequence[Path],
+    *,
+    video_type: str,
+    annotations_root: Path,
+    split: str,
+    video_id: str,
+) -> np.ndarray:
+    """Use extra annotations only where the ORBIT query protocol permits."""
+
+    if video_type == "clean":
+        # ORBIT forbids extra clean-frame annotations during personalization.
+        return np.ones(len(frame_paths), dtype=np.bool_)
+    if video_type != "clutter":
+        raise ValueError("video_type must be clean or clutter")
+    return _annotation_mask(
+        frame_paths,
+        annotations_root=annotations_root,
+        split=split,
+        video_id=video_id,
+    )
+
+
 def _source_fingerprint(
-    frame_paths: Sequence[Path], annotation_path: Path, encoder_identity: str
+    frame_paths: Sequence[Path],
+    annotation_path: Path | None,
+    encoder_identity: str,
 ) -> str:
     digest = hashlib.sha256(encoder_identity.encode("utf-8"))
-    for path in (*frame_paths, annotation_path):
+    paths = (
+        (*frame_paths, annotation_path) if annotation_path is not None else frame_paths
+    )
+    for path in paths:
         stat = path.stat()
         digest.update(path.name.encode("utf-8"))
         digest.update(str(stat.st_size).encode("ascii"))
@@ -303,7 +331,11 @@ def main() -> None:
         video_id = video_dir.name
         try:
             frame_paths = _frame_paths(video_dir, max_frames=args.max_frames_per_video)
-            annotation_path = annotation_root / args.split / f"{video_id}.json"
+            annotation_path = (
+                annotation_root / args.split / f"{video_id}.json"
+                if video_type == "clutter"
+                else None
+            )
             fingerprint = _source_fingerprint(
                 frame_paths, annotation_path, encoder_identity
             )
@@ -328,8 +360,9 @@ def main() -> None:
                 raise RuntimeError(
                     "unmanifested feature file exists; choose a new output root"
                 )
-            mask = _annotation_mask(
+            mask = _protocol_object_present_mask(
                 frame_paths,
+                video_type=video_type,
                 annotations_root=annotation_root,
                 split=args.split,
                 video_id=video_id,

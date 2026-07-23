@@ -49,7 +49,7 @@ from src.utils.reproducibility import derive_seed
 
 
 EXPERIMENT = "exp34_orbit_causal_consensus"
-PROTOCOL_VERSION = "exp34_orbit_causal_consensus_v1"
+PROTOCOL_VERSION = "exp34_orbit_causal_consensus_v2_support_annotation_safe"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 AUTHORIZATION_SCHEMA = "exp34_formal_scale_authorization_v1"
 AUTHORIZATION_EXCLUDED_CONFIG_KEYS = frozenset(
