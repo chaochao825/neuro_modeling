@@ -77,7 +77,7 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
         project_root / "provenance" / "experiment_registry.csv", EXPERIMENT_FIELDS
     )
     ids = [row["experiment_id"] for row in rows]
-    expected_ids = [f"exp{index:02d}" for index in range(34)]
+    expected_ids = [f"exp{index:02d}" for index in range(35)]
     if ids != expected_ids:
         raise ValueError(f"experiment IDs must be exactly {expected_ids}; got {ids}")
     if len(ids) != len(set(ids)):
@@ -92,7 +92,7 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
     )
     if script_ids != expected_ids:
         raise ValueError(
-            f"experiment entry points do not cover exp00-exp33: {script_ids}"
+            f"experiment entry points do not cover exp00-exp34: {script_ids}"
         )
 
     for row in rows:

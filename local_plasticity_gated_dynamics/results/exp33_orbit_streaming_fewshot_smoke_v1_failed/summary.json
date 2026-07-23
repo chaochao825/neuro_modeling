@@ -1,0 +1,36 @@
+{
+  "claim_classification": "inconclusive",
+  "claim_reason": "development panel is used only for a scale decision",
+  "experiment": "exp33_orbit_streaming_fewshot",
+  "holm_adjusted_pvalues": [
+    1.0,
+    1.0
+  ],
+  "local_vs_credit_shuffled": {
+    "ci_high": -0.004666666666666708,
+    "ci_low": -0.05122222222222228,
+    "comparator": "credit_shuffled_local",
+    "mean_difference": -0.027944444444444494,
+    "method": "reward_only_local",
+    "n_users": 2,
+    "positive_users": 0,
+    "sign_flip_pvalue": 0.5
+  },
+  "local_vs_train_fixed": {
+    "ci_high": 0.011733333333333262,
+    "ci_low": -0.07500000000000007,
+    "comparator": "train_fixed_best",
+    "mean_difference": -0.0316333333333334,
+    "method": "reward_only_local",
+    "n_users": 2,
+    "positive_users": 1,
+    "sign_flip_pvalue": 1.0
+  },
+  "mean_action_disagreement": 0.5966722222222223,
+  "mean_oracle_headroom": 0.10634999999999992,
+  "n_seeds": 3,
+  "n_users": 2,
+  "profile": "smoke",
+  "protocol_version": "exp33_orbit_causal_cluve_v1",
+  "scale_decision": "scale-not-authorized"
+}

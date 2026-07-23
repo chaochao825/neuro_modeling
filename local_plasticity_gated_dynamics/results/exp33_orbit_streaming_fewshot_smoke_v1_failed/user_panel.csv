@@ -1,0 +1,17 @@
+user_id,condition,user_video_mean_accuracy
+P189,credit_shuffled_local,0.6662666666666667
+P189,delta,0.6662
+P189,gain,0.7286
+P189,oracle_per_frame,0.8231333333333333
+P189,prototype,0.6187999999999999
+P189,reward_only_local,0.6616
+P189,temporal,0.6498666666666667
+P189,train_fixed_best,0.6498666666666667
+P194,credit_shuffled_local,0.6125
+P194,delta,0.37222222222222223
+P194,gain,0.6318888888888888
+P194,oracle_per_frame,0.7552222222222222
+P194,prototype,0.5669444444444444
+P194,reward_only_local,0.5612777777777778
+P194,temporal,0.6362777777777778
+P194,train_fixed_best,0.6362777777777778

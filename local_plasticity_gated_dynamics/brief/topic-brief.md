@@ -18,7 +18,7 @@ Researchers in few-shot and continual learning, efficient sequence models, compu
 
 ## Constraints
 
-- Venue: empirical ML/computational-neuroscience paper; venue selected only after the primary ORBIT evidence is available.
+Venue: TMLR; NeurIPS Datasets and Benchmarks is the secondary target if the untouched ORBIT test-user result clears its formal gate.
 - Page target: 8--10 main pages plus reproducibility and mechanism supplement.
 - Deadline: none registered.
 - Special requirements: Python 3.11; fixed seeds; user is the statistical unit; train-only preprocessing and controller fitting; official ORBIT user splits; causal query inference; every failed condition retained; support/oppose/inconclusive conclusions; BPTT allowed only for explicit offline baselines or shared-motif pretraining, never for the local controller.
