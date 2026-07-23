@@ -17,18 +17,49 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
     rows = load_registry(PROJECT_ROOT)
-    assert [row["experiment_id"] for row in rows] == [f"exp{index:02d}" for index in range(33)]
-    current = {row["experiment_id"] for row in rows if row["disposition"] in CURRENT_DISPOSITIONS}
-    history = {row["experiment_id"] for row in rows if row["disposition"] == "historical_only"}
+    assert [row["experiment_id"] for row in rows] == [
+        f"exp{index:02d}" for index in range(34)
+    ]
+    current = {
+        row["experiment_id"]
+        for row in rows
+        if row["disposition"] in CURRENT_DISPOSITIONS
+    }
+    history = {
+        row["experiment_id"] for row in rows if row["disposition"] == "historical_only"
+    }
     assert current.isdisjoint(history)
-    assert current | history == {f"exp{index:02d}" for index in range(33)}
+    assert current | history == {f"exp{index:02d}" for index in range(34)}
 
 
 def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
-    dispositions = {row["experiment_id"]: row["disposition"] for row in load_registry(PROJECT_ROOT)}
-    for experiment_id in ("exp00", "exp04", "exp13", "exp16", "exp18", "exp22", "exp23", "exp28", "exp30"):
+    dispositions = {
+        row["experiment_id"]: row["disposition"] for row in load_registry(PROJECT_ROOT)
+    }
+    for experiment_id in (
+        "exp00",
+        "exp04",
+        "exp13",
+        "exp16",
+        "exp18",
+        "exp22",
+        "exp23",
+        "exp28",
+        "exp30",
+    ):
         assert dispositions[experiment_id] == "historical_only"
-    for experiment_id in ("exp08", "exp09", "exp21", "exp24", "exp25", "exp26", "exp29", "exp31", "exp32"):
+    for experiment_id in (
+        "exp08",
+        "exp09",
+        "exp21",
+        "exp24",
+        "exp25",
+        "exp26",
+        "exp29",
+        "exp31",
+        "exp32",
+        "exp33",
+    ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
 
 
@@ -63,7 +94,9 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
         Path("history/branches.csv"),
         Path("history/snapshot_manifest.csv"),
     ):
-        assert (tmp_path / relative).read_bytes() == (PROJECT_ROOT / "results" / relative).read_bytes()
+        assert (tmp_path / relative).read_bytes() == (
+            PROJECT_ROOT / "results" / relative
+        ).read_bytes()
 
     with (tmp_path / "history" / "snapshot_manifest.csv").open(
         "r", encoding="utf-8", newline=""

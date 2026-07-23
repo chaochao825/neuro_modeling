@@ -48,6 +48,7 @@ fixed actuator; low matrix rank alone is not evidence.
 | Executed scalar reward selects fixed motifs under hidden reliability | Exp31, 30 seeds; local-minus-fixed accuracy +0.0472, 95% CI [0.0459, 0.0485] | support for a reset-block two-actuator controller |
 | Reward belief persists in a continuous hidden stream | Exp32 main cell; local-minus-fixed +0.0435, 95% CI [0.0345, 0.0529] | support for the bounded slow-switch endpoint |
 | Performance follows the registered feedback-memory timescale structure | Exp32 iso-lambda effect +0.0119, below the 0.02 MCID | inconclusive; the Exp32 joint claim is not promoted |
+| Reward-only motif selection improves real personalized video recognition | Exp33 ORBIT endpoint is implemented with user-disjoint causal evaluation but awaits eligible validation/formal results | inconclusive / open |
 | Participating E/I carrier improves Exp31/32 behavior | Exp31/32 use fixed motifs without a participating E/I carrier | inconclusive / untested |
 | Shared model wins on multi-animal neural data | Exp25 fails closed because eligible canonical neural inputs are absent | inconclusive / open |
 

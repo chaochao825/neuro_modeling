@@ -27,7 +27,7 @@ The repository has two exhaustive and mutually exclusive result views:
   positive, negative, failed, and inconclusive rows.
 
 The [experiment registry](provenance/experiment_registry.csv) classifies every
-entry point from Exp00 through Exp32. The [branch audit](docs/branch_consolidation.md)
+entry point from Exp00 through Exp33. The [branch audit](docs/branch_consolidation.md)
 shows that all other remote branches were already ancestors of the audited
 base, so no implementation commit was missing. Hash-bound snapshots preserve
 their prior README/report/summary surfaces.
@@ -48,7 +48,10 @@ The current evidence chain is:
 7. Exp32: persistent sparse-feedback control supports at the slow-switch main
    endpoint, while the stronger registered timescale phase claim remains
    inconclusive.
-8. Exp25: the real compositional neural endpoint remains active but correctly
+8. Exp33: the ORBIT real-video endpoint tests reward-only selection among
+   support-only and causal temporal few-shot motifs for unseen users; it is
+   open until its user-level gates are evaluated.
+9. Exp25: the real compositional neural endpoint remains active but correctly
    fails closed because an eligible canonical neural bundle is unavailable.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
@@ -65,6 +68,8 @@ sizes, boundaries, and scale priorities.
 - The ARC, maze, Sudoku, tiny-HRM, and recursive baseline experiments are
   historical capability probes, not evidence for the active neural theory.
 - Exp31/32 do not yet contain a participating high-rank E/I carrier.
+- Exp33 is not confirmatory until the frozen train/test-user protocol runs; a
+  validation-only trend cannot be promoted to support.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

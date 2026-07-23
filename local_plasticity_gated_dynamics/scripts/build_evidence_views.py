@@ -73,9 +73,11 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
     """Load and validate the experiment registry."""
 
     project_root = project_root.resolve()
-    rows = _read_csv(project_root / "provenance" / "experiment_registry.csv", EXPERIMENT_FIELDS)
+    rows = _read_csv(
+        project_root / "provenance" / "experiment_registry.csv", EXPERIMENT_FIELDS
+    )
     ids = [row["experiment_id"] for row in rows]
-    expected_ids = [f"exp{index:02d}" for index in range(33)]
+    expected_ids = [f"exp{index:02d}" for index in range(34)]
     if ids != expected_ids:
         raise ValueError(f"experiment IDs must be exactly {expected_ids}; got {ids}")
     if len(ids) != len(set(ids)):
@@ -89,14 +91,20 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
         }
     )
     if script_ids != expected_ids:
-        raise ValueError(f"experiment entry points do not cover exp00-exp32: {script_ids}")
+        raise ValueError(
+            f"experiment entry points do not cover exp00-exp33: {script_ids}"
+        )
 
     for row in rows:
         experiment_id = row["experiment_id"]
         if row["disposition"] not in ALLOWED_DISPOSITIONS:
-            raise ValueError(f"invalid disposition for {experiment_id}: {row['disposition']}")
+            raise ValueError(
+                f"invalid disposition for {experiment_id}: {row['disposition']}"
+            )
         if row["conclusion"] not in ALLOWED_CONCLUSIONS:
-            raise ValueError(f"invalid conclusion for {experiment_id}: {row['conclusion']}")
+            raise ValueError(
+                f"invalid conclusion for {experiment_id}: {row['conclusion']}"
+            )
         if row["disposition"] == "historical_only" and not row["reason"]:
             raise ValueError(f"historical experiment {experiment_id} requires a reason")
         successor = row["current_successor"]
@@ -104,7 +112,9 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
             raise ValueError(f"unknown successor for {experiment_id}: {successor}")
         evidence = (project_root / row["canonical_evidence"]).resolve()
         if project_root not in evidence.parents or not evidence.is_file():
-            raise ValueError(f"missing or out-of-tree evidence for {experiment_id}: {evidence}")
+            raise ValueError(
+                f"missing or out-of-tree evidence for {experiment_id}: {evidence}"
+            )
     return rows
 
 
@@ -121,14 +131,20 @@ def load_branch_history(project_root: Path) -> list[dict[str, str]]:
             raise ValueError(f"invalid tip SHA for {row['branch']}")
         relation = row["relationship_to_current"]
         if relation not in {"current_base", "ancestor"}:
-            raise ValueError(f"invalid branch relationship for {row['branch']}: {relation}")
+            raise ValueError(
+                f"invalid branch relationship for {row['branch']}: {relation}"
+            )
         if relation == "ancestor" and row["disposition"] != "historical_snapshot":
-            raise ValueError(f"ancestor branch lacks historical disposition: {row['branch']}")
+            raise ValueError(
+                f"ancestor branch lacks historical disposition: {row['branch']}"
+            )
         snapshot = row["snapshot_path"]
         if relation == "ancestor":
             snapshot_path = (project_root / snapshot).resolve()
             if project_root not in snapshot_path.parents or not snapshot_path.is_dir():
-                raise ValueError(f"missing branch snapshot for {row['branch']}: {snapshot_path}")
+                raise ValueError(
+                    f"missing branch snapshot for {row['branch']}: {snapshot_path}"
+                )
             expected = {"project_README.md", "report.md", "summary.csv"}
             if not expected.issubset({path.name for path in snapshot_path.iterdir()}):
                 raise ValueError(f"incomplete branch snapshot for {row['branch']}")
@@ -156,23 +172,33 @@ def load_historical_git_objects(project_root: Path) -> list[dict[str, str]]:
         if project_root not in archive_path.parents or not archive_path.is_file():
             raise ValueError(f"missing materialized historical object: {archive_path}")
         if row["archive_format"] != "tar.gz":
-            raise ValueError(f"unsupported historical archive format: {row['archive_format']}")
+            raise ValueError(
+                f"unsupported historical archive format: {row['archive_format']}"
+            )
         with tarfile.open(archive_path, mode="r:gz") as archive:
             member = archive.getmember(row["archive_member"])
             if not member.isfile() or member.size != int(row["bytes"]):
-                raise ValueError(f"historical archive member mismatch: {row['archive_member']}")
+                raise ValueError(
+                    f"historical archive member mismatch: {row['archive_member']}"
+                )
             source = archive.extractfile(member)
             if source is None:
-                raise ValueError(f"cannot read historical archive member: {row['archive_member']}")
+                raise ValueError(
+                    f"cannot read historical archive member: {row['archive_member']}"
+                )
             digest = hashlib.sha1(f"blob {member.size}\0".encode("ascii"))
             while chunk := source.read(1024 * 1024):
                 digest.update(chunk)
         if digest.hexdigest() != row["blob_sha"]:
-            raise ValueError(f"materialized archive does not match Git blob: {archive_path}")
+            raise ValueError(
+                f"materialized archive does not match Git blob: {archive_path}"
+            )
     return rows
 
 
-def _write_csv(path: Path, rows: Iterable[Mapping[str, str]], fields: Sequence[str]) -> None:
+def _write_csv(
+    path: Path, rows: Iterable[Mapping[str, str]], fields: Sequence[str]
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
@@ -204,7 +230,9 @@ def _experiment_table(rows: Sequence[Mapping[str, str]]) -> list[str]:
 def _snapshot_manifest(project_root: Path) -> list[dict[str, str]]:
     snapshot_root = project_root / "results" / "history" / "branch_snapshots"
     manifest: list[dict[str, str]] = []
-    preserved = [candidate for candidate in snapshot_root.rglob("*") if candidate.is_file()]
+    preserved = [
+        candidate for candidate in snapshot_root.rglob("*") if candidate.is_file()
+    ]
     preserved.extend(
         project_root / "results" / "history" / name
         for name in (
@@ -253,7 +281,9 @@ def _split_aggregate_claims(
         elif experiment_id in historical_ids:
             history.append(row)
         else:
-            raise ValueError(f"aggregate row references an unregistered experiment: {experiment_id}")
+            raise ValueError(
+                f"aggregate row references an unregistered experiment: {experiment_id}"
+            )
     return current, history, fields
 
 
@@ -347,7 +377,9 @@ def build_views(project_root: Path, output_root: Path | None = None) -> None:
         "",
         "Generated by `scripts/build_evidence_views.py` from the provenance registry.",
     ]
-    (current_root / "README.md").write_text("\n".join(current_lines) + "\n", encoding="utf-8", newline="\n")
+    (current_root / "README.md").write_text(
+        "\n".join(current_lines) + "\n", encoding="utf-8", newline="\n"
+    )
 
     history_lines = [
         "# Historical evidence view",
@@ -380,7 +412,9 @@ def build_views(project_root: Path, output_root: Path | None = None) -> None:
         "",
         "Generated by `scripts/build_evidence_views.py` from the provenance registry.",
     ]
-    (history_root / "README.md").write_text("\n".join(history_lines) + "\n", encoding="utf-8", newline="\n")
+    (history_root / "README.md").write_text(
+        "\n".join(history_lines) + "\n", encoding="utf-8", newline="\n"
+    )
 
 
 def main() -> None:
