@@ -10,6 +10,7 @@ The extractor is frozen and preprocessing is fixed by its published weights.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
 from datetime import datetime, timezone
 import hashlib
@@ -210,26 +211,30 @@ def _embed_frames(
     transform: Any,
     device: str,
     batch_size: int,
+    decode_workers: int,
 ) -> np.ndarray:
     import torch
     from PIL import Image
 
+    def load_frame(path: Path) -> Any:
+        with Image.open(path) as image:
+            return transform(image.convert("RGB"))
+
     batches: list[np.ndarray] = []
     use_amp = str(device).startswith("cuda")
-    for start in range(0, len(frame_paths), batch_size):
-        tensors = []
-        for path in frame_paths[start : start + batch_size]:
-            with Image.open(path) as image:
-                tensors.append(transform(image.convert("RGB")))
-        batch = torch.stack(tensors).to(device, non_blocking=True)
-        amp = (
-            torch.autocast(device_type="cuda", dtype=torch.float16)
-            if use_amp
-            else nullcontext()
-        )
-        with torch.inference_mode(), amp:
-            features = model(batch)
-        batches.append(features.detach().float().cpu().numpy())
+    with ThreadPoolExecutor(max_workers=decode_workers or 1) as executor:
+        for start in range(0, len(frame_paths), batch_size):
+            paths = frame_paths[start : start + batch_size]
+            tensors = list(executor.map(load_frame, paths))
+            batch = torch.stack(tensors).to(device, non_blocking=True)
+            amp = (
+                torch.autocast(device_type="cuda", dtype=torch.float16)
+                if use_amp
+                else nullcontext()
+            )
+            with torch.inference_mode(), amp:
+                features = model(batch)
+            batches.append(features.detach().float().cpu().numpy())
     result = np.concatenate(batches, axis=0).astype(np.float32, copy=False)
     if result.ndim != 2 or result.shape[0] != len(frame_paths):
         raise RuntimeError("encoder returned an invalid feature matrix")
@@ -271,6 +276,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--encoder", choices=ENCODERS, default="efficientnet_b0")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--decode-workers", type=int, default=8)
     parser.add_argument("--max-frames-per-video", type=int, default=1000)
     parser.add_argument("--max-users", type=int, default=None)
     parser.add_argument("--require-complete-split", action="store_true")
@@ -281,6 +287,8 @@ def main() -> None:
     args = _parser().parse_args()
     if args.batch_size < 1 or args.max_frames_per_video < 1:
         raise ValueError("batch size and max frames must be positive")
+    if args.decode_workers < 0:
+        raise ValueError("decode-workers must be non-negative")
     if args.max_users is not None and args.max_users < 1:
         raise ValueError("max-users must be positive")
     splits = load_official_orbit_splits(args.official_splits)
@@ -373,6 +381,7 @@ def main() -> None:
                 transform=transform,
                 device=args.device,
                 batch_size=args.batch_size,
+                decode_workers=args.decode_workers,
             )
             if embeddings.shape[1] != feature_dim:
                 raise RuntimeError(
@@ -444,6 +453,7 @@ def main() -> None:
             "split": args.split,
             "encoder_identity": encoder_identity,
             "feature_dim": feature_dim,
+            "decode_workers": args.decode_workers,
             "max_frames_per_video": args.max_frames_per_video,
             "n_planned_videos": len(videos),
             "n_failures": len(failures),

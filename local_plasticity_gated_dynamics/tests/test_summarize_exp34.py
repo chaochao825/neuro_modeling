@@ -80,6 +80,9 @@ def test_exp34_summary_uses_user_not_seed_as_independent_unit() -> None:
     assert summary["scale_decision"] == "scale-authorized"
     assert np.isclose(comparisons.iloc[0]["mean_difference"], 0.10)
     assert comparisons.iloc[0]["positive_users"] == 3
+    assert np.isclose(
+        summary["official_task_video_mean_accuracy"]["causal_consensus"], 0.745
+    )
 
 
 def test_exp34_authorization_receipt_is_self_hashed(tmp_path) -> None:

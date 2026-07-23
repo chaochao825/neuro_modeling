@@ -540,6 +540,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         means = (
             user_rows.groupby("condition")["user_video_mean_accuracy"].mean().to_dict()
         )
+        official_means = raw.groupby("condition")["frame_accuracy"].mean().to_dict()
         bootstrap = int(config["analysis"].get("bootstrap_samples", 20_000))
         inference = []
         for index, comparator in enumerate(
@@ -589,6 +590,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             "selected_fixed_action": fixed_action,
             "selected_fixed_name": ACTUATOR_NAMES[fixed_action],
             "condition_user_mean_accuracy": means,
+            "official_task_video_mean_accuracy": official_means,
             "consensus_gain_over_selection_fixed": fixed_gain,
             "consensus_gain_over_memoryless": memory_gain,
             "mean_oracle_headroom": headroom,

@@ -245,6 +245,7 @@ def summarize_panel(
         else:
             reason = "formal user-level uncertainty did not resolve the claim"
     means = user_panel.groupby("condition")["user_video_mean_accuracy"].mean()
+    official_means = raw.groupby("condition")["frame_accuracy"].mean()
     summary = {
         "experiment": EXPERIMENT,
         "protocol_version": PROTOCOL_VERSION,
@@ -253,6 +254,10 @@ def summarize_panel(
         "n_users": int(user_panel["user_id"].nunique()),
         "condition_user_mean_accuracy": {
             condition: float(means[condition]) for condition in EVALUATION_CONDITIONS
+        },
+        "official_task_video_mean_accuracy": {
+            condition: float(official_means[condition])
+            for condition in EVALUATION_CONDITIONS
         },
         "mean_oracle_headroom": mean_headroom,
         "mean_action_disagreement": mean_disagreement,
@@ -323,12 +328,16 @@ def _report(summary: Mapping[str, Any]) -> str:
         "",
         "## User-level accuracy",
         "",
-        "| Condition | Mean task-video accuracy |",
-        "|---|---:|",
+        "| Condition | User-equal mean | Official task-video mean |",
+        "|---|---:|---:|",
     ]
     means = summary["condition_user_mean_accuracy"]
+    official = summary["official_task_video_mean_accuracy"]
     for condition in EVALUATION_CONDITIONS:
-        lines.append(f"| {condition} | {float(means[condition]):.4f} |")
+        lines.append(
+            f"| {condition} | {float(means[condition]):.4f} | "
+            f"{float(official[condition]):.4f} |"
+        )
     lines.extend(["", "## Registered causal comparisons", ""])
     for item in summary["comparisons"]:
         lines.append(
@@ -346,6 +355,7 @@ def _report(summary: Mapping[str, Any]) -> str:
             f"- Mean actuator disagreement: {summary['mean_action_disagreement']:.4f}.",
             "",
             "The gate uses no query labels or future frames, but computes the full four-actuator bank. Its consensus signal is specific to ORBIT's one-object-per-video structure. Development users only authorize a frozen test run and never count as confirmatory evidence.",
+            "The official-style point estimate flattens task/video samples for benchmark comparability; all hypothesis uncertainty still uses user as the independent unit.",
             "",
         ]
     )
