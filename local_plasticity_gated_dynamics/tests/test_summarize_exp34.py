@@ -90,10 +90,23 @@ def test_exp34_authorization_receipt_is_self_hashed(tmp_path) -> None:
     manifest_path = tmp_path / "manifest.csv"
     summary_path.write_text("{}\n", encoding="utf-8")
     manifest_path.write_text("seed\n1\n", encoding="utf-8")
+    selection_features = tmp_path / "selection-features"
+    evaluation_features = tmp_path / "evaluation-features"
+    for root, split in (
+        (selection_features, "validation"),
+        (evaluation_features, "test"),
+    ):
+        root.mkdir()
+        (root / "feature_manifest.csv").write_text("split\n" + split + "\n")
+        (root / f"provenance_{split}.json").write_text("{}\n")
     formal = {
         "profile": "formal",
         "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
         "seeds": [1],
+        "selection_split": "validation",
+        "eval_split": "test",
+        "selection_feature_root": str(selection_features),
+        "eval_feature_root": str(evaluation_features),
         "analysis": {
             "minimum_accuracy_gain": 0.005,
             "minimum_retained_oracle_headroom": 0.2,

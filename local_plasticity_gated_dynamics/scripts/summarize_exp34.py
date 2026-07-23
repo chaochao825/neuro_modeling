@@ -22,6 +22,7 @@ from experiments.exp34_orbit_causal_consensus import (
     EXPERIMENT,
     PROTOCOL_VERSION,
     _canonical_sha256,
+    feature_store_hashes,
     formal_config_fingerprint,
     implementation_hashes,
 )
@@ -299,6 +300,7 @@ def build_authorization_receipt(
         "development_run_manifest_sha256": _file_sha256(run_manifest_path),
         "formal_config_fingerprint": formal_config_fingerprint(formal_config),
         "implementation_sha256": implementation_hashes(),
+        "feature_store_sha256": feature_store_hashes(formal_config),
         "registered_gate_results": {
             "minimum_accuracy_gain": float(
                 formal_config["analysis"]["minimum_accuracy_gain"]

@@ -63,10 +63,13 @@ AUTHORIZATION_EXCLUDED_CONFIG_KEYS = frozenset(
 )
 IMPLEMENTATION_PATHS = (
     "experiments/exp34_orbit_causal_consensus.py",
+    "scripts/prepare_orbit_features.py",
+    "scripts/merge_orbit_feature_shards.py",
     "src/models/causal_consensus_gate.py",
     "src/models/streaming_fewshot_actuators.py",
     "src/data/orbit_streaming.py",
     "src/analysis/orbit_streaming_metrics.py",
+    "data/orbit_official_splits.json",
 )
 EVALUATION_CONDITIONS = (
     *ACTUATOR_NAMES,
@@ -111,6 +114,30 @@ def implementation_hashes() -> dict[str, str]:
     }
 
 
+def feature_store_hashes(config: Mapping[str, Any]) -> dict[str, dict[str, str]]:
+    """Bind the exact validation/test embedding manifests and provenance."""
+
+    fallback = config.get("feature_root")
+    result: dict[str, dict[str, str]] = {}
+    for role, root_key, split_key in (
+        ("selection", "selection_feature_root", "selection_split"),
+        ("evaluation", "eval_feature_root", "eval_split"),
+    ):
+        root = Path(str(config.get(root_key, fallback))).expanduser().resolve()
+        split = str(config[split_key])
+        manifest = root / "feature_manifest.csv"
+        provenance = root / f"provenance_{split}.json"
+        if not manifest.is_file() or not provenance.is_file():
+            raise ValueError(f"formal Exp34 {role} feature receipt is missing")
+        result[role] = {
+            "root": str(root),
+            "split": split,
+            "manifest_sha256": _file_sha256(manifest),
+            "provenance_sha256": _file_sha256(provenance),
+        }
+    return result
+
+
 def _validate_formal_authorization(config: Mapping[str, Any]) -> None:
     receipt_value = config.get("authorization_receipt")
     expected_digest = config.get("authorization_receipt_sha256")
@@ -146,6 +173,8 @@ def _validate_formal_authorization(config: Mapping[str, Any]) -> None:
         raise ValueError("formal Exp34 config differs from its frozen receipt")
     if receipt.get("implementation_sha256") != implementation_hashes():
         raise ValueError("formal Exp34 implementation differs from its receipt")
+    if receipt.get("feature_store_sha256") != feature_store_hashes(config):
+        raise ValueError("formal Exp34 feature store differs from its receipt")
 
 
 def _sampling_config(config: Mapping[str, Any]) -> OrbitEpisodeSamplingConfig:
