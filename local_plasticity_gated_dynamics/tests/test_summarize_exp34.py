@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from experiments.exp34_orbit_causal_consensus import formal_config_fingerprint
 from figures.exp34_orbit_causal_consensus_plot import make_figure
 from scripts.summarize_exp34 import build_authorization_receipt, summarize_panel
 
@@ -111,6 +112,10 @@ def test_exp34_authorization_receipt_is_self_hashed(tmp_path) -> None:
     )
     assert receipt["authorized"] is True
     assert len(receipt["receipt_sha256"]) == 64
+    moved = dict(formal)
+    formal["config_path"] = "/server/a/formal.json"
+    moved["config_path"] = "/server/b/formal.json"
+    assert formal_config_fingerprint(formal) == formal_config_fingerprint(moved)
 
 
 def test_exp34_plot_is_bound_to_accuracy_cost_and_interventions() -> None:

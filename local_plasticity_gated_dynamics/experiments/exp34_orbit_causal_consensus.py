@@ -58,6 +58,7 @@ AUTHORIZATION_EXCLUDED_CONFIG_KEYS = frozenset(
         "authorization_reason",
         "authorization_receipt",
         "authorization_receipt_sha256",
+        "config_path",
     }
 )
 IMPLEMENTATION_PATHS = (
