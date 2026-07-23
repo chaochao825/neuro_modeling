@@ -7,13 +7,14 @@ list of current methods. The authoritative machine-readable status is
 ## Current
 
 - Foundations: Exp08, Exp09, Exp10, Exp11, and Exp21.
-- Core Actuator Matching evidence: Exp24, Exp26, Exp29, Exp31, and Exp32.
-- Open fail-closed endpoints: Exp25 for real neural population dynamics and
-  Exp34 for causal personalized recognition in real ORBIT videos.
+- Core Actuator Matching evidence: Exp24, Exp26, Exp29, Exp31, Exp32, and
+  corrected Exp34.
+- Open fail-closed endpoint: Exp25 for real neural population dynamics.
 
-Exp34's first numerical validation trend is retained but invalidated because
-clean support used a forbidden extra frame annotation. The annotation-safe
-protocol is fail-closed until its replacement validation panel passes.
+Exp34 has a mixed global conclusion. Its corrected 17-user task and
+causal-state contrasts support, but a prior incomplete test exposure prevents
+a strict untouched-first-look claim; full-bank execution also provides no
+efficiency evidence. Both invalid precursor attempts remain retained.
 
 Exp32 has a mixed conclusion: its bounded main controller endpoint supports,
 but the registered joint timescale phase claim is inconclusive.

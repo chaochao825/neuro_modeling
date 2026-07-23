@@ -111,7 +111,7 @@ def make_figure(
             zorder=3,
         )
     ax.set_xticks(positions, METHOD_LABELS, rotation=38, ha="right")
-    ax.set_ylabel("Task-video accuracy (%)")
+    ax.set_ylabel("User-equal task-video accuracy (%)")
     ax.text(-0.15, 1.04, "a", transform=ax.transAxes, fontweight="bold")
 
     ax = axes[0, 1]
@@ -168,16 +168,18 @@ def make_figure(
         .mean()
         .set_index("condition")
     )
-    label_offsets = {
-        "prototype": (4, 2),
-        "gain": (4, 2),
-        "delta": (4, 2),
-        "temporal": (4, -14),
-        "selection_fixed_best": (4, 7),
-        "memoryless_consensus": (8, 7),
-        "instantaneous_majority": (8, -14),
-        "delayed_consensus": (4, 2),
-        "causal_consensus": (4, 2),
+    # Keep labels readable in the two deliberately dense cost clusters.  Gain
+    # and the validation-selected fixed actuator coincide in this frozen run,
+    # so one combined label is more truthful than visually separating them.
+    label_layout = {
+        "prototype": (5, -3, "left", "Proto"),
+        "gain": (5, -8, "left", "Gain / Val-fixed"),
+        "delta": (5, 2, "left", "Delta"),
+        "temporal": (5, 5, "left", "Temporal"),
+        "memoryless_consensus": (-7, -7, "right", "Memoryless"),
+        "instantaneous_majority": (-7, -1, "right", "Majority"),
+        "delayed_consensus": (-7, -1, "right", "Delayed"),
+        "causal_consensus": (-7, 4, "right", "Causal"),
     }
     for condition in METHOD_ORDER[:-1]:
         row = cost_frame.loc[condition]
@@ -189,15 +191,18 @@ def make_figure(
             linewidth=0.35,
             s=28,
         )
-        ax.annotate(
-            METHOD_LABELS[METHOD_ORDER.index(condition)],
-            (float(row["mean_event_l1"]), 100.0 * float(row["frame_accuracy"])),
-            xytext=label_offsets[condition],
-            textcoords="offset points",
-            fontsize=7,
-        )
+        if condition != "selection_fixed_best":
+            dx, dy, horizontal_alignment, label = label_layout[condition]
+            ax.annotate(
+                label,
+                (float(row["mean_event_l1"]), 100.0 * float(row["frame_accuracy"])),
+                xytext=(dx, dy),
+                textcoords="offset points",
+                fontsize=7,
+                ha=horizontal_alignment,
+            )
     ax.set_xlabel("Mean event L1 (full bank charged)")
-    ax.set_ylabel("Task-video accuracy (%)")
+    ax.set_ylabel("Official-style task-video accuracy (%)")
     ax.text(-0.15, 1.04, "d", transform=ax.transAxes, fontweight="bold")
 
     fig.tight_layout(w_pad=2.0, h_pad=2.0)

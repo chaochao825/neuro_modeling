@@ -419,13 +419,15 @@ def _report(summary: Mapping[str, Any]) -> str:
             f"{float(official[condition]):.4f} |"
         )
     lines.extend(["", "## Registered causal comparisons", ""])
-    for item in summary["comparisons"]:
+    for index, item in enumerate(summary["comparisons"]):
         lines.append(
             f"- Causal consensus minus {item['comparator']}: "
             f"{item['mean_difference']:+.4f} "
             f"(95% user bootstrap {item['ci_low']:+.4f}, "
             f"{item['ci_high']:+.4f}; positive users "
-            f"{item['positive_users']}/{item['n_users']})."
+            f"{item['positive_users']}/{item['n_users']}; exact sign-flip "
+            f"p={item['sign_flip_pvalue']:.6g}; Holm "
+            f"p={summary['holm_adjusted_pvalues'][index]:.6g})."
         )
     lines.extend(
         [

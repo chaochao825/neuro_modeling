@@ -160,3 +160,33 @@ local learning in general.
 
 See `results/actuator_matching_critical_audit_20260718.md` for the consolidated
 support/oppose/inconclusive ledger, frontier comparison and next scale gate.
+
+## Exp34 corrected formal update: causal motif consensus on ORBIT
+
+The annotation-safe v3 formal panel completed all 5 seeds, 17 official test
+users, and 4,250 planned seed-user-task episodes. Three clutter videos with
+fewer than 50 valid frames were excluded exactly as required by the official
+protocol; no remaining condition failed or was invalid. Algorithmic seeds were
+averaged within user before paired inference.
+
+| comparison | user-equal gain | 95% user-bootstrap CI | Holm p | conclusion |
+| --- | ---: | ---: | ---: | --- |
+| causal minus validation-fixed | +0.02929 | [+0.01549, +0.04368] | 0.001892 | support |
+| causal minus memoryless reset | +0.01568 | [+0.00386, +0.02787] | 0.025452 | support |
+| causal minus instantaneous majority | +0.02525 | [+0.01500, +0.03619] | 0.000183 | support |
+| causal minus eight-frame delay | +0.00657 | [+0.00433, +0.00876] | 0.000275 | support |
+
+The corrected joint task-and-causal-state claim is **support**. Causal
+consensus reached 0.7189 user-equal accuracy, retained 53.6% of oracle
+headroom, and used no query labels, future frames, autograd, or BPTT. Its
+official-style task-video point estimate was 67.43%, essentially tied with the
+published EfficientNet-B0 cosine ProtoNet 67.48%; it is not a SOTA claim. The
+full four-actuator bank is evaluated, so no efficiency claim is supported.
+
+The overall Exp34 evidence is **mixed** for protocol reasons. A preceding
+formal-v2 attempt exposed 15 test users before a missing-user coverage defect
+was identified. That result is invalid and retained with hashes. V3 repaired
+only official short-video exclusion and strict expected-set checks, but reused
+the same public test split. Consequently the corrected within-dataset
+mechanism contrast supports, whereas strict untouched prospective
+confirmation remains inconclusive pending a new frozen replication.

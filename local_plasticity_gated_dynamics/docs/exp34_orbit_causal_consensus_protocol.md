@@ -53,10 +53,9 @@ forbids extra clean-video annotations during personalization. The artifacts and
 receipt are retained, but the formal launch was stopped before any test user
 was evaluated.
 
-The active protocol is
-`exp34_orbit_causal_consensus_v2_support_annotation_safe`. It makes all clean
-frames support-eligible, uses object-presence filtering only for clutter query,
-and stores validation and test features in separate cache roots.
+The annotation-safe feature rule makes all clean frames support-eligible, uses
+object-presence filtering only for clutter query, and stores validation and
+test features in separate cache roots.
 
 ## Annotation-safe development result and formal authorization
 
@@ -69,6 +68,59 @@ headroom. Because only two development users are involved, this result remains
 `inconclusive`; it authorizes but does not substitute for the frozen test run.
 
 The authorization receipt binds the exact implementation plus the separate
-six-user validation and 17-user test feature manifests. The formal endpoint is
-now unlocked for five seeds and 50 tasks per untouched test user. No test-user
-result was inspected before this receipt was frozen.
+six-user validation and 17-user test feature manifests. No test-user result
+was inspected before this receipt was frozen.
+
+## Invalid formal-v2 coverage attempt
+
+The first authorized formal attempt used the annotation-safe feature stores,
+but the episode loader treated an official video-level exclusion as a fatal
+user-level error. ORBIT requires clutter videos with fewer than 50 valid query
+frames to be excluded. Instead, the run dropped all tasks for P204 and P901,
+leaving only 15/17 users. An early aggregator did not enforce the registered
+coverage set and returned a nominally positive result. That result is
+**invalid** and contributes no inferential evidence. The incomplete raw run,
+hashes, and failure explanation remain in
+[`results/exp34_orbit_causal_consensus_formal_v2_incomplete_invalid`](../results/exp34_orbit_causal_consensus_formal_v2_incomplete_invalid/INVALID_COVERAGE.md).
+
+The correction changed only protocol compliance: skip and record a clutter
+video below the official 50-valid-frame minimum, then fail unless every seed,
+user, task, and remaining video is complete. It also added an explicit
+coverage regression test. The active protocol is
+`exp34_orbit_causal_consensus_v3_official_video_exclusion`.
+
+## Corrected formal-v3 result
+
+The corrected run completed 5/5 seeds, 17/17 test users, and all 4,250 planned
+seed-user-task episodes with no failed or invalid condition. Exactly three
+short clutter videos were excluded and recorded: two for P204 and one for
+P901. Algorithmic seeds were averaged within user before inference.
+
+Causal consensus reached 0.7189 user-equal accuracy. It exceeded the
+validation-selected fixed gain actuator by +0.0293 (95% user-bootstrap CI
+[+0.0155, +0.0437]; Holm p=0.00189), the memoryless reset by +0.0157
+([+0.0039, +0.0279]; Holm p=0.02545), instantaneous majority by +0.0253
+([+0.0150, +0.0362]; Holm p=0.000183), and the eight-frame delayed gate by
++0.0066 ([+0.0043, +0.0088]; Holm p=0.000275). The four effects were positive
+for 15/17, 11/17, 16/17, and 15/17 users, respectively. The gate retained
+53.6% of the available oracle headroom and had 0.3006 mean actuator
+disagreement. Thus the corrected, registered task-and-causal-state gate is
+**support**.
+
+The official-style task-video point estimate was 67.43%. It is effectively
+tied with the official EfficientNet-B0 cosine ProtoNet reference (67.48%) and
+well below the reported ViT-B/32 reference (75.38%). These independently
+published numbers use different representation-training budgets, so they are
+descriptive context rather than paired non-inferiority or SOTA evidence. See
+the [benchmark context](../results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/benchmark_context.md),
+[formal report](../results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/report.md),
+and [publication figure](../figures/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion.pdf).
+
+There is one unavoidable evidence boundary. Fifteen test users were exposed
+by the invalid formal-v2 attempt before the coverage defect was found. The v3
+correction was protocol-driven and did not tune the gate, but it reused the
+same public test split. Therefore the corrected within-dataset mechanism
+contrast supports C0/C1, while a strictly untouched prospective confirmation
+is **inconclusive** and requires a new dataset or independently frozen
+replication. No compute-efficiency, E/I-carrier, neural-data, or general-SOTA
+claim follows from Exp34.

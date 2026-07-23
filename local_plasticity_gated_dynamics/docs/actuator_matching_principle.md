@@ -49,14 +49,17 @@ fixed actuator; low matrix rank alone is not evidence.
 | Reward belief persists in a continuous hidden stream | Exp32 main cell; local-minus-fixed +0.0435, 95% CI [0.0345, 0.0529] | support for the bounded slow-switch endpoint |
 | Performance follows the registered feedback-memory timescale structure | Exp32 iso-lambda effect +0.0119, below the 0.02 MCID | inconclusive; the Exp32 joint claim is not promoted |
 | Reward-only motif selection improves real personalized video recognition | Exp33 had 0.106 oracle headroom but local-minus-fixed was -0.0316 across three development seeds | inconclusive and superseded; the bounded reward-only transfer failed |
-| Label-free causal consensus selects motifs for unseen-user video | The first Exp34 validation package was invalidated for forbidden clean-support annotation use; annotation-safe rerun pending | inconclusive / open |
+| Label-free causal consensus selects motifs for unseen-user video | Corrected Exp34 formal: +0.0293 over validation-fixed, +0.0157 over memoryless, +0.0253 over majority, and +0.0066 over delayed across 17 users; all four Holm-adjusted p<=0.0255 | support for the corrected bounded task/causal-state claim; untouched prospective replication remains inconclusive |
 | Participating E/I carrier improves Exp31/32 behavior | Exp31/32 use fixed motifs without a participating E/I carrier | inconclusive / untested |
 | Shared model wins on multi-animal neural data | Exp25 fails closed because eligible canonical neural inputs are absent | inconclusive / open |
 
 The full Actuator Matching Principle is therefore **partially supported but
-formally inconclusive**. The synthetic family-matching and bounded reward-only
-controller layers support. Carrier participation, broad motif reuse, and real
-neural generalization remain unverified.
+formally inconclusive**. Synthetic family matching, bounded reward-only
+control, and corrected real-video causal actuator selection support. The Exp34
+official-style accuracy (67.43%) is not a SOTA result, its full bank has no
+efficiency advantage, and the invalid earlier formal attempt prevents a claim
+of untouched prospective replication. Carrier participation, broad motif
+reuse, and real neural generalization remain unverified.
 
 ## Evidence boundary
 
@@ -83,6 +86,10 @@ hash-bound and auditable.
   than calibrated context posteriors; its opposite-credit intervention is not
   update-budget matched.
 - Exp31/32 do not contain a participating high-rank E/I carrier.
+- Exp34 uses a deterministic count-belief rule specific to one-object videos;
+  it is not a reward-learned controller and evaluates all four actuators.
+- Exp34's corrected result reuses a public test split after a coverage-only
+  repair; a new frozen dataset is needed for strict prospective confirmation.
 - The current shared neural model has not beaten common dynamics across the
   required animals and sessions.
 - The current results do not show end-to-end SOTA, universal network reuse,

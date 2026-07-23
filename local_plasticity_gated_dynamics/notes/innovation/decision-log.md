@@ -7,3 +7,6 @@
 - 2026-07-24: Exp33 rejected the attempted reward-only cross-user selector on held-out validation users; the failed raw panel remains historical evidence.
 - 2026-07-24: Selected the narrower Exp34 label-free within-video consensus belief because memoryless and delayed interventions make its causal state directly falsifiable.
 - 2026-07-24: Invalidated the first Exp34 trend after auditing forbidden clean-support annotation use; upgraded to an annotation-safe protocol and kept test users untouched.
+- 2026-07-24: Invalidated formal-v2 after discovering that two users were dropped when three officially excludable short clutter videos were treated as fatal. Added full expected-set coverage gates and retained the incomplete run plus hashes.
+- 2026-07-24: Completed corrected formal-v3 on 5 seeds and all 17 users. The paired task and causal-state claim supports; the overall Exp34 conclusion is mixed because v2 exposed 15 test users, full-bank compute has no efficiency advantage, and 67.43% is not SOTA.
+- 2026-07-24: Promoted same-tape stronger-backbone comparison and sparse execution ahead of E/I neuron-count scaling. A participating carrier remains conditional on preserving the real task-space effect.

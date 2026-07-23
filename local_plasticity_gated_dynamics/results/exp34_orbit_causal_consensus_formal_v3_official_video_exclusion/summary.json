@@ -1,0 +1,101 @@
+{
+  "algorithmic_seed_handling": "averaged within user",
+  "claim_classification": "support",
+  "claim_reason": "registered test-user task and causal-memory gates passed",
+  "comparisons": [
+    {
+      "ci_high": 0.043682754237128925,
+      "ci_low": 0.015487261486797873,
+      "comparator": "selection_fixed_best",
+      "mean_difference": 0.029289870512132134,
+      "method": "causal_consensus",
+      "n_users": 17,
+      "positive_users": 15,
+      "sign_flip_pvalue": 0.000946044921875
+    },
+    {
+      "ci_high": 0.027868602482722105,
+      "ci_low": 0.0038648276535538056,
+      "comparator": "memoryless_consensus",
+      "mean_difference": 0.01567691421876964,
+      "method": "causal_consensus",
+      "n_users": 17,
+      "positive_users": 11,
+      "sign_flip_pvalue": 0.02545166015625
+    },
+    {
+      "ci_high": 0.03618826982129049,
+      "ci_low": 0.014996824215576304,
+      "comparator": "instantaneous_majority",
+      "mean_difference": 0.025251949389296553,
+      "method": "causal_consensus",
+      "n_users": 17,
+      "positive_users": 16,
+      "sign_flip_pvalue": 4.57763671875e-05
+    },
+    {
+      "ci_high": 0.008760103602497064,
+      "ci_low": 0.004332719759939636,
+      "comparator": "delayed_consensus",
+      "mean_difference": 0.006567201290554247,
+      "method": "causal_consensus",
+      "n_users": 17,
+      "positive_users": 15,
+      "sign_flip_pvalue": 9.1552734375e-05
+    }
+  ],
+  "condition_user_mean_accuracy": {
+    "causal_consensus": 0.7188553253025354,
+    "delayed_consensus": 0.7122881240119812,
+    "delta": 0.6377136891982058,
+    "gain": 0.6895654547904033,
+    "instantaneous_majority": 0.6936033759132388,
+    "memoryless_consensus": 0.7031784110837658,
+    "oracle_per_frame": 0.7665184118578706,
+    "prototype": 0.6829830179772045,
+    "selection_fixed_best": 0.6895654547904033,
+    "temporal": 0.7031784110837658
+  },
+  "coverage": {
+    "complete": true,
+    "excluded_query_videos": [
+      "P204--backpack--clutter--DnuhHsQgq_C2vTDZAzwxckmLA50tsz0UodeFQn1ExmA",
+      "P204--virgin-remote-control--clutter--_fZS0VqsbNA3hr4dZoBoOJM7zqJgijA3VaQPk4QFJFI",
+      "P901--victor-stream-book-reader--clutter--liazgsBSaVK-X-qe0AFs0Q4Hv8W_8Q8u0VlsdRZ8yYQ"
+    ],
+    "expected_seeds": 5,
+    "expected_user_tasks": 4250,
+    "expected_users": 17,
+    "observed_seeds": 5,
+    "observed_user_tasks": 4250,
+    "observed_users": 17
+  },
+  "experiment": "exp34_orbit_causal_consensus",
+  "holm_adjusted_pvalues": [
+    0.00189208984375,
+    0.02545166015625,
+    0.00018310546875,
+    0.000274658203125
+  ],
+  "mean_action_disagreement": 0.3005817869066057,
+  "mean_oracle_headroom": 0.05461069956994776,
+  "n_seeds": 5,
+  "n_users": 17,
+  "official_task_video_mean_accuracy": {
+    "causal_consensus": 0.6743063591535763,
+    "delayed_consensus": 0.668306454835795,
+    "delta": 0.5945878547905917,
+    "gain": 0.651966999070731,
+    "instantaneous_majority": 0.6529076214069877,
+    "memoryless_consensus": 0.6611067333564399,
+    "oracle_per_frame": 0.7240672041515785,
+    "prototype": 0.643550858054634,
+    "selection_fixed_best": 0.651966999070731,
+    "temporal": 0.6611067333564399
+  },
+  "profile": "formal",
+  "protocol_version": "exp34_orbit_causal_consensus_v3_official_video_exclusion",
+  "retained_oracle_headroom_fraction": 0.5363394122907433,
+  "scale_decision": "not-applicable",
+  "statistical_unit": "user"
+}

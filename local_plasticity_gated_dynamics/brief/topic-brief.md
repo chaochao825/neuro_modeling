@@ -26,3 +26,16 @@ Venue: TMLR; NeurIPS Datasets and Benchmarks is the secondary target if the unto
 ## Key Terms
 
 ORBIT, personalized few-shot recognition, causal video inference, actuator matching, fast weights, gated delta memory, dynamical motifs, local credit assignment, E/I carrier, out-of-distribution personalization.
+
+## Current evidence status
+
+The corrected Exp34 run supports the bounded primary mechanism claim across
+17 ORBIT test users: causal consensus improves over validation-fixed,
+memoryless, state-free majority, and delayed controls under one Holm family.
+The project does not promote this to SOTA, efficiency, or pristine prospective
+confirmation. Its official-style 67.43% is comparable to older published
+EfficientNet-B0 references, the full actuator bank is always executed, and an
+invalid earlier attempt exposed 15 test users before the coverage repair.
+
+The next evidence gates are a shared-tape stronger-backbone comparison, sparse
+execution under measured compute, and only then a participating E/I carrier.

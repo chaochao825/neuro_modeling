@@ -16,6 +16,7 @@ is indexed only in `results/history/README.md`.
 | Exp29 selector | **Support**, descriptor-driven meta-selection | Inputs are privileged generator descriptors and training uses a full candidate-utility teacher, not scalar bandit feedback |
 | Exp31 hidden-reliability selector | **Support**, narrow reward-only controller result | Fixed synthetic motifs; test-time scalar feedback is available; no participating high-rank carrier or real neural data |
 | Exp32 persistent sparse-feedback selector | Main endpoint **support**; registered joint claim **inconclusive** | Slow-switch primary supports but the iso-lambda timescale effect misses its MCID; no participating E/I carrier |
+| Exp34 ORBIT causal consensus | Corrected task/causal-state claim **support**; overall evidence **mixed** | 17/17-user effects survive fixed, memoryless, majority, and delay controls, but full-bank compute has no efficiency gain and the corrected run followed an invalid 15-user test exposure |
 | Exp25 real compositional panel | **Inconclusive** | Canonical neural inputs are unavailable and the loader correctly fails closed |
 
 Exp31's full-block reward-only advantage over the train-selected fixed actuator
@@ -26,17 +27,30 @@ with 28/30 positive seeds. The stronger iso-lambda slow-minus-fast effect is
 only +0.0119 and does not clear the registered 0.02 MCID, so the joint Exp32
 claim remains inconclusive.
 
+Exp34 provides the first complete real-task effect. Across 17 ORBIT test users,
+causal consensus exceeded validation-fixed by +0.0293 (95% user-bootstrap CI
+[+0.0155, +0.0437]), memoryless by +0.0157, state-free majority by +0.0253,
+and an eight-frame delay by +0.0066; all four survived Holm correction. The
+official-style task-video accuracy was 67.43%, essentially the published
+EfficientNet-B0 cosine ProtoNet reference of 67.48%, rather than a new SOTA.
+The result is classified mixed globally: the corrected mechanism contrast
+supports, while strict untouched-first-look confirmation is lost because a
+coverage bug exposed 15 test users before the correction.
+
 Scaling priority is therefore:
 
-1. place the frozen motifs and persistent reward-only controller inside a
-   stable participating E/I carrier that changes held-out utility and passes
-   closure and normal-perturbation tests;
-2. calibrate controller belief and match intervention update budgets while
-   retaining executed-reward-only access;
-3. test the frozen motif/controller decomposition on real multi-session
-   block-switching neural and behavioral data.
+1. rerun the paired actuator audit with a stronger official backbone and one
+   shared task tape, including trained same-budget ProtoNet/CNAP-style
+   comparators, to separate controller value from representation quality;
+2. replace full-bank execution with a registered sparse/early-exit controller
+   and require matched accuracy at lower measured MAC/event cost;
+3. realize the surviving motifs inside a stable participating E/I carrier and
+   require gain retention, low closure error, normal contraction, and matched
+   control budget;
+4. test the decomposition on a new prospectively frozen real task and on
+   eligible multi-session neural data at animal/session inference level.
 
 Increasing carrier neuron count while the carrier does no computation has no
-scientific value. Adding GRU/BPTT or broad SOTA baselines before carrier
-participation and controller calibration are identified would test model
-capacity before mechanism identifiability and is therefore lower priority.
+scientific value. Likewise, quoting independently trained leaderboard numbers
+cannot replace same-tape paired baselines; representation scaling and
+mechanism scaling must remain separately identifiable.

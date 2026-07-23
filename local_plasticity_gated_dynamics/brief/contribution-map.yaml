@@ -13,6 +13,8 @@ primary_claim:
     literature snapshot did not identify an ORBIT evaluation that uses a
     backpropagation-free causal belief over qualitatively different reusable
     computations under the benchmark's current/past-only query constraint.
+  verification_status: corrected-support-with-prospective-caveat
+  evidence_source: results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/report.md
 
 secondary_claims:
   - id: C1

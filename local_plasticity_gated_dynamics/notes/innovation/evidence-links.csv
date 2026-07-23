@@ -1,5 +1,5 @@
 innovation_id,claim_id,issue_id,artifact_path,what_to_verify,status,notes
-I1,C0,E34-3,brief/evidence-matrix.csv,Paired held-out user gain over validation-selected fixed motif,in_progress,Official annotation-safe ORBIT endpoint
-I1,C1,E34-4,notes/design/orbit_experiment_matrix.csv,Causal memoryless and delay intervention directions,in_progress,Holm-corrected family
+I1,C0,E34-3,results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/report.md,Paired held-out user gain over validation-selected fixed motif,verified,"Corrected complete ORBIT endpoint; first-look caveat retained"
+I1,C1,E34-4,results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/paired_user_comparisons.csv,Causal fixed memoryless majority and delay intervention directions,verified,Holm-corrected family across 17 users
 I1,C3,FUTURE-SPARSE,notes/design/orbit_experiment_matrix.csv,Sparse-execution accuracy versus personalization cost,planned,Current controller computes full bank
 I3,C2,E35-1,notes/design/orbit_experiment_matrix.csv,Carrier gain retention closure and normal contraction,deferred,Scale only after C0 formal support

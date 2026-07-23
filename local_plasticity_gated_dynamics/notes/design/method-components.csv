@@ -1,12 +1,14 @@
-component,exp30_status,exp31_status,falsification
-target,explicit direct-memory mixture,one queried random value,reject shortcut if target depends algebraically on actuator weights
-memory_keys,one-hot exact retrieval,dense bipolar capacity-limited,retrieval must decline with preregistered pressure
-selector_input,explicit memory demand,executed action plus scalar reward only,fail if context descriptor or unexecuted reward enters API
-gain,fit per mode and demand,no gain fit,all outputs must have matched unit magnitude
-shuffled_control,value permutation with matched write norms,identical writes/state plus query shift,specificity must exceed preregistered margin
-carrier,identity-calibrated high-rank transport,absent and no carrier claim,do not scale N until carrier contributes held-out utility
-stream,block-reset selector,persistent HMM stream,no reset or switch-time input permitted
-feedback,64 labelled probes per 128-trial block,exact nested fractions from 1/2 to 1/16 with delays,full-stream score must charge exploration and adaptation
-belief,terminal sample-average arm choice,two retained action values with one-dimensional action-control coordinate,policy probability is not a calibrated context posterior
-credit_control,matched random deployment,reward credited to opposite action,opposite-eligibility intervention is not a random shuffle or matched-budget claim
-timescale_phase,not_tested,lambda_feedback_per_dwell plus chi_environment_to_memory plus delay_staleness,fit frozen response coefficients within each seed
+component_id,name,role,input_format,output_format,is_novel,replaceable_by,ablation_priority,notes
+AMP-C1,Task-demand target,Define the computation that an actuator must realize,"task inputs and targets","routing dynamics or memory demand",no,"standard task generator; real task protocol",medium,"Exp30 explicit mixtures are historical; Exp31 queries one random value to remove algebraic shortcuts"
+AMP-C2,Associative key memory,Store content-addressable support information,"dense keys and labelled values","retrieved class evidence",yes,"prototype; ridge head; attention",high,"Dense capacity-limited keys replace the historical one-hot exact-retrieval shortcut"
+AMP-C3,Reward-only controller,Select an executed actuator from local scalar feedback,"action and executed reward","action values and policy coordinate",yes,"fixed best; random; Bayes filter",high,"No true context descriptor unexecuted reward or candidate utility enters the API"
+AMP-C4,Persistent feedback eligibility,Assign delayed scalar feedback to executed history,"action trace and delayed reward","local action-value update",yes,"opposite eligibility; no-feedback update",high,"Full-stream scores charge exploration and adaptation; the opposite control is not budget matched"
+ORB-C1,Frozen visual encoder,Map raw frames to shared embeddings,"RGB frame [3,H,W]","unit embedding [D]",no,"EfficientNet-B0; ViT-B/32; CLIP; DINOv2",low,"Identical frozen weights and transforms across every paired Exp34 condition"
+ORB-C2,Support prototype memory,Bind each held-out user object from clean support,"support embeddings and labels","class prototypes and statistics",no,"nearest neighbour; linear head; Naive Bayes",medium,"All clean frames are eligible; forbidden clean-video annotations are excluded"
+ORB-C3,Diagonal gain motif,Reweight unreliable embedding coordinates,"support statistics and current embedding","gain-adjusted class evidence",yes,"identity; whitening; FiLM",high,"No query quality annotation or query label is available"
+ORB-C4,Delta association motif,Write bounded class associations into a fast state,"support keys and labels","class evidence",yes,"prototype; ridge head; Gated DeltaNet",high,"Support-only writes are audited and query labels are unavailable"
+ORB-C5,Temporal accumulation motif,Maintain causal class evidence through clutter,"current class evidence and previous state","temporally integrated evidence",yes,"no recurrence; fixed EMA; GRU",high,"Uses only current and earlier frames and resets at a video boundary"
+ORB-C6,Causal consensus belief,Select a motif from prediction persistence,"current motif predictions and past within-video counts","selected current class prediction",yes,"fixed best; majority; supervised selector",high,"Deterministic tie order is frozen; no labels future frames autograd or BPTT"
+ORB-C7,Task head,Decode object identity from a common class map,"motif or controller evidence","object label",no,"cosine or linear readout",medium,"The class map is formed from support only"
+ORB-C8,Full-bank cost accounting,Charge every computed motif and controller state,"per-frame actuator events","event L1 state bytes and optional MACs",no,"sparse early exit; confidence trigger",high,"Current Exp34 has no efficiency claim because all four motifs execute"
+ORB-C9,High-rank E/I carrier,Execute selected effective currents in a participating state,"selected motif currents","Dale E/I population state",yes,"score-space state; non-Dale carrier",high,"Future claim only; no output bypass and must retain task gain with closure and contraction"

@@ -2,7 +2,7 @@
 
 ## Decision
 
-The next evidence-bearing task is causal personalized video recognition on
+The selected evidence-bearing task was causal personalized video recognition on
 ORBIT, not another synthetic actuator endpoint and not a solver-dominated ARC,
 maze, or Sudoku score. ORBIT supplies raw observations, few-shot clean-video
 support, cluttered query videos, official user-disjoint splits, and a protocol
@@ -10,7 +10,7 @@ that permits only the current and preceding query frames. It therefore tests
 the intended combination of small-sample personalization, temporal state, and
 unseen-person generalization end to end.
 
-The choice is task-first. A participating Dale E/I carrier is scientifically
+The choice remains task-first. A participating Dale E/I carrier is scientifically
 useful only after a controller improves real held-out behavior; adding one to a
 task-space failure would increase mechanism complexity without rescuing the
 identifiability problem.
@@ -54,11 +54,11 @@ identifiability problem.
    across prototype, diagonal gain, delta memory, temporal accumulation,
    validation-selected fixed, causal consensus, memoryless, delayed, and
    oracle conditions. Charge the full actuator-bank event cost to consensus.
-2. **Untouched public test.** Select the fixed comparator on all six validation
-   users and evaluate the frozen gate on 50 tasks for every one of the 17 test
-   users. Average algorithmic seeds within user; use user-level bootstrap and
-   exact paired sign flips with Holm correction.
-3. **Competitive representation check.** Only if step 2 supports, repeat the
+2. **Public test (completed, corrected).** The gate completed 50 tasks for all
+   17 test users and passed all four paired controls after official exclusion
+   of three short clutter videos. The mechanism effect supports, but an earlier
+   invalid 15-user attempt means this is no longer an untouched first look.
+3. **Competitive representation check (next).** Repeat the
    paired controller audit with the official ViT-B/32 or CLIP feature path and
    compare against official LITE ProtoNet, CNAPs, and fine-tuning numbers. This
    separates controller value from encoder value.
@@ -82,3 +82,20 @@ unseen people with causal ablations. A positive test result would support this
 bounded capability. A negative result would oppose the registered consensus
 rule and end this scale path without being hidden by synthetic or matrix-rank
 diagnostics.
+
+## Executed outcome
+
+The corrected formal run completed 5 seeds, 17 users, and 4,250
+seed-user-task episodes without failed conditions. Causal consensus improved
+user-equal accuracy over validation-fixed by +2.93 percentage points, over
+memoryless reset by +1.57, over state-free majority by +2.53, and over an
+eight-frame delay by +0.66; every comparison survived Holm correction. The
+official-style point estimate was 67.43%, essentially tied with the published
+EfficientNet-B0 cosine ProtoNet 67.48% and below ViT-B/32 75.38%.
+
+Accordingly, the bounded causal-selection claim is supported, while three
+stronger claims are not: it is not SOTA, not compute-efficient because the
+full bank is charged, and not a pristine prospective replication after the
+coverage repair. The next scale step is therefore stronger paired
+representation/baseline evaluation, followed by sparse execution; E/I carrier
+scale is conditional on preserving that task-space effect.
