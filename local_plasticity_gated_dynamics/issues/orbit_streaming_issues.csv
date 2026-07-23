@@ -1,12 +1,12 @@
 ID,Phase,Title,Claim_ID,Experiment_ID,Result_Status,Acceptance,Status,Depends_On
 R33-1,Research,Verify public task and closest primary sources,C0,N/A,verified,"Official protocol and baseline sources recorded",DONE,N/A
 R33-2,Research,Freeze contribution and non-claim boundaries,C0,N/A,verified,"Handoff artifacts validate",DONE,R33-1
-E33-1,Experiment,Implement fail-closed ORBIT manifest and causal episode loader,C0,EXP33-SMOKE,in_progress,"User-disjoint split; no future/query-label access; unit tests",IN_PROGRESS,R33-2
-E33-2,Experiment,Implement paired motif library and local controller,C0,EXP33-SMOKE,planned,"Three useful motifs; executed-reward API audit; tests",TODO,E33-1
-E33-3,Experiment,Implement paired baselines metrics and user-level inference,C0,EXP33-MAIN,planned,"Same frame tape and preprocessing; bootstrap/permutation tests",TODO,E33-2
-E33-4,Experiment,Run validation headroom smoke,C0,EXP33-HEADROOM,in_progress,"Registered headroom and disagreement gate resolved",IN_PROGRESS,E33-3
-E33-5,Experiment,Freeze validation-selected configuration,C0,EXP33-MAIN,planned,"Hash-bound config and no test tuning",TODO,E33-4
-E33-6,Experiment,Run official test users and low-shot sweep,C0,EXP33-MAIN,planned,"All users and failed tasks retained",TODO,E33-5
-E33-7,Experiment,Run causal interventions and multiplicity correction,C1,EXP33-INTERVENTION,planned,"Mechanism interaction family resolved",TODO,E33-6
-E34-1,Experiment,Add participating E/I carrier after performance gate,C2,EXP34-EI,deferred,"No output bypass; gain-retention and dynamics gates",BLOCKED,E33-6
-W33-1,Writing,Backfill only verified ORBIT conclusions,C0,EXP33-MAIN,placeholder,"Support oppose or inconclusive conclusion per claim",TODO,E33-7
+E33-1,Experiment,Implement fail-closed ORBIT manifest and causal episode loader,C0,EXP33-SMOKE,complete,"User-disjoint split; no future/query-label access; unit tests",DONE,R33-2
+E33-2,Experiment,Test executed-reward cross-user selector,C0,EXP33-SMOKE,inconclusive,"Failure retained; local selector did not beat fixed or shuffled",DONE,E33-1
+E33-3,Experiment,Retain failed reward-only evidence as historical,C0,EXP33-SMOKE,inconclusive,"Raw rows report and figure retained",DONE,E33-2
+E34-1,Experiment,Implement label-free causal consensus and interventions,C0,EXP34-SMOKE,complete,"No labels future frames autograd or BPTT; full-bank cost charged",DONE,E33-3
+E34-2,Experiment,Run support-annotation-safe validation gate,C0,EXP34-SMOKE,in_progress,"Separate cache; user-level trend and retained headroom",IN_PROGRESS,E34-1
+E34-3,Experiment,Freeze hash-bound configuration and run 17 test users,C0,EXP34-MAIN,planned,"50 tasks/user; every failure retained; no test tuning",TODO,E34-2
+E34-4,Experiment,Resolve causal memoryless and delay comparisons,C1,EXP34-MAIN,planned,"Paired user inference with Holm correction",TODO,E34-3
+E35-1,Experiment,Add participating E/I carrier only after performance gate,C2,FUTURE-EI,deferred,"No output bypass; gain-retention and dynamics gates",BLOCKED,E34-3
+W34-1,Writing,Backfill only verified annotation-safe conclusions,C0,EXP34-MAIN,placeholder,"Support oppose or inconclusive conclusion per claim",TODO,E34-4

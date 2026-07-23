@@ -1,27 +1,25 @@
 primary_claim:
   id: C0
   statement: >-
-    On held-out ORBIT users, a low-dimensional causal controller trained from
-    executed-action rewards on training users can select among reusable
-    routing, associative-memory, and temporal-dynamics motifs and outperform
-    the best globally fixed motif under the same frozen encoder, frame tape,
-    support set, and personalization budget.
+    On held-out ORBIT users, a label-free causal consensus belief can select
+    among reusable prototype, gain, associative-delta, and temporal motifs and
+    outperform the validation-selected globally fixed motif under the same
+    frozen encoder, frame tape, and support set.
   novelty_type: new-method
   gap_evidence: >-
     ORBIT work establishes strong prototype, meta-learning, sampling, and
     parameter-efficient adaptation baselines, while fast-weight and state-space
     work establishes powerful individual memory mechanisms. The verified
-    literature snapshot did not identify an ORBIT evaluation that learns a
-    low-dimensional, reward-trained policy for choosing among qualitatively
-    different reusable computation mechanisms under causal query constraints.
+    literature snapshot did not identify an ORBIT evaluation that uses a
+    backpropagation-free causal belief over qualitatively different reusable
+    computations under the benchmark's current/past-only query constraint.
 
 secondary_claims:
   - id: C1
     statement: >-
-      Any aggregate gain is mechanism-specific: routing/gain helps observable
-      support-query mismatch, fast memory helps low-shot binding, and temporal
-      dynamics helps transient query degradation; targeted clamp and shuffle
-      interventions remove the corresponding stratum-specific benefit.
+      Any aggregate gain requires causal within-video state: resetting belief
+      every frame or delaying its update reduces held-out accuracy under a
+      Holm-corrected paired user analysis.
     supports_primary: true
   - id: C2
     statement: >-
@@ -32,9 +30,9 @@ secondary_claims:
     supports_primary: false
   - id: C3
     statement: >-
-      The controller provides a better accuracy-versus-personalization-cost
-      trade-off than per-user gradient adaptation at very low support counts.
-    supports_primary: true
+      A future sparse-execution controller can retain the full-bank controller
+      gain at lower measured event/MAC cost than per-user gradient adaptation.
+    supports_primary: false
 
 non_claims:
   - The method is not claimed to train a visual foundation model locally.
@@ -58,8 +56,8 @@ risk_factors:
 likely_reviewer_objections:
   - objection: The gain is only a better visual backbone or a different frame sampler.
     preemptive_response: Pair encoder weights, sampled support/query frames, preprocessing, and query order across all rerun baselines; label paper-reported numbers separately.
-  - objection: The selector sees true task demand or counterfactual action rewards.
-    preemptive_response: Audit the API and logs so the main selector observes only causal diagnostics, its sampled action, and that action's training reward; oracle and supervised policies are labelled upper bounds.
+  - objection: The selector leaks query labels, future frames, or forbidden clean-support annotations.
+    preemptive_response: Expose only current/past predictions to the gate, hash-bind the support-annotation-safe pipeline, and keep the label oracle isolated as a diagnostic upper bound.
   - objection: Temporal smoothing alone explains the result.
     preemptive_response: Include fixed temporal, memory-only, routing-only, fixed-best, and selector-shuffled controls plus mechanism-stratified interventions.
   - objection: A low-dimensional controller is merely low matrix rank.
