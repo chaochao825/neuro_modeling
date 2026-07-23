@@ -1,0 +1,83 @@
+{
+  "authorized": true,
+  "development_run_manifest_sha256": "7eb25ba5444fbef4674a2360d150fb55e3bc4b7d6c1ac50497ebdea3d9ce7647",
+  "development_summary_sha256": "d1db8e5779d726f1ae676b19413bbfa569297b3de8fea9dff498f31a291637a1",
+  "feature_store_sha256": {
+    "evaluation": {
+      "manifest_sha256": "03bc7a346a929ddb8ce7463928abe815c2fdb30626b78de158a05aee448c8171",
+      "provenance_sha256": "9ca80433d19eb9b455cd77f9eaf518aeb3e8f03be5db9806b255711d0ed9468c",
+      "root": "/home/spco/data/orbit_features_efficientnet_b0_protocol_v2_test",
+      "split": "test"
+    },
+    "selection": {
+      "manifest_sha256": "7a734dbd25c32994df7276cb9aecd727fc91451694334b995aec2693d94b4e16",
+      "provenance_sha256": "763fa96dfa4bcfbf93626910a477b62d2d881eea70d1c058a67487c9cc7e57b0",
+      "root": "/home/spco/data/orbit_features_efficientnet_b0_protocol_v2_validation",
+      "split": "validation"
+    }
+  },
+  "formal_config_fingerprint": "2291eeb833304d195bf396053c9352d50f2fa79b1036745ccd1be808b805f9b9",
+  "implementation_sha256": {
+    "data/orbit_official_splits.json": "a9416f13a86cf8efeace03b27677a2569dfeae7442719a4a7b82c81510c873d4",
+    "experiments/exp34_orbit_causal_consensus.py": "e65fcfb83cee5fdeece8975e86059cec503d1827bea51cbb8b6e9c4c3365253b",
+    "scripts/merge_orbit_feature_shards.py": "8437011089a4634eb773049f267efa7336a270523dfce219afcc6582f7061260",
+    "scripts/prepare_orbit_features.py": "da69a293d003a2150f5490dcfc9bccc346a8a698ed30cde5ed565ddb8f726b93",
+    "src/analysis/orbit_streaming_metrics.py": "ef485e6f676c9acd9904ff14cef55e40d4077338c59372b63b43d4261ea9faaf",
+    "src/data/orbit_streaming.py": "f5d1066120f6ff852dc239f91096a495524bde144b1db9aa289a0f658c956885",
+    "src/models/causal_consensus_gate.py": "a006e941e483bc3bfadd0c6d7f07bf7f79281b0d6e97c333b4c44afceb1d4015",
+    "src/models/streaming_fewshot_actuators.py": "47dd3cc635f85ace805fc2865211486835a848f86555dab4561412ddcfbe9d10"
+  },
+  "n_development_seeds": 3,
+  "n_development_users": 2,
+  "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
+  "receipt_sha256": "7e7d3d6c57fa3d6ac61719f13e8d345c8f7ca5fab376acdeaa6447b78c323422",
+  "registered_gate_results": {
+    "comparisons": [
+      {
+        "ci_high": 0.13980000000000004,
+        "ci_low": 0.050999999999999934,
+        "comparator": "selection_fixed_best",
+        "mean_difference": 0.09539999999999998,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      },
+      {
+        "ci_high": 0.13980000000000004,
+        "ci_low": 0.050999999999999934,
+        "comparator": "memoryless_consensus",
+        "mean_difference": 0.09539999999999998,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      },
+      {
+        "ci_high": 0.11313333333333342,
+        "ci_low": 0.0641666666666666,
+        "comparator": "instantaneous_majority",
+        "mean_difference": 0.08865,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      },
+      {
+        "ci_high": 0.04455555555555546,
+        "ci_low": 0.042200000000000126,
+        "comparator": "delayed_consensus",
+        "mean_difference": 0.04337777777777779,
+        "method": "causal_consensus",
+        "n_users": 2,
+        "positive_users": 2,
+        "sign_flip_pvalue": 0.5
+      }
+    ],
+    "minimum_accuracy_gain": 0.005,
+    "minimum_retained_oracle_headroom": 0.2,
+    "observed_retained_oracle_headroom": 0.8862052949372972
+  },
+  "scale_decision": "scale-authorized",
+  "schema": "exp34_formal_scale_authorization_v1"
+}

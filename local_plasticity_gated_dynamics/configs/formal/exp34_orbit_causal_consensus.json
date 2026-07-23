@@ -1,9 +1,9 @@
 {
   "profile": "formal",
-  "formal_authorized": false,
-  "authorization_reason": "fail-closed until the support-annotation-safe Exp34 validation rerun passes",
-  "authorization_receipt": "",
-  "authorization_receipt_sha256": "",
+  "formal_authorized": true,
+  "authorization_reason": "annotation-safe validation passed the frozen fixed, memoryless, majority, delayed, and oracle-headroom scale gates",
+  "authorization_receipt": "results/exp34_orbit_causal_consensus_smoke_v4_annotation_safe/scale_authorization.json",
+  "authorization_receipt_sha256": "7e7d3d6c57fa3d6ac61719f13e8d345c8f7ca5fab376acdeaa6447b78c323422",
   "protocol_version": "exp34_orbit_causal_consensus_v2_support_annotation_safe",
   "seeds": [13400, 13401, 13402, 13403, 13404],
   "training_algorithm": "causal_label_free_count_belief",

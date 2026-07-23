@@ -56,5 +56,19 @@ was evaluated.
 The active protocol is
 `exp34_orbit_causal_consensus_v2_support_annotation_safe`. It makes all clean
 frames support-eligible, uses object-presence filtering only for clutter query,
-stores validation and test features in separate cache roots, and requires a new validation scale
-receipt before the untouched 17-user formal endpoint can unlock.
+and stores validation and test features in separate cache roots.
+
+## Annotation-safe development result and formal authorization
+
+The corrected three-seed panel reached 0.7374 user-equal accuracy on the same
+two held-out development users. It exceeded the validation-selected temporal
+actuator by 0.0954, the memoryless reset by 0.0954, the state-free majority
+ensemble by 0.0887, and the eight-frame delayed gate by 0.0434. Both users
+improved in all four comparisons, and the gate retained 88.6% of oracle
+headroom. Because only two development users are involved, this result remains
+`inconclusive`; it authorizes but does not substitute for the frozen test run.
+
+The authorization receipt binds the exact implementation plus the separate
+six-user validation and 17-user test feature manifests. The formal endpoint is
+now unlocked for five seeds and 50 tasks per untouched test user. No test-user
+result was inspected before this receipt was frozen.
