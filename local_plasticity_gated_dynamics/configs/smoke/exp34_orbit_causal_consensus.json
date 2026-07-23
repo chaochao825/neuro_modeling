@@ -15,6 +15,7 @@
   "eval_user_ids": ["P189", "P194"],
   "require_complete_selection_split": true,
   "require_complete_eval_split": true,
+  "cache_features_in_memory": true,
   "n_selection_tasks_per_user": 3,
   "n_eval_tasks_per_user": 5,
   "sampling": {

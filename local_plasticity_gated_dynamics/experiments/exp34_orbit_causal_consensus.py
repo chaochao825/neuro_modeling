@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, replace
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -50,6 +51,22 @@ from src.utils.reproducibility import derive_seed
 EXPERIMENT = "exp34_orbit_causal_consensus"
 PROTOCOL_VERSION = "exp34_orbit_causal_consensus_v1"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+AUTHORIZATION_SCHEMA = "exp34_formal_scale_authorization_v1"
+AUTHORIZATION_EXCLUDED_CONFIG_KEYS = frozenset(
+    {
+        "formal_authorized",
+        "authorization_reason",
+        "authorization_receipt",
+        "authorization_receipt_sha256",
+    }
+)
+IMPLEMENTATION_PATHS = (
+    "experiments/exp34_orbit_causal_consensus.py",
+    "src/models/causal_consensus_gate.py",
+    "src/models/streaming_fewshot_actuators.py",
+    "src/data/orbit_streaming.py",
+    "src/analysis/orbit_streaming_metrics.py",
+)
 EVALUATION_CONDITIONS = (
     *ACTUATOR_NAMES,
     "selection_fixed_best",
@@ -58,6 +75,76 @@ EVALUATION_CONDITIONS = (
     "delayed_consensus",
     "oracle_per_frame",
 )
+
+
+def _canonical_sha256(payload: Mapping[str, Any]) -> str:
+    encoded = json.dumps(
+        dict(payload), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def formal_config_fingerprint(config: Mapping[str, Any]) -> str:
+    """Hash every registered formal setting except receipt plumbing."""
+
+    payload = {
+        key: value
+        for key, value in dict(config).items()
+        if key not in AUTHORIZATION_EXCLUDED_CONFIG_KEYS
+    }
+    return _canonical_sha256(payload)
+
+
+def implementation_hashes() -> dict[str, str]:
+    return {
+        relative: _file_sha256(PROJECT_ROOT / relative)
+        for relative in IMPLEMENTATION_PATHS
+    }
+
+
+def _validate_formal_authorization(config: Mapping[str, Any]) -> None:
+    receipt_value = config.get("authorization_receipt")
+    expected_digest = config.get("authorization_receipt_sha256")
+    if not isinstance(receipt_value, str) or not receipt_value:
+        raise ValueError("formal Exp34 requires an authorization receipt")
+    if not isinstance(expected_digest, str) or len(expected_digest) != 64:
+        raise ValueError("formal Exp34 requires the registered receipt digest")
+    receipt_path = Path(receipt_value)
+    if not receipt_path.is_absolute():
+        receipt_path = PROJECT_ROOT / receipt_path
+    receipt_path = receipt_path.resolve()
+    if not receipt_path.is_relative_to(PROJECT_ROOT) or not receipt_path.is_file():
+        raise ValueError("formal Exp34 receipt must be a committed project artifact")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if not isinstance(receipt, dict):
+        raise ValueError("formal Exp34 authorization receipt must be a JSON object")
+    observed_digest = receipt.get("receipt_sha256")
+    unsigned = dict(receipt)
+    unsigned.pop("receipt_sha256", None)
+    if (
+        observed_digest != _canonical_sha256(unsigned)
+        or observed_digest != expected_digest
+    ):
+        raise ValueError("formal Exp34 authorization receipt hash mismatch")
+    if (
+        receipt.get("schema") != AUTHORIZATION_SCHEMA
+        or receipt.get("protocol_version") != PROTOCOL_VERSION
+        or receipt.get("authorized") is not True
+        or receipt.get("scale_decision") != "scale-authorized"
+    ):
+        raise ValueError("formal Exp34 authorization receipt did not pass")
+    if receipt.get("formal_config_fingerprint") != formal_config_fingerprint(config):
+        raise ValueError("formal Exp34 config differs from its frozen receipt")
+    if receipt.get("implementation_sha256") != implementation_hashes():
+        raise ValueError("formal Exp34 implementation differs from its receipt")
 
 
 def _sampling_config(config: Mapping[str, Any]) -> OrbitEpisodeSamplingConfig:
@@ -108,6 +195,8 @@ def _validate_config(config: Mapping[str, Any]) -> None:
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, int) or value < 1:
             raise ValueError(f"{name} must be a positive integer")
+    if not isinstance(config.get("cache_features_in_memory", False), bool):
+        raise ValueError("cache_features_in_memory must be boolean")
     if config.get("selection_split") not in {"train", "validation"}:
         raise ValueError("selection_split must be train or validation")
     if config.get("eval_split") not in {"validation", "test"}:
@@ -122,6 +211,7 @@ def _validate_config(config: Mapping[str, Any]) -> None:
     if profile == "formal":
         if config.get("formal_authorized") is not True:
             raise ValueError("formal Exp34 is fail-closed without authorization")
+        _validate_formal_authorization(config)
         if (config["selection_split"], config["eval_split"]) != (
             "validation",
             "test",
@@ -336,6 +426,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
         require_complete_split=bool(
             config.get("require_complete_selection_split", False)
         ),
+        cache_videos=bool(config.get("cache_features_in_memory", False)),
     )
     if config["selection_split"] == config["eval_split"]:
         eval_store = selection_store
@@ -347,6 +438,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             require_complete_split=bool(
                 config.get("require_complete_eval_split", False)
             ),
+            cache_videos=bool(config.get("cache_features_in_memory", False)),
         )
         validate_user_disjoint_stores((selection_store, eval_store))
     selection_users = _users(selection_store, config.get("selection_user_ids"))
@@ -461,9 +553,7 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
                 fixed_gain >= minimum
                 and memory_gain > 0.0
                 and retained
-                >= float(
-                    config["analysis"]["minimum_retained_oracle_headroom"]
-                )
+                >= float(config["analysis"]["minimum_retained_oracle_headroom"])
                 and inference[0].ci_low > 0.0
                 and inference[1].ci_low > 0.0
                 and adjusted[0] <= 0.05
@@ -491,6 +581,10 @@ def run_seed(config: Mapping[str, Any], *, seed: int, results_root: str | Path) 
             "mean_action_disagreement": float(
                 diagnostic_frame["action_disagreement"].mean()
             ),
+            "feature_cache": {
+                "selection": selection_store.cache_stats,
+                "evaluation": eval_store.cache_stats,
+            },
             "paired_user_inference": [asdict(item) for item in inference],
             "holm_adjusted_pvalues": adjusted.tolist(),
             "conclusion": conclusion,

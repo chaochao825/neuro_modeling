@@ -127,3 +127,32 @@ def test_store_pair_validation_uses_user_as_independent_unit(tmp_path: Path) -> 
     validate_user_disjoint_stores((train, validation))
     with pytest.raises(ValueError, match="share users"):
         validate_user_disjoint_stores((train, train))
+
+
+def test_optional_video_cache_is_immutable_and_reuses_decoding(tmp_path: Path) -> None:
+    root, split_path = _make_store(tmp_path)
+    store = OrbitFeatureStore(
+        root,
+        split="validation",
+        official_splits_path=split_path,
+        cache_videos=True,
+    )
+    config = OrbitEpisodeSamplingConfig(
+        support_stride=2,
+        max_support_frames_per_video=3,
+        query_frames_per_video=4,
+        min_query_frames_per_video=2,
+        max_frames_per_video=8,
+    )
+    first = store.sample_episode("validation_user", seed=2, task_index=0, config=config)
+    after_first = dict(store.cache_stats)
+    second = store.sample_episode(
+        "validation_user", seed=2, task_index=0, config=config
+    )
+    assert first.fingerprint == second.fingerprint
+    assert after_first["misses"] == 4
+    assert after_first["hits"] == 0
+    assert store.cache_stats["hits"] == 4
+    assert store.cache_stats["videos"] == 4
+    assert store.cache_stats["nbytes"] > 0
+    assert not first.query_embeddings.flags.writeable

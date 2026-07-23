@@ -302,6 +302,7 @@ class OrbitFeatureStore:
         split: SplitName,
         official_splits_path: str | Path,
         require_complete_split: bool = False,
+        cache_videos: bool = False,
     ) -> None:
         if split not in {"train", "validation", "test"}:
             raise ValueError("split must be train, validation, or test")
@@ -362,11 +363,42 @@ class OrbitFeatureStore:
         ).reset_index(drop=True)
         self.feature_dim = int(self.frame["feature_dim"].iloc[0])
         self.users = tuple(sorted(observed))
+        self.cache_videos = bool(cache_videos)
+        self._video_cache: dict[str, tuple[FloatArray, IntArray, BoolArray]] = {}
+        self.cache_hits = 0
+        self.cache_misses = 0
+
+    @property
+    def cache_nbytes(self) -> int:
+        """Bytes held by the optional immutable in-process video cache."""
+
+        return int(
+            sum(
+                array.nbytes
+                for values in self._video_cache.values()
+                for array in values
+            )
+        )
+
+    @property
+    def cache_stats(self) -> dict[str, int | bool]:
+        return {
+            "enabled": self.cache_videos,
+            "hits": int(self.cache_hits),
+            "misses": int(self.cache_misses),
+            "videos": len(self._video_cache),
+            "nbytes": self.cache_nbytes,
+        }
 
     def _load_video(
         self, row: Mapping[str, object]
     ) -> tuple[FloatArray, IntArray, BoolArray]:
-        path = (self.root / str(row["feature_path"])).resolve()
+        relative = str(row["feature_path"])
+        if self.cache_videos and relative in self._video_cache:
+            self.cache_hits += 1
+            return self._video_cache[relative]
+        self.cache_misses += 1
+        path = (self.root / relative).resolve()
         with np.load(path, allow_pickle=False) as payload:
             required = {"embeddings", "frame_indices", "object_present"}
             if not required <= set(payload.files):
@@ -381,11 +413,14 @@ class OrbitFeatureStore:
             raise ValueError(f"metadata shape mismatch in {path}")
         if not np.all(np.isfinite(embeddings)) or np.any(np.diff(frame_indices) < 0):
             raise ValueError(f"non-finite or unsorted features in {path}")
-        return (
+        result = (
             _readonly(embeddings, dtype=np.float64),
             _readonly(frame_indices, dtype=np.int64),
             _readonly(object_present, dtype=np.bool_),
         )
+        if self.cache_videos:
+            self._video_cache[relative] = result
+        return result
 
     def sample_episode(
         self,

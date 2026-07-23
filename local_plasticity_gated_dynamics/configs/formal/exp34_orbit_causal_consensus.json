@@ -2,6 +2,8 @@
   "profile": "formal",
   "formal_authorized": false,
   "authorization_reason": "fail-closed until Exp34 validation artifacts pass the scale gate",
+  "authorization_receipt": "",
+  "authorization_receipt_sha256": "",
   "protocol_version": "exp34_orbit_causal_consensus_v1",
   "seeds": [13400, 13401, 13402, 13403, 13404],
   "training_algorithm": "causal_label_free_count_belief",
@@ -17,6 +19,7 @@
   "eval_user_ids": [],
   "require_complete_selection_split": true,
   "require_complete_eval_split": true,
+  "cache_features_in_memory": true,
   "n_selection_tasks_per_user": 5,
   "n_eval_tasks_per_user": 50,
   "sampling": {

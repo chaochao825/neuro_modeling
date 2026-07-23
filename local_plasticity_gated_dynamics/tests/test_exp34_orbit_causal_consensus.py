@@ -77,8 +77,9 @@ def _config(tmp_path: Path) -> dict[str, object]:
         "eval_user_ids": ["eval-user"],
         "require_complete_selection_split": True,
         "require_complete_eval_split": True,
+        "cache_features_in_memory": True,
         "n_selection_tasks_per_user": 1,
-        "n_eval_tasks_per_user": 1,
+        "n_eval_tasks_per_user": 2,
         "sampling": {
             "support_stride": 2,
             "max_support_frames_per_video": 4,
@@ -111,4 +112,6 @@ def test_exp34_retains_all_causal_interventions(tmp_path: Path) -> None:
     assert set(consensus["compute_scope"]) == {"full_actuator_bank"}
     summary = json.loads((path / "summary.json").read_text(encoding="utf-8"))
     assert summary["conclusion"] == "inconclusive"
+    assert summary["feature_cache"]["selection"]["enabled"] is True
+    assert summary["feature_cache"]["selection"]["hits"] > 0
     assert (path / "selection_audit.json").is_file()
