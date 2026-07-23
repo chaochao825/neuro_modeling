@@ -10,6 +10,7 @@ from scripts.prepare_orbit_features import (
     _protocol_object_present_mask,
     discover_orbit_videos,
     parse_frame_index,
+    parse_user_ids,
 )
 
 
@@ -18,6 +19,13 @@ def test_frame_index_parser_is_strict() -> None:
     assert parse_frame_index(Path("nested/video-3.JPEG")) == 3
     with pytest.raises(ValueError, match="cannot parse"):
         parse_frame_index("frame.jpg")
+
+
+def test_user_shard_parser_is_explicit_and_unique() -> None:
+    assert parse_user_ids("u2,u0") == ("u2", "u0")
+    assert parse_user_ids(None) is None
+    with pytest.raises(ValueError, match="unique"):
+        parse_user_ids("u0,u0")
 
 
 def test_video_discovery_enforces_user_boundary(tmp_path: Path) -> None:

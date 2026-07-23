@@ -48,6 +48,15 @@ def parse_frame_index(path: str | Path) -> int:
     return value
 
 
+def parse_user_ids(value: str | None) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    users = tuple(item.strip() for item in value.split(",") if item.strip())
+    if not users or len(users) != len(set(users)):
+        raise ValueError("user-ids must be a non-empty unique comma-separated list")
+    return users
+
+
 def discover_orbit_videos(
     raw_root: str | Path,
     *,
@@ -278,7 +287,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--decode-workers", type=int, default=8)
     parser.add_argument("--max-frames-per-video", type=int, default=1000)
-    parser.add_argument("--max-users", type=int, default=None)
+    users = parser.add_mutually_exclusive_group()
+    users.add_argument("--max-users", type=int, default=None)
+    users.add_argument("--user-ids", default=None)
     parser.add_argument("--require-complete-split", action="store_true")
     return parser
 
@@ -291,6 +302,7 @@ def main() -> None:
         raise ValueError("decode-workers must be non-negative")
     if args.max_users is not None and args.max_users < 1:
         raise ValueError("max-users must be positive")
+    requested_users = parse_user_ids(args.user_ids)
     splits = load_official_orbit_splits(args.official_splits)
     videos = discover_orbit_videos(
         args.raw_root, split=args.split, allowed_users=splits[args.split]
@@ -303,6 +315,12 @@ def main() -> None:
         )
     if args.max_users is not None:
         selected = set(observed_users[: args.max_users])
+        videos = [item for item in videos if item[0] in selected]
+    elif requested_users is not None:
+        missing = set(requested_users) - set(observed_users)
+        if missing:
+            raise ValueError(f"requested users are absent: {sorted(missing)}")
+        selected = set(requested_users)
         videos = [item for item in videos if item[0] in selected]
 
     import torch
@@ -456,6 +474,7 @@ def main() -> None:
             "decode_workers": args.decode_workers,
             "max_frames_per_video": args.max_frames_per_video,
             "n_planned_videos": len(videos),
+            "requested_users": list(requested_users or ()),
             "n_failures": len(failures),
             "python": sys.version,
             "platform": platform.platform(),
