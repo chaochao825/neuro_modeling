@@ -1,0 +1,70 @@
+{
+  "profile": "prospective_compositional_identifiability",
+  "protocol_version": "exp39_factorized_uncertainty_v1",
+  "protocol_frozen_at": "2026-07-26T13:40:10Z",
+  "protocol_path": "docs/exp39_factorized_uncertainty_protocol_20260726.md",
+  "implementation_receipt_path": "configs/prospective/exp39_factorized_uncertainty_implementation_receipt.json",
+  "claim_upgrade_allowed": true,
+  "development_disclosure": {
+    "seeds": [39000, 39001, 39002, 39003, 39004, 39005, 39006, 39007],
+    "v1_result": "factorized beat fixed 8/8 but beat seen-mode IMM only 4/8",
+    "v2_result": "after factor-specific local timescale correction all utility and clamp directions held 8/8",
+    "formal_seed_outcomes_inspected_at_freeze": false
+  },
+  "seeds": [
+    39100, 39101, 39102, 39103, 39104, 39105, 39106, 39107, 39108, 39109,
+    39110, 39111, 39112, 39113, 39114, 39115, 39116, 39117, 39118, 39119,
+    39120, 39121, 39122, 39123, 39124, 39125, 39126, 39127, 39128, 39129
+  ],
+  "used_autograd": false,
+  "used_bptt": false,
+  "used_future_observations": false,
+  "controller_state_dimension": 3,
+  "statistics_unit": "seed",
+  "levels": {
+    "hazard": [0.0025, 0.06],
+    "process_variance": [0.0025, 0.04],
+    "observation_variance": [0.01, 0.16]
+  },
+  "stream": {
+    "block_length": 96,
+    "blocks_per_sequence": 16,
+    "n_sequences": 4,
+    "jump_variance": 4.0
+  },
+  "partitions": {
+    "fit_cells": ["000", "100", "010", "001"],
+    "heldout_composition_cells": ["110", "101", "011", "111"],
+    "calibration_sequence_ids": [0, 1],
+    "selection_sequence_ids": [2, 3]
+  },
+  "selection": {
+    "predictive_variance_floor": 0.0001,
+    "ema_alpha_grid": [0.02, 0.05, 0.1, 0.2, 0.4, 0.7],
+    "window_grid": [2, 4, 8, 16, 32, 64],
+    "fixed_jump_grid": {
+      "hazard": [0.0025, 0.01, 0.03, 0.06],
+      "process_variance": [0.0025, 0.01, 0.04],
+      "observation_variance": [0.01, 0.04, 0.16]
+    },
+    "hazard_adaptation_rate_grid": [0.002, 0.01, 0.05],
+    "process_adaptation_rate_grid": [0.08, 0.2, 0.5],
+    "observation_adaptation_rate_grid": [0.08, 0.2, 0.5],
+    "imm_switch_grid": [0.00390625, 0.0078125, 0.015625, 0.03125]
+  },
+  "analysis": {
+    "recovery_window": 16,
+    "holm_alpha": 0.05,
+    "bootstrap_samples": 100000,
+    "statistics_seed": 39039,
+    "acceptance": {
+      "min_fixed_nll_gain": 0.01,
+      "min_fixed_positive_seeds": 24,
+      "min_seen_imm_nll_gain": 0.005,
+      "min_seen_imm_positive_seeds": 21,
+      "min_target_clamp_penalty": 0.002,
+      "min_clamp_selectivity": 0.002,
+      "min_clamp_positive_seeds": 21
+    }
+  }
+}

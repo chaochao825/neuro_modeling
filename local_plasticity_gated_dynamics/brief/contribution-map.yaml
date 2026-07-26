@@ -1,11 +1,49 @@
-paper_identity:
+active_research_contract:
+  working_title: Factorized Uncertainty for Compositional Memory Adaptation
+  readiness: synthetic-supported-real-behavior-eligible
+  primary_claim_id: C10
+  state_dimension_limit: 4
+  deployment_boundary: causal-no-test-time-gradient
+  stop_rule: >-
+    Stop the computational mainline unless the factorized controller stably
+    improves held-out NLL over both the best fixed filter and the seen-mode IMM
+    on unseen factor compositions and its h/Q/R clamps have distinct
+    registered effects.
+
+active_primary_claim:
+  id: C10
+  statement: >-
+    A three-state causal filter fitted on isolated abrupt hazard, gradual
+    process volatility, and observation-noise changes composes them on unseen
+    joint conditions and improves predictive NLL over matched fixed and
+    seen-mode multiple-model filters.
+  novelty_type: compositional-uncertainty-generalization
+  verification_status: verified-support-bounded
+  evidence_source: >-
+    results/exp39_factorized_uncertainty_prospective_v1/report.md
+
+active_secondary_claims:
+  - id: C11
+    statement: Clamping h, Q, and R causes distinct preregistered deficits.
+    verification_status: verified-functional-selectivity
+  - id: C12
+    statement: The same state improves held-out IBL choice likelihood across sessions and animals.
+    verification_status: eligible-but-unverified-new-cohort-required
+  - id: C13
+    statement: Pre-stimulus neural activity decodes the behaviorally verified state across sessions.
+    verification_status: locked-behind-behavior
+  - id: C14
+    statement: The three controller coordinates quantitatively recover the generating h, Q, and R parameters.
+    verification_status: opposed-for-h-and-inconclusive-for-q
+
+historical_paper_identity:
   working_title: >-
     When Consistency Is Not Reliability: A Causal Audit of Streaming
     Personalized Recognition
   programme_name: Actuator Matching Principle
   readiness: bounded-negative-mechanism-audit
 
-primary_claim:
+historical_primary_claim:
   id: C0
   statement: >-
     In constant-object personalized query videos, prediction-prefix
@@ -22,7 +60,7 @@ primary_claim:
   evidence_source: >-
     results/exp35_prefix_reliability_audit_retrospective_v2/report.md
 
-secondary_claims:
+historical_secondary_claims:
   - id: C1
     statement: >-
       Simple equal-weight accumulation of class probabilities over a query
@@ -79,6 +117,8 @@ non_claims:
   - Participating E/I dynamics, local plasticity, and neural generalization are outside this paper.
   - Exp37 does not reject all change-point detection; it rejects the frozen categorical-BOCPD hard-reset controller on CORe50.
   - Exp38 does not establish external utility: its disjoint development qualification gate failed in all five seeds, so untouched external Stream-51 videos were never featurized or scored.
+  - Exp39 does not establish calibrated h/Q/R recovery: log-parameter correlations are 0.089, 0.312, and 0.868.
+  - Exp39 does not dominate every unseen cell, improve immediate post-switch NLL, or match the privileged eight-mode/dynamic oracles.
 
 risk_factors:
   - description: The strongest positive prefix-aggregation evidence is retrospective and post-hoc.

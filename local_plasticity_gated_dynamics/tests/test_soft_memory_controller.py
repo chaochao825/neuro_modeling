@@ -167,3 +167,4 @@ def test_standardizer_rejects_degenerate_schema_but_stabilizes_constant_axis() -
     standardizer = ControllerStandardizer.fit(np.ones((3, 3)))
     assert np.allclose(standardizer.scale, 1e-8)
     assert np.allclose(standardizer.transform(np.ones((1, 3))), 0.0)
+

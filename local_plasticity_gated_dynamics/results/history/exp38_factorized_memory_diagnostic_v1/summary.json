@@ -1,0 +1,71 @@
+{
+  "alpha_grid": [
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "analysis_status": "post_hoc_revealed_qualification_diagnostic_only",
+  "claim_upgrade_allowed": false,
+  "external_features_accessed": false,
+  "external_outcomes_accessed": false,
+  "factorized_h_q_r_claim": "inconclusive_not_tested",
+  "hazard_grid": [
+    0.0,
+    0.005208333333333333,
+    0.010416666666666666,
+    0.020833333333333332,
+    0.041666666666666664,
+    0.08333333333333333,
+    0.16666666666666666,
+    0.3333333333333333
+  ],
+  "interpretation": "This diagnostic can retire or retain the revealed Stream-51 task for development. It cannot validate h/Q/R or unlock external data.",
+  "oracle_write_probe": {
+    "mean_mass_auc_gain": 0.001363537547592375,
+    "mean_three_feature_auc": 0.7006582070859476,
+    "mean_three_plus_mass_auc": 0.7020217446335401
+  },
+  "seeds": [
+    13800,
+    13801,
+    13802,
+    13803,
+    13804
+  ],
+  "stream51_reuse_gate": {
+    "methods": {
+      "direct_alpha": {
+        "mean_nll_gain": 0.0038131472894176845,
+        "n_positive_seeds": 5,
+        "passed": false,
+        "seed_gains": {
+          "13800": 0.0036051503948395514,
+          "13801": 0.0021319298720217095,
+          "13802": 0.0028889166927370535,
+          "13803": 0.0037677094902878183,
+          "13804": 0.006672029997202289
+        }
+      },
+      "likelihood_hmm": {
+        "mean_nll_gain": -0.06697124374187138,
+        "n_positive_seeds": 0,
+        "passed": false,
+        "seed_gains": {
+          "13800": -0.09468877327081604,
+          "13801": -0.026749245000643018,
+          "13802": -0.07182659232297728,
+          "13803": -0.05558601647847816,
+          "13804": -0.08600559163644239
+        }
+      }
+    },
+    "minimum_mean_nll_gain": 0.005,
+    "minimum_positive_seeds": 4,
+    "stream51_retained": false
+  }
+}

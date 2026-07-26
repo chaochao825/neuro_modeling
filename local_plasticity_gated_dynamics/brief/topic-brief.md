@@ -2,21 +2,82 @@
 
 ## Working title
 
-**When Consistency Is Not Reliability: A Causal Audit of Streaming Personalized Recognition**
+**Factorized Uncertainty for Compositional Memory Adaptation**
 
-`Actuator Matching Principle` remains a broader research programme. It is not
-the title claim of this paper.
+This is a pre-evidence successor question. `Actuator Matching Principle`
+remains a broader programme and is not an established contribution.
 
 ## Paper question
 
-Does prediction-prefix concentration identify the most reliable few-shot
-operator in a streaming personalized-recognition system, or can its apparent
-gain be explained by simpler causal accumulation of class evidence?
+Can a three-scalar causal state separately estimate abrupt hazard \(h_t\),
+gradual process volatility \(Q_t\), and observation noise \(R_t\), then
+compose factors that were observed only in isolation during fitting and
+improve held-out predictive NLL over the best fixed filter and a seen-mode
+interacting multiple-model baseline without test-time gradients?
 
-Here, causal means current-and-past-only execution. It does not mean causal
-discovery or treatment-effect identification.
+Here, causal means current-and-past-only execution plus registered clamp
+interventions. It does not mean causal discovery from observational data.
 
-## Scope
+## Active evidence status
+
+One bounded formal result now supports this question. Exp35--Exp38 are
+historical failure-boundary evidence, archived in
+`results/history/adaptive_memory_exp35_exp38_20260726.md`. They motivate the
+separation of change and noise but cannot verify it.
+
+The claim-ineligible Exp38 algebra diagnostic is complete: direct alpha
+improved NLL in 5/5 seeds but its mean 0.003813-nat gain missed the frozen
+0.005 reuse threshold, and likelihood-HMM was worse. Stream-51 is retired for
+the successor.
+
+Eight disclosed Exp39 development seeds selected factor-specific local update
+timescales. Development v2 was scale evidence only. The hash-frozen 30-seed
+formal run then improved unseen-composition NLL over selected fixed by
+0.290580 nats and over seen-mode IMM by 0.048008 nats, both in 30/30 seeds.
+All three clamp-selectivity gates passed the frozen Holm family.
+
+The result is functionally positive but mechanistically mixed. Log-parameter
+correlations were only 0.089 for h and 0.312 for Q, versus 0.868 for R.
+Cell 110 did not improve and early post-switch NLL was worse than seen IMM.
+Accordingly the paper may claim aggregate compositional predictive utility and
+functional clamp selectivity, but not calibrated h/Q/R identification,
+universal cell-wise dominance, or faster switching.
+
+The active sequence is gated:
+
+1. the completed claim-ineligible Exp38 diagnostic retires the semantic-splice
+   video task without testing h/Q/R;
+2. the completed 30-seed synthetic factorial fits only baseline and isolated
+   h/Q/R elevations, then supports aggregate prediction on unseen pairwise and
+   triple compositions;
+3. a new, outcome-blind IBL cohort is now eligible, but the exposed historical
+   cohort cannot provide confirmation and behavioral NLL must improve;
+4. neural decoding and E/I interpretation remain locked behind behavior.
+
+## Active hypothesis and stop rule
+
+The candidate method is
+
+\[
+(h_t,Q_t,R_t)\rightarrow
+\text{state-aware Bayesian gain or directional delta update}.
+\]
+
+The state dimension, Kalman filtering, IMM, input-dependent memory, and
+directional forgetting are not claimed novel. The only eligible contribution
+is a tightly constrained causal-state comparison under matched data and strong
+baselines. A privileged eight-mode IMM and a time-varying oracle are reported
+as upper bounds and are not targets to beat. Exp39 cleared the frozen
+synthetic gate. The next stop rule is behavioral: failure to improve held-out
+choice prediction on a newly frozen multi-animal IBL cohort prevents all
+neural claims.
+
+## Archived Exp35 paper contract (historical, not current)
+
+Everything below this heading records the superseded consistency-audit paper
+contract. It remains reproducible but does not define the active method claim.
+
+### Historical scope
 
 The empirical task is ORBIT clutter-video recognition. Labelled clean support
 videos personalize a frozen recognizer for one held-out user, while each query

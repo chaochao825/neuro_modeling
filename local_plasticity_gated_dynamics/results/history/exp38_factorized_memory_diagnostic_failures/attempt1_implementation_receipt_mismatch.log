@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/scripts/diagnose_exp38_factorized_memory.py", line 556, in <module>
+    main()
+  File "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/scripts/diagnose_exp38_factorized_memory.py", line 520, in main
+    summary, frames = diagnose(
+                      ^^^^^^^^^
+  File "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/scripts/diagnose_exp38_factorized_memory.py", line 238, in diagnose
+    validate_implementation_receipt()
+  File "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/experiments/exp38_stream51_soft_memory.py", line 217, in validate_implementation_receipt
+    raise ValueError(f"Exp38 implementation hash mismatch: {source}")
+ValueError: Exp38 implementation hash mismatch: /home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/tests/test_embedding_evidence.py

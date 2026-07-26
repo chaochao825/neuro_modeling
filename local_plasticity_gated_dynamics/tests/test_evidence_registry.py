@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
     rows = load_registry(PROJECT_ROOT)
     assert [row["experiment_id"] for row in rows] == [
-        f"exp{index:02d}" for index in range(39)
+        f"exp{index:02d}" for index in range(40)
     ]
     current = {
         row["experiment_id"]
@@ -29,7 +29,7 @@ def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
         row["experiment_id"] for row in rows if row["disposition"] == "historical_only"
     }
     assert current.isdisjoint(history)
-    assert current | history == {f"exp{index:02d}" for index in range(39)}
+    assert current | history == {f"exp{index:02d}" for index in range(40)}
 
 
 def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
@@ -49,7 +49,10 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp30",
         "exp33",
         "exp34",
+        "exp35",
         "exp36",
+        "exp37",
+        "exp38",
     ):
         assert dispositions[experiment_id] == "historical_only"
     for experiment_id in (
@@ -62,11 +65,10 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp29",
         "exp31",
         "exp32",
-        "exp35",
-        "exp37",
+        "exp39",
     ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
-    assert registry["exp37"]["disposition"] == "current_core"
+    assert registry["exp37"]["disposition"] == "historical_only"
     assert registry["exp37"]["conclusion"] == "oppose"
     assert registry["exp37"]["canonical_evidence"] == (
         "results/exp37_core50_change_aware_prefix_confirmation/report.md"
@@ -140,7 +142,7 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
     )
     exp37_claims = [
         row
-        for row in current_claims
+        for row in historical_claims
         if row["experiment"] == "exp37_core50_change_aware_prefix"
     ]
     assert {row["claim_id"] for row in exp37_claims} >= {

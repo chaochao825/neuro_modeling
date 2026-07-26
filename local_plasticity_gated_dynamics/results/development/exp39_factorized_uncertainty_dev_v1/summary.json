@@ -1,0 +1,49 @@
+{
+  "claim_eligible": false,
+  "joint_gate_passed": false,
+  "n_complete_seeds": 8,
+  "oracle_baselines_are_upper_bounds": true,
+  "primary_panel": "heldout_pairwise_and_triple_h_q_r_compositions",
+  "protocol_version": "exp39_factorized_uncertainty_dev_v1",
+  "real_data_unlocked": false,
+  "selective_clamp_gates": {
+    "h": {
+      "mean_high_penalty": 0.020207569208616587,
+      "mean_low_penalty": -0.018084809441297874,
+      "mean_selectivity": 0.03829237864991446,
+      "passed": false,
+      "positive_selectivity_seeds": 7
+    },
+    "q": {
+      "mean_high_penalty": 0.028365635752614894,
+      "mean_low_penalty": -0.007942506014164573,
+      "mean_selectivity": 0.03630814176677947,
+      "passed": false,
+      "positive_selectivity_seeds": 8
+    },
+    "r": {
+      "mean_high_penalty": 0.10480747678918413,
+      "mean_low_penalty": 0.08813287322619379,
+      "mean_selectivity": 0.016674603562990338,
+      "passed": false,
+      "positive_selectivity_seeds": 6
+    }
+  },
+  "utility_gates": {
+    "best_fixed": {
+      "mean_nll_gain": 0.24854205977254717,
+      "minimum_gain": 0.01,
+      "minimum_positive_seeds": 24,
+      "passed": false,
+      "positive_seeds": 8
+    },
+    "seen_mode_imm": {
+      "mean_nll_gain": 0.0015153866587098025,
+      "minimum_gain": 0.005,
+      "minimum_positive_seeds": 21,
+      "passed": false,
+      "positive_seeds": 4
+    }
+  },
+  "verdict": "oppose"
+}

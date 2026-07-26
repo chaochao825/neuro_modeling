@@ -109,3 +109,4 @@ def test_missing_registered_seed_is_invalid_not_inconclusive(tmp_path: Path) -> 
             preregistration_receipt_path=preregistration,
             implementation_receipt_path=implementation,
         )
+

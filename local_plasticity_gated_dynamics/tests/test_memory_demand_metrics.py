@@ -105,3 +105,4 @@ def test_qualification_requires_every_gate() -> None:
     )
     assert not failed.passed
     assert not failed.stable_accumulation_gate
+

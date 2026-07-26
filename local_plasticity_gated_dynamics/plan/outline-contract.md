@@ -1,6 +1,28 @@
 # Outline Contract
 
-## Paper spine
+## Active pre-evidence paper spine
+
+The successor paper asks whether uncertainty factors can be composed rather
+than memorized as joint modes. It fits a three-dimensional causal
+\((h,Q,R)\) state only on baseline and isolated hazard, drift, and noise
+elevations, then tests pairwise and triple combinations absent from fitting.
+The hash-frozen 30-seed factorial passed its stop gate against the best fixed
+and seen-mode IMM. Positive wording is restricted to aggregate compositional
+predictive utility and functional clamp selectivity.
+
+Required active sections are: normative identifiability; local online-EM
+factorized filter; isolated-factor train split; unseen-composition test;
+matched fixed and four-mode IMM controls; privileged eight-mode/dynamic
+oracles; selective clamps; held-out IBL behavior; and only then neural
+decoding. A new IBL behavior cohort is eligible but unverified; the neural
+section remains locked. Parameter recovery, cell heterogeneity, early-switch
+cost, and privileged-oracle gaps are mandatory negative-result subsections.
+
+The Exp35--Exp38 consistency/change-aware/soft-retention line is historical and
+belongs in `results/history/adaptive_memory_exp35_exp38_20260726.md` or an
+appendix. It cannot provide positive evidence for the successor.
+
+## Historical Exp35 audit paper spine
 
 The paper asks one question: when an unlabelled personalized-video stream is
 processed causally, does prediction concentration measure operator

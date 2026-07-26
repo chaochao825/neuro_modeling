@@ -1,0 +1,24 @@
+{
+  "audit_status": "passed",
+  "implementation_frozen_at": "2026-07-26T13:43:33Z",
+  "joint_gate_passed": true,
+  "methods": [
+    "selected_fixed",
+    "seen_mode_imm",
+    "oracle_factorial_imm",
+    "factorized",
+    "clamp_h",
+    "clamp_q",
+    "clamp_r",
+    "oracle_dynamic"
+  ],
+  "n_block_rows": 15360,
+  "n_failed_seeds": 0,
+  "n_seeds": 30,
+  "paired_tape_check": "passed",
+  "protocol_version": "exp39_factorized_uncertainty_v1",
+  "selection_replay_check": "passed",
+  "statistics_unit": "seed",
+  "summary_replay_check": "passed",
+  "verdict": "support"
+}

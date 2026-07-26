@@ -1,0 +1,29 @@
+{
+  "alpha_grid": [
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "analysis_status": "post_hoc_revealed_qualification_diagnostic_only",
+  "claim_upgrade_allowed": false,
+  "external_access_allowed": false,
+  "hazard_grid": [
+    0.0,
+    0.005208333333333333,
+    0.010416666666666666,
+    0.020833333333333332,
+    0.041666666666666664,
+    0.08333333333333333,
+    0.16666666666666666,
+    0.3333333333333333
+  ],
+  "stream51_reuse_gate": {
+    "minimum_mean_nll_gain": 0.005,
+    "minimum_positive_seeds": 4
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "receipt_type": "implementation_hash_manifest",
+  "protocol_version": "exp39_factorized_uncertainty_v1",
+  "frozen_at": "2026-07-26T13:43:33Z",
+  "formal_outcomes_inspected": false,
+  "development_versions_retained": [
+    "exp39_factorized_uncertainty_dev_v1",
+    "exp39_factorized_uncertainty_dev_v2"
+  ],
+  "verification_at_freeze": {
+    "targeted_tests_passed": 14,
+    "ruff_check": "all_checks_passed",
+    "formal_config_validation": "passed"
+  },
+  "files": {
+    "configs/prospective/exp39_factorized_uncertainty.json": "6ff0c9fc399c84ddc29f557c99717d252a11d9d6c2957b8bf7bb074e42f6367b",
+    "docs/exp39_factorized_uncertainty_protocol_20260726.md": "36a3922bee56fc1b912e6ede7e12dc9b117c1629cb8a87d9d063376f4f12ed5f",
+    "experiments/exp39_factorized_uncertainty.py": "65a227923391cc658df5fcecb16c8daf2c2ca7a87755d7bf074ef296abe28830",
+    "figures/exp39_factorized_uncertainty_plot.py": "4aadd023e4994324edfebfa709df9ec6d258f1ef396c4d16a0d258133b5deb8f",
+    "src/models/factorized_uncertainty_filter.py": "69579dd4bb967b12645039b600ae511bfdae6304f8b165b281464c553f35e47a",
+    "src/tasks/factorized_uncertainty.py": "a2b5ee2eb3a7e5829c13acec55b08cb62bfc5d933895b7445350ffe065b3f6a2",
+    "src/utils/reproducibility.py": "a21a453f18c1e2a4da6943cffffc3d6d11f5594d1120bb21d1e6a73eea0ad0b0",
+    "tests/test_factorized_uncertainty_filter.py": "2f421a3328a06bdaf24fcfcebb011673502ab4229a33ca85501b9b94082b59ed",
+    "tests/test_factorized_uncertainty_task.py": "960c33a06e8ba41512a0ec6c17c636b1d20ba8d0cde62239a400867ddacbd9ee",
+    "tests/test_exp39_factorized_uncertainty.py": "394c60ff024688c16bacd108ec59355643bcd38e036ea8614b4ec5d6cc60732c",
+    "tests/test_exp39_figure.py": "45f821b18b42cbd90b32f09dbdee64c6ea91d76204be386c8121990d26cc25d6"
+  }
+}

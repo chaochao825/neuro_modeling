@@ -1,0 +1,18 @@
+{
+  "receipt_type": "outcome_blind_execution_amendment",
+  "protocol_version": "exp39_factorized_uncertainty_v1",
+  "frozen_at": "2026-07-26T13:58:01Z",
+  "formal_scientific_outcomes_inspected": false,
+  "scientific_implementation_changed": false,
+  "workers": 6,
+  "verification_at_freeze": {
+    "parallel_wrapper_tests_passed": 1,
+    "ruff_check": "all_checks_passed"
+  },
+  "files": {
+    "configs/prospective/exp39_factorized_uncertainty_implementation_receipt.json": "1b99329955c590492b3331fce98b217bf75e5960fcbcd4a494cb0f2a8fa0835f",
+    "docs/exp39_execution_amendment_20260726.md": "fdf22cf78b86eca4e46363b4e2004f08b29929f6828738c735985347acbf8525",
+    "scripts/run_exp39_parallel.py": "710291fbffa270848aca3f0846f65d1d19f20c523f78d7d5f7d13c67db97478f",
+    "tests/test_run_exp39_parallel.py": "be78bc823ae7106ede75a751bc97a9a3b326002c66e3be1a145158ea5706edff"
+  }
+}

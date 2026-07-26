@@ -1,0 +1,8 @@
+{
+  "classification_outcomes_inspected_before_amendment": false,
+  "frozen_seed_function": "experiments.exp39_factorized_uncertainty.run_seed",
+  "frozen_summary_function": "experiments.exp39_factorized_uncertainty.summarize",
+  "reason": "Dispatch independent formal seeds across CPU workers",
+  "scientific_functions_changed": false,
+  "workers": 6
+}

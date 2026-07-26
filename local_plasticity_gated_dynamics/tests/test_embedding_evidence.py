@@ -51,3 +51,4 @@ def test_vmf_model_parameters_are_read_only() -> None:
     model = VMFEvidenceModel.fit(features, labels, n_classes=2)
     with pytest.raises(ValueError):
         model.directions[0, 0] = 0.0
+

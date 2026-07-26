@@ -1,0 +1,112 @@
+{
+  "claim_eligible": true,
+  "joint_gate_passed": true,
+  "multiplicity": {
+    "alpha": 0.05,
+    "bootstrap_samples": 100000,
+    "family": [
+      "factorized_over_selected_fixed",
+      "factorized_over_seen_mode_imm",
+      "clamp_h_selectivity",
+      "clamp_q_selectivity",
+      "clamp_r_selectivity"
+    ],
+    "method": "Holm",
+    "statistics_seed": 39039
+  },
+  "n_complete_seeds": 30,
+  "oracle_baselines_are_upper_bounds": true,
+  "parameter_tracking": {
+    "h": {
+      "mean_absolute_log_error": 1.5536706445845148,
+      "mean_log_parameter_correlation": 0.08928394684815877
+    },
+    "q": {
+      "mean_absolute_log_error": 1.2191547528661764,
+      "mean_log_parameter_correlation": 0.3116512908176381
+    },
+    "r": {
+      "mean_absolute_log_error": 0.6472166407167081,
+      "mean_log_parameter_correlation": 0.8675959045572578
+    }
+  },
+  "primary_panel": "heldout_pairwise_and_triple_h_q_r_compositions",
+  "protocol_version": "exp39_factorized_uncertainty_v1",
+  "real_data_unlocked": true,
+  "selective_clamp_gates": {
+    "h": {
+      "bootstrap_mean_selectivity_ci95": [
+        0.034788134731178734,
+        0.03937457415895372
+      ],
+      "holm_adjusted_p": 4.6566128730773926e-09,
+      "holm_alpha": 0.05,
+      "mean_high_penalty": 0.026064367011069154,
+      "mean_low_penalty": -0.011032544144366266,
+      "mean_selectivity": 0.037096911155435425,
+      "one_sided_sign_p": 9.313225746154785e-10,
+      "passed": true,
+      "positive_selectivity_seeds": 30
+    },
+    "q": {
+      "bootstrap_mean_selectivity_ci95": [
+        0.020827781330953206,
+        0.03225388268978384
+      ],
+      "holm_adjusted_p": 4.215165972709656e-06,
+      "holm_alpha": 0.05,
+      "mean_high_penalty": 0.04175049907048956,
+      "mean_low_penalty": 0.015067957880731732,
+      "mean_selectivity": 0.026682541189757814,
+      "one_sided_sign_p": 4.215165972709656e-06,
+      "passed": true,
+      "positive_selectivity_seeds": 27
+    },
+    "r": {
+      "bootstrap_mean_selectivity_ci95": [
+        0.04399095202867098,
+        0.06117272562488846
+      ],
+      "holm_adjusted_p": 4.6566128730773926e-09,
+      "holm_alpha": 0.05,
+      "mean_high_penalty": 0.1507998314543896,
+      "mean_low_penalty": 0.09843014075382883,
+      "mean_selectivity": 0.05236969070056081,
+      "one_sided_sign_p": 9.313225746154785e-10,
+      "passed": true,
+      "positive_selectivity_seeds": 30
+    }
+  },
+  "statistics_unit": "seed",
+  "utility_gates": {
+    "best_fixed": {
+      "bootstrap_mean_ci95": [
+        0.28012248159728176,
+        0.3005939177517998
+      ],
+      "holm_adjusted_p": 4.6566128730773926e-09,
+      "holm_alpha": 0.05,
+      "mean_nll_gain": 0.29058048303731177,
+      "minimum_gain": 0.01,
+      "minimum_positive_seeds": 24,
+      "one_sided_sign_p": 9.313225746154785e-10,
+      "passed": true,
+      "positive_seeds": 30
+    },
+    "seen_mode_imm": {
+      "bootstrap_mean_ci95": [
+        0.0421358792371623,
+        0.054094041418507634
+      ],
+      "holm_adjusted_p": 4.6566128730773926e-09,
+      "holm_alpha": 0.05,
+      "mean_nll_gain": 0.048008079302522225,
+      "minimum_gain": 0.005,
+      "minimum_positive_seeds": 21,
+      "one_sided_sign_p": 9.313225746154785e-10,
+      "passed": true,
+      "positive_seeds": 30
+    }
+  },
+  "verdict": "support"
+}

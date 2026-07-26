@@ -1,0 +1,49 @@
+{
+  "controller_state_dimension": 3,
+  "fit_tape_digest": "135449170b3508fa9042139dec65384b6b58c8457f8df3720f5c3dc0ff8f26ea",
+  "oracle_factorial_imm_modes": 8,
+  "seed": 39124,
+  "seen_imm_modes": 4,
+  "selected": {
+    "factorized": {
+      "candidate": "0.002:0.5:0.2",
+      "candidate_family": "online_em",
+      "candidate_h": 0.002,
+      "candidate_q": 0.5,
+      "candidate_r": 0.2,
+      "seed": 39124,
+      "selected": true,
+      "selection_family": "factorized",
+      "selection_nll": 0.024443869282356704
+    },
+    "fit_tape_digest": "135449170b3508fa9042139dec65384b6b58c8457f8df3720f5c3dc0ff8f26ea",
+    "fixed": {
+      "candidate": "0.03:0.01:0.04",
+      "candidate_family": "fixed_jump",
+      "candidate_h": 0.03,
+      "candidate_q": 0.01,
+      "candidate_r": 0.04,
+      "seed": 39124,
+      "selected": true,
+      "selection_family": "fixed",
+      "selection_nll": 0.21092433473265837
+    },
+    "oracle_imm": {
+      "candidate": 0.015625,
+      "candidate_family": "oracle_imm",
+      "seed": 39124,
+      "selected": true,
+      "selection_family": "oracle_imm",
+      "selection_nll": -0.043974299830026785
+    },
+    "seen_imm": {
+      "candidate": 0.015625,
+      "candidate_family": "seen_imm",
+      "seed": 39124,
+      "selected": true,
+      "selection_family": "seen_imm",
+      "selection_nll": -0.051707506844348584
+    }
+  },
+  "test_tape_digest": "5f4e42569d42618b585dbf47a6f914247996ced0bf4166d27a196bb53edef0f7"
+}

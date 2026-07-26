@@ -330,3 +330,79 @@ gate failed, all 381 external videos remain unfeaturized and unscored; the main
 external utility claim is **inconclusive**. The stop rule prohibits post-hoc
 threshold tuning or GRU/BPTT, E/I, and encoder rescue. The canonical package is
 `results/exp38_stream51_soft_memory_prospective_v1/`.
+
+## Exp38 post-hoc diagnostic and historical disposition
+
+The attachment-motivated diagnostic tested whether the failed scalar soft
+memory controller had nevertheless exposed a reusable uncertainty signal. It
+is explicitly post-hoc and cannot rescue Exp38. Directly selected scalar
+retention improved qualification NLL by only +0.003813 nats (5/5 seeds), below
+the frozen +0.005 reuse threshold. Replacing the causal controller with a
+likelihood HMM reduced NLL by -0.066971 nats relative to the selected fixed
+memory (0/5 seeds positive). Adding cumulative log evidence to the three
+instantaneous risk statistics increased oracle write-harm AUC by only
++0.001364 (0.700658 to 0.702022).
+
+The diagnostic verdict is therefore **oppose** for both scalar-controller
+reuse routes. Stream-51 is retired as a test bed for factorized uncertainty:
+its semantic splice construction does not independently identify abrupt jump
+hazard, gradual process drift, and observation noise. The complete Exp35--38
+decision trail, including failed launches and supersession rules, is archived
+in `results/history/adaptive_memory_exp35_exp38_20260726.md`; the raw diagnostic
+package is `results/history/exp38_factorized_memory_diagnostic_v1/`.
+
+## Exp39 prospective update: factorized uncertainty composition
+
+Exp39 separated the successor question from Stream-51 using a synthetic jump
+diffusion in which hazard, process variance, and observation variance are
+orthogonally controlled. Fitting used only the baseline and three single-factor
+cells (`000`, `100`, `010`, and `001`). Pairwise and triple cells (`110`,
+`101`, `011`, and `111`) were untouched until the 30-seed formal run. The
+controller maintains three causal, factor-indexed local states and performs no
+test-time gradient update or BPTT. It was compared with a selected fixed
+filter and an IMM containing only the four fitting modes; an eight-mode IMM
+and a dynamic truth filter were retained as privileged upper bounds.
+
+| Method | Mean held-out predictive NLL |
+|---|---:|
+| Dynamic truth filter | 0.724684 |
+| Eight-mode oracle-supported IMM | 0.764398 |
+| Factorized controller | 0.841257 |
+| Four seen-mode IMM | 0.889265 |
+| Selected fixed filter | 1.131837 |
+
+The registered joint gate is **support**. Relative to the selected fixed
+filter, the NLL gain was +0.290580 nats with a 95% seed-bootstrap interval of
+[0.280122, 0.300594], positive in 30/30 seeds. Relative to the seen-mode IMM,
+the gain was +0.048008 [0.042136, 0.054094], also positive in 30/30 seeds.
+All five registered utility and clamp tests passed their Holm-corrected family.
+High-minus-low clamp selectivity was +0.037097, +0.026683, and +0.052370 nats
+for the h-, Q-, and R-indexed states, respectively.
+
+This supports only a functional compositional statement: separate causal
+states can reuse fitting-time evidence across unseen uncertainty combinations
+more effectively than selecting among joint modes observed during fitting.
+It does not establish calibrated recovery of the generating parameters.
+Block-level log-parameter correlations were 0.089, 0.312, and 0.868 for h, Q,
+and R, so parameter identification is **oppose**. Performance was not uniform:
+the factorized controller did not beat the seen-mode IMM in held-out cell
+`110`. It was also worse immediately after switches (NLL 1.059377 versus
+0.972679), although better late in blocks (0.796637 versus 0.878553). Claims of
+faster switching, universal cell-wise dominance, or oracle equivalence are
+therefore rejected.
+
+The independently replayed package contains 30/30 completed seeds, 15,360
+block rows, zero failed conditions, paired-tape verification, selection replay,
+summary replay, and SHA-256 manifests. The canonical report is
+`results/exp39_factorized_uncertainty_prospective_v1/report.md`; bounded
+post-outcome interpretation is in its `critical_analysis.md` companion.
+
+## Real-data gate after Exp39
+
+Exp39 makes a new real-data attempt eligible but does not itself validate one.
+The existing 30-session IBL cohort is outcome-exposed and cannot be relabeled
+as confirmatory. Its earlier categorical HMM improved context NLL without
+improving held-out behavioral log loss. A successor real-data experiment is
+therefore **inconclusive/not yet run** and must freeze a disjoint animal/session
+cohort, keep preprocessing inside training folds, and require held-out choice
+or reaction-time utility before any neural-mechanism analysis is unlocked.

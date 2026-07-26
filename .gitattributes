@@ -26,3 +26,4 @@ local_plasticity_gated_dynamics/results/exp35_prefix_reliability_audit_retrospec
 local_plasticity_gated_dynamics/results/exp36_v1_invalid_schema_audit/** -text
 local_plasticity_gated_dynamics/results/exp37_core50_change_aware_prefix_confirmation/** -text
 local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/** -text
+local_plasticity_gated_dynamics/results/exp39_factorized_uncertainty_prospective_v1/** -text

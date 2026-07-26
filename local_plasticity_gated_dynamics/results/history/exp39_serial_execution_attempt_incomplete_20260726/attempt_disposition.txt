@@ -1,0 +1,2 @@
+outcomes_inspected=false
+termination_reason=outcome_blind_parallel_execution_amendment
