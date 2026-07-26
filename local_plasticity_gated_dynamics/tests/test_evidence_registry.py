@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
     rows = load_registry(PROJECT_ROOT)
     assert [row["experiment_id"] for row in rows] == [
-        f"exp{index:02d}" for index in range(35)
+        f"exp{index:02d}" for index in range(39)
     ]
     current = {
         row["experiment_id"]
@@ -29,12 +29,13 @@ def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
         row["experiment_id"] for row in rows if row["disposition"] == "historical_only"
     }
     assert current.isdisjoint(history)
-    assert current | history == {f"exp{index:02d}" for index in range(35)}
+    assert current | history == {f"exp{index:02d}" for index in range(39)}
 
 
 def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
+    registry = {row["experiment_id"]: row for row in load_registry(PROJECT_ROOT)}
     dispositions = {
-        row["experiment_id"]: row["disposition"] for row in load_registry(PROJECT_ROOT)
+        experiment_id: row["disposition"] for experiment_id, row in registry.items()
     }
     for experiment_id in (
         "exp00",
@@ -47,6 +48,8 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp28",
         "exp30",
         "exp33",
+        "exp34",
+        "exp36",
     ):
         assert dispositions[experiment_id] == "historical_only"
     for experiment_id in (
@@ -59,9 +62,15 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp29",
         "exp31",
         "exp32",
-        "exp34",
+        "exp35",
+        "exp37",
     ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
+    assert registry["exp37"]["disposition"] == "current_core"
+    assert registry["exp37"]["conclusion"] == "oppose"
+    assert registry["exp37"]["canonical_evidence"] == (
+        "results/exp37_core50_change_aware_prefix_confirmation/report.md"
+    )
 
 
 def test_every_ancestor_branch_has_a_hash_bound_snapshot() -> None:
@@ -117,7 +126,33 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
     assert current_claims
     assert historical_claims
     assert all(not row["experiment"].startswith("exp23_") for row in current_claims)
-    assert all(row["experiment"].startswith("exp23_") for row in historical_claims)
+    historical_ids = {
+        row["experiment_id"]
+        for row in load_registry(PROJECT_ROOT)
+        if row["disposition"] == "historical_only"
+    }
+    assert all(
+        any(
+            row["experiment"].startswith(f"{experiment_id}_")
+            for experiment_id in historical_ids
+        )
+        for row in historical_claims
+    )
+    exp37_claims = [
+        row
+        for row in current_claims
+        if row["experiment"] == "exp37_core50_change_aware_prefix"
+    ]
+    assert {row["claim_id"] for row in exp37_claims} >= {
+        "exp37_over_fixed_forgetting_switch",
+        "exp37_over_sliding_window_switch",
+        "exp37_joint_change_aware_prefix",
+    }
+    assert next(
+        row
+        for row in exp37_claims
+        if row["claim_id"] == "exp37_joint_change_aware_prefix"
+    )["conclusion"] == "oppose"
 
     with (tmp_path / "current" / "foundation_claims.csv").open(
         "r", encoding="utf-8", newline=""

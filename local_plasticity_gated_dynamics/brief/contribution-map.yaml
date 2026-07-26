@@ -1,66 +1,127 @@
+paper_identity:
+  working_title: >-
+    When Consistency Is Not Reliability: A Causal Audit of Streaming
+    Personalized Recognition
+  programme_name: Actuator Matching Principle
+  readiness: bounded-negative-mechanism-audit
+
 primary_claim:
   id: C0
   statement: >-
-    On held-out ORBIT users, a label-free causal consensus belief can select
-    among reusable prototype, gain, associative-delta, and temporal motifs and
-    outperform the validation-selected globally fixed motif under the same
-    frozen encoder, frame tape, and support set.
-  novelty_type: new-method
+    In constant-object personalized query videos, prediction-prefix
+    concentration is not a reliable operator-selection criterion: under a
+    matched causal tape it underperforms simple prefix vote and probability
+    accumulation and locks onto stable incorrect operators.
+  novelty_type: failure-boundary-and-benchmark-audit
   gap_evidence: >-
-    ORBIT work establishes strong prototype, meta-learning, sampling, and
-    parameter-efficient adaptation baselines, while fast-weight and state-space
-    work establishes powerful individual memory mechanisms. The verified
-    literature snapshot did not identify an ORBIT evaluation that uses a
-    backpropagation-free causal belief over qualitatively different reusable
-    computations under the benchmark's current/past-only query constraint.
-  verification_status: corrected-support-with-prospective-caveat
-  evidence_source: results/exp34_orbit_causal_consensus_formal_v3_official_video_exclusion/report.md
+    Algorithm selection, expert advice, modular routing, ensembling, and
+    temporal adaptation are established. The contribution is a controlled
+    audit of a tempting label-free reliability proxy under a precisely stated
+    current-and-past-only information boundary, not a new generic router.
+  verification_status: verified-oppose-original-method-claim
+  evidence_source: >-
+    results/exp35_prefix_reliability_audit_retrospective_v2/report.md
 
 secondary_claims:
   - id: C1
     statement: >-
-      Any aggregate gain requires causal within-video state: resetting belief
-      every frame or delaying its update reduces held-out accuracy under a
-      Holm-corrected paired user analysis.
+      Simple equal-weight accumulation of class probabilities over a query
+      prefix outperforms the prefix-consistency selector on the same ORBIT
+      users, episodes, features, order, noise, and seeds.
     supports_primary: true
+    verification_status: verified-retrospective
   - id: C2
     statement: >-
-      A fixed high-rank Dale E/I carrier can realize the selected effective
-      computation while retaining at least 90% of the score-space controller's
-      held-out gain, with low latent closure error and decaying normal
-      perturbations.
-    supports_primary: false
+      Prefix concentration cannot distinguish a stable correct operator from a
+      stable wrong operator without an additional calibration assumption.
+    supports_primary: true
+    verification_status: verified-analytic-and-controlled
   - id: C3
     statement: >-
-      A future sparse-execution controller can retain the full-bank controller
-      gain at lower measured event/MAC cost than per-user gradient adaptation.
+      Accumulating probabilities within each operator improves recognition,
+      while the incremental benefit of a heterogeneous operator bank over a
+      validation-selected single prefix operator is not established.
     supports_primary: false
+    verification_status: exploratory-inconclusive-bank-value
+  - id: C4
+    statement: >-
+      The prefix-aggregation effect transfers to an untouched external cohort.
+    supports_primary: false
+    verification_status: unregistered-future-work
+  - id: C8
+    statement: >-
+      Explicit categorical-BOCPD reset adds decision utility beyond
+      validation-selected stationary forgetting on hidden object switches.
+    supports_primary: false
+    verification_status: prospective-verified-oppose-on-core50
+  - id: C9
+    statement: >-
+      On a genuinely memory-demanding untouched video stream, a three-state
+      causal controller can continuously regulate evidence retention and
+      improve held-out task utility over every development-selected fixed
+      time scale without updating the representation.
+    supports_primary: false
+    verification_status: prospective-qualification-opposed-external-locked
+
+literature_boundary:
+  - Generic actuator matching and algorithm selection are not new.
+  - Prototype, diagonal gain, delta memory, temporal EMA, voting, and probability averaging are not individually novel.
+  - The work does not claim a new state of the art, calibrated reliability model, or efficient pre-execution router.
+  - The candidate contribution is an evidence-governed causal audit with exact failure controls and user-level inference.
 
 non_claims:
-  - The method is not claimed to train a visual foundation model locally.
-  - The method is not claimed to replace Transformers, Mamba, or Gated DeltaNet on general sequence modelling.
-  - Low effective control dimension is not evidence of low physical recurrent matrix rank.
-  - The standard ORBIT result is not an open-set result unless an explicitly registered unknown-object track is run.
-  - The E/I carrier is not called biologically realistic solely because it obeys Dale signs.
+  - Exp34 is not current positive evidence for a routing method after Exp35.
+  - The Exp35 retrospective panel cannot establish prospective generalization.
+  - The equal-prefix baseline is not claimed as a novel algorithm or ORBIT state of the art.
+  - The full operator bank has no demonstrated advantage over a selected single prefix operator.
+  - The action-per-frame oracle is not an upper bound on temporal ensembles.
+  - Low control dimension is not evidence of low physical recurrent rank.
+  - Participating E/I dynamics, local plasticity, and neural generalization are outside this paper.
+  - Exp37 does not reject all change-point detection; it rejects the frozen categorical-BOCPD hard-reset controller on CORe50.
+  - Exp38 does not establish external utility: its disjoint development qualification gate failed in all five seeds, so untouched external Stream-51 videos were never featurized or scored.
 
 risk_factors:
-  - description: A strong frozen encoder and cosine prototypes may leave no useful actuator-selection headroom.
-    mitigation: Report oracle headroom before scaling; classify a zero-headroom result as oppose rather than tuning around it.
-  - description: Actuator outputs may be too correlated for a selector gain to identify mechanisms.
-    mitigation: Measure action disagreement and per-user oracle gain; require targeted intervention effects, not only aggregate accuracy.
-  - description: Randomly sampled ORBIT query frames may weaken temporal continuity.
-    mitigation: Preserve original frame order, record temporal gaps, and report the official random-frame endpoint separately from a preregistered contiguous causal stress track.
-  - description: User-level sample size is limited to 17 official test users.
-    mitigation: Use paired user-level bootstrap intervals and permutation tests; never treat frames as independent replicates.
-  - description: A participating E/I carrier may reduce task accuracy without adding explanatory value.
-    mitigation: Keep score-space performance primary and enforce a predeclared 90% gain-retention gate before mechanistic claims.
+  - description: The strongest positive prefix-aggregation evidence is retrospective and post-hoc.
+    mitigation: >-
+      Label it exploratory, preserve the frozen Exp35 receipt, and require a
+      new untouched cohort before any confirmatory claim.
+  - description: Constant-object videos make temporal accumulation unusually favorable.
+    mitigation: >-
+      Bound the thesis to this task assumption and report within-stream switch
+      failure rather than implying general streaming robustness.
+  - description: Stronger representation models could change absolute accuracy.
+    mitigation: >-
+      Treat representation competitiveness as orthogonal to the same-feature
+      mechanism contrast and avoid SOTA language.
+  - description: The broad programme overlaps established algorithm selection and modular routing.
+    mitigation: >-
+      Keep Actuator Matching out of the paper title and contribution list.
+  - description: The Exp37 detector score never approached the frozen alarm threshold.
+    mitigation: >-
+      Preserve the prospective oppose verdict, disclose the post-hoc scale
+      diagnosis, stop tuning on CORe50, and require a new frozen contract for
+      any differently scaled detector.
+  - description: A new video stream may still be solvable frame by frame or lack an identifiable causal switch statistic.
+    mitigation: >-
+      Exp38 kept external outcomes locked because its disjoint development
+      holdout did not jointly establish robust accumulation value and actuator
+      reachability across all five seeds; no post-hoc rescue is allowed.
 
 likely_reviewer_objections:
-  - objection: The gain is only a better visual backbone or a different frame sampler.
-    preemptive_response: Pair encoder weights, sampled support/query frames, preprocessing, and query order across all rerun baselines; label paper-reported numbers separately.
-  - objection: The selector leaks query labels, future frames, or forbidden clean-support annotations.
-    preemptive_response: Expose only current/past predictions to the gate, hash-bind the support-annotation-safe pipeline, and keep the label oracle isolated as a diagnostic upper bound.
-  - objection: Temporal smoothing alone explains the result.
-    preemptive_response: Include fixed temporal, memory-only, routing-only, fixed-best, and selector-shuffled controls plus mechanism-stratified interventions.
-  - objection: A low-dimensional controller is merely low matrix rank.
-    preemptive_response: Report controller dimension, effective Jacobian changes, raw carrier rank, closure error, and normal perturbation decay separately.
+  - objection: This is only temporal smoothing.
+    preemptive_response: >-
+      Agree with the bounded interpretation: the audit finds temporal prefix
+      accumulation, not heterogeneous routing, to be the supported mechanism.
+  - objection: The main method failed, so there is no method contribution.
+    preemptive_response: >-
+      Present the work as a reproducible negative mechanism audit with a
+      formal counterexample, matched baselines, stress interventions, and
+      preserved invalid history.
+  - objection: The test set was already exposed.
+    preemptive_response: >-
+      Mark every positive Exp35 observation retrospective and prohibit claim
+      upgrade; reserve prospective language for a newly frozen cohort.
+  - objection: The bank may be unnecessary.
+    preemptive_response: >-
+      Report that its incremental value is inconclusive rather than claiming
+      actuator matching.

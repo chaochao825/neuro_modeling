@@ -1,0 +1,106 @@
+{
+  "all_development_hidden_frames": {
+    "maximum": 0.008528636702379466,
+    "n": 48000,
+    "n_at_or_above_frozen_minimum": 0,
+    "quantiles": {
+      "0.5": 0.007784883024517559,
+      "0.9": 0.00787418359658284,
+      "0.99": 0.008047234513722737,
+      "0.999": 0.008282967989769177
+    }
+  },
+  "analysis_status": "post_hoc_failure_diagnostic_only",
+  "claim_upgrade_allowed": false,
+  "development_session": "s2",
+  "external_outcomes_used": false,
+  "feature_cache": {
+    "archive_content_length": 5892103007,
+    "archive_sha256": "f3d65017490dfc4392bc5e41b66930600f1d00898cae47fc4bd1a01cf92e1c6a",
+    "encoder_identity": "torchvision::efficientnet_b0::EfficientNet_B0_Weights.IMAGENET1K_V1",
+    "n_cells": 550,
+    "n_frames": 164866,
+    "root": "/home/spco/data/core50_features_efficientnet_b0_v1"
+  },
+  "frozen_minimum_alarm_threshold": 0.2,
+  "interpretation": "The frozen detector score did not reach the minimum registered alarm threshold on development data; this diagnoses threshold/model scale mismatch and cannot rescue or replace the preregistered verdict.",
+  "post_switch_window_frames": {
+    "maximum": 0.008528636702379466,
+    "n": 20000,
+    "n_at_or_above_frozen_minimum": 0,
+    "quantiles": {
+      "0.5": 0.007822463299736952,
+      "0.9": 0.007932913596270312,
+      "0.99": 0.008130001331098032,
+      "0.999": 0.008366585832241482
+    }
+  },
+  "selected_hyperparameters": [
+    {
+      "detector": {
+        "alarm_threshold": 0.2,
+        "hazard": 0.0078125,
+        "max_run_length": 128,
+        "min_run_frames": 2,
+        "prior_concentration": 0.1
+      },
+      "seed": 13700,
+      "temperature": 1.0
+    },
+    {
+      "detector": {
+        "alarm_threshold": 0.2,
+        "hazard": 0.0078125,
+        "max_run_length": 128,
+        "min_run_frames": 2,
+        "prior_concentration": 0.1
+      },
+      "seed": 13701,
+      "temperature": 1.0
+    },
+    {
+      "detector": {
+        "alarm_threshold": 0.2,
+        "hazard": 0.0078125,
+        "max_run_length": 128,
+        "min_run_frames": 2,
+        "prior_concentration": 0.1
+      },
+      "seed": 13702,
+      "temperature": 1.0
+    },
+    {
+      "detector": {
+        "alarm_threshold": 0.2,
+        "hazard": 0.0078125,
+        "max_run_length": 128,
+        "min_run_frames": 2,
+        "prior_concentration": 0.1
+      },
+      "seed": 13703,
+      "temperature": 1.0
+    },
+    {
+      "detector": {
+        "alarm_threshold": 0.2,
+        "hazard": 0.0078125,
+        "max_run_length": 128,
+        "min_run_frames": 2,
+        "prior_concentration": 0.1
+      },
+      "seed": 13704,
+      "temperature": 1.0
+    }
+  ],
+  "true_switch_frames": {
+    "maximum": 0.008528636702379466,
+    "n": 1250,
+    "n_at_or_above_frozen_minimum": 0,
+    "quantiles": {
+      "0.5": 0.007886361730161657,
+      "0.9": 0.008066712410596467,
+      "0.99": 0.008372098589698111,
+      "0.999": 0.008511788043821869
+    }
+  }
+}

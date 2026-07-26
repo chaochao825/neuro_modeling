@@ -1,0 +1,19 @@
+{
+  "executable": "/home/spco/sow_linear/.venvs/neuro_modeling_311/bin/python",
+  "git": {
+    "commit": "484918e44d725e16a7235a7bb0c9cea6f7f3afb3",
+    "dirty": true,
+    "tree": "f773e8e7462b2b1fa67fcf72b431f8c53e39a702"
+  },
+  "packages": {
+    "matplotlib": "3.10.8",
+    "numpy": "2.3.5",
+    "pandas": "3.0.1",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1",
+    "statsmodels": "0.14.6",
+    "torch": "2.7.0"
+  },
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]"
+}

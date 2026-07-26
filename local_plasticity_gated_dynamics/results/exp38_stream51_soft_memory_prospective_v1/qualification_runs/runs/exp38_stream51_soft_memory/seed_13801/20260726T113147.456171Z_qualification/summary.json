@@ -1,0 +1,67 @@
+{
+  "experiment": "exp38_stream51_soft_memory",
+  "external_features_accessed": false,
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "qualification": {
+    "controller_fit_eligible": true,
+    "cumulative_harm_gate": true,
+    "cumulative_hidden_accuracy": 0.22006704980842914,
+    "cumulative_post_switch_harm": 0.7304597701149425,
+    "current_frame_natural_accuracy": 0.7514580205691619,
+    "fixed_retention_hidden_accuracy": 0.7784961685823756,
+    "fixed_retention_natural_accuracy": 0.7672245665306114,
+    "oracle_adaptation_headroom": 0.04932950191570862,
+    "oracle_headroom_gate": true,
+    "oracle_hidden_accuracy": 0.8278256704980842,
+    "passed": false,
+    "reachability_auc": 0.8289196259190761,
+    "reachability_false_alarms_per_1000": 15.445598687807545,
+    "reachability_gate": false,
+    "reachability_median_delay": 0.0,
+    "reachability_recall": 0.20689655172413793,
+    "selected_retention": 0.25,
+    "selected_window_frames": 2,
+    "sliding_window_hidden_accuracy": 0.7772988505747126,
+    "sliding_window_natural_accuracy": 0.770979676012651,
+    "soft_hidden_accuracy": 0.7799329501915707,
+    "soft_hidden_post_switch_accuracy": 0.756896551724138,
+    "soft_natural_accuracy": 0.7986943289715849,
+    "stable_accumulation_gain": 0.01952165544348916,
+    "stable_accumulation_gate": false
+  },
+  "seed": 13801,
+  "selected_hyperparameters": {
+    "controller": {
+      "bias": -0.0,
+      "disagreement_weight": 2.0,
+      "entropy_weight": 0.0,
+      "epsilon": 1e-12,
+      "evidence_weight_floor": 1.0,
+      "fast_retention": 0.5,
+      "retention_ceiling": 0.99,
+      "retention_floor": 0.25,
+      "slow_retention": 0.98,
+      "surprise_weight": 0.0
+    },
+    "controller_fit_eligible": true,
+    "controller_standardizer": {
+      "mean": [
+        416.30985010027706,
+        0.31916226657555447,
+        0.08340820478585007
+      ],
+      "scale": [
+        119.92403805975918,
+        0.24417336111018204,
+        0.11360507723361145
+      ]
+    },
+    "fit_video_count": 147,
+    "qualification_video_count": 174,
+    "retention": 0.25,
+    "temperature": 50.0,
+    "window_frames": 2
+  },
+  "stage": "qualification",
+  "statistical_unit": "source_video"
+}

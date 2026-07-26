@@ -1,0 +1,64 @@
+{
+  "accuracy_fields_read": false,
+  "audit_type": "outcome_blind_schema_and_coverage",
+  "claim_upgrade_allowed": false,
+  "conclusion": "inconclusive",
+  "condition_failures_per_seed": {
+    "13600": 6400,
+    "13601": 6400,
+    "13602": 6400,
+    "13603": 6400,
+    "13604": 6400
+  },
+  "condition_failures_total": 32000,
+  "experiment": "exp36_change_aware_prefix",
+  "failed_collectors": [
+    "P11",
+    "P12",
+    "P2",
+    "P3",
+    "P4",
+    "P6",
+    "P8",
+    "P9"
+  ],
+  "feature_cache": {
+    "encoder_identity": "torchvision::efficientnet_b0::EfficientNet_B0_Weights.IMAGENET1K_V1",
+    "n_collectors": 12,
+    "n_frames": 105243,
+    "n_videos": 587,
+    "root": "/home/spco/data/orbit_india_features_efficientnet_b0_v1",
+    "source_archive_md5": "af4d05689f556ca477acc09a73bb3d3d"
+  },
+  "n_failed_collectors": 8,
+  "n_registered_collectors": 12,
+  "n_schema_eligible_collectors": 4,
+  "n_seeds": 5,
+  "next_action": "Do not summarize the four surviving collectors as confirmation; register a new schema-compatible dataset before outcome access.",
+  "observed_collectors_per_seed": {
+    "4": 5
+  },
+  "protocol_version": "exp36_change_aware_prefix_v1",
+  "reason": "The frozen 12-collector ORBIT-India cohort cannot instantiate the registered four-class paired clean/clutter panel.",
+  "registered_collectors": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8",
+    "P9",
+    "P10",
+    "P11",
+    "P12"
+  ],
+  "schema_eligible_collectors": [
+    "P1",
+    "P10",
+    "P5",
+    "P7"
+  ],
+  "status": "invalid"
+}

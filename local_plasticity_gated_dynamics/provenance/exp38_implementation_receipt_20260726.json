@@ -1,0 +1,45 @@
+{
+  "files": {
+    "experiments/common.py": "476ae9b4b93b9e31861962fbf2b2830f7d7ddbccc1ebdacba7be39a85c8cf6d3",
+    "experiments/exp38_stream51_soft_memory.py": "1457fa428342dd6aad63b916e9650729dc7192cacc6fcc2a6beb58a4fcc96b21",
+    "figures/exp38_stream51_soft_memory_plot.py": "374a733cebc8f353e650b5d6aca5a0f3f133ed0efccc1365d1ad247f4eaac028",
+    "scripts/build_stream51_cohort.py": "6b86012bd5338093c52abaad4282350b08131035f6b2475f79d185095a581428",
+    "scripts/prepare_stream51_features.py": "f2aacd24177f9e19a020fa5042b31808aa331bc46415e501238274def72b5c4c",
+    "scripts/summarize_exp38.py": "4a109544dd0bd47be9f5211491c15734f3f7b34ae5943a8e007f372fd161c092",
+    "src/analysis/memory_demand_metrics.py": "7f09af89d96f8bed2ffa7bf50c096c162a47acc48620a0cd68fcde36f1dbfba1",
+    "src/analysis/orbit_streaming_metrics.py": "ef485e6f676c9acd9904ff14cef55e40d4077338c59372b63b43d4261ea9faaf",
+    "src/data/stream51_streaming.py": "d5972478eda4669a759ae099558400ab0a9a9c9ae66ef6edc832c20917cd65cb",
+    "src/models/change_aware_prefix.py": "b899ae0e8d196e6b89908d02930d08bad632ed6f3cb2c355237692b4abb293a4",
+    "src/models/embedding_evidence.py": "4463e8b7c7b93ab0d4358c48a7d39ccd8e14b7b0e856c85976c188d9177fcb83",
+    "src/models/soft_memory_controller.py": "ff26523c7bb987e2e08b18293342f6bd574a6e75a9323728f7a9c85ca41385a8",
+    "src/utils/artifacts.py": "6bd95f938acc7737448a3dc74c40ceb1e823405684e7e7df547040401e3122bb",
+    "src/utils/reproducibility.py": "a21a453f18c1e2a4da6943cffffc3d6d11f5594d1120bb21d1e6a73eea0ad0b0",
+    "tests/test_embedding_evidence.py": "f645f6b67a753d641c6b53874d86ecbdd233f32054bc1d04297a30496359cf76",
+    "tests/test_exp38_figure.py": "848aa4dccc1540d08bdc6f67837ba87f5a8de01b8a4de08c579ce9eeb960038b",
+    "tests/test_exp38_stream51_soft_memory.py": "e9b5e21e76a6b56d98849aba970ed501b12ff99b6e976e9a902b46f33b654adf",
+    "tests/test_memory_demand_metrics.py": "3ecc5122284f0fa064c3135603e62fd4ef2820817ddeda19bf080843926bb712",
+    "tests/test_prepare_stream51_features.py": "63604db4e7e91b33238a80506ca80cde1ac3726c23068eb59eb8623cdcfe9104",
+    "tests/test_soft_memory_controller.py": "61400f0fc7bed68d5751248f848f51dffdac36890efa46381b2a497baf00a038",
+    "tests/test_stream51_streaming.py": "174143653da454336b9aad3f272aeb62a8d197a262d9dced50ea36b69ac6b754",
+    "tests/test_summarize_exp38.py": "baa53f09d36f0fa3ee768cf508ea0f4f20b16e329f88204d25aff72746a21973"
+  },
+  "execution_amendment": {
+    "classification_outcomes_inspected": false,
+    "reason": "Ordered eight-worker CPU decode; scientific output unchanged"
+  },
+  "frozen_at": "2026-07-26T11:17:56Z",
+  "outcome_blind_amendment": {
+    "prior_freeze_at": "2026-07-26T10:54:47Z",
+    "reason": "Controller-independent oracle definition; no classification or qualification outcome had been inspected"
+  },
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "receipt_type": "implementation_hash_manifest",
+  "schema_amendment": {
+    "failed_attempt_generated_embeddings": false,
+    "reason": "Reference-compatible bbox clipping before feature extraction"
+  },
+  "verification_at_freeze": {
+    "exp38_and_registry_tests_passed": 53,
+    "ruff_check": "all_checks_passed"
+  }
+}

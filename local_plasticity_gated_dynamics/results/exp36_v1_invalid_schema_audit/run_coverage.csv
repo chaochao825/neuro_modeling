@@ -1,0 +1,6 @@
+seed,run_path,run_status,condition_failures,condition_invalid,expected_collectors,observed_collectors,expected_conditions,observed_conditions,coverage_complete
+13600,/home/spco/sow_linear/exp36_runs/prospective_external_v1/runs/exp36_change_aware_prefix/seed_13600/20260726T064154.670999Z_prospective_external,complete_with_failures,6400,0,12,4,9600,3200,False
+13601,/home/spco/sow_linear/exp36_runs/prospective_external_v1/runs/exp36_change_aware_prefix/seed_13601/20260726T064159.776518Z_prospective_external,complete_with_failures,6400,0,12,4,9600,3200,False
+13602,/home/spco/sow_linear/exp36_runs/prospective_external_v1/runs/exp36_change_aware_prefix/seed_13602/20260726T064203.810621Z_prospective_external,complete_with_failures,6400,0,12,4,9600,3200,False
+13603,/home/spco/sow_linear/exp36_runs/prospective_external_v1/runs/exp36_change_aware_prefix/seed_13603/20260726T064205.887671Z_prospective_external,complete_with_failures,6400,0,12,4,9600,3200,False
+13604,/home/spco/sow_linear/exp36_runs/prospective_external_v1/runs/exp36_change_aware_prefix/seed_13604/20260726T064210.164554Z_prospective_external,complete_with_failures,6400,0,12,4,9600,3200,False

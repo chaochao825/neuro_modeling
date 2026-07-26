@@ -29,7 +29,7 @@ from numpy.typing import ArrayLike, NDArray
 FloatArray = NDArray[np.float64]
 IntArray = NDArray[np.int64]
 BoolArray = NDArray[np.bool_]
-SplitName = Literal["train", "validation", "test"]
+SplitName = Literal["train", "validation", "test", "external"]
 
 FEATURE_MANIFEST_COLUMNS = (
     "split",
@@ -112,6 +112,23 @@ def load_official_orbit_splits(path: str | Path) -> dict[str, tuple[str, ...]]:
     return result
 
 
+def load_orbit_external_cohort(path: str | Path) -> tuple[str, ...]:
+    """Load a frozen external-collector manifest without inventing train splits."""
+
+    source = Path(path)
+    if not source.is_file():
+        raise FileNotFoundError(f"external ORBIT cohort file not found: {source}")
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    if payload.get("split") != "external":
+        raise ValueError("external cohort manifest must declare split=external")
+    collectors = tuple(str(value) for value in payload.get("collectors", ()))
+    if not collectors or len(collectors) != len(set(collectors)):
+        raise ValueError("external collectors must be non-empty and unique")
+    if any(not value for value in collectors):
+        raise ValueError("external collectors cannot contain empty IDs")
+    return collectors
+
+
 @dataclass(frozen=True, slots=True, eq=False)
 class OrbitSupportSet:
     embeddings: FloatArray
@@ -190,8 +207,8 @@ class OrbitEmbeddingEpisode:
     fingerprint: str = ""
 
     def __post_init__(self) -> None:
-        if self.split not in {"train", "validation", "test"}:
-            raise ValueError("split must be train, validation, or test")
+        if self.split not in {"train", "validation", "test", "external"}:
+            raise ValueError("split must be train, validation, test, or external")
         if not self.user_id or not self.class_names:
             raise ValueError("episode user and class names must be non-empty")
         if len(self.class_names) != len(set(self.class_names)):
@@ -308,12 +325,13 @@ class OrbitFeatureStore:
         root: str | Path,
         *,
         split: SplitName,
-        official_splits_path: str | Path,
+        official_splits_path: str | Path | None = None,
+        external_cohort_path: str | Path | None = None,
         require_complete_split: bool = False,
         cache_videos: bool = False,
     ) -> None:
-        if split not in {"train", "validation", "test"}:
-            raise ValueError("split must be train, validation, or test")
+        if split not in {"train", "validation", "test", "external"}:
+            raise ValueError("split must be train, validation, test, or external")
         self.root = Path(root).expanduser().resolve()
         self.split = split
         manifest_path = self.root / "feature_manifest.csv"
@@ -350,15 +368,21 @@ class OrbitFeatureStore:
             ["split", "user_id", "object_name", "video_type", "video_id"]
         ).any():
             raise ValueError("feature manifest contains duplicate videos")
-        splits = load_official_orbit_splits(official_splits_path)
-        expected = set(splits[split])
+        if split == "external":
+            if external_cohort_path is None:
+                raise ValueError("external split requires external_cohort_path")
+            expected = set(load_orbit_external_cohort(external_cohort_path))
+        else:
+            if official_splits_path is None:
+                raise ValueError("official split requires official_splits_path")
+            expected = set(load_official_orbit_splits(official_splits_path)[split])
         observed = set(frame["user_id"])
         if not observed <= expected:
-            raise ValueError(f"feature store has users outside official {split} split")
+            raise ValueError(f"feature store has users outside frozen {split} cohort")
         if require_complete_split and observed != expected:
             missing_users = sorted(expected - observed)
             raise ValueError(
-                f"incomplete official {split} split; missing {missing_users}"
+                f"incomplete frozen {split} cohort; missing {missing_users}"
             )
         for relative in frame["feature_path"]:
             path = (self.root / relative).resolve()

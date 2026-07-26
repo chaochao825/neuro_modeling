@@ -1,0 +1,10 @@
+{
+  "condition_failures": 0,
+  "condition_invalid": 0,
+  "duration_seconds": 248.679941,
+  "ended_at": "2026-07-26T11:35:54.563947+00:00",
+  "run_label": "qualification",
+  "seed": 13800,
+  "started_at": "2026-07-26T11:31:45.884006+00:00",
+  "status": "complete"
+}

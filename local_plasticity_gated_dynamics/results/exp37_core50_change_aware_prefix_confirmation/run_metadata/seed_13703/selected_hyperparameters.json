@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "alarm_threshold": 0.2,
+    "hazard": 0.0078125,
+    "max_run_length": 128,
+    "min_run_frames": 2,
+    "prior_concentration": 0.1
+  },
+  "development_sessions": [
+    "s2"
+  ],
+  "fixed_retention": 0.0,
+  "temperature": 1.0,
+  "used_external_labels": false,
+  "window_frames": 2
+}

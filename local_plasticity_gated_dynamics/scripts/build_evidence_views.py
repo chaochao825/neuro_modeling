@@ -77,12 +77,6 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
         project_root / "provenance" / "experiment_registry.csv", EXPERIMENT_FIELDS
     )
     ids = [row["experiment_id"] for row in rows]
-    expected_ids = [f"exp{index:02d}" for index in range(35)]
-    if ids != expected_ids:
-        raise ValueError(f"experiment IDs must be exactly {expected_ids}; got {ids}")
-    if len(ids) != len(set(ids)):
-        raise ValueError("experiment registry contains duplicate IDs")
-
     script_ids = sorted(
         {
             match.group(1)
@@ -90,9 +84,18 @@ def load_registry(project_root: Path) -> list[dict[str, str]]:
             if (match := re.match(r"(exp\d{2})_", path.name))
         }
     )
+    if not script_ids:
+        raise ValueError("experiment entry points are empty")
+    expected_ids = [
+        f"exp{index:02d}" for index in range(int(script_ids[-1].removeprefix("exp")) + 1)
+    ]
+    if ids != expected_ids:
+        raise ValueError(f"experiment IDs must be exactly {expected_ids}; got {ids}")
+    if len(ids) != len(set(ids)):
+        raise ValueError("experiment registry contains duplicate IDs")
     if script_ids != expected_ids:
         raise ValueError(
-            f"experiment entry points do not cover exp00-exp34: {script_ids}"
+            f"experiment entry points are not contiguous from exp00: {script_ids}"
         )
 
     for row in rows:
@@ -359,14 +362,18 @@ def build_views(project_root: Path, output_root: Path | None = None) -> None:
     current_lines = [
         "# Current evidence view",
         "",
-        "This view contains only evidence that remains part of the active theory:",
+        "This view contains only evidence that remains part of an active contract:",
         "high-rank physical E/I substrates, low-dimensional credit/effective control,",
-        "hidden belief inference, and task-matched actuator selection. Superseded or",
-        "rejected methods are excluded and live only in the historical view.",
+        "hidden belief inference, bounded actuator studies, the decisive Exp35",
+        "negative audit, the Exp37 CORe50 stop result, and the Exp38 Stream-51",
+        "qualification stop result. Superseded methods live only in",
+        "the historical view.",
         "",
-        "A `support` label is scoped to the registered experiment; it is not support",
-        "for the complete theory. The active real-neural endpoint (Exp25) remains",
-        "fail-closed and inconclusive.",
+        "Every `support`, `oppose`, or `inconclusive` label is scoped to the registered",
+        "experiment. Exp35 opposes prefix consistency as reliability; Exp37 opposes",
+        "the tested hard-reset BOCPD controller versus stationary forgetting; Exp38",
+        "fails its joint qualification gate and leaves external utility inconclusive;",
+        "the active real-neural endpoint (Exp25) remains fail-closed and inconclusive.",
         "",
         "`claims.csv` is the lossless current-only split of the legacy mixed",
         "`results/summary.csv`; no historical claim row is present in it.",

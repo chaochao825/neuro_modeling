@@ -1,0 +1,42 @@
+{
+  "archive_content_length": 11343409620,
+  "archive_crc_bad_member": null,
+  "archive_crc_passed": true,
+  "archive_etag": "\"2a41eb1d4-5bc7ec7c486c0\"",
+  "archive_last_modified": "Mon, 01 Mar 2021 19:39:47 GMT",
+  "archive_member_count": 155892,
+  "archive_sha256": "db2711e34130923147c69e203ebfde46c8d651846958d645359a0ceb4d910465",
+  "archive_url": "http://klab.cis.rit.edu/files/Stream-51.zip",
+  "cohort_path": "data/stream51_videos_v1.json",
+  "cohort_sha256": "5d76d95c52a88b15b9a3d40f17f5ff57beaade4cb3f5c4b4010850ffeabf265e",
+  "cohort_split_counts": {
+    "development": 321,
+    "external": 381,
+    "support": 434
+  },
+  "config_path": "configs/prospective/exp38_stream51_soft_memory.json",
+  "config_sha256": "7caac2d0bcbe2d70c059ce4a4bd79c95967c5d5f8a2a024957ba7c28fde995da",
+  "external_features_generated_at_freeze": false,
+  "external_outcomes_inspected_at_freeze": false,
+  "execution_amendment": {
+    "classification_outcomes_inspected": false,
+    "reason": "Ordered eight-worker CPU decode with exact serial-equivalence test"
+  },
+  "frozen_at": "2026-07-26T11:17:56Z",
+  "metadata_rows": 150736,
+  "official_ordering_sha256": "8368c5920486e83746d03acd9d71e71fdc403065d8f5d74df6d8de275b426fd4",
+  "official_repo_commit": "8a066737ac8b3ac6f57987e6b3713ddcfbd1dcbf",
+  "protocol_path": "docs/exp38_stream51_soft_memory_protocol_20260726.md",
+  "protocol_sha256": "c72ef1367cbd668ec17eb4083f429abec666a13039fbcfef378cf836223db227",
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "outcome_blind_amendment": {
+    "prior_freeze_at": "2026-07-26T10:54:47Z",
+    "reason": "Oracle changed from selected controller bounds to lambda=1 within segments and lambda=0 at true switches"
+  },
+  "qualification_outcomes_inspected_at_freeze": false,
+  "schema_amendment": {
+    "failed_attempt_generated_embeddings": false,
+    "reason": "Clip official tracker overflow exactly as the reference loader does"
+  },
+  "receipt_type": "prospective_preregistration"
+}

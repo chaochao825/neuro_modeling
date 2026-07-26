@@ -1,0 +1,346 @@
+{
+  "all_registered_seeds_passed": false,
+  "external_outcomes_inspected": false,
+  "external_stage_authorized": false,
+  "implementation_receipt_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/provenance/exp38_implementation_receipt_20260726.json",
+  "implementation_receipt_sha256": "15521ffa818f4aa623c345b7b6ec2793b3c233bf452a9f98a2d7c549ceb4cea2",
+  "preregistration_receipt_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/provenance/exp38_preregistration_receipt_20260726.json",
+  "preregistration_receipt_sha256": "1952cfc4b038bce7382246e4dd296df16d4fc31cd5012d900fd418c0b80c27a0",
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "receipt_type": "exp38_qualification_gate",
+  "require_all_seeds": true,
+  "seed_results": [
+    {
+      "passed": false,
+      "qualification": {
+        "controller_fit_eligible": true,
+        "cumulative_harm_gate": true,
+        "cumulative_hidden_accuracy": 0.21623563218390804,
+        "cumulative_post_switch_harm": 0.735632183908046,
+        "current_frame_natural_accuracy": 0.7514580205691619,
+        "fixed_retention_hidden_accuracy": 0.771072796934866,
+        "fixed_retention_natural_accuracy": 0.7836405371985637,
+        "oracle_adaptation_headroom": 0.039990421455938785,
+        "oracle_headroom_gate": true,
+        "oracle_hidden_accuracy": 0.8110632183908048,
+        "passed": false,
+        "reachability_auc": 0.8310066337715384,
+        "reachability_false_alarms_per_1000": 15.172225259704756,
+        "reachability_gate": false,
+        "reachability_median_delay": 0.0,
+        "reachability_recall": 0.2,
+        "selected_retention": 0.5,
+        "selected_window_frames": 2,
+        "sliding_window_hidden_accuracy": 0.7593390804597702,
+        "sliding_window_natural_accuracy": 0.770979676012651,
+        "soft_hidden_accuracy": 0.7693965517241379,
+        "soft_hidden_post_switch_accuracy": 0.7660919540229886,
+        "soft_natural_accuracy": 0.7832813417962649,
+        "stable_accumulation_gain": 0.03218251662940186,
+        "stable_accumulation_gate": true
+      },
+      "run_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/qualification_runs/runs/exp38_stream51_soft_memory/seed_13800/20260726T113145.883463Z_qualification",
+      "seed": 13800,
+      "selected_hyperparameters": {
+        "controller": {
+          "bias": -0.0,
+          "disagreement_weight": 0.5,
+          "entropy_weight": 0.0,
+          "epsilon": 1e-12,
+          "evidence_weight_floor": 1.0,
+          "fast_retention": 0.5,
+          "retention_ceiling": 0.93,
+          "retention_floor": 0.0,
+          "slow_retention": 0.98,
+          "surprise_weight": 0.0
+        },
+        "controller_fit_eligible": true,
+        "controller_standardizer": {
+          "mean": [
+            418.4637718935759,
+            0.3209965881374981,
+            0.0834547805706015
+          ],
+          "scale": [
+            120.91740618201405,
+            0.24450379055411514,
+            0.11343999440155303
+          ]
+        },
+        "fit_video_count": 147,
+        "qualification_video_count": 174,
+        "retention": 0.5,
+        "temperature": 50.0,
+        "window_frames": 2
+      },
+      "summary_sha256": "ea7bb6727044ff98bacbd6de6f2c9cdf42ba2eddad806fb91ff0f47fe251db65"
+    },
+    {
+      "passed": false,
+      "qualification": {
+        "controller_fit_eligible": true,
+        "cumulative_harm_gate": true,
+        "cumulative_hidden_accuracy": 0.22006704980842914,
+        "cumulative_post_switch_harm": 0.7304597701149425,
+        "current_frame_natural_accuracy": 0.7514580205691619,
+        "fixed_retention_hidden_accuracy": 0.7784961685823756,
+        "fixed_retention_natural_accuracy": 0.7672245665306114,
+        "oracle_adaptation_headroom": 0.04932950191570862,
+        "oracle_headroom_gate": true,
+        "oracle_hidden_accuracy": 0.8278256704980842,
+        "passed": false,
+        "reachability_auc": 0.8289196259190761,
+        "reachability_false_alarms_per_1000": 15.445598687807545,
+        "reachability_gate": false,
+        "reachability_median_delay": 0.0,
+        "reachability_recall": 0.20689655172413793,
+        "selected_retention": 0.25,
+        "selected_window_frames": 2,
+        "sliding_window_hidden_accuracy": 0.7772988505747126,
+        "sliding_window_natural_accuracy": 0.770979676012651,
+        "soft_hidden_accuracy": 0.7799329501915707,
+        "soft_hidden_post_switch_accuracy": 0.756896551724138,
+        "soft_natural_accuracy": 0.7986943289715849,
+        "stable_accumulation_gain": 0.01952165544348916,
+        "stable_accumulation_gate": false
+      },
+      "run_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/qualification_runs/runs/exp38_stream51_soft_memory/seed_13801/20260726T113147.456171Z_qualification",
+      "seed": 13801,
+      "selected_hyperparameters": {
+        "controller": {
+          "bias": -0.0,
+          "disagreement_weight": 2.0,
+          "entropy_weight": 0.0,
+          "epsilon": 1e-12,
+          "evidence_weight_floor": 1.0,
+          "fast_retention": 0.5,
+          "retention_ceiling": 0.99,
+          "retention_floor": 0.25,
+          "slow_retention": 0.98,
+          "surprise_weight": 0.0
+        },
+        "controller_fit_eligible": true,
+        "controller_standardizer": {
+          "mean": [
+            416.30985010027706,
+            0.31916226657555447,
+            0.08340820478585007
+          ],
+          "scale": [
+            119.92403805975918,
+            0.24417336111018204,
+            0.11360507723361145
+          ]
+        },
+        "fit_video_count": 147,
+        "qualification_video_count": 174,
+        "retention": 0.25,
+        "temperature": 50.0,
+        "window_frames": 2
+      },
+      "summary_sha256": "e1de88c0c5a820a8dcdc32b367648e3f480c7c8416aa03bc44422b7895f7e1f8"
+    },
+    {
+      "passed": false,
+      "qualification": {
+        "controller_fit_eligible": true,
+        "cumulative_harm_gate": true,
+        "cumulative_hidden_accuracy": 0.22126436781609196,
+        "cumulative_post_switch_harm": 0.732183908045977,
+        "current_frame_natural_accuracy": 0.7514580205691619,
+        "fixed_retention_hidden_accuracy": 0.7768199233716476,
+        "fixed_retention_natural_accuracy": 0.7672245665306114,
+        "oracle_adaptation_headroom": 0.04932950191570873,
+        "oracle_headroom_gate": true,
+        "oracle_hidden_accuracy": 0.8261494252873564,
+        "passed": false,
+        "reachability_auc": 0.8248817608176653,
+        "reachability_false_alarms_per_1000": 5.877528704209951,
+        "reachability_gate": true,
+        "reachability_median_delay": 0.0,
+        "reachability_recall": 0.3586206896551724,
+        "selected_retention": 0.25,
+        "selected_window_frames": 2,
+        "sliding_window_hidden_accuracy": 0.772030651340996,
+        "sliding_window_natural_accuracy": 0.770979676012651,
+        "soft_hidden_accuracy": 0.7828065134099618,
+        "soft_hidden_post_switch_accuracy": 0.7706896551724138,
+        "soft_natural_accuracy": 0.7878550965855368,
+        "stable_accumulation_gain": 0.01952165544348916,
+        "stable_accumulation_gate": false
+      },
+      "run_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/qualification_runs/runs/exp38_stream51_soft_memory/seed_13802/20260726T113144.715268Z_qualification",
+      "seed": 13802,
+      "selected_hyperparameters": {
+        "controller": {
+          "bias": -0.25,
+          "disagreement_weight": 0.5,
+          "entropy_weight": 0.0,
+          "epsilon": 1e-12,
+          "evidence_weight_floor": 1.0,
+          "fast_retention": 0.5,
+          "retention_ceiling": 0.97,
+          "retention_floor": 0.0,
+          "slow_retention": 0.98,
+          "surprise_weight": 0.0
+        },
+        "controller_fit_eligible": true,
+        "controller_standardizer": {
+          "mean": [
+            416.8445438454228,
+            0.32061054989742266,
+            0.08342076197331569
+          ],
+          "scale": [
+            118.89623950797623,
+            0.2434464643715931,
+            0.11349501359228308
+          ]
+        },
+        "fit_video_count": 147,
+        "qualification_video_count": 174,
+        "retention": 0.25,
+        "temperature": 50.0,
+        "window_frames": 2
+      },
+      "summary_sha256": "b19072510173c8c17a90cdc00b3b6bd0844a93e96a68ebca58b0bd63e67cf579"
+    },
+    {
+      "passed": false,
+      "qualification": {
+        "controller_fit_eligible": true,
+        "cumulative_harm_gate": true,
+        "cumulative_hidden_accuracy": 0.24880268199233718,
+        "cumulative_post_switch_harm": 0.7114942528735633,
+        "current_frame_natural_accuracy": 0.7514580205691619,
+        "fixed_retention_hidden_accuracy": 0.7957375478927203,
+        "fixed_retention_natural_accuracy": 0.7836405371985637,
+        "oracle_adaptation_headroom": 0.027298850574712707,
+        "oracle_headroom_gate": true,
+        "oracle_hidden_accuracy": 0.823036398467433,
+        "passed": false,
+        "reachability_auc": 0.7462514549310558,
+        "reachability_false_alarms_per_1000": 35.265172225259704,
+        "reachability_gate": false,
+        "reachability_median_delay": 0.0,
+        "reachability_recall": 0.23448275862068965,
+        "selected_retention": 0.5,
+        "selected_window_frames": 2,
+        "sliding_window_hidden_accuracy": 0.784243295019157,
+        "sliding_window_natural_accuracy": 0.770979676012651,
+        "soft_hidden_accuracy": 0.7919061302681993,
+        "soft_hidden_post_switch_accuracy": 0.7706896551724138,
+        "soft_natural_accuracy": 0.7824621242120743,
+        "stable_accumulation_gain": 0.03218251662940186,
+        "stable_accumulation_gate": true
+      },
+      "run_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/qualification_runs/runs/exp38_stream51_soft_memory/seed_13803/20260726T113145.838031Z_qualification",
+      "seed": 13803,
+      "selected_hyperparameters": {
+        "controller": {
+          "bias": -0.0,
+          "disagreement_weight": 0.25,
+          "entropy_weight": 0.0,
+          "epsilon": 1e-12,
+          "evidence_weight_floor": 1.0,
+          "fast_retention": 0.5,
+          "retention_ceiling": 0.97,
+          "retention_floor": 0.0,
+          "slow_retention": 0.98,
+          "surprise_weight": 0.25
+        },
+        "controller_fit_eligible": true,
+        "controller_standardizer": {
+          "mean": [
+            417.589245704942,
+            0.32112717895026427,
+            0.08243276204111964
+          ],
+          "scale": [
+            119.98095647155779,
+            0.24475320484389643,
+            0.11283776339866569
+          ]
+        },
+        "fit_video_count": 147,
+        "qualification_video_count": 174,
+        "retention": 0.5,
+        "temperature": 50.0,
+        "window_frames": 2
+      },
+      "summary_sha256": "a06dfaf4dacdd770f59c3374ddaca82982a82050946a6a9b2d323a6566745cdc"
+    },
+    {
+      "passed": false,
+      "qualification": {
+        "controller_fit_eligible": true,
+        "cumulative_harm_gate": true,
+        "cumulative_hidden_accuracy": 0.23539272030651337,
+        "cumulative_post_switch_harm": 0.7344827586206897,
+        "current_frame_natural_accuracy": 0.7514580205691619,
+        "fixed_retention_hidden_accuracy": 0.7629310344827587,
+        "fixed_retention_natural_accuracy": 0.7672245665306114,
+        "oracle_adaptation_headroom": 0.055795019157087955,
+        "oracle_headroom_gate": true,
+        "oracle_hidden_accuracy": 0.8187260536398466,
+        "passed": false,
+        "reachability_auc": 0.8290367344801403,
+        "reachability_false_alarms_per_1000": 15.787315472936031,
+        "reachability_gate": false,
+        "reachability_median_delay": 0.0,
+        "reachability_recall": 0.1724137931034483,
+        "selected_retention": 0.25,
+        "selected_window_frames": 2,
+        "sliding_window_hidden_accuracy": 0.7590996168582376,
+        "sliding_window_natural_accuracy": 0.770979676012651,
+        "soft_hidden_accuracy": 0.7705938697318007,
+        "soft_hidden_post_switch_accuracy": 0.7781609195402299,
+        "soft_natural_accuracy": 0.7844673643510253,
+        "stable_accumulation_gain": 0.01952165544348916,
+        "stable_accumulation_gate": false
+      },
+      "run_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/results/exp38_stream51_soft_memory_prospective_v1/qualification_runs/runs/exp38_stream51_soft_memory/seed_13804/20260726T113145.950909Z_qualification",
+      "seed": 13804,
+      "selected_hyperparameters": {
+        "controller": {
+          "bias": -0.0,
+          "disagreement_weight": 0.5,
+          "entropy_weight": 0.0,
+          "epsilon": 1e-12,
+          "evidence_weight_floor": 1.0,
+          "fast_retention": 0.5,
+          "retention_ceiling": 0.97,
+          "retention_floor": 0.0,
+          "slow_retention": 0.98,
+          "surprise_weight": 0.0
+        },
+        "controller_fit_eligible": true,
+        "controller_standardizer": {
+          "mean": [
+            418.7840448888519,
+            0.3209074569560277,
+            0.08319319872157573
+          ],
+          "scale": [
+            119.99184134719073,
+            0.244637358433205,
+            0.11328998263873097
+          ]
+        },
+        "fit_video_count": 147,
+        "qualification_video_count": 174,
+        "retention": 0.25,
+        "temperature": 50.0,
+        "window_frames": 2
+      },
+      "summary_sha256": "825f64f15abe92c81046ccdeeccb0da8cb052a6085861201afd4df949819e577"
+    }
+  ],
+  "seeds": [
+    13800,
+    13801,
+    13802,
+    13803,
+    13804
+  ]
+}

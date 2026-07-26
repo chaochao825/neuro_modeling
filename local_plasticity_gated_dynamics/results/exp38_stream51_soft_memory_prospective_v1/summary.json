@@ -1,0 +1,49 @@
+{
+  "cumulative_harm_range": [
+    0.7114942528735633,
+    0.735632183908046
+  ],
+  "experiment": "exp38_stream51_soft_memory",
+  "external_features_generated": false,
+  "external_outcomes_inspected": false,
+  "external_stage_authorized": false,
+  "feature_audit_passed": true,
+  "gate_pass_counts": {
+    "cumulative_harm_gate": 5,
+    "oracle_headroom_gate": 5,
+    "passed": 0,
+    "reachability_gate": 1,
+    "stable_accumulation_gate": 2
+  },
+  "generated_at": "2026-07-26T11:39:51.093172+00:00",
+  "main_claim_verdict": "inconclusive",
+  "n_qualification_videos": 174,
+  "n_registered_seeds": 5,
+  "oracle_headroom_range": [
+    0.027298850574712707,
+    0.055795019157087955
+  ],
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "qualification_verdict": "oppose_registered_joint_gate",
+  "reachability_auc_range": [
+    0.7462514549310558,
+    0.8310066337715384
+  ],
+  "reachability_recall_range": [
+    0.1724137931034483,
+    0.3586206896551724
+  ],
+  "soft_over_best_fixed_hidden_mean": 0.0019157088122604415,
+  "soft_over_best_fixed_hidden_range": [
+    -0.003831417624520994,
+    0.007662835249041988
+  ],
+  "stable_accumulation_gain_range": [
+    0.01952165544348916,
+    0.03218251662940186
+  ],
+  "stage": "qualification_complete_external_locked",
+  "statistical_unit": "source_video; assembly seed is a robustness axis",
+  "support_development_frames": 34250,
+  "support_development_videos": 755
+}

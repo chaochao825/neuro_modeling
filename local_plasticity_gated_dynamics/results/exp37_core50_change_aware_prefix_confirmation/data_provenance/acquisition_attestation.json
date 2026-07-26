@@ -1,0 +1,21 @@
+{
+  "actual_transport": "BitTorrent mirror after canonical HTTP stall",
+  "archive_content_length": 5892103007,
+  "archive_sha256": "f3d65017490dfc4392bc5e41b66930600f1d00898cae47fc4bd1a01cf92e1c6a",
+  "archive_url": "http://bias.csr.unibo.it/maltoni/download/core50/core50_128x128.zip",
+  "dataset_root": "/home/spco/data/core50_v1_raw/core50_128x128",
+  "n_cells": 550,
+  "n_images": 164866,
+  "n_objects": 50,
+  "n_sessions": 11,
+  "outcomes_inspected": false,
+  "preregistered_http_metadata": {
+    "etag": "\"03beef164c9d21:0\"",
+    "last_modified": "Wed, 10 May 2017 08:10:54 GMT"
+  },
+  "protocol_version": "exp37_core50_change_aware_prefix_v1",
+  "schema_complete": true,
+  "torrent_metadata_sha256": "ca49bc65fa9435fd443043ab2f5f502ad6a93cb0963a1c469a076550b0caa816",
+  "transport_attestation_path": "/home/spco/data/core50_v1_archive/acquisition_transport_attestation.json",
+  "validated_at": "2026-07-26T07:53:57.256481+00:00"
+}

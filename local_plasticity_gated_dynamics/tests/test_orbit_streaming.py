@@ -12,6 +12,7 @@ from src.data.orbit_streaming import (
     OrbitEpisodeSamplingConfig,
     OrbitFeatureStore,
     load_official_orbit_splits,
+    load_orbit_external_cohort,
     validate_user_disjoint_stores,
 )
 
@@ -85,6 +86,81 @@ def test_official_split_loader_rejects_user_leakage(tmp_path: Path) -> None:
 
     # The feature cache remains intact after the fail-closed check.
     assert (root / "feature_manifest.csv").is_file()
+
+
+def test_external_cohort_requires_exact_frozen_collectors(tmp_path: Path) -> None:
+    cohort_path = tmp_path / "external.json"
+    cohort_path.write_text(
+        json.dumps({"split": "external", "collectors": ["P1"]}),
+        encoding="utf-8",
+    )
+    assert load_orbit_external_cohort(cohort_path) == ("P1",)
+
+    root = tmp_path / "external_features"
+    root.mkdir()
+    rows: list[dict[str, object]] = []
+    for class_index, object_name in enumerate(("cup", "keys")):
+        for video_type in ("clean", "clutter"):
+            video_id = f"P1-{object_name}-{video_type}"
+            relative = Path("external") / f"{video_id}.npz"
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            embeddings = np.zeros((8, 4), dtype=np.float32)
+            embeddings[:, class_index] = 1.0
+            np.savez_compressed(
+                path,
+                embeddings=embeddings,
+                frame_indices=np.arange(8, dtype=np.int64),
+                object_present=np.ones(8, dtype=np.bool_),
+            )
+            rows.append(
+                {
+                    "split": "external",
+                    "user_id": "P1",
+                    "object_name": object_name,
+                    "video_type": video_type,
+                    "video_id": video_id,
+                    "feature_path": relative.as_posix(),
+                    "n_frames": 8,
+                    "feature_dim": 4,
+                    "source_fingerprint": video_id,
+                }
+            )
+    pd.DataFrame(rows, columns=FEATURE_MANIFEST_COLUMNS).to_csv(
+        root / "feature_manifest.csv", index=False
+    )
+    store = OrbitFeatureStore(
+        root,
+        split="external",
+        external_cohort_path=cohort_path,
+        require_complete_split=True,
+    )
+    assert store.users == ("P1",)
+    episode = store.sample_episode(
+        "P1",
+        seed=0,
+        task_index=0,
+        config=OrbitEpisodeSamplingConfig(
+            support_stride=2,
+            max_support_frames_per_video=3,
+            query_frames_per_video=4,
+            min_query_frames_per_video=2,
+            max_frames_per_video=8,
+        ),
+    )
+    assert episode.split == "external"
+
+    cohort_path.write_text(
+        json.dumps({"split": "external", "collectors": ["P1", "P2"]}),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="missing.*P2"):
+        OrbitFeatureStore(
+            root,
+            split="external",
+            external_cohort_path=cohort_path,
+            require_complete_split=True,
+        )
 
 
 def test_episode_is_reproducible_chronological_and_label_free(tmp_path: Path) -> None:

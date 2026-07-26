@@ -1,0 +1,13 @@
+collector_id,n_objects,n_complete_clean_clutter_objects,n_incomplete_objects,incomplete_objects,n_videos,n_frames,eligible_for_registered_sampling
+P1,10,10,0,,87,14122,True
+P10,7,7,0,,56,10891,True
+P11,1,1,0,,8,1531,False
+P12,1,1,0,,8,1371,False
+P2,2,2,0,,16,3108,False
+P3,11,10,1,Black knife,83,10991,False
+P4,13,12,1,little toy car,94,17850,False
+P5,9,9,0,,72,13936,True
+P6,1,1,0,,8,1554,False
+P7,9,9,0,,75,14676,True
+P8,1,0,1,bottle,8,1547,False
+P9,11,6,5,currency note|earphone|glass container|hair oil|headphone,72,13666,False

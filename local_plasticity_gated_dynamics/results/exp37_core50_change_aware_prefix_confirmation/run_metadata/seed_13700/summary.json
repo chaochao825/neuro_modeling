@@ -1,0 +1,132 @@
+{
+  "claim_upgrade_allowed": true,
+  "condition_task_mean_accuracy": [
+    {
+      "accuracy": 0.402974537037037,
+      "condition": "bocpd_change_reset",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.45446759259259256,
+      "condition": "bocpd_posterior",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.402974537037037,
+      "condition": "bocpd_score_no_reset",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.402974537037037,
+      "condition": "cumulative",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.9329050925925927,
+      "condition": "current_frame",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.9329050925925927,
+      "condition": "fixed_forgetting",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.402974537037037,
+      "condition": "matched_shifted_reset",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.954224537037037,
+      "condition": "oracle_change_reset",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.9233564814814815,
+      "condition": "sliding_window",
+      "panel": "hidden_switch"
+    },
+    {
+      "accuracy": 0.9795616319444445,
+      "condition": "bocpd_change_reset",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9791232638888889,
+      "condition": "bocpd_posterior",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9795616319444445,
+      "condition": "bocpd_score_no_reset",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9795616319444445,
+      "condition": "cumulative",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9314973958333334,
+      "condition": "current_frame",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9314973958333334,
+      "condition": "fixed_forgetting",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9795616319444445,
+      "condition": "matched_shifted_reset",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9795616319444445,
+      "condition": "oracle_change_reset",
+      "panel": "natural"
+    },
+    {
+      "accuracy": 0.9339626736111111,
+      "condition": "sliding_window",
+      "panel": "natural"
+    }
+  ],
+  "coverage": {
+    "complete": true,
+    "expected_conditions": 8100,
+    "expected_sessions": 9,
+    "observed_conditions": 8100,
+    "observed_sessions": 9
+  },
+  "evidence_provenance": "prospective_core50_session_holdout",
+  "experiment": "exp37_core50_change_aware_prefix",
+  "feature_cache": {
+    "archive_content_length": 5892103007,
+    "archive_sha256": "f3d65017490dfc4392bc5e41b66930600f1d00898cae47fc4bd1a01cf92e1c6a",
+    "encoder_identity": "torchvision::efficientnet_b0::EfficientNet_B0_Weights.IMAGENET1K_V1",
+    "n_cells": 550,
+    "n_frames": 164866,
+    "root": "/home/spco/data/core50_features_efficientnet_b0_v1"
+  },
+  "profile": "prospective_external",
+  "protocol_version": "exp37_core50_change_aware_prefix_v1",
+  "seed": 13700,
+  "selected_hyperparameters": {
+    "detector": {
+      "alarm_threshold": 0.2,
+      "hazard": 0.0078125,
+      "max_run_length": 128,
+      "min_run_frames": 2,
+      "prior_concentration": 0.1
+    },
+    "development_sessions": [
+      "s2"
+    ],
+    "fixed_retention": 0.0,
+    "temperature": 1.0,
+    "used_external_labels": false,
+    "window_frames": 2
+  },
+  "statistical_unit": "session"
+}

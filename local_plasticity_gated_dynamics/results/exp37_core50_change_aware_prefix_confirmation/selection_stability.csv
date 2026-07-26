@@ -1,0 +1,6 @@
+seed,temperature,fixed_retention,window_frames,alarm_threshold,hazard,max_run_length,min_run_frames,prior_concentration,run_path
+13700,1.0,0.0,2,0.2,0.0078125,128,2,0.1,/home/spco/sow_linear/exp37_runs/prospective_external_v1/runs/exp37_core50_change_aware_prefix/seed_13700/20260726T080612.932373Z_prospective_external
+13701,1.0,0.0,2,0.2,0.0078125,128,2,0.1,/home/spco/sow_linear/exp37_runs/prospective_external_v1/runs/exp37_core50_change_aware_prefix/seed_13701/20260726T080614.076764Z_prospective_external
+13702,1.0,0.0,2,0.2,0.0078125,128,2,0.1,/home/spco/sow_linear/exp37_runs/prospective_external_v1/runs/exp37_core50_change_aware_prefix/seed_13702/20260726T080614.101253Z_prospective_external
+13703,1.0,0.0,2,0.2,0.0078125,128,2,0.1,/home/spco/sow_linear/exp37_runs/prospective_external_v1/runs/exp37_core50_change_aware_prefix/seed_13703/20260726T080613.353771Z_prospective_external
+13704,1.0,0.0,2,0.2,0.0078125,128,2,0.1,/home/spco/sow_linear/exp37_runs/prospective_external_v1/runs/exp37_core50_change_aware_prefix/seed_13704/20260726T080614.112095Z_prospective_external

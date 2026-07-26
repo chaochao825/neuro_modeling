@@ -1,0 +1,58 @@
+collector_id,error_type,error,n_failed_cells
+P11,ValueError,n_classes must be an integer >= 2,4000
+P12,ValueError,n_classes must be an integer >= 2,4000
+P2,ValueError,P2 task 0 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 1 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 10 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 11 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 12 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 13 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 14 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 15 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 16 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 17 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 18 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 19 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 2 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 20 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 21 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 22 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 23 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 24 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 25 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 26 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 27 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 28 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 29 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 3 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 30 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 31 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 32 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 33 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 34 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 35 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 36 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 37 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 38 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 39 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 4 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 40 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 41 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 42 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 43 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 44 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 45 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 46 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 47 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 48 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 49 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 5 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 6 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 7 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 8 has only 2 eligible switch classes,80
+P2,ValueError,P2 task 9 has only 2 eligible switch classes,80
+P3,ValueError,P3/Black knife lacks clean or clutter videos,4000
+P4,ValueError,P4/little toy car lacks clean or clutter videos,4000
+P6,ValueError,n_classes must be an integer >= 2,4000
+P8,ValueError,P8/bottle lacks clean or clutter videos,4000
+P9,ValueError,P9/currency note lacks clean or clutter videos,4000

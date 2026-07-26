@@ -1,0 +1,183 @@
+{
+  "analysis": {
+    "alpha": 0.05,
+    "bootstrap_samples": 100000,
+    "hidden_switch_mcid": 0.03,
+    "holm_family": [
+      "change_reset_over_cumulative_switch",
+      "change_reset_over_fixed_forgetting_switch",
+      "change_reset_over_sliding_window_switch",
+      "change_reset_over_cumulative_natural"
+    ],
+    "max_false_alarms_per_1000": 5.0,
+    "max_median_delay": 8.0,
+    "max_natural_point_loss": 0.01,
+    "natural_noninferiority_margin": 0.02,
+    "statistics_seed": 37037
+  },
+  "archive_content_length": 5892103007,
+  "archive_etag": "\"03beef164c9d21:0\"",
+  "archive_last_modified": "Wed, 10 May 2017 08:10:54 GMT",
+  "archive_path": "/home/spco/data/core50_v1_archive/core50_128x128.zip",
+  "archive_url": "http://bias.csr.unibo.it/maltoni/download/core50/core50_128x128.zip",
+  "bocpd_grid": {
+    "alarm_threshold": [
+      0.2,
+      0.4,
+      0.6,
+      0.8
+    ],
+    "hazard": [
+      0.0078125,
+      0.015625,
+      0.03125,
+      0.0625
+    ],
+    "max_run_length": 128,
+    "min_run_frames": [
+      2,
+      4,
+      8
+    ],
+    "prior_concentration": [
+      0.1,
+      1.0,
+      5.0
+    ]
+  },
+  "claim_upgrade_allowed": true,
+  "cohort_path": "data/core50_sessions_v1.json",
+  "config_path": "/home/spco/sow_linear/codex_worktrees/neuro_exp36_20260726/local_plasticity_gated_dynamics/configs/prospective/exp37_core50_change_aware_prefix.json",
+  "development_sessions": [
+    "s2"
+  ],
+  "evidence_provenance": "prospective_core50_session_holdout",
+  "experiment": "exp37_core50_change_aware_prefix",
+  "external_sessions": [
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8",
+    "s9",
+    "s10",
+    "s11"
+  ],
+  "feature_root": "/home/spco/data/core50_features_efficientnet_b0_v1",
+  "max_prototype_frames_per_object": 60,
+  "n_development_tasks": 50,
+  "n_external_tasks_per_session": 50,
+  "objects": [
+    "o1",
+    "o2",
+    "o3",
+    "o4",
+    "o5",
+    "o6",
+    "o7",
+    "o8",
+    "o9",
+    "o10",
+    "o11",
+    "o12",
+    "o13",
+    "o14",
+    "o15",
+    "o16",
+    "o17",
+    "o18",
+    "o19",
+    "o20",
+    "o21",
+    "o22",
+    "o23",
+    "o24",
+    "o25",
+    "o26",
+    "o27",
+    "o28",
+    "o29",
+    "o30",
+    "o31",
+    "o32",
+    "o33",
+    "o34",
+    "o35",
+    "o36",
+    "o37",
+    "o38",
+    "o39",
+    "o40",
+    "o41",
+    "o42",
+    "o43",
+    "o44",
+    "o45",
+    "o46",
+    "o47",
+    "o48",
+    "o49",
+    "o50"
+  ],
+  "profile": "prospective_external",
+  "protocol_frozen_at": "2026-07-26T07:07:28Z",
+  "protocol_version": "exp37_core50_change_aware_prefix_v1",
+  "prototype_stride": 5,
+  "raw_root": "/home/spco/data/core50_v1_raw",
+  "require_complete_schema": true,
+  "retention_grid": [
+    0.0,
+    0.5,
+    0.7,
+    0.85,
+    0.93,
+    0.97,
+    0.99,
+    1.0
+  ],
+  "run_label": "prospective_external",
+  "seed": 13702,
+  "seeds": [
+    13700,
+    13701,
+    13702,
+    13703,
+    13704
+  ],
+  "selection_constraints": {
+    "max_false_alarms_per_1000": 5.0,
+    "max_natural_accuracy_loss": 0.01
+  },
+  "stream": {
+    "detection_tolerance": 16,
+    "n_classes": 4,
+    "natural_frames": 128,
+    "post_switch_window": 16,
+    "segment_frames": 32,
+    "segments_per_stream": 6
+  },
+  "support_sessions": [
+    "s1"
+  ],
+  "temperature_grid": [
+    1.0,
+    2.0,
+    5.0,
+    10.0,
+    20.0
+  ],
+  "used_autograd": false,
+  "used_bptt": false,
+  "used_development_labels_for_selection": true,
+  "used_external_labels_for_fit": false,
+  "used_future_frames": false,
+  "window_grid": [
+    2,
+    4,
+    8,
+    16,
+    32,
+    64
+  ]
+}

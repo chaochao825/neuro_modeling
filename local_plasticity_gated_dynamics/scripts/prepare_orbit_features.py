@@ -29,6 +29,7 @@ if __package__ in {None, ""}:
 
 from src.data.orbit_streaming import (
     FEATURE_MANIFEST_COLUMNS,
+    load_orbit_external_cohort,
     load_official_orbit_splits,
 )
 
@@ -57,6 +58,21 @@ def parse_user_ids(value: str | None) -> tuple[str, ...] | None:
     return users
 
 
+def file_md5(path: str | Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
+    """Return a streaming MD5 for comparison with a dataset publisher checksum."""
+
+    source = Path(path).expanduser().resolve()
+    if not source.is_file():
+        raise FileNotFoundError(f"source archive not found: {source}")
+    if isinstance(chunk_bytes, bool) or int(chunk_bytes) < 1:
+        raise ValueError("chunk_bytes must be positive")
+    digest = hashlib.md5(usedforsecurity=False)
+    with source.open("rb") as stream:
+        while chunk := stream.read(int(chunk_bytes)):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def discover_orbit_videos(
     raw_root: str | Path,
     *,
@@ -65,7 +81,8 @@ def discover_orbit_videos(
 ) -> list[tuple[str, str, str, Path]]:
     """Discover canonical ``user/object/type/video`` directories."""
 
-    root = Path(raw_root).expanduser().resolve() / split
+    base = Path(raw_root).expanduser().resolve()
+    root = base / ("Dataset" if split == "external" else split)
     if not root.is_dir():
         raise FileNotFoundError(f"ORBIT split directory not found: {root}")
     expected = set(map(str, allowed_users))
@@ -114,7 +131,11 @@ def _annotation_mask(
     split: str,
     video_id: str,
 ) -> np.ndarray:
-    path = annotations_root / split / f"{video_id}.json"
+    path = (
+        annotations_root / f"{video_id}.json"
+        if split == "external"
+        else annotations_root / split / f"{video_id}.json"
+    )
     if not path.is_file():
         raise FileNotFoundError(f"ORBIT frame annotations not found: {path}")
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -280,7 +301,24 @@ def _parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--split", choices=("train", "validation", "test"), required=True
+        "--split",
+        choices=("train", "validation", "test", "external"),
+        required=True,
+    )
+    parser.add_argument(
+        "--external-cohort",
+        default=None,
+        help="frozen collector manifest required when --split=external",
+    )
+    parser.add_argument(
+        "--source-archive",
+        default=None,
+        help="immutable source archive used to verify external provenance",
+    )
+    parser.add_argument(
+        "--expected-archive-md5",
+        default=None,
+        help="publisher MD5 required with --source-archive",
     )
     parser.add_argument("--encoder", choices=ENCODERS, default="efficientnet_b0")
     parser.add_argument("--device", default="cuda:0")
@@ -303,15 +341,39 @@ def main() -> None:
     if args.max_users is not None and args.max_users < 1:
         raise ValueError("max-users must be positive")
     requested_users = parse_user_ids(args.user_ids)
-    splits = load_official_orbit_splits(args.official_splits)
+    archive_md5: str | None = None
+    if (args.source_archive is None) != (args.expected_archive_md5 is None):
+        raise ValueError(
+            "--source-archive and --expected-archive-md5 must be provided together"
+        )
+    if args.split == "external" and args.source_archive is None:
+        raise ValueError("external split requires immutable archive provenance")
+    if args.source_archive is not None:
+        expected_md5 = str(args.expected_archive_md5).strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{32}", expected_md5):
+            raise ValueError("expected archive MD5 must contain 32 hexadecimal digits")
+        archive_md5 = file_md5(args.source_archive)
+        if archive_md5 != expected_md5:
+            raise ValueError(
+                f"source archive MD5 mismatch: {archive_md5} != {expected_md5}"
+            )
+    if args.split == "external":
+        if args.external_cohort is None:
+            raise ValueError("external split requires --external-cohort")
+        expected_users = load_orbit_external_cohort(args.external_cohort)
+    else:
+        if args.external_cohort is not None:
+            raise ValueError("--external-cohort is only valid for external split")
+        splits = load_official_orbit_splits(args.official_splits)
+        expected_users = splits[args.split]
     videos = discover_orbit_videos(
-        args.raw_root, split=args.split, allowed_users=splits[args.split]
+        args.raw_root, split=args.split, allowed_users=expected_users
     )
     observed_users = sorted({item[0] for item in videos})
-    if args.require_complete_split and set(observed_users) != set(splits[args.split]):
+    if args.require_complete_split and set(observed_users) != set(expected_users):
         raise ValueError(
             f"raw split is incomplete; observed {len(observed_users)} of "
-            f"{len(splits[args.split])} official users"
+            f"{len(expected_users)} expected users"
         )
     if args.max_users is not None:
         selected = set(observed_users[: args.max_users])
@@ -357,11 +419,13 @@ def main() -> None:
         video_id = video_dir.name
         try:
             frame_paths = _frame_paths(video_dir, max_frames=args.max_frames_per_video)
-            annotation_path = (
-                annotation_root / args.split / f"{video_id}.json"
-                if video_type == "clutter"
-                else None
-            )
+            annotation_path = None
+            if video_type == "clutter":
+                annotation_path = (
+                    annotation_root / f"{video_id}.json"
+                    if args.split == "external"
+                    else annotation_root / args.split / f"{video_id}.json"
+                )
             fingerprint = _source_fingerprint(
                 frame_paths, annotation_path, encoder_identity
             )
@@ -468,6 +532,17 @@ def main() -> None:
             "raw_root": str(Path(args.raw_root).expanduser().resolve()),
             "annotations_root": str(annotation_root),
             "official_splits": str(Path(args.official_splits).resolve()),
+            "external_cohort": (
+                str(Path(args.external_cohort).resolve())
+                if args.external_cohort is not None
+                else None
+            ),
+            "source_archive": (
+                str(Path(args.source_archive).resolve())
+                if args.source_archive is not None
+                else None
+            ),
+            "source_archive_md5": archive_md5,
             "split": args.split,
             "encoder_identity": encoder_identity,
             "feature_dim": feature_dim,

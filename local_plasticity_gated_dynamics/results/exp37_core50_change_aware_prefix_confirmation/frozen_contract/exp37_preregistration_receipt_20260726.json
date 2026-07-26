@@ -1,0 +1,19 @@
+{
+  "protocol_version": "exp37_core50_change_aware_prefix_v1",
+  "frozen_at": "2026-07-26T07:07:28Z",
+  "freeze_boundary": "before CORe50 archive download extraction embedding model evaluation or outcome inspection",
+  "public_metadata_inspected": true,
+  "external_images_inspected": false,
+  "external_model_outputs_inspected": false,
+  "external_outcomes_inspected": false,
+  "protocol_path": "docs/exp37_core50_change_aware_prefix_protocol_20260726.md",
+  "protocol_sha256": "8649bbc673f9f5722cc39ca1a502e0ee72e9ea9e4e433495c944dd7684678457",
+  "config_path": "configs/prospective/exp37_core50_change_aware_prefix.json",
+  "config_sha256": "983b790e6a0b47e8bf6e668636fc8c9d4ab710bf07b67a4c363d38688a998fd4",
+  "cohort_path": "data/core50_sessions_v1.json",
+  "cohort_sha256": "d1f9826399dceb03354412d391388c301a4b6238365307217a41d3630cf91c5f",
+  "archive_url": "http://bias.csr.unibo.it/maltoni/download/core50/core50_128x128.zip",
+  "archive_content_length": 5892103007,
+  "archive_etag": "\"03beef164c9d21:0\"",
+  "archive_last_modified": "Wed, 10 May 2017 08:10:54 GMT"
+}

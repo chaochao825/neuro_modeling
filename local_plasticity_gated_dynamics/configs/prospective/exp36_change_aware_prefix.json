@@ -1,0 +1,78 @@
+{
+  "profile": "prospective_external",
+  "protocol_version": "exp36_change_aware_prefix_v1",
+  "protocol_frozen_at": "2026-07-26T05:54:33Z",
+  "evidence_provenance": "prospective_external_confirmation",
+  "claim_upgrade_allowed": true,
+  "seeds": [13600, 13601, 13602, 13603, 13604],
+  "used_development_labels_for_selection": true,
+  "used_external_labels_for_fit": false,
+  "used_future_frames": false,
+  "used_autograd": false,
+  "used_bptt": false,
+  "development_feature_root": "/home/spco/data/orbit_features_efficientnet_b0_protocol_v2_validation",
+  "development_split": "validation",
+  "development_splits_path": "data/orbit_official_splits.json",
+  "external_feature_root": "/home/spco/data/orbit_india_features_efficientnet_b0_v1",
+  "external_split": "external",
+  "external_cohort_path": "data/orbit_india_collectors_v1.json",
+  "external_archive_name": "ORBIT-India dataset.zip",
+  "external_archive_md5": "af4d05689f556ca477acc09a73bb3d3d",
+  "external_collectors": ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12"],
+  "require_complete_development_split": true,
+  "require_complete_external_cohort": true,
+  "cache_features_in_memory": true,
+  "n_development_tasks_per_user": 5,
+  "n_external_tasks_per_collector": 50,
+  "retention_grid": [0.0, 0.5, 0.7, 0.85, 0.93, 0.97, 0.99, 1.0],
+  "window_grid": [4, 8, 16, 32, 64],
+  "detector_grid": {
+    "fast_retention": [0.0, 0.5, 0.8, 0.9],
+    "jsd_threshold": [0.01, 0.02, 0.05, 0.1, 0.2],
+    "patience": [1, 2, 3],
+    "min_run_frames": [4, 8]
+  },
+  "selection_constraints": {
+    "max_natural_accuracy_loss": 0.01,
+    "max_false_alarms_per_1000": 5.0
+  },
+  "stream": {
+    "segments_per_stream": 4,
+    "segment_frames": 32,
+    "post_switch_window": 16,
+    "detection_tolerance": 16
+  },
+  "sampling": {
+    "support_stride": 30,
+    "max_support_frames_per_video": 200,
+    "query_frames_per_video": 200,
+    "min_query_frames_per_video": 32,
+    "max_frames_per_video": 1000,
+    "support_video_limit": null
+  },
+  "actuators": {
+    "norm_floor": 1e-08,
+    "variance_floor": 0.0001,
+    "gain_min": 0.25,
+    "gain_max": 4.0,
+    "delta_beta": 0.5,
+    "delta_passes": 2,
+    "score_temperature": 10.0,
+    "temporal_retention": 0.97
+  },
+  "analysis": {
+    "bootstrap_samples": 100000,
+    "statistics_seed": 36036,
+    "alpha": 0.05,
+    "hidden_switch_mcid": 0.03,
+    "natural_noninferiority_margin": 0.02,
+    "max_median_delay": 8.0,
+    "max_false_alarms_per_1000": 5.0,
+    "holm_family": [
+      "change_reset_over_cumulative_switch",
+      "change_reset_over_fixed_forgetting_switch",
+      "change_reset_over_fixed_forgetting_post_switch",
+      "change_reset_over_cumulative_natural"
+    ]
+  }
+}

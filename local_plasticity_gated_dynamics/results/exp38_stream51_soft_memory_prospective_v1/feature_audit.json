@@ -1,0 +1,28 @@
+{
+  "audit_type": "exp38_support_development_feature_cache",
+  "audited_at": "2026-07-26T11:31:06.851168+00:00",
+  "bad_shape_videos": [],
+  "bbox_schema": {
+    "reference_clipping_applied": true,
+    "xmax_over_width": 63,
+    "xmin_below_zero": 7,
+    "ymax_over_height": 23,
+    "ymin_below_zero": 0
+  },
+  "external_features_accessed": false,
+  "external_manifest_rows": 0,
+  "failure_rows": 0,
+  "feature_dims": [
+    1280
+  ],
+  "frame_total": 34250,
+  "manifest_rows": 755,
+  "manifest_sha256": "a54f86e834257820e14a125f5b7639e58d06a9a4f035ba1ae0d55ef3ae5f86c1",
+  "nonfinite_values": 0,
+  "passed": true,
+  "split_counts": {
+    "development": 321,
+    "support": 434
+  },
+  "temporary_files": 0
+}

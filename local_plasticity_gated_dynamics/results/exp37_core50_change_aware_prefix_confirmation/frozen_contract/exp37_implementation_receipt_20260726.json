@@ -1,0 +1,17 @@
+{
+  "protocol_version": "exp37_core50_change_aware_prefix_v1",
+  "frozen_at": "2026-07-26T07:35:33Z",
+  "freeze_boundary": "before CORe50 archive completion extraction embedding model evaluation or outcome inspection",
+  "external_images_inspected": false,
+  "external_model_outputs_inspected": false,
+  "external_outcomes_inspected": false,
+  "files": {
+    "src/models/bocpd_prefix.py": "817d1ea070a6bf4a9388592d3e033c0d8782c23c485a021fd5cd87470c8d6609",
+    "src/data/core50_streaming.py": "166a131380643a44e24ad6d717f0ebb7ab7ce77fb2fc5f0d481b3dc6d26a2eb7",
+    "experiments/exp37_core50_change_aware_prefix.py": "f9389580e42b32a502d10f767ef6b395a1d1cf7a000a8c46d3d232932b06d35a",
+    "scripts/prepare_core50_features.py": "877cd314bfc349442c764a380ba693105a95486814713aec45a603ebd8e522db",
+    "scripts/attest_core50_acquisition.py": "5aa1f25dc3e68712afd5552b1d331281bd72bd0216a6e0a6903f4a7e186e99ea",
+    "scripts/summarize_exp37.py": "6dca221c2ba857d60c86cb71d470ebf5e77d7bf4aa6fe84f37ce7cd1651f7b34",
+    "figures/exp37_core50_change_aware_prefix_plot.py": "c204c13057491e45371323e8ff62a897831f568734b33c421509337cffecd98a"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "cohort": "ORBIT-India",
+  "dataset_version": 1,
+  "doi": "10.5281/zenodo.12608444",
+  "archive_name": "ORBIT-India dataset.zip",
+  "archive_md5": "af4d05689f556ca477acc09a73bb3d3d",
+  "split": "external",
+  "collectors": ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12"],
+  "protocol_frozen_at": "2026-07-26T05:54:33Z"
+}

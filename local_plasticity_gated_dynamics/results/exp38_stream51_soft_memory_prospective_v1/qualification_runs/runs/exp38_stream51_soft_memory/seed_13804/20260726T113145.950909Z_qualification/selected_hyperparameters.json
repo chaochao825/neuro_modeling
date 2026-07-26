@@ -1,0 +1,32 @@
+{
+  "controller": {
+    "bias": -0.0,
+    "disagreement_weight": 0.5,
+    "entropy_weight": 0.0,
+    "epsilon": 1e-12,
+    "evidence_weight_floor": 1.0,
+    "fast_retention": 0.5,
+    "retention_ceiling": 0.97,
+    "retention_floor": 0.0,
+    "slow_retention": 0.98,
+    "surprise_weight": 0.0
+  },
+  "controller_fit_eligible": true,
+  "controller_standardizer": {
+    "mean": [
+      418.7840448888519,
+      0.3209074569560277,
+      0.08319319872157573
+    ],
+    "scale": [
+      119.99184134719073,
+      0.244637358433205,
+      0.11328998263873097
+    ]
+  },
+  "fit_video_count": 147,
+  "qualification_video_count": 174,
+  "retention": 0.25,
+  "temperature": 50.0,
+  "window_frames": 2
+}

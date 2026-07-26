@@ -1,0 +1,5 @@
+comparison,panel,metric,method,comparator,n_users,mean_difference,ci_low,ci_high,positive_users,sign_flip_pvalue,holm_adjusted_pvalue
+change_reset_over_cumulative_switch,hidden_switch,accuracy,bocpd_change_reset,cumulative,9,0.0,0.0,0.0,0,1.0,1.0
+change_reset_over_fixed_forgetting_switch,hidden_switch,accuracy,bocpd_change_reset,fixed_forgetting,9,-0.5328935185185185,-0.5432337962962963,-0.5220462962962963,0,0.00390625,0.015625
+change_reset_over_sliding_window_switch,hidden_switch,accuracy,bocpd_change_reset,sliding_window,9,-0.5237546296296296,-0.533351851851852,-0.5140831597222223,0,0.00390625,0.015625
+change_reset_over_cumulative_natural,natural,accuracy,bocpd_change_reset,cumulative,9,0.0,0.0,0.0,0,1.0,1.0

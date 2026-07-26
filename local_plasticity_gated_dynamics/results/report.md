@@ -190,3 +190,143 @@ only official short-video exclusion and strict expected-set checks, but reused
 the same public test split. Consequently the corrected within-dataset
 mechanism contrast supports, whereas strict untouched prospective
 confirmation remains inconclusive pending a new frozen replication.
+
+## Exp35 retrospective update: prefix reliability audit
+
+Exp35 executes the stronger same-tape audit requested by the Exp34 stop rule.
+The frozen v2 panel completed all five seeds, all 17 users, and all 19
+conditions with zero failed or invalid conditions. Seeds were averaged within
+user before paired inference. Validation users alone selected the temporal
+retention, the single prefix operator, action temperatures, and stacking
+weights; no evaluation label was used by a deployable condition.
+
+| condition | user-equal accuracy |
+| --- | ---: |
+| equal prefix probability accumulation | **0.81905** |
+| prefix prototype probability | 0.81683 |
+| validation-calibrated prefix stack | 0.81681 |
+| cumulative prefix vote | 0.81581 |
+| validation-selected single prefix operator | 0.81336 |
+| fixed temporal | 0.76011 |
+| prefix consistency | **0.75917** |
+| instantaneous majority | 0.70984 |
+
+| registered comparison | consistency-minus-control | 95% user-bootstrap CI | Holm p | conclusion |
+| --- | ---: | ---: | ---: | --- |
+| lagged consistency | +0.00070 | [+0.00040, +0.00101] | 0.001221 | support, narrow self-inclusion effect |
+| cumulative prefix vote | -0.05664 | [-0.09071, -0.02906] | 0.001587 | oppose |
+| equal prefix probability | -0.05988 | [-0.09444, -0.03197] | 0.000549 | oppose |
+| calibrated prefix stack | -0.05764 | [-0.09247, -0.02992] | 0.001587 | oppose |
+| selected single prefix operator | -0.05419 | [-0.08681, -0.02637] | 0.002747 | oppose |
+| fixed temporal | -0.00095 | [-0.00833, +0.00728] | 0.819824 | inconclusive |
+
+The comparative routing claim is **oppose**. In the exact stable-correct versus
+stable-wrong intervention, both actions have concentration one; the frozen tie
+rule selects the wrong action throughout, giving accuracy 0 and wrong-lock
+fraction 1. The consistency-as-correctness interpretation is also **oppose**.
+
+An explicitly exploratory decomposition gives prefix-probability gains of
++0.1339, +0.1238, +0.1393, and +0.0510 for prototype, gain, delta, and temporal
+respectively. The equal prefix bank exceeds the validation-selected single
+prefix operator by only +0.0057, with a 95% interval [-0.0043, +0.0161]. Thus
+the surviving signal is temporal evidence accumulation within constant-object
+videos; heterogeneous-bank value remains inconclusive.
+
+Exp35 is retrospective because the ORBIT test split had already been exposed.
+No positive observation can upgrade a claim. The result supersedes Exp34 as
+the paper-level verdict, moves Exp34 to historical motivation, and triggers the
+registered stop rule against adding HMM, Hedge, GRU, sparse execution, or E/I
+to rescue the router. The canonical package is
+`results/exp35_prefix_reliability_audit_retrospective_v2/`.
+
+## Exp36 prospective validity update: ORBIT-India schema incompatibility
+
+Exp36-v1 was frozen before ORBIT-India download and completed all five planned
+seed processes, but the registered inferential panel is invalid. Only 4 of 12
+collectors could instantiate every four-class clean/clutter task. The other
+eight collectors generated exactly 6,400 retained failed condition cells per
+seed (32,000 total): some collectors had fewer than four classes and others
+contained at least one object without the required clean/clutter pair.
+
+This determination is outcome-blind. The validity audit parsed only status,
+error, and schema fields; it did not inspect accuracy, post-switch accuracy, or
+detector-utility fields. The four surviving collectors were deliberately not
+summarized as a prospective result. Therefore the Exp36 change-aware prefix
+claim is **inconclusive**, v1 is historical-only, and the failure is evidence
+about dataset--protocol compatibility rather than evidence for or against the
+controller.
+
+The canonical audit is `results/exp36_v1_invalid_schema_audit/`. Its successor,
+Exp37 freezes a balanced CORe50 session/object schema and a Bayesian online
+change-point controller before data acquisition completes.
+
+## Exp37 prospective update: change-aware prefix accumulation on CORe50
+
+Exp37 was frozen before the CORe50 archive completed downloading, before image
+extraction or embedding, and before any task outcome was available. The
+acquired archive matched the published MD5 and the frozen byte length; the
+outcome-blind schema audit found exactly 11 sessions, 50 objects, 550
+session/object cells, and 164,866 images. Frozen EfficientNet-B0 features then
+completed all 550 cells with zero failures.
+
+The external panel contains all five seeds, all nine held-out sessions
+(`s3`--`s11`), 50 tasks per session, two panels, and nine conditions: 40,500
+registered condition cells with no failures or exclusions. Seeds, tasks,
+objects, and frames were averaged inside session before inference.
+
+| registered comparison | session-mean difference | 95% session-bootstrap CI | Holm p | conclusion |
+| --- | ---: | ---: | ---: | --- |
+| hard-reset BOCPD minus cumulative, hidden switch | +0.0000 | [+0.0000, +0.0000] | 1.000000 | inconclusive |
+| hard-reset BOCPD minus selected fixed forgetting | -0.5329 | [-0.5432, -0.5220] | 0.015625 | oppose |
+| hard-reset BOCPD minus selected sliding window | -0.5238 | [-0.5334, -0.5141] | 0.015625 | oppose |
+| hard-reset BOCPD minus cumulative, natural | +0.0000 | [+0.0000, +0.0000] | 1.000000 | noninferiority gate passes |
+
+Hard-reset BOCPD reached 0.3984 hidden-switch accuracy, exactly matching
+unbounded cumulative accumulation because it never reset. Validation-selected
+retention zero (current-frame evidence) reached 0.9313, the two-frame sliding
+window reached 0.9221, and oracle change reset reached 0.9528. The registered
+joint conclusion is therefore **oppose**, and the frozen stop rule against
+further tuning this controller on CORe50 is triggered.
+
+A separately labeled post-hoc, development-only diagnostic explains the
+failure without changing the verdict. Across 48,000 `s2` hidden-stream frames,
+the maximum change posterior was 0.008529; the minimum frozen alarm threshold
+was 0.2, so no candidate in the 144-point BOCPD grid could alarm. This is a
+threshold/model-scale defect in the tested detector and means Exp37 does not
+refute all possible change-point methods. It does refute the registered claim
+that this BOCPD hard-reset controller adds decision utility beyond simple
+forgetting on this task.
+
+The canonical 61-file package plus the non-overwriting interpretive figure
+amendment is `results/exp37_core50_change_aware_prefix_confirmation/`; both
+artifact SHA256 manifests are retained. The result is not an official CORe50
+continual-learning, SOTA, biological, or general concept-drift claim.
+
+## Exp38 prospective update: continuous memory control on Stream-51
+
+Exp38 froze the official 11.34 GB Stream-51 archive identity, source-video
+split, EfficientNet-B0 representation, support-only vMF evidence model,
+development selection, five assembly seeds, and four conjunctive readiness
+gates before any task outcome. The complete archive CRC passed. The final
+support/development cache contains 755 source videos and 34,250 finite
+1,280-dimensional frame embeddings with zero failed videos and zero external
+rows. A reference-loader bbox schema failure and a later manifest-writer race
+were retained as separate logs and repaired before qualification; neither
+exposed classification outcomes.
+
+The registered joint qualification is **oppose**: 0/5 seeds passed. Oracle
+cumulative memory with perfect reset exceeded the stronger fixed time scale
+in 5/5 seeds (headroom 0.0273--0.0558), and cumulative post-switch harm passed
+in 5/5 (0.7115--0.7356). Stable accumulation cleared the 0.02 MCID in only
+2/5 seeds; the other three reached 0.01952. Causal risk AUC was 0.746--0.831,
+but the operational reachability gate passed only 1/5 because recall was
+0.172--0.359 and one seed also exceeded the false-alarm ceiling.
+
+On the disjoint qualification holdout, soft retention minus the stronger fixed
+forgetting/window baseline averaged only +0.0019 across assembly seeds (range
+-0.0038 to +0.0077), descriptively far below the external MCID of 0.02. This
+does not replace the untouched external endpoint. Because the frozen all-seed
+gate failed, all 381 external videos remain unfeaturized and unscored; the main
+external utility claim is **inconclusive**. The stop rule prohibits post-hoc
+threshold tuning or GRU/BPTT, E/I, and encoder rescue. The canonical package is
+`results/exp38_stream51_soft_memory_prospective_v1/`.

@@ -27,7 +27,7 @@ The repository has two exhaustive and mutually exclusive result views:
   positive, negative, failed, and inconclusive rows.
 
 The [experiment registry](provenance/experiment_registry.csv) classifies every
-entry point from Exp00 through Exp34. The [branch audit](docs/branch_consolidation.md)
+entry point from Exp00 through Exp38. The [branch audit](docs/branch_consolidation.md)
 shows that all other remote branches were already ancestors of the audited
 base, so no implementation commit was missing. Hash-bound snapshots preserve
 their prior README/report/summary surfaces.
@@ -48,18 +48,53 @@ The current evidence chain is:
 7. Exp32: persistent sparse-feedback control supports at the slow-switch main
    endpoint, while the stronger registered timescale phase claim remains
    inconclusive.
-8. Exp33/34: real ORBIT video exposed substantial motif headroom but rejected
-   the first cross-user reward-only selector. The corrected Exp34 formal panel
-   completed 17/17 users and supports a label-free causal-consensus advantage
-   over fixed, memoryless, majority, and delayed controls. Its strict
-   untouched-first-look status is inconclusive because an earlier 15-user
-   formal attempt exposed test data before a coverage defect was corrected.
-9. Exp25: the real compositional neural endpoint remains active but correctly
+8. Exp33/34: real ORBIT video rejected the first cross-user reward-only
+   selector, then produced a bounded prefix-consistency gain over weak causal
+   controls. Exp34 is retained as historical motivation.
+9. Exp35: the decisive same-tape audit **opposes** prefix consistency as a
+   useful reliability router. Equal prefix probability reaches 81.90% versus
+   75.92% for consistency, and the exact stable-wrong control yields accuracy
+   zero and wrong-lock fraction one. Exploratory evidence favors within-video
+   temporal accumulation; heterogeneous-bank value remains inconclusive.
+10. Exp36: the prospectively frozen ORBIT-India cohort is historical and
+   inconclusive because only 4/12 collectors could instantiate the registered
+   schema; its outcome-blind audit did not inspect accuracy.
+11. Exp37: the untouched CORe50 session-held panel **opposes** the registered
+   hard-reset BOCPD controller. It exactly matches cumulative accumulation at
+   39.84% hidden-switch accuracy and is far below selected current-frame
+   forgetting (93.13%) and a two-frame window (92.21%). The stop rule triggers.
+12. Exp38: the prospective Stream-51 qualification **opposes** the registered
+   joint readiness gate (0/5 seeds). Oracle headroom and cumulative switch harm
+   hold, but causal reachability is not robust; external data remain untouched
+   and the main utility claim is inconclusive.
+13. Exp25: the real compositional neural endpoint remains active but correctly
    fails closed because an eligible canonical neural bundle is unavailable.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
 [current critical audit](docs/current_evidence_critical_audit.md) for effect
 sizes, boundaries, and scale priorities.
+
+The [ICLR-style review and paper reframe](docs/iclr_paper_reframe_20260726.md)
+records the decisive Exp35 stop decision. The current paper is a bounded
+negative mechanism audit, not an ICLR-ready routing method. Its recommended
+title is *When Consistency Is Not Reliability: A Causal Audit of Streaming
+Personalized Recognition*. Exp37 and Exp38 are prospective follow-up stop
+results, not positive method extensions: the former identifies an unreachable
+frozen BOCPD threshold grid, while the latter fails robust causal reachability
+before external access.
+
+The [Exp00--Exp35 diagnostic lineage](docs/experiment_lineage_diagnostic_audit_20260726.md)
+separates theory errors from identification, method, and data failures. The
+[reviewer-response revision plan](docs/iclr_reviewer_response_and_revision_plan_20260726.md)
+records the revised title, abstract, contribution boundary, and stop rules.
+
+## System architecture
+
+The [source-grounded architecture figure](docs/figures/actuator_matching_system_architecture.md)
+shows the complete active dataflow, evidence boundary, and conditional scale
+frontier. SVG, PDF, PNG, editable PowerPoint, generator source, and a
+hash-bound figure contract are included; historical-only branches are kept in
+the evidence registry rather than mixed into the active computation graph.
 
 ## What is not currently claimed
 
@@ -74,9 +109,15 @@ sizes, boundaries, and scale priorities.
 - Exp34 does not establish SOTA or efficiency: its official-style 67.43% is
   effectively tied with the published EfficientNet-B0 cosine ProtoNet 67.48%,
   and the controller computes the full four-actuator bank.
-- The corrected Exp34 mechanism contrast supports its bounded task claim, but
-  it is not a fresh prospective replication after the invalid incomplete
-  formal attempt exposed 15 test users.
+- Exp35 supersedes Exp34 as the paper-level verdict: stronger same-tape causal
+  baselines remove and reverse the router gain, so Exp34 is historical rather
+  than current positive method evidence.
+- Exp35's positive prefix-accumulation decomposition is retrospective and
+  exploratory; it is not a prospective transfer or novelty claim.
+- Exp37 does not show that change-point detection is generally useless. It
+  opposes the registered categorical-BOCPD hard reset on CORe50; the maximum
+  development change posterior (0.00853) never approached the minimum frozen
+  threshold (0.2), and that post-hoc diagnosis cannot rescue the verdict.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

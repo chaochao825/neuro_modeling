@@ -1,0 +1,111 @@
+{
+  "profile": "prospective_external_staged",
+  "protocol_version": "exp38_stream51_soft_memory_v1",
+  "protocol_frozen_at": "2026-07-26T11:17:56Z",
+  "outcome_blind_amendment": {
+    "amended_at": "2026-07-26T11:06:26Z",
+    "prior_freeze_at": "2026-07-26T10:54:47Z",
+    "reason": "Define oracle independently as cumulative retention with exact true-switch reset before any task outcome was inspected"
+  },
+  "schema_amendment": {
+    "amended_at": "2026-07-26T11:09:13Z",
+    "failed_run_generated_embeddings": false,
+    "reason": "Match the official loader by clipping the small number of tracker boxes extending outside the JPEG canvas"
+  },
+  "execution_amendment": {
+    "amended_at": "2026-07-26T11:17:56Z",
+    "classification_outcomes_inspected": false,
+    "reason": "Decode registered frames with eight ordered CPU workers while preserving the exact transform and frame order"
+  },
+  "evidence_provenance": "prospective_stream51_video_holdout",
+  "claim_upgrade_allowed": true,
+  "seeds": [13800, 13801, 13802, 13803, 13804],
+  "used_support_labels_for_evidence_model": true,
+  "used_development_labels_for_selection": true,
+  "used_qualification_labels_for_gating": true,
+  "used_external_labels_for_fit": false,
+  "used_future_frames": false,
+  "used_autograd": false,
+  "used_bptt": false,
+  "archive_url": "http://klab.cis.rit.edu/files/Stream-51.zip",
+  "archive_path": "/home/spco/data/stream51_v1_archive/Stream-51.zip",
+  "archive_content_length": 11343409620,
+  "archive_sha256": "db2711e34130923147c69e203ebfde46c8d651846958d645359a0ceb4d910465",
+  "archive_etag": "\"2a41eb1d4-5bc7ec7c486c0\"",
+  "archive_last_modified": "Mon, 01 Mar 2021 19:39:47 GMT",
+  "official_repo_url": "https://github.com/tyler-hayes/Stream-51",
+  "official_repo_commit": "8a066737ac8b3ac6f57987e6b3713ddcfbd1dcbf",
+  "official_ordering": "/home/spco/data/stream51_official_repo/orderings/instance_seed10/train.txt",
+  "official_ordering_sha256": "8368c5920486e83746d03acd9d71e71fdc403065d8f5d74df6d8de275b426fd4",
+  "cohort_path": "data/stream51_videos_v1.json",
+  "feature_root": "/home/spco/data/stream51_features_efficientnet_b0_v1",
+  "encoder": {
+    "architecture": "torchvision_efficientnet_b0",
+    "weights": "IMAGENET1K_V1",
+    "bbox_crop": true,
+    "bbox_padding_ratio": 1.1,
+    "batch_size": 128,
+    "decode_workers": 8,
+    "support_frames_per_video": 32,
+    "development_frames_per_video": 64,
+    "external_frames_per_video": 64
+  },
+  "development_partition_salt": "exp38-controller-fit-vs-qualification-v1",
+  "development_fit_fraction": 0.5,
+  "temperature_grid": [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1000.0],
+  "retention_grid": [0.0, 0.25, 0.5, 0.7, 0.85, 0.93, 0.97, 0.99, 1.0],
+  "window_grid": [2, 4, 8, 16, 32],
+  "controller_grid": {
+    "retention_floor": [0.0, 0.25, 0.5, 0.7],
+    "retention_ceiling": [0.93, 0.97, 0.99],
+    "gain": [0.5, 1.0, 2.0, 4.0],
+    "threshold": [-1.0, -0.5, 0.0, 0.5, 1.0],
+    "feature_templates": [
+      [1.0, 0.0, 0.0],
+      [0.0, 0.0, 1.0],
+      [1.0, 0.0, 1.0],
+      [1.0, 0.5, 1.0]
+    ],
+    "fast_retention": 0.5,
+    "slow_retention": 0.98,
+    "evidence_weight_floor": 1.0
+  },
+  "selection_constraints": {
+    "max_natural_accuracy_loss": 0.01,
+    "min_switch_recall": 0.10,
+    "max_false_alarms_per_1000": 50.0
+  },
+  "task": {
+    "natural_max_frames": 64,
+    "segment_frames": 24,
+    "videos_per_stream": 6,
+    "post_switch_window": 12,
+    "detection_tolerance": 12,
+    "refractory_frames": 6,
+    "min_run_frames": 4
+  },
+  "qualification": {
+    "stable_gain_mcid": 0.02,
+    "oracle_headroom_mcid": 0.02,
+    "cumulative_harm_mcid": 0.03,
+    "min_reachability_auc": 0.65,
+    "min_reachability_recall": 0.30,
+    "max_false_alarms_per_1000": 30.0,
+    "max_median_delay": 8.0,
+    "require_all_seeds": true
+  },
+  "analysis": {
+    "bootstrap_samples": 100000,
+    "statistics_seed": 38038,
+    "alpha": 0.05,
+    "hidden_switch_mcid": 0.02,
+    "natural_noninferiority_margin": 0.01,
+    "holm_family": [
+      "soft_over_fixed_forgetting_hidden",
+      "soft_over_sliding_window_hidden",
+      "soft_over_hard_hidden",
+      "soft_over_shifted_timing_hidden",
+      "soft_noninferior_current_natural"
+    ]
+  }
+}

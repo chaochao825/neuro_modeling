@@ -1,0 +1,17 @@
+{
+  "protocol_version": "exp36_change_aware_prefix_v1",
+  "frozen_at": "2026-07-26T05:54:33Z",
+  "freeze_boundary": "before ORBIT-India archive download extraction embedding or model evaluation",
+  "public_metadata_inspected": true,
+  "external_images_inspected": false,
+  "external_model_outputs_inspected": false,
+  "external_outcomes_inspected": false,
+  "protocol_path": "docs/exp36_change_aware_prefix_protocol_20260726.md",
+  "protocol_sha256": "5873c860b719470a9e562e46ae83c6938632ea45411189ff30d05ffff8cd9644",
+  "config_path": "configs/prospective/exp36_change_aware_prefix.json",
+  "config_sha256": "dbd06cca425862d9a123bfa0d9d7adadf78c3bbc84c3140904bf89be87736b1a",
+  "cohort_path": "data/orbit_india_collectors_v1.json",
+  "cohort_sha256": "f1e8666bc967dfcf663007f0f02937fce11f4d53d9f3784a436b9402047c4121",
+  "external_archive_name": "ORBIT-India dataset.zip",
+  "external_archive_md5": "af4d05689f556ca477acc09a73bb3d3d"
+}
