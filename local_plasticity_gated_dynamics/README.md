@@ -79,7 +79,12 @@ The current evidence chain is:
     does not improve held-out low-contrast choice NLL. Meaningful utility and
     the precision-clamp claim are opposed; the disjoint cohort and neural stage
     remain locked.
-15. Exp25: the real compositional neural endpoint remains active but correctly
+15. Exp41: the outcome-blind matched-Q/R development run separates both Q and
+    R orderings in both equal-marginal pairs (8/8 seeds), but loses to current
+    online-EM and the reduced total-variance controller on overall NLL and at
+    every early transition window. It is a historical mixed/no-go result; no
+    formal seed was accessed and Exp42 remains locked.
+16. Exp25: the real compositional neural endpoint remains active but correctly
     fails closed because an eligible canonical neural bundle is unavailable.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
@@ -97,9 +102,11 @@ prediction on the four registered held-out composition cells. Its additive
 records exact replay checks and post-hoc claim boundaries without changing the
 frozen algorithm, protocol, or result artifacts. The
 [Exp41 matched-identifiability protocol](docs/exp41_matched_identifiability_development_protocol_20260727.md)
-is development-only and must test matched \(Q/R\) alternatives before any new
-confirmation claim. [Exp42](docs/exp42_actuator_factorization_audit_plan_20260727.md)
-remains locked behind an Exp41 go decision.
+was executed only on its disclosed development seeds. The
+[critical result audit](results/history/exp41_matched_qr_development_20260727.md)
+records successful Q/R separation but failed predictive and early-transition
+utility. Its stop rule blocks formal advancement and keeps
+[Exp42](docs/exp42_actuator_factorization_audit_plan_20260727.md) unexecuted.
 
 The [Exp40 historical development audit](results/history/exp40_ibl_factorized_state_development_20260726.md)
 records the synthetic-to-real transfer boundary: better hidden-block decoding
@@ -131,11 +138,13 @@ flowchart LR
     P --> S
 ```
 
-Exp41 tests whether the slow Q/R coordinates are identifiable under matched
-one-step marginals. Exp42 may test actuator matching only after that gate;
-real behavior, neural shared dynamics, and a participating E/I carrier remain
-conditional later stages. Historical-only branches stay in the evidence
-registry rather than the active computation graph.
+Exp41 shows that the slow Q/R coordinates can carry matched-marginal
+information, but also that identifiability alone is insufficient: the tested
+single-timescale estimator adapts too slowly to improve held-out prediction.
+The fast-event/slow-uncertainty architecture therefore remains a hypothesis,
+not a validated method. Exp42, real behavior, neural shared dynamics, and a
+participating E/I carrier remain locked. Historical-only branches stay in the
+evidence registry rather than the active computation graph.
 
 ## What is not currently claimed
 
@@ -173,6 +182,10 @@ registry rather than the active computation graph.
   also finds worse early NLL than seen-mode IMM.
 - Exp39 is wholly synthetic and supplies no behavioral, neural, E/I, or
   biological mechanism validation.
+- Exp41 does not establish a superior factorized controller. Its lagged
+  covariance statistics separate matched Q/R regimes, but aggregate NLL is
+  worse than current online-EM and total variance, early transition costs are
+  larger, functional budgets are unmatched, and the result is development-only.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

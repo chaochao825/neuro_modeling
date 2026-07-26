@@ -4,6 +4,12 @@ Status: **conditionally planned and locked**. Exp42 must not run unless Exp41
 meets its development go criteria and a separate prospective protocol is
 frozen before any Exp42 outcome is observed.
 
+Outcome note (2026-07-27): Exp41 separated matched Q/R regimes but failed the
+required predictive-utility and early-transition gates against total variance
+and current online-EM. Exp42 is therefore **not authorized and was not run**.
+This document is retained as a conditional historical design, not an active
+experiment protocol.
+
 ## Question
 
 Exp39 shows average synthetic prediction benefit but leaves inference and

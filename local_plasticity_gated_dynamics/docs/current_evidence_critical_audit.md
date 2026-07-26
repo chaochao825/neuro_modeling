@@ -31,6 +31,7 @@ prediction across its four registered held-out composition cells.
 | Exp38 Stream-51 soft memory | Joint qualification **oppose**; external utility **inconclusive** | Oracle headroom and switch harm pass, but stable gain passes 2/5 seeds and causal reachability 1/5; external videos remain untouched |
 | Exp39 factor-indexed uncertainty | Average four-cell compositional utility **support**; clean parameter decomposition, uniform cell-wise dominance, and fast release **oppose** | Cell `110` loses on mean NLL; h recovery is weak; Q/R cross-load strongly; `early_nll` includes sequence-initial blocks; synthetic data provide no real behavior or neural evidence |
 | Exp40 IBL factorized-state development | Context decoding **support**; meaningful choice utility **oppose**; confirmation **inconclusive/not run** | Outcome-exposed cohort; 27/30 endpoint-eligible animals; release is inconclusive and precision clamp improves NLL |
+| Exp41 matched-Q/R development | Statistical Q/R separation **support**; predictive and early-transition utility **oppose**; formal confirmation **not run** | Eight development seeds only; autocovariance loses to online-EM and total variance, improves only late, clips Q in 8.65% of steps, and has unmatched functional budgets |
 | Exp25 real compositional panel | **Inconclusive** | Canonical neural inputs are unavailable and the loader correctly fails closed |
 
 Exp31's full-block reward-only advantage over the train-selected fixed actuator
@@ -118,21 +119,32 @@ remains negative. The new disjoint cohort and neural analysis therefore stay
 locked. This is the clearest current example that latent-state decoding does
 not establish downstream actuator utility.
 
+Exp41 then removes the lag-zero Q/R shortcut by matching \(Q+2R\) within two
+regime pairs. The lagged-covariance controller orders both Q and R correctly
+in both pairs in 8/8 development seeds, confirming that the temporal statistic
+contains identifying information. That information does not produce useful
+control: relative to autocovariance, current online-EM has 0.021208 lower NLL
+in 8/8 seeds and the one-coordinate total-variance control has 0.010722 lower
+NLL on average. Total variance also wins at every 1/4/8/16-step transition
+window; autocovariance becomes descriptively better only in the late window
+by 0.016334. Latent MSE does not improve, and Q reaches a clipping bound in
+8.65% of steps. This is a mixed identifiability success and utility failure,
+not a successful factorized controller.
+
 Priority is therefore:
 
 1. preserve Exp39's frozen implementation, settings, tapes, and artifacts;
    enforce its semantic lock and keep confirmatory and post-hoc claims
    separate;
-2. run Exp41 only as a development test of matched-Q/R alternatives,
-   `h + total variance`, tied-Q/R, current online-EM, and autocovariance-based
-   coordinates; do not use reserved formal seeds `41100--41129` before a
-   protocol-only commit/tag;
-3. stop the three-coordinate claim if it cannot add stable held-out utility
-   beyond the reduced-factor controls under matched marginals; only an Exp41
-   go decision can authorize the Exp42 actuator audit;
+2. archive Exp41 as the registered development no-go: preserve its successful
+   matched-Q/R separation and failed predictive/transition utility together;
+   do not access reserved seeds `41100--41129` or retune seeds `41000--41007`;
+3. contract the deployable utility claim to total uncertainty/current online
+   adaptation. Lagged Q/R covariance remains a slow diagnostic state, not a
+   validated actuator;
 4. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
-   extensions locked until the preceding mechanism gate passes and held-out
-   behavior improves;
+   extensions locked. Any future fast-event/slow-uncertainty study requires a
+   materially new prospective contract and untouched data;
 5. retain Exp35--Exp38 as historical failure-boundary evidence: do not retune
    categorical BOCPD on CORe50, reopen Stream-51 external data, or present
    prefix consistency as a positive active method;

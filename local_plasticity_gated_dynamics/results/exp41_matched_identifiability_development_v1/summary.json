@@ -1,0 +1,273 @@
+{
+  "all_methods_paired_on_test_tape": true,
+  "budget_matched": false,
+  "budget_note": "Parameter-update L1/L2/count are measured, but no functional or update budget has yet been matched across adaptive methods.",
+  "claim_eligible": false,
+  "claim_upgrade_allowed": false,
+  "cross_loading_diagonal_dominance_claimed": false,
+  "cross_loading_note": "The matched panel intentionally anticorrelates Q and R within each equal-marginal pair; it tests separation, not a diagonal-dominance cross-loading claim.",
+  "development_go_gate_satisfied": false,
+  "development_only": true,
+  "filter_hazard_floor": 0.0001,
+  "fit_selection_only": true,
+  "generator_hazard": 0.0,
+  "generator_supported_privileged_methods": [
+    "generator_supported_seen_regime_imm",
+    "dynamic_qr_oracle"
+  ],
+  "interpretation": "Post-hoc development diagnostic only; results can motivate a frozen future protocol but cannot modify Exp39 conclusions.",
+  "late_window": 16,
+  "mandatory_diagnostics": {
+    "autocov_factorized": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": 0.016683955570609338,
+      "mean_direct_gamma0_estimate": 0.08891825599380596,
+      "mean_direct_gamma1_absolute_error": 0.009873836672871079,
+      "mean_direct_gamma1_estimate": -0.028695520658366606,
+      "mean_implied_gamma0_bias": -0.0004798693158495969,
+      "mean_implied_gamma1_bias": -0.0002710856883551537,
+      "mean_parameter_saturation_fraction": 0.09228515625,
+      "mean_parameter_update_count": 8184.0,
+      "mean_parameter_update_l1": 13.499602495351471,
+      "mean_parameter_update_l2": 0.19451835911998944,
+      "mean_q_absolute_log_error": 0.8066968279833211,
+      "mean_q_bias": -0.0010220406925599077,
+      "mean_q_clipping_fraction": 0.08648681640625,
+      "mean_r_absolute_log_error": 0.3971791832518946,
+      "mean_r_bias": 0.0002710856883551537,
+      "mean_r_clipping_fraction": 0.00579833984375
+    },
+    "current_online_em": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": null,
+      "mean_direct_gamma0_estimate": null,
+      "mean_direct_gamma1_absolute_error": null,
+      "mean_direct_gamma1_estimate": null,
+      "mean_implied_gamma0_bias": 0.0013648272745980313,
+      "mean_implied_gamma1_bias": -0.0026472597608589166,
+      "mean_parameter_saturation_fraction": 0.0,
+      "mean_parameter_update_count": 8188.0,
+      "mean_parameter_update_l1": 14.092031613109832,
+      "mean_parameter_update_l2": 0.21394259298809842,
+      "mean_q_absolute_log_error": 1.0220689366723206,
+      "mean_q_bias": -0.003929692247119806,
+      "mean_q_clipping_fraction": 0.0,
+      "mean_r_absolute_log_error": 0.6185606367796243,
+      "mean_r_bias": 0.0026472597608589166,
+      "mean_r_clipping_fraction": 0.0
+    },
+    "dynamic_qr_oracle": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": null,
+      "mean_direct_gamma0_estimate": null,
+      "mean_direct_gamma1_absolute_error": null,
+      "mean_direct_gamma1_estimate": null,
+      "mean_implied_gamma0_bias": 3.9898639947466563e-17,
+      "mean_implied_gamma1_bias": -5.204170427930421e-18,
+      "mean_parameter_saturation_fraction": 0.0,
+      "mean_parameter_update_count": 28.0,
+      "mean_parameter_update_l1": 1.87421875,
+      "mean_parameter_update_l2": 0.2963054359152435,
+      "mean_q_absolute_log_error": 0.0,
+      "mean_q_bias": 0.0,
+      "mean_q_clipping_fraction": 0.0,
+      "mean_r_absolute_log_error": 1.1102230246251565e-16,
+      "mean_r_bias": 5.204170427930421e-18,
+      "mean_r_clipping_fraction": 0.0
+    },
+    "generator_supported_seen_regime_imm": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": null,
+      "mean_direct_gamma0_estimate": null,
+      "mean_direct_gamma1_absolute_error": null,
+      "mean_direct_gamma1_estimate": null,
+      "mean_implied_gamma0_bias": 0.00024364546605649582,
+      "mean_implied_gamma1_bias": -8.36890265166852e-05,
+      "mean_parameter_saturation_fraction": 0.0,
+      "mean_parameter_update_count": 8188.0,
+      "mean_parameter_update_l1": 15.745744870669819,
+      "mean_parameter_update_l2": 0.28623550223172217,
+      "mean_q_absolute_log_error": 0.40239716754280463,
+      "mean_q_bias": 7.626741302312206e-05,
+      "mean_q_clipping_fraction": 0.0,
+      "mean_r_absolute_log_error": 0.1649961033928961,
+      "mean_r_bias": 8.36890265166852e-05,
+      "mean_r_clipping_fraction": 0.0
+    },
+    "h_plus_total_variance": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": 0.009651500586627247,
+      "mean_direct_gamma0_estimate": 0.08980387425586754,
+      "mean_direct_gamma1_absolute_error": null,
+      "mean_direct_gamma1_estimate": null,
+      "mean_implied_gamma0_bias": -0.00021578841207092444,
+      "mean_implied_gamma1_bias": 0.003179667201321109,
+      "mean_parameter_saturation_fraction": 0.0,
+      "mean_parameter_update_count": 8184.0,
+      "mean_parameter_update_l1": 10.630935082934572,
+      "mean_parameter_update_l2": 0.13457739034860378,
+      "mean_q_absolute_log_error": 1.2052578925341533,
+      "mean_q_bias": 0.006143545990571289,
+      "mean_q_clipping_fraction": 0.0,
+      "mean_r_absolute_log_error": 0.5266696329307087,
+      "mean_r_bias": -0.003179667201321109,
+      "mean_r_clipping_fraction": 0.0
+    },
+    "selected_fixed_jump": {
+      "invalid_rows": 0,
+      "mean_direct_gamma0_absolute_error": null,
+      "mean_direct_gamma0_estimate": null,
+      "mean_direct_gamma1_absolute_error": null,
+      "mean_direct_gamma1_estimate": null,
+      "mean_implied_gamma0_bias": 0.007499999999999991,
+      "mean_implied_gamma1_bias": -0.00031250000000000114,
+      "mean_parameter_saturation_fraction": 0.0,
+      "mean_parameter_update_count": 0.0,
+      "mean_parameter_update_l1": 0.0,
+      "mean_parameter_update_l2": 0.0,
+      "mean_q_absolute_log_error": 1.213007565979904,
+      "mean_q_bias": 0.006874999999999999,
+      "mean_q_clipping_fraction": 0.0,
+      "mean_r_absolute_log_error": 0.5169133964819483,
+      "mean_r_bias": 0.00031250000000000114,
+      "mean_r_clipping_fraction": 0.0
+    }
+  },
+  "matched_pair_go_diagnostic_method": "autocov_factorized",
+  "matched_pair_separation": {
+    "m06": {
+      "mean_q_separation": 0.02317914276028305,
+      "mean_r_separation": 0.010179762827980686,
+      "n_seeds": 8,
+      "positive_q_separation_seeds": 8,
+      "positive_r_separation_seeds": 8
+    },
+    "m12": {
+      "mean_q_separation": 0.030731997589928485,
+      "mean_r_separation": 0.015604596669502023,
+      "n_seeds": 8,
+      "positive_q_separation_seeds": 8,
+      "positive_r_separation_seeds": 8
+    }
+  },
+  "matched_pair_separation_by_method": {
+    "autocov_factorized": {
+      "m06": {
+        "mean_q_separation": 0.02317914276028305,
+        "mean_r_separation": 0.010179762827980686,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      },
+      "m12": {
+        "mean_q_separation": 0.030731997589928485,
+        "mean_r_separation": 0.015604596669502023,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      }
+    },
+    "current_online_em": {
+      "m06": {
+        "mean_q_separation": 0.006862665163260595,
+        "mean_r_separation": -0.006126198063278154,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 0
+      },
+      "m12": {
+        "mean_q_separation": 0.01431914144834406,
+        "mean_r_separation": -0.005711077362918561,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 1
+      }
+    },
+    "dynamic_qr_oracle": {
+      "m06": {
+        "mean_q_separation": 0.0375,
+        "mean_r_separation": 0.018750000000000003,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      },
+      "m12": {
+        "mean_q_separation": 0.07,
+        "mean_r_separation": 0.03500000000000002,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      }
+    },
+    "generator_supported_seen_regime_imm": {
+      "m06": {
+        "mean_q_separation": 0.03311637938344078,
+        "mean_r_separation": 0.014554536782891918,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      },
+      "m12": {
+        "mean_q_separation": 0.05365388939850696,
+        "mean_r_separation": 0.026201302742183477,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 8,
+        "positive_r_separation_seeds": 8
+      }
+    },
+    "h_plus_total_variance": {
+      "m06": {
+        "mean_q_separation": 0.0010032578984653742,
+        "mean_r_separation": -0.000516205534218503,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 5,
+        "positive_r_separation_seeds": 3
+      },
+      "m12": {
+        "mean_q_separation": 0.00018333570410361934,
+        "mean_r_separation": -3.7384044757348116e-05,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 4,
+        "positive_r_separation_seeds": 4
+      }
+    },
+    "selected_fixed_jump": {
+      "m06": {
+        "mean_q_separation": 0.0,
+        "mean_r_separation": 0.0,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 0,
+        "positive_r_separation_seeds": 0
+      },
+      "m12": {
+        "mean_q_separation": 0.0,
+        "mean_r_separation": 0.0,
+        "n_seeds": 8,
+        "positive_q_separation_seeds": 0,
+        "positive_r_separation_seeds": 0
+      }
+    }
+  },
+  "method_roles": {
+    "autocov_factorized": "deployable_full_qr_covariance",
+    "current_online_em": "deployable_frozen_exp39",
+    "dynamic_qr_oracle": "privileged_dynamic_truth_oracle",
+    "generator_supported_seen_regime_imm": "privileged_generator_supported_regime_modes",
+    "h_plus_total_variance": "deployable_reduced_one_coordinate",
+    "selected_fixed_jump": "deployable_fit_selected"
+  },
+  "n_complete_seeds": 8,
+  "profile": "development_matched_identifiability_probe",
+  "protocol_version": "exp41_matched_identifiability_probe_v1",
+  "statistics_unit": "seed",
+  "tied_qr_equivalence_note": "At H=0 with a fixed Q/R allocation, tied Q/R and h-plus-total-variance are the same one-scalar parameterization; only h_plus_total_variance is executed.",
+  "tied_qr_executed_separately": false,
+  "transition_first_block_excluded": true,
+  "transition_windows": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "verdict": "inconclusive"
+}

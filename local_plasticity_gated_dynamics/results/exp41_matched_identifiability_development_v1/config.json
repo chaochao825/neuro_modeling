@@ -1,0 +1,44 @@
+{
+  "profile": "development_matched_identifiability_probe",
+  "protocol_version": "exp41_matched_identifiability_probe_v1",
+  "claim_upgrade_allowed": false,
+  "seeds": [41000, 41001, 41002, 41003, 41004, 41005, 41006, 41007],
+  "used_autograd": false,
+  "used_bptt": false,
+  "generator_hazard": 0.0,
+  "filter_hazard_floor": 0.0001,
+  "stream": {
+    "block_length": 256,
+    "blocks_per_sequence": 8,
+    "n_sequences": 4,
+    "initial_state_variance": 4.0
+  },
+  "filter": {
+    "initial_process_variance": 0.02,
+    "initial_observation_variance": 0.02,
+    "jump_variance": 4.0,
+    "hazard_adaptation_rate": 0.0,
+    "minimum_continuation_weight": 0.000001
+  },
+  "selection": {
+    "fixed_jump_grid": {
+      "process_variance": [0.0025, 0.01, 0.02, 0.04, 0.08],
+      "observation_variance": [0.01, 0.02, 0.02875, 0.055]
+    },
+    "online_em_process_rate_grid": [0.02, 0.1, 0.2, 0.5],
+    "online_em_observation_rate_grid": [0.02, 0.1, 0.2, 0.5],
+    "autocovariance_decay_grid": [0.95, 0.98, 0.99, 0.995, 1.0],
+    "autocovariance_prior_mass_grid": [1.0, 4.0, 16.0],
+    "total_variance_decay_grid": [0.95, 0.98, 0.99, 0.995, 1.0],
+    "total_variance_prior_mass_grid": [1.0, 4.0, 16.0],
+    "total_variance_q_fraction_grid": [0.041666666666666664, 0.08333333333333333, 0.25, 0.5, 0.6666666666666666, 0.9],
+    "imm_switch_grid": [0.001, 0.005, 0.01, 0.02, 0.05]
+  },
+  "analysis": {
+    "transition_windows": [1, 4, 8, 16],
+    "late_window": 16,
+    "bootstrap_samples": 10000,
+    "statistics_seed": 41041,
+    "primary_method": "autocov_factorized"
+  }
+}

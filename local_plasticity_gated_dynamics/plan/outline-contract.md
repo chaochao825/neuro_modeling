@@ -22,8 +22,10 @@ post-switch endpoint; the transition-only panel is post-hoc.
 
 Identifiability, real behavior, neural decoding, and E/I interpretation are
 not active positive sections. Exp40's exposed-cohort behavioral utility gate
-failed. Exp41 is a development-only matched-Q/R test; Exp42, a new IBL cohort,
-and all neural claims remain conditional on its go decision.
+failed. Exp41 is now a historical mixed development result: matched-Q/R
+ordering succeeds, but predictive utility beyond online-EM/total variance and
+early-transition adaptation fail. Reserved formal seeds were not accessed.
+Exp42, a new IBL cohort, and all neural claims remain locked.
 
 ## Active Exp39 contribution wording allowed today
 
@@ -46,6 +48,13 @@ and all neural claims remain conditional on its go decision.
 - faster change-point release or superior early post-switch adaptation;
 - behavioral, neural, E/I, or biological validation;
 - a general Actuator Matching result or state-of-the-art claim.
+
+Exp41 may appear only as a limitation/audit subsection. Allowed wording is
+that lagged covariance contains matched-Q/R identifying information; required
+counterevidence is its worse overall and early-transition NLL, lack of latent
+MSE improvement, Q clipping, unmatched budgets, and development-only scope.
+It cannot be used to upgrade the Exp39 mechanism claim or motivate Exp42 as an
+executed follow-up.
 
 The Exp35--Exp38 consistency/change-aware/soft-retention line is historical and
 belongs in `results/history/adaptive_memory_exp35_exp38_20260726.md` or an

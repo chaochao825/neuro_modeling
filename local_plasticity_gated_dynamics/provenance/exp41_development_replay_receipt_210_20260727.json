@@ -1,0 +1,28 @@
+{
+  "aggregate_shard_identity": "passed",
+  "artifact_hash_check": "passed",
+  "audit_status": "passed",
+  "budget_matched": false,
+  "claim_eligible": false,
+  "development_only": true,
+  "methods": [
+    "selected_fixed_jump",
+    "current_online_em",
+    "h_plus_total_variance",
+    "autocov_factorized",
+    "generator_supported_seen_regime_imm",
+    "dynamic_qr_oracle"
+  ],
+  "n_block_rows": 1536,
+  "n_seeds": 8,
+  "n_selection_rows": 1176,
+  "protocol_version": "exp41_matched_identifiability_probe_v1",
+  "run_start_clean": true,
+  "run_start_commit": "0f9fbc861cc21799752daa4706c8a05eb7e1128d",
+  "selection_argmin_replay": "passed",
+  "source_commit_check": "passed",
+  "statistics_unit": "seed",
+  "summary_replay_check": "passed",
+  "tape_replay_check": "passed",
+  "verdict": "inconclusive"
+}

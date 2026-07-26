@@ -44,8 +44,10 @@ allocation:
 | low | (0.0400, 0.0100) | (0.0025, 0.02875) | 0.0600 |
 | high | (0.0800, 0.0200) | (0.0100, 0.05500) | 0.1200 |
 
-The main matched panel fixes hazard to zero. Hazard recovery and Q/R recovery
-must not be conflated in this diagnostic.
+The main matched panel fixes the latent-state jump hazard to zero while Q/R
+regimes still change at registered block boundaries. Thus `H=0` means “no
+state-reset jump component,” not “stationary observation statistics.” Hazard
+recovery and Q/R-regime recovery must not be conflated in this diagnostic.
 
 ## Causal information boundary
 
@@ -55,9 +57,12 @@ future observations, test labels, or oracle change flags. Generator labels are
 available only to oracle baselines and post-run recovery metrics.
 
 All methods within a seed share the same fit tape, test tape, block order,
-observations, initialization, and numerical precision. Hyperparameters and any
-fixed Q/R allocation are selected on the fit tape only. Test blocks are never
-used for selection, normalization, clipping-bound estimation, or early stopping.
+observations, state prior, hazard floor, jump variance, and numerical precision.
+Their Q/R parameterization is method-specific by construction: deployable
+hyperparameters and any fixed Q/R allocation are selected on the fit tape only,
+whereas the two explicitly privileged references use generator-supported Q/R.
+Test blocks are never used for selection, normalization, clipping-bound
+estimation, or early stopping.
 
 ## Development method panel
 
@@ -110,9 +115,16 @@ used to claim a diagonal loading matrix.
 
 The current development implementation records parameter-update count and
 cumulative L1/L2 movement but does **not** yet match those budgets across
-adaptive methods. It must therefore emit `budget_matched=false`, keep the
-verdict inconclusive, and cannot satisfy the development go gate regardless of
-descriptive performance.
+adaptive methods. These are trace-level Q/R/h movements; for mixture models
+they summarize effective parameters rather than internal mode-state updates,
+so they are not themselves a common functional budget. The run must therefore
+emit `budget_matched=false`, keep the verdict inconclusive, and cannot satisfy
+the development go gate regardless of descriptive performance.
+
+`scripts/validate_exp41_development_result.py` independently checks artifact
+and run-start source hashes, exact seed/aggregate identity, regenerated fit and
+test tape digests, fit-only selection argmins, paired method coverage, and full
+summary replay. Its default mode rejects a dirty run-start Git snapshot.
 
 ## Development seeds and formal lock
 
@@ -151,3 +163,23 @@ obtain its aggregate gain solely from one cell or the late window. Otherwise:
   identify useful actuator specialization and Exp42 stops.
 
 These development outcomes guide protocol design but are not paper evidence.
+
+## Outcome and stop decision (added after execution)
+
+The protocol was frozen at commit
+`0f9fbc861cc21799752daa4706c8a05eb7e1128d` before the result existed. The
+eight disclosed development seeds completed with no failures; reserved formal
+seeds `41100--41129` were not accessed. The independent replay audit passed.
+
+The autocovariance controller correctly separates Q and R in both matched
+pairs in 8/8 seeds. It nevertheless loses on aggregate NLL to current
+online-EM by 0.021208 nats and to `h_plus_total_variance` by 0.010722 nats.
+It is worse than total variance at all 1/4/8/16-step transition endpoints and
+becomes descriptively better only in the late window (+0.016334 nats).
+
+The registered development entry gate therefore fails. Exp41 does not advance
+to a formal freeze, its development seeds must not be retuned, and Exp42 stays
+unexecuted under the plan above. The complete interpretation and machine-bound
+decision are retained in
+`results/history/exp41_matched_qr_development_20260727.md` and
+`provenance/exp41_development_decision_20260727.json`.

@@ -4,9 +4,9 @@
 
 **Compositional Online Filtering from Isolated Uncertainty Regimes**
 
-This is a bounded synthetic successor result plus a development-only
-identifiability question. `Actuator Matching Principle` remains a broader
-programme and is not an established contribution.
+This is a bounded synthetic successor result plus a completed negative
+development audit. `Actuator Matching Principle` remains a broader programme
+and is not an established contribution.
 
 ## Paper question
 
@@ -63,11 +63,12 @@ The active sequence is gated:
    triple compositions;
 3. Exp40 shows that better state decoding on the exposed IBL development
    cohort does not yield held-out behavioral utility; it cannot confirm Exp39;
-4. Exp41 first tests matched Q/R alternatives and reduced-factor controls in
-   development only. Reserved formal seeds remain untouched until a
-   protocol-only commit/tag freezes the full contract;
-5. a new outcome-blind IBL cohort, neural decoding, and E/I interpretation all
-   remain locked behind the Exp41/Exp42 gates and a held-out behavioral gain.
+4. Exp41 separates matched Q/R alternatives in 8/8 development seeds, but its
+   autocovariance controller loses overall to current online-EM and the
+   reduced total-variance control and is worse at every early transition
+   window. Reserved formal seeds remain untouched and the formal stage stops;
+5. Exp42, a new outcome-blind IBL cohort, neural decoding, and E/I
+   interpretation remain locked because the Exp41 utility gate failed.
 
 ## Active hypothesis and stop rule
 
@@ -83,11 +84,13 @@ directional forgetting are not claimed novel. The only eligible contribution
 is a tightly constrained causal-state comparison under matched data and strong
 baselines. A privileged eight-mode IMM and a time-varying oracle are reported
 as upper bounds and are not targets to beat. Exp39 cleared only its frozen
-**aggregate** synthetic gate. The next stop rule is mechanistic: a full
-factor-indexed controller must add stable held-out utility beyond matched
-`h + total variance` and tied-Q/R alternatives before Exp42 or a new IBL
-confirmation study is eligible. Exact formal MCIDs must be frozen in a
-protocol-only commit/tag before reserved seeds `41100--41129` are generated.
+**aggregate** synthetic gate. Exp41 then triggered the mechanistic stop rule:
+statistical Q/R separation did not add stable held-out utility beyond
+`h + total variance`, and transition behavior worsened. The tested full
+controller is therefore historical; Exp42 and reserved seeds `41100--41129`
+are not authorized. A future fast-event/slow-uncertainty study would require a
+materially new protocol, untouched development data, frozen MCIDs, and matched
+functional budgets.
 
 ## Archived Exp35 paper contract (historical, not current)
 

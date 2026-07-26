@@ -1,0 +1,44 @@
+{
+  "budget_matched": false,
+  "claim_upgrade_allowed": false,
+  "development_only": true,
+  "filter_hazard_floor": 0.0001,
+  "generator_hazard": 0.0,
+  "generator_supported_privileged_methods": [
+    "generator_supported_seen_regime_imm",
+    "dynamic_qr_oracle"
+  ],
+  "late_window": 16,
+  "methods": [
+    "selected_fixed_jump",
+    "current_online_em",
+    "h_plus_total_variance",
+    "autocov_factorized",
+    "generator_supported_seen_regime_imm",
+    "dynamic_qr_oracle"
+  ],
+  "regimes": [
+    "m06_q_dominant",
+    "m06_r_dominant",
+    "m12_q_dominant",
+    "m12_r_dominant"
+  ],
+  "seeds": [
+    41000,
+    41001,
+    41002,
+    41003,
+    41004,
+    41005,
+    41006,
+    41007
+  ],
+  "tied_qr_equivalent_to": "h_plus_total_variance",
+  "tied_qr_executed_separately": false,
+  "transition_windows": [
+    1,
+    4,
+    8,
+    16
+  ]
+}

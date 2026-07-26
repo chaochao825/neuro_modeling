@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "experiment": "exp41_matched_identifiability",
+  "protocol_version": "exp41_matched_identifiability_probe_v1",
+  "decision_date": "2026-07-27",
+  "evidence_scope": "outcome_exposed_development_only",
+  "claim_eligible": false,
+  "verdict": "mixed",
+  "run_start_commit": "0f9fbc861cc21799752daa4706c8a05eb7e1128d",
+  "run_start_tag": "exp41-dev-v1-preoutcome-20260727",
+  "result_relative_path": "results/exp41_matched_identifiability_development_v1",
+  "result_hashes": {
+    "manifest.json": "a8d9cf80eba53852b920ce3e62d5b3bc3d8f9baacd12b0b9f55b9c60cf48ddf5",
+    "summary.json": "4cd8ff495400787eb629f83ae94c764e810392680b4188a310c5333aa67fa159",
+    "comparisons.csv": "6c72751f5c1cd7bfd93730b1b76173943d28270e623335b4edfef9e7182dd9c5",
+    "block_metrics.csv": "f1a4ce57d7bbfba726af9091265d464573649ee62c910c7a47bccd57eba46cdd"
+  },
+  "replay_receipt": {
+    "path": "provenance/exp41_development_replay_receipt_210_20260727.json",
+    "sha256": "535fa7f532d744933b0a1a5f7045be208bb99a9a1e41cff64ff3e1f39fc5d8e9",
+    "audit_status": "passed"
+  },
+  "execution": {
+    "planned_seeds": 8,
+    "complete_seeds": 8,
+    "failed_seeds": 0,
+    "statistics_unit": "seed",
+    "reserved_formal_seeds_accessed": false,
+    "fit_selection_only": true,
+    "all_methods_paired_on_test_tape": true,
+    "budget_matched": false
+  },
+  "descriptive_endpoints": {
+    "nll_gain_baseline_minus_autocov": {
+      "selected_fixed_jump": {
+        "mean": 0.003886096879860832,
+        "positive_seeds": 4,
+        "ci95": [-0.006687, 0.013813]
+      },
+      "current_online_em": {
+        "mean": -0.02120780631208279,
+        "positive_seeds": 0,
+        "ci95": [-0.031299, -0.012281]
+      },
+      "h_plus_total_variance": {
+        "mean": -0.010722277767784522,
+        "positive_seeds": 3,
+        "ci95": [-0.020269, -0.002166]
+      },
+      "generator_supported_seen_regime_imm": {
+        "mean": -0.0595577468081899,
+        "positive_seeds": 0,
+        "ci95": [-0.070179, -0.050039]
+      },
+      "dynamic_qr_oracle": {
+        "mean": -0.07484609957815251,
+        "positive_seeds": 0,
+        "ci95": [-0.085627, -0.065526]
+      }
+    },
+    "total_variance_minus_autocov_transition_nll": {
+      "step_1": -0.0428432405984286,
+      "step_4": -0.07789015369934711,
+      "step_8": -0.09083775194699346,
+      "step_16": -0.13610812488279925,
+      "late": 0.016334077811905552
+    },
+    "autocov_matched_pair_separation": {
+      "m06": {
+        "q_separation": 0.02317914276028305,
+        "q_fraction_of_true_difference": 0.618110473607548,
+        "q_positive_seeds": 8,
+        "r_separation": 0.010179762827980686,
+        "r_fraction_of_true_difference": 0.5429206841589699,
+        "r_positive_seeds": 8
+      },
+      "m12": {
+        "q_separation": 0.030731997589928485,
+        "q_fraction_of_true_difference": 0.43902853699897836,
+        "q_positive_seeds": 8,
+        "r_separation": 0.015604596669502023,
+        "r_fraction_of_true_difference": 0.4458456191286292,
+        "r_positive_seeds": 8
+      }
+    },
+    "autocov_diagnostics": {
+      "mean_q_absolute_log_error": 0.8066968279833211,
+      "mean_r_absolute_log_error": 0.3971791832518946,
+      "mean_q_clipping_fraction": 0.08648681640625,
+      "mean_r_clipping_fraction": 0.00579833984375,
+      "mean_parameter_saturation_fraction": 0.09228515625,
+      "invalid_rows": 0
+    }
+  },
+  "claim_classification": [
+    {
+      "claim_id": "matched_qr_statistical_discrimination",
+      "conclusion": "support",
+      "reason": "Both Q and R orderings are correct in both equal-marginal pairs in 8/8 development seeds."
+    },
+    {
+      "claim_id": "predictive_utility_beyond_total_variance",
+      "conclusion": "oppose",
+      "reason": "Total-variance minus autocov NLL is -0.010722 and positive in only 3/8 seeds."
+    },
+    {
+      "claim_id": "predictive_utility_beyond_current_online_em",
+      "conclusion": "oppose",
+      "reason": "Current-online-EM minus autocov NLL is -0.021208 and negative in 8/8 seeds."
+    },
+    {
+      "claim_id": "fast_post_transition_adaptation",
+      "conclusion": "oppose",
+      "reason": "Autocov loses to total variance at every registered 1/4/8/16-step transition endpoint."
+    },
+    {
+      "claim_id": "late_regime_adaptation",
+      "conclusion": "inconclusive",
+      "reason": "Late NLL is descriptively better than total variance by 0.016334 in 6/8 seeds, but budgets are unmatched and no formal MCID was frozen."
+    },
+    {
+      "claim_id": "real_behavior_or_neural_utility",
+      "conclusion": "inconclusive",
+      "reason": "Exp41 contains no real behavior or neural data."
+    }
+  ],
+  "stop_decision": {
+    "advance_exp41_to_formal": false,
+    "execute_exp42_under_current_entry_gate": false,
+    "retune_on_development_seeds": false,
+    "reason": "The deployable autocovariance controller separates matched Q/R regimes but does not beat the reduced total-variance control, is worse than current online-EM, and has transition-window harm."
+  },
+  "allowed_interpretation": "Lagged covariance supplies genuine Q/R-identifying information, but the current single-timescale local estimator converts it into slow late-regime tracking rather than held-out predictive utility.",
+  "prohibited_interpretation": "Exp41 does not support a superior factorized controller, fast release, matched-budget efficiency, general nonstationary robustness, or real behavioral/neural utility."
+}

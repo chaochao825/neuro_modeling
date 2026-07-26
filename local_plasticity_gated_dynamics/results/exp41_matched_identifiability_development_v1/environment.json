@@ -1,0 +1,16 @@
+{
+  "development_run_environment": true,
+  "executable": "/home/spco/sow_linear/.venvs/neuro_modeling_311/bin/python",
+  "git": {
+    "commit": "0f9fbc861cc21799752daa4706c8a05eb7e1128d",
+    "dirty": false,
+    "tree": "2261f5eb7bcea5a0c0466995503337fe6ae85379"
+  },
+  "packages": {
+    "numpy": "2.3.5",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1"
+  },
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]"
+}
