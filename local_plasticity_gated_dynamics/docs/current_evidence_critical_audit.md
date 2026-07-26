@@ -27,6 +27,8 @@ negative title claim; Exp34 is now historical motivation.
 | Exp36 ORBIT-India change-aware prefix | **Inconclusive**, historical schema failure | Only 4/12 collectors instantiate every frozen task; the audit was outcome-blind and did not analyze the surviving subset |
 | Exp37 CORe50 change-aware prefix | **Oppose**, prospective controller stop result | Hard-reset BOCPD never alarms and trails selected forgetting by 53.29 points; post-hoc analysis shows the frozen score/threshold scales were mismatched |
 | Exp38 Stream-51 soft memory | Joint qualification **oppose**; external utility **inconclusive** | Oracle headroom and switch harm pass, but stable gain passes 2/5 seeds and causal reachability 1/5; external videos remain untouched |
+| Exp39 factorized uncertainty | Aggregate compositional utility **support**; parameter recovery and fast switching **oppose** | Synthetic factors are independently manipulated; h/Q recovery is weak and one held-out cell loses to the seen-mode IMM |
+| Exp40 IBL factorized-state development | Context decoding **support**; meaningful choice utility **oppose**; confirmation **inconclusive/not run** | Outcome-exposed cohort; 27/30 endpoint-eligible animals; release is inconclusive and precision clamp improves NLL |
 | Exp25 real compositional panel | **Inconclusive** | Canonical neural inputs are unavailable and the loader correctly fails closed |
 
 Exp31's full-block reward-only advantage over the train-selected fixed actuator
@@ -84,6 +86,25 @@ the external MCID. The all-seed gate therefore fails 0/5. This opposes the
 registered readiness claim, leaves the external utility claim inconclusive,
 and prevents any access to the 381 external videos.
 
+Exp39 repairs the synthetic identifiability problem by orthogonally controlling
+jump hazard, process variance, and observation variance. Its factorized local
+controller improves unseen-composition predictive NLL over both the selected
+fixed filter (+0.290580) and the four seen-mode IMM (+0.048008) in 30/30 seeds.
+That support is functional, not parametric: h/Q/R log correlations are only
+0.089/0.312/0.868, immediate post-switch NLL is worse than the IMM, and one
+held-out composition loses.
+
+Exp40 then tests the only identifiable IBL analogue on the already exposed
+30-animal behavior cohort: prior mean, posterior recent-change probability, and
+run-length concentration. Semi-Markov structure improves block-context NLL by
+0.071391 nats/trial [0.049444, 0.095949], but dev-selected baseline minus
+factorized low-contrast choice NLL is -0.010723 [-0.022459, 0.001010], positive
+in only 9/27 endpoint-eligible animals. The 0.005 utility claim and precision
+clamp are opposed; release is inconclusive. A bounded readout-variance probe
+remains negative. The new disjoint cohort and neural analysis therefore stay
+locked. This is the clearest current example that latent-state decoding does
+not establish downstream actuator utility.
+
 Priority is therefore:
 
 1. write the complete negative mechanism audit and retain Exp34 as motivating
@@ -96,7 +117,10 @@ Priority is therefore:
 4. retain simple forgetting/current-frame evidence as the real-task reference,
    rather than treating explicit change detection as automatically superior;
 5. treat participating E/I and multi-session neural validation as separate
-   paper contracts.
+   paper contracts;
+6. do not scale Exp40 to new IBL animals or neural activity unless a distinct,
+   independently identifiable task first passes a held-out behavioral-utility
+   development gate.
 
 Increasing carrier neuron count while the carrier does no computation has no
 scientific value. Likewise, quoting independently trained leaderboard numbers

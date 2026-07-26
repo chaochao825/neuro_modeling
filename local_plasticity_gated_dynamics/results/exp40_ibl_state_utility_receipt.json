@@ -1,0 +1,33 @@
+{
+  "complete_endpoint_animals": 27,
+  "development_gate": "failed",
+  "experiment": "exp40_ibl_state_utility",
+  "neural_analysis_unlocked": false,
+  "new_disjoint_cohort_frozen": false,
+  "new_disjoint_cohort_outcomes_opened": false,
+  "planned_animals": 30,
+  "primary": {
+    "condition_failures": 21,
+    "config_sha256": "5a1e0e37a193807d8d458c9787ba5c573511829f98ceb3c97d2ec9763d41e391",
+    "metrics_rows": 210,
+    "metrics_sha256": "2404bb4ff6ac09d85a80389d0913b8e10f014b8c84ca7067d0e39f22e3cbaea4",
+    "planned_conditions_sha256": "2cfc6cb1fdd9017ff3ea10984efc9fb55e3afc85f1526d059d2638ab50566ed0",
+    "profile": "development_posthoc_exposed_cohort",
+    "run_name": "20260726T152019.701984Z",
+    "run_path": "results/runs/exp40_ibl_state_utility/seed_0000/20260726T152019.701984Z",
+    "status": "complete_with_failures"
+  },
+  "probe": {
+    "condition_failures": 21,
+    "config_sha256": "fe2487b20aa2fad0e6ff36bc0eed8dc7662d3fce055e24005744da2e191a524f",
+    "metrics_rows": 210,
+    "metrics_sha256": "68f0ecd4dd23bb8eb9fb4452d1f9f55cf9654cf48a057e14b163ce4e04cb27ec",
+    "planned_conditions_sha256": "2cfc6cb1fdd9017ff3ea10984efc9fb55e3afc85f1526d059d2638ab50566ed0",
+    "profile": "development_posthoc_assay_probe",
+    "run_name": "20260726T153200.935487Z",
+    "run_path": "results/runs/exp40_ibl_state_utility/seed_0000/20260726T153200.935487Z",
+    "status": "complete_with_failures"
+  },
+  "schema_version": "1.0",
+  "selection_policy": "latest_attempt_with_exact_profile_including_failures"
+}

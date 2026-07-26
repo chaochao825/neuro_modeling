@@ -397,12 +397,35 @@ summary replay, and SHA-256 manifests. The canonical report is
 `results/exp39_factorized_uncertainty_prospective_v1/report.md`; bounded
 post-outcome interpretation is in its `critical_analysis.md` companion.
 
-## Real-data gate after Exp39
+## Exp40 post-hoc IBL state-utility audit
 
-Exp39 makes a new real-data attempt eligible but does not itself validate one.
-The existing 30-session IBL cohort is outcome-exposed and cannot be relabeled
-as confirmatory. Its earlier categorical HMM improved context NLL without
-improving held-out behavioral log loss. A successor real-data experiment is
-therefore **inconclusive/not yet run** and must freeze a disjoint animal/session
-cohort, keep preprocessing inside training folds, and require held-out choice
-or reaction-time utility before any neural-mechanism analysis is unlocked.
+Exp40 used the existing outcome-exposed 30-session/30-animal IBL cohort only as
+a development gate. It did not port the synthetic \((h,Q,R)\) labels literally:
+IBL does not independently manipulate a time-varying sensory-noise parameter.
+Instead, a task-structured causal observer exposed prior log odds, posterior
+recent-change probability, and run-length concentration. It received only past
+stimulus sides; `probabilityLeft` remained evaluation-only. Whole blocks were
+split chronologically, and every scaler/readout was fitted inside train/dev.
+
+All 210 planned cells were retained. Twenty-seven animals formed a complete
+seven-condition endpoint panel; three failed every condition symmetrically
+because their test folds contained fewer than eight low-contrast choices. The
+semi-Markov state improved context NLL over the learned HMM by +0.071391
+nats/trial [0.049444, 0.095949], so structured block decoding is **support** at
+the post-hoc development tier.
+
+That decoding gain did not produce behavioral utility. Dev-selected baseline
+minus factorized-state low-contrast NLL was -0.010723 [-0.022459, 0.001010],
+positive in 9/27 animals. Any positive gain is **inconclusive**, while the
+0.005-nat meaningful-utility claim is **oppose** after Holm correction. Release
+clamp harm was +0.001786 [-0.004956, 0.009137] (**inconclusive**); precision
+clamp harm was -0.005114 [-0.009175, -0.001242] (**oppose**).
+
+A single result-revealed assay probe selected regularization on all dev trials
+and reduced readout variance, but its factorized gain remained negative
+(-0.003617). It cannot replace the registered development result. The disjoint
+IBL cohort was therefore neither frozen nor opened, and neural analysis remains
+locked. Confirmatory real-data evidence is **inconclusive/not run**. The report,
+animal effects, failure rows, figure, and run hashes are preserved under
+`results/exp40_ibl_state_utility_*`; the full lineage record is
+`results/history/exp40_ibl_factorized_state_development_20260726.md`.

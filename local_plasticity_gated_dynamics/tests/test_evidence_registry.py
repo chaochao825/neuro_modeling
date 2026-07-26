@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
     rows = load_registry(PROJECT_ROOT)
     assert [row["experiment_id"] for row in rows] == [
-        f"exp{index:02d}" for index in range(40)
+        f"exp{index:02d}" for index in range(41)
     ]
     current = {
         row["experiment_id"]
@@ -29,7 +29,7 @@ def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
         row["experiment_id"] for row in rows if row["disposition"] == "historical_only"
     }
     assert current.isdisjoint(history)
-    assert current | history == {f"exp{index:02d}" for index in range(40)}
+    assert current | history == {f"exp{index:02d}" for index in range(41)}
 
 
 def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
@@ -53,6 +53,7 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp36",
         "exp37",
         "exp38",
+        "exp40",
     ):
         assert dispositions[experiment_id] == "historical_only"
     for experiment_id in (

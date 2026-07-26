@@ -27,7 +27,7 @@ The repository has two exhaustive and mutually exclusive result views:
   positive, negative, failed, and inconclusive rows.
 
 The [experiment registry](provenance/experiment_registry.csv) classifies every
-entry point from Exp00 through Exp38. The [branch audit](docs/branch_consolidation.md)
+entry point from Exp00 through Exp40. The [branch audit](docs/branch_consolidation.md)
 shows that all other remote branches were already ancestors of the audited
 base, so no implementation commit was missing. Hash-bound snapshots preserve
 their prior README/report/summary surfaces.
@@ -67,8 +67,16 @@ The current evidence chain is:
    joint readiness gate (0/5 seeds). Oracle headroom and cumulative switch harm
    hold, but causal reachability is not robust; external data remain untouched
    and the main utility claim is inconclusive.
-13. Exp25: the real compositional neural endpoint remains active but correctly
-   fails closed because an eligible canonical neural bundle is unavailable.
+13. Exp39: a frozen synthetic factorial task supports functional composition
+    of separate uncertainty states over fixed and seen-mode comparators, while
+    parameter recovery and faster switching are opposed.
+14. Exp40: on the outcome-exposed 30-animal IBL development cohort, structured
+    semi-Markov state improves block-context NLL but the three-state controller
+    does not improve held-out low-contrast choice NLL. Meaningful utility and
+    the precision-clamp claim are opposed; the disjoint cohort and neural stage
+    remain locked.
+15. Exp25: the real compositional neural endpoint remains active but correctly
+    fails closed because an eligible canonical neural bundle is unavailable.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
 [current critical audit](docs/current_evidence_critical_audit.md) for effect
@@ -82,6 +90,11 @@ Personalized Recognition*. Exp37 and Exp38 are prospective follow-up stop
 results, not positive method extensions: the former identifies an unreachable
 frozen BOCPD threshold grid, while the latter fails robust causal reachability
 before external access.
+
+The [Exp40 historical development audit](results/history/exp40_ibl_factorized_state_development_20260726.md)
+records the synthetic-to-real transfer boundary: better hidden-block decoding
+did not yield held-out behavioral utility, so no new IBL cohort or neural data
+were opened.
 
 The [Exp00--Exp35 diagnostic lineage](docs/experiment_lineage_diagnostic_audit_20260726.md)
 separates theory errors from identification, method, and data failures. The
@@ -118,6 +131,9 @@ the evidence registry rather than mixed into the active computation graph.
   opposes the registered categorical-BOCPD hard reset on CORe50; the maximum
   development change posterior (0.00853) never approached the minimum frozen
   threshold (0.2), and that post-hoc diagnosis cannot rescue the verdict.
+- Exp40's improved block-context NLL does not establish a useful release or
+  precision actuator. Its outcome-exposed behavioral gate failed, and no
+  disjoint IBL or neural result is claimed.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

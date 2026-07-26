@@ -1,0 +1,34 @@
+{
+  "profile": "smoke",
+  "seeds": [0],
+  "sessions": [],
+  "split": {
+    "test_fraction": 0.2,
+    "validation_fraction": 0.2,
+    "min_blocks": 5
+  },
+  "learned_hmm": {
+    "max_iter": 30,
+    "tolerance": 1e-5,
+    "pseudocount": 0.1,
+    "n_restarts": 1,
+    "min_emission_gap": 0.1,
+    "restart_selection_policy": "likelihood_only"
+  },
+  "run_length_candidates": [
+    {"min_run": 20, "max_run": 100, "hazard_scale": 30.0}
+  ],
+  "run_length_observer": {
+    "burn_in_trials": 90,
+    "release_window": 5,
+    "emission_left": [0.2, 0.8]
+  },
+  "choice_readout": {
+    "c_grid": [0.1, 1.0],
+    "low_contrast_threshold": 0.0625,
+    "min_dev_low_contrast_trials": 8,
+    "min_test_low_contrast_trials": 8,
+    "max_iter": 500
+  },
+  "primary_baseline_condition": "dev_best"
+}

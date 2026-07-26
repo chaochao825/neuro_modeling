@@ -8,16 +8,14 @@ list of current methods. The authoritative machine-readable status is
 
 - Foundations: Exp08, Exp09, Exp10, Exp11, and Exp21.
 - Core Actuator Matching evidence: Exp24, Exp26, Exp29, Exp31, Exp32, and
-  corrected Exp34.
+  Exp39.
 - Open fail-closed endpoint: Exp25 for real neural population dynamics.
-
-Exp34 has a mixed global conclusion. Its corrected 17-user task and
-causal-state contrasts support, but a prior incomplete test exposure prevents
-a strict untouched-first-look claim; full-bank execution also provides no
-efficiency evidence. Both invalid precursor attempts remain retained.
 
 Exp32 has a mixed conclusion: its bounded main controller endpoint supports,
 but the registered joint timescale phase claim is inconclusive.
+
+Exp39 supports functional generalization across unseen synthetic uncertainty
+compositions. It does not support calibrated h/Q recovery or faster switching.
 
 ## Historical only
 
@@ -27,9 +25,12 @@ but the registered joint timescale phase claim is inconclusive.
 - Superseded belief/E-I and controller stages: Exp19, Exp20, Exp22, and Exp23.
 - Selector/associative development panels replaced by formal confirmation:
   Exp27, Exp28, and Exp30.
-- The Exp33 ORBIT reward-only cross-user selector failed its registered
-  development gate and is superseded by the narrower Exp34 causal-consensus
-  probe.
+- Exp33--Exp38 retain the complete ORBIT/CORe50/Stream-51 reliability and
+  adaptive-memory lineage, including failed prospective gates and untouched
+  external endpoints.
+- Exp40 is an outcome-exposed IBL development audit. Structured context
+  decoding improves, but meaningful held-out choice utility is opposed; the
+  disjoint cohort and neural stage remain locked.
 
 Historical scripts and artifacts must not be cited as current evidence. Their
 original conclusions, including positive results and failed attempts, are

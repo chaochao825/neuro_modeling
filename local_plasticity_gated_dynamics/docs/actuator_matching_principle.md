@@ -49,17 +49,20 @@ fixed actuator; low matrix rank alone is not evidence.
 | Reward belief persists in a continuous hidden stream | Exp32 main cell; local-minus-fixed +0.0435, 95% CI [0.0345, 0.0529] | support for the bounded slow-switch endpoint |
 | Performance follows the registered feedback-memory timescale structure | Exp32 iso-lambda effect +0.0119, below the 0.02 MCID | inconclusive; the Exp32 joint claim is not promoted |
 | Reward-only motif selection improves real personalized video recognition | Exp33 had 0.106 oracle headroom but local-minus-fixed was -0.0316 across three development seeds | inconclusive and superseded; the bounded reward-only transfer failed |
-| Label-free causal consensus selects motifs for unseen-user video | Corrected Exp34 formal: +0.0293 over validation-fixed, +0.0157 over memoryless, +0.0253 over majority, and +0.0066 over delayed across 17 users; all four Holm-adjusted p<=0.0255 | support for the corrected bounded task/causal-state claim; untouched prospective replication remains inconclusive |
+| Label-free causal consensus selects motifs for unseen-user video | Exp34 was positive against weak controls, but Exp35 equal prefix probability reached 0.8190 versus 0.7592 for consistency | oppose after the stronger same-tape audit; Exp34 is historical motivation |
+| Change-aware retention improves real streaming recognition | Exp37 hard reset trails fixed forgetting by 0.5329; Exp38 joint qualification passes 0/5 seeds | oppose for the registered controllers; Exp38 external endpoint remains untouched |
+| Factorized uncertainty states compose beyond seen modes | Exp39 improves NLL over selected fixed by 0.290580 and over seen-mode IMM by 0.048008 in 30/30 seeds | support for synthetic functional composition; parameter recovery and fast switching are opposed |
+| Factorized state improves real hidden-block behavior | Exp40 semi-Markov context NLL gain is +0.071391, but choice-NLL gain is -0.010723 and meaningful utility is opposed | decoding support does not transfer to actuator utility; new IBL and neural stages are locked |
 | Participating E/I carrier improves Exp31/32 behavior | Exp31/32 use fixed motifs without a participating E/I carrier | inconclusive / untested |
 | Shared model wins on multi-animal neural data | Exp25 fails closed because eligible canonical neural inputs are absent | inconclusive / open |
 
 The full Actuator Matching Principle is therefore **partially supported but
 formally inconclusive**. Synthetic family matching, bounded reward-only
-control, and corrected real-video causal actuator selection support. The Exp34
-official-style accuracy (67.43%) is not a SOTA result, its full bank has no
-efficiency advantage, and the invalid earlier formal attempt prevents a claim
-of untouched prospective replication. Carrier participation, broad motif
-reuse, and real neural generalization remain unverified.
+control, and Exp39 uncertainty composition support narrow computational
+claims. Stronger real-video controls overturn the Exp34 routing interpretation,
+and Exp40 shows that improved hidden-context decoding need not improve held-out
+behavior. Carrier participation, broad motif reuse, and real neural
+generalization remain unverified.
 
 ## Evidence boundary
 
@@ -86,10 +89,12 @@ hash-bound and auditable.
   than calibrated context posteriors; its opposite-credit intervention is not
   update-budget matched.
 - Exp31/32 do not contain a participating high-rank E/I carrier.
-- Exp34 uses a deterministic count-belief rule specific to one-object videos;
-  it is not a reward-learned controller and evaluates all four actuators.
-- Exp34's corrected result reuses a public test split after a coverage-only
-  repair; a new frozen dataset is needed for strict prospective confirmation.
+- Exp34 uses a deterministic count-belief rule specific to one-object videos,
+  evaluates all four actuators, and is superseded by the negative Exp35 audit.
+- Exp39 is an identifiable synthetic composition result, not evidence that its
+  h/Q/R coordinates transfer unchanged to IBL.
+- Exp40 is post-hoc development evidence. Context NLL support cannot unlock a
+  disjoint cohort or neural analysis without held-out behavioral utility.
 - The current shared neural model has not beaten common dynamics across the
   required animals and sessions.
 - The current results do not show end-to-end SOTA, universal network reuse,

@@ -1,0 +1,43 @@
+{
+  "profile": "development_posthoc_assay_probe",
+  "evidence_provenance": "Exp40 exposed-cohort outcomes were inspected before this all-dev regularization probe; it cannot confirm the controller.",
+  "seeds": [0],
+  "cohort_manifest": "data/ibl_behavior/bwm_behavior_v1/cohort_manifest.csv",
+  "sessions": [],
+  "cohort_requirements": {
+    "minimum_sessions": 20,
+    "minimum_animals": 20
+  },
+  "split": {
+    "test_fraction": 0.2,
+    "validation_fraction": 0.2,
+    "min_blocks": 5
+  },
+  "learned_hmm": {
+    "max_iter": 100,
+    "tolerance": 1e-7,
+    "pseudocount": 0.1,
+    "n_restarts": 5,
+    "min_emission_gap": 0.1,
+    "restart_selection_policy": "eligible_converged_identifiable_then_likelihood"
+  },
+  "run_length_candidates": [
+    {"min_run": 20, "max_run": 100, "hazard_scale": 30.0},
+    {"min_run": 20, "max_run": 100, "hazard_scale": 60.0},
+    {"min_run": 20, "max_run": 100, "hazard_scale": 90.0}
+  ],
+  "run_length_observer": {
+    "burn_in_trials": 90,
+    "release_window": 5,
+    "emission_left": [0.2, 0.8]
+  },
+  "choice_readout": {
+    "c_grid": [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0],
+    "dev_selection_scope": "all",
+    "low_contrast_threshold": 0.0625,
+    "min_dev_low_contrast_trials": 8,
+    "min_test_low_contrast_trials": 8,
+    "max_iter": 2000
+  },
+  "primary_baseline_condition": "dev_best"
+}

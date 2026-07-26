@@ -1,0 +1,15 @@
+analysis,condition,planned_animals,complete_animals,failed_animals,mean_test_low_contrast_choice_nll,mean_context_nll,behavior_parameter_count
+registered_readout,history_only,30,27,3,0.48393831886998284,0.6931471805599455,7
+registered_readout,learned_hmm_mean,30,27,3,0.48263014577964614,0.30723887899884683,8
+registered_readout,semimarkov_mean,30,27,3,0.48865557167007895,0.2358477389532142,8
+registered_readout,semimarkov_release,30,27,3,0.49092361877415136,0.2358477389532142,10
+registered_readout,semimarkov_concentration,30,27,3,0.49579261928547175,0.2358477389532142,10
+registered_readout,factorized_state,30,27,3,0.4967342230130739,0.2358477389532142,12
+registered_readout,oracle_context_mean,30,27,3,0.5065256652507137,0.0,8
+assay_probe,history_only,30,27,3,0.47426834649165106,0.6931471805599455,7
+assay_probe,learned_hmm_mean,30,27,3,0.473710645522262,0.30723887899884683,8
+assay_probe,semimarkov_mean,30,27,3,0.47305291592243953,0.2358477389532142,8
+assay_probe,semimarkov_release,30,27,3,0.4744568140598516,0.2358477389532142,10
+assay_probe,semimarkov_concentration,30,27,3,0.476996101108275,0.2358477389532142,10
+assay_probe,factorized_state,30,27,3,0.4752062673258869,0.2358477389532142,12
+assay_probe,oracle_context_mean,30,27,3,0.4930106763234336,0.0,8
