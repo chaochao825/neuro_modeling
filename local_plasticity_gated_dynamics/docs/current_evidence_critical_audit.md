@@ -8,9 +8,11 @@ is indexed only in `results/history/README.md`.
 
 The experiment-level diagnosis is broader than this active view. See
 `docs/experiment_lineage_diagnostic_audit_20260726.md` for Exp00--Exp35 and
-`docs/iclr_reviewer_response_and_revision_plan_20260726.md` for the revised
-paper boundary. Exp35 supplies the decisive evidence for the current paper's
-negative title claim; Exp34 is now historical motivation.
+`docs/iclr_reviewer_response_and_revision_plan_20260726.md` for the historical
+Exp35 paper boundary. Exp35 supplies the decisive evidence for that bounded
+negative title claim; Exp34 is historical motivation. The active synthetic
+successor is Exp39, whose eligible positive claim is limited to average
+prediction across its four registered held-out composition cells.
 
 | Evidence | Current conclusion | Main limitation |
 |---|---|---|
@@ -27,7 +29,7 @@ negative title claim; Exp34 is now historical motivation.
 | Exp36 ORBIT-India change-aware prefix | **Inconclusive**, historical schema failure | Only 4/12 collectors instantiate every frozen task; the audit was outcome-blind and did not analyze the surviving subset |
 | Exp37 CORe50 change-aware prefix | **Oppose**, prospective controller stop result | Hard-reset BOCPD never alarms and trails selected forgetting by 53.29 points; post-hoc analysis shows the frozen score/threshold scales were mismatched |
 | Exp38 Stream-51 soft memory | Joint qualification **oppose**; external utility **inconclusive** | Oracle headroom and switch harm pass, but stable gain passes 2/5 seeds and causal reachability 1/5; external videos remain untouched |
-| Exp39 factorized uncertainty | Aggregate compositional utility **support**; parameter recovery and fast switching **oppose** | Synthetic factors are independently manipulated; h/Q recovery is weak and one held-out cell loses to the seen-mode IMM |
+| Exp39 factor-indexed uncertainty | Average four-cell compositional utility **support**; clean parameter decomposition, uniform cell-wise dominance, and fast release **oppose** | Cell `110` loses on mean NLL; h recovery is weak; Q/R cross-load strongly; `early_nll` includes sequence-initial blocks; synthetic data provide no real behavior or neural evidence |
 | Exp40 IBL factorized-state development | Context decoding **support**; meaningful choice utility **oppose**; confirmation **inconclusive/not run** | Outcome-exposed cohort; 27/30 endpoint-eligible animals; release is inconclusive and precision clamp improves NLL |
 | Exp25 real compositional panel | **Inconclusive** | Canonical neural inputs are unavailable and the loader correctly fails closed |
 
@@ -86,13 +88,24 @@ the external MCID. The all-seed gate therefore fails 0/5. This opposes the
 registered readiness claim, leaves the external utility claim inconclusive,
 and prevents any access to the 381 external videos.
 
-Exp39 repairs the synthetic identifiability problem by orthogonally controlling
-jump hazard, process variance, and observation variance. Its factorized local
-controller improves unseen-composition predictive NLL over both the selected
-fixed filter (+0.290580) and the four seen-mode IMM (+0.048008) in 30/30 seeds.
-That support is functional, not parametric: h/Q/R log correlations are only
-0.089/0.312/0.868, immediate post-switch NLL is worse than the IMM, and one
-held-out composition loses.
+Exp39 creates a synthetic panel in which jump hazard, process variance, and
+observation variance are orthogonally manipulated; it does **not** thereby
+solve parameter identifiability. Its factor-indexed local controller improves
+average held-out-composition predictive NLL over both selected fixed
+(+0.290580) and four-mode seen IMM (+0.048008) in 30/30 seeds. The result is
+heterogeneous: versus seen IMM, cells `011`, `101`, `110`, and `111` improve by
++0.042613, +0.020958, -0.004333, and +0.132794 nats respectively. Log-parameter
+correlations are only 0.089/0.312/0.868 for h/Q/R. In the post-hoc loading
+audit, the Q coordinate responds more to true R (1.492) than true Q (0.540),
+while the Q/R columns for the R coordinate are 0.550/1.518. Those values are
+factor-indexed adaptive coordinates, not cleanly recovered physical states.
+
+The timing claim is also narrower than earlier wording implied. Exp39's frozen
+`early_nll` is an early-in-block metric and includes each sequence's initial
+block. A post-hoc transition-only audit still finds factorized worse than seen
+IMM early (-0.087523 nats) and better late (+0.083153 nats). Thus Exp39
+supports average synthetic predictive composition, not fast change-point
+release, uniform composition, or real behavioral/neural utility.
 
 Exp40 then tests the only identifiable IBL analogue on the already exposed
 30-animal behavior cohort: prior mean, posterior recent-change probability, and
@@ -107,20 +120,24 @@ not establish downstream actuator utility.
 
 Priority is therefore:
 
-1. write the complete negative mechanism audit and retain Exp34 as motivating
-   history rather than positive title evidence;
-2. stop HMM/Hedge/GRU, sparse-routing, and E/I extensions intended to rescue
-   prefix consistency;
-3. honor both prospective stop rules: do not retune categorical BOCPD on
-   CORe50 or the three-statistic soft controller on Stream-51, and do not open
-   Exp38 external data after failed qualification;
-4. retain simple forgetting/current-frame evidence as the real-task reference,
-   rather than treating explicit change detection as automatically superior;
-5. treat participating E/I and multi-session neural validation as separate
-   paper contracts;
-6. do not scale Exp40 to new IBL animals or neural activity unless a distinct,
-   independently identifiable task first passes a held-out behavioral-utility
-   development gate.
+1. preserve Exp39's frozen implementation, settings, tapes, and artifacts;
+   enforce its semantic lock and keep confirmatory and post-hoc claims
+   separate;
+2. run Exp41 only as a development test of matched-Q/R alternatives,
+   `h + total variance`, tied-Q/R, current online-EM, and autocovariance-based
+   coordinates; do not use reserved formal seeds `41100--41129` before a
+   protocol-only commit/tag;
+3. stop the three-coordinate claim if it cannot add stable held-out utility
+   beyond the reduced-factor controls under matched marginals; only an Exp41
+   go decision can authorize the Exp42 actuator audit;
+4. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
+   extensions locked until the preceding mechanism gate passes and held-out
+   behavior improves;
+5. retain Exp35--Exp38 as historical failure-boundary evidence: do not retune
+   categorical BOCPD on CORe50, reopen Stream-51 external data, or present
+   prefix consistency as a positive active method;
+6. retain simple forgetting/current-frame evidence as the real-task reference
+   rather than treating explicit change detection as automatically superior.
 
 Increasing carrier neuron count while the carrier does no computation has no
 scientific value. Likewise, quoting independently trained leaderboard numbers

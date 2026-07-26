@@ -2,18 +2,22 @@
 
 ## Working title
 
-**Factorized Uncertainty for Compositional Memory Adaptation**
+**Compositional Online Filtering from Isolated Uncertainty Regimes**
 
-This is a pre-evidence successor question. `Actuator Matching Principle`
-remains a broader programme and is not an established contribution.
+This is a bounded synthetic successor result plus a development-only
+identifiability question. `Actuator Matching Principle` remains a broader
+programme and is not an established contribution.
 
 ## Paper question
 
-Can a three-scalar causal state separately estimate abrupt hazard \(h_t\),
-gradual process volatility \(Q_t\), and observation noise \(R_t\), then
-compose factors that were observed only in isolation during fitting and
-improve held-out predictive NLL over the best fixed filter and a seen-mode
-interacting multiple-model baseline without test-time gradients?
+Can three factor-indexed causal adaptive coordinates, fitted only on baseline
+and isolated uncertainty regimes, improve **average** predictive NLL across
+four registered unseen joint regimes over the best fixed filter and a
+seen-mode interacting multiple-model baseline without test-time gradients?
+
+The coordinates \((z_h,z_Q,z_R)\) name the factor to which each update rule was
+assigned. They must not be described as recovered physical \((h,Q,R)\)
+parameters unless a separate identifiability test supports that statement.
 
 Here, causal means current-and-past-only execution plus registered clamp
 interventions. It does not mean causal discovery from observational data.
@@ -37,11 +41,18 @@ formal run then improved unseen-composition NLL over selected fixed by
 All three clamp-selectivity gates passed the frozen Holm family.
 
 The result is functionally positive but mechanistically mixed. Log-parameter
-correlations were only 0.089 for h and 0.312 for Q, versus 0.868 for R.
-Cell 110 did not improve and early post-switch NLL was worse than seen IMM.
-Accordingly the paper may claim aggregate compositional predictive utility and
-functional clamp selectivity, but not calibrated h/Q/R identification,
-universal cell-wise dominance, or faster switching.
+correlations were only 0.089 for h and 0.312 for Q, versus 0.868 for R. In the
+post-hoc loading audit, the estimated Q coordinate loads 0.540 on true Q but
+1.492 on true R, while the estimated R coordinate loads 0.550 on true Q and
+1.518 on true R. Cell `110` loses on mean NLL against both selected fixed and
+seen-mode IMM. The frozen `early_nll` is properly named **early-in-block**:
+it includes each sequence's initial block and is not a pure transition metric.
+A post-hoc transition-only recomputation also finds factorized worse than
+seen-mode IMM early after transitions (-0.087523 nats), although it is better
+late (+0.083153 nats). Accordingly the paper may claim average compositional
+predictive utility across the four registered cells and functional clamp
+selectivity, but not calibrated h/Q/R identification, universal cell-wise
+dominance, or faster switching.
 
 The active sequence is gated:
 
@@ -50,16 +61,20 @@ The active sequence is gated:
 2. the completed 30-seed synthetic factorial fits only baseline and isolated
    h/Q/R elevations, then supports aggregate prediction on unseen pairwise and
    triple compositions;
-3. a new, outcome-blind IBL cohort is now eligible, but the exposed historical
-   cohort cannot provide confirmation and behavioral NLL must improve;
-4. neural decoding and E/I interpretation remain locked behind behavior.
+3. Exp40 shows that better state decoding on the exposed IBL development
+   cohort does not yield held-out behavioral utility; it cannot confirm Exp39;
+4. Exp41 first tests matched Q/R alternatives and reduced-factor controls in
+   development only. Reserved formal seeds remain untouched until a
+   protocol-only commit/tag freezes the full contract;
+5. a new outcome-blind IBL cohort, neural decoding, and E/I interpretation all
+   remain locked behind the Exp41/Exp42 gates and a held-out behavioral gain.
 
 ## Active hypothesis and stop rule
 
 The candidate method is
 
 \[
-(h_t,Q_t,R_t)\rightarrow
+(z_{h,t},z_{Q,t},z_{R,t})\rightarrow
 \text{state-aware Bayesian gain or directional delta update}.
 \]
 
@@ -67,10 +82,12 @@ The state dimension, Kalman filtering, IMM, input-dependent memory, and
 directional forgetting are not claimed novel. The only eligible contribution
 is a tightly constrained causal-state comparison under matched data and strong
 baselines. A privileged eight-mode IMM and a time-varying oracle are reported
-as upper bounds and are not targets to beat. Exp39 cleared the frozen
-synthetic gate. The next stop rule is behavioral: failure to improve held-out
-choice prediction on a newly frozen multi-animal IBL cohort prevents all
-neural claims.
+as upper bounds and are not targets to beat. Exp39 cleared only its frozen
+**aggregate** synthetic gate. The next stop rule is mechanistic: a full
+factor-indexed controller must add stable held-out utility beyond matched
+`h + total variance` and tied-Q/R alternatives before Exp42 or a new IBL
+confirmation study is eligible. Exact formal MCIDs must be frozen in a
+protocol-only commit/tag before reserved seeds `41100--41129` are generated.
 
 ## Archived Exp35 paper contract (historical, not current)
 

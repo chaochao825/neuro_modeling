@@ -1,0 +1,57 @@
+{
+  "aggregate_shard_identity": "passed",
+  "audit_status": "passed",
+  "claim_boundary": {
+    "clean_three_factor_parameter_decomposition": "oppose",
+    "faster_post_switch_release_than_seen_mode_imm": "oppose",
+    "real_behavior_or_neural_utility": "inconclusive",
+    "registered_average_unseen_composition_utility": "support",
+    "uniform_cellwise_composition_utility": "oppose"
+  },
+  "claim_upgrade_allowed": false,
+  "exact_tape_digest_mismatches": [],
+  "fit_test_tape_exact_replay": "passed",
+  "fit_test_tape_semantic_replay": "passed",
+  "formal_result_introduced_by_commit": "5a62db0102bf5e7d4229c86a39402d562af4fd5b",
+  "frozen_replay": {
+    "audit_status": "passed",
+    "paired_tape_check": "passed",
+    "registered_joint_gate_passed": true,
+    "registered_verdict": "support",
+    "selection_replay_check": "passed",
+    "summary_replay_check": "passed"
+  },
+  "full_summary_replay": "passed",
+  "lock_version": "exp39_semantic_lock_v1",
+  "n_block_rows": 15360,
+  "n_seeds": 30,
+  "n_selection_rows": 2490,
+  "numeric_semantic_fingerprint": "passed",
+  "portable_tape_semantic_fingerprint": {
+    "fit": "2418a5a9f92c56ec999c24b6879a6f13ebb0e1a84d7150efb993dba63a5389bf",
+    "test": "ff65c7f65bd38a54220c654c5ba3788dd3acabdecad10fb7b14b4f4e59f4dae3"
+  },
+  "replay_environment": {
+    "executable": "/home/spco/sow_linear/.venvs/neuro_modeling_311/bin/python",
+    "implementation": "CPython",
+    "packages": {
+      "numpy": "2.3.5",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1"
+    },
+    "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+    "python": "3.11.15",
+    "scope": "current_replay_only_not_original_formal_execution"
+  },
+  "replay_environment_is_original_formal_environment": false,
+  "selection_argmin_replay": "passed",
+  "summary_derived_tables_replay": "passed",
+  "verified_hash_receipt_files": {
+    "outcome_blind_parallel_execution": 4,
+    "scientific_implementation": 11
+  },
+  "verified_manifest_entries": {
+    "formal_artifacts": 139,
+    "publication_amendment": 6
+  }
+}

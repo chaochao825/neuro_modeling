@@ -1,0 +1,90 @@
+{
+  "lock_version": "exp39_semantic_lock_v1",
+  "created_at": "2026-07-27T00:00:00+08:00",
+  "analysis_status": "post_hoc_integrity_and_claim_boundary_lock",
+  "claim_upgrade_allowed": false,
+  "result_relative_path": "results/exp39_factorized_uncertainty_prospective_v1",
+  "formal_result_introduced_by_commit": "5a62db0102bf5e7d4229c86a39402d562af4fd5b",
+  "external_transfer_archive": {
+    "filename": "exp39_formal_results_20260726.tar.gz",
+    "repository_tracked": false,
+    "sha256": "9d0baff5afafe02bd2d29c0fdb852398e7803bbe30422287c4777cd1de5fed5d"
+  },
+  "manifests": {
+    "formal_artifacts": {
+      "path": "results/exp39_factorized_uncertainty_prospective_v1/artifact_manifest.sha256",
+      "sha256": "dc7d2ab60831740c2167abad5107b3b7907bdb6f2a296b53e193aabbc9a00348",
+      "entry_count": 139
+    },
+    "publication_amendment": {
+      "path": "results/exp39_factorized_uncertainty_prospective_v1/publication_amendment_manifest.sha256",
+      "sha256": "4ed0874bcc4d0301d2fd6c6e94b6d149f11acef852b8c51ac3058168fb944fdb",
+      "entry_count": 6
+    }
+  },
+  "hash_receipts": {
+    "scientific_implementation": {
+      "path": "configs/prospective/exp39_factorized_uncertainty_implementation_receipt.json",
+      "sha256": "1b99329955c590492b3331fce98b217bf75e5960fcbcd4a494cb0f2a8fa0835f"
+    },
+    "outcome_blind_parallel_execution": {
+      "path": "configs/prospective/exp39_execution_amendment_receipt.json",
+      "sha256": "85d4146910666fa70b60db49f9154caf75e51a1efe4799fb90f71b9c044d9d9e"
+    }
+  },
+  "expected_result": {
+    "config_sha256": "6ff0c9fc399c84ddc29f557c99717d252a11d9d6c2957b8bf7bb074e42f6367b",
+    "seeds": [
+      39100, 39101, 39102, 39103, 39104, 39105, 39106, 39107, 39108, 39109,
+      39110, 39111, 39112, 39113, 39114, 39115, 39116, 39117, 39118, 39119,
+      39120, 39121, 39122, 39123, 39124, 39125, 39126, 39127, 39128, 39129
+    ],
+    "n_block_rows": 15360,
+    "n_selection_rows": 2490,
+    "portable_tape_semantic_fingerprint": {
+      "quantization_decimals": 10,
+      "fit_aggregate_sha256": "2418a5a9f92c56ec999c24b6879a6f13ebb0e1a84d7150efb993dba63a5389bf",
+      "test_aggregate_sha256": "ff65c7f65bd38a54220c654c5ba3788dd3acabdecad10fb7b14b4f4e59f4dae3"
+    },
+    "cellwise_nll_gain": [
+      {"comparison": "seen_mode_imm_minus_factorized_nll", "cell": "011", "value": 0.042613449067249114, "positive_seeds": 27},
+      {"comparison": "seen_mode_imm_minus_factorized_nll", "cell": "101", "value": 0.020958453050105654, "positive_seeds": 22},
+      {"comparison": "seen_mode_imm_minus_factorized_nll", "cell": "110", "value": -0.004333153288187528, "positive_seeds": 12},
+      {"comparison": "seen_mode_imm_minus_factorized_nll", "cell": "111", "value": 0.13279356838092157, "positive_seeds": 30},
+      {"comparison": "selected_fixed_minus_factorized_nll", "cell": "011", "value": 0.4463121635172605, "positive_seeds": 30},
+      {"comparison": "selected_fixed_minus_factorized_nll", "cell": "101", "value": 0.30530903761406775, "positive_seeds": 30},
+      {"comparison": "selected_fixed_minus_factorized_nll", "cell": "110", "value": -0.012256769366356782, "positive_seeds": 4},
+      {"comparison": "selected_fixed_minus_factorized_nll", "cell": "111", "value": 0.4229575003842756, "positive_seeds": 30}
+    ],
+    "cross_loading": [
+      {"estimated_factor": "h", "true_factor": "h", "value": 0.08832743622376364},
+      {"estimated_factor": "h", "true_factor": "q", "value": 0.02822806320513287},
+      {"estimated_factor": "h", "true_factor": "r", "value": 0.09179627730364606},
+      {"estimated_factor": "q", "true_factor": "h", "value": 0.06718165125449145},
+      {"estimated_factor": "q", "true_factor": "q", "value": 0.5396564822329561},
+      {"estimated_factor": "q", "true_factor": "r", "value": 1.4917690133988044},
+      {"estimated_factor": "r", "true_factor": "h", "value": 0.07540436012813347},
+      {"estimated_factor": "r", "true_factor": "q", "value": 0.5495433960919797},
+      {"estimated_factor": "r", "true_factor": "r", "value": 1.5181259805385185}
+    ],
+    "timing_nll_gain": [
+      {"panel": "all_blocks_including_sequence_initialization", "comparison": "seen_mode_imm_minus_factorized_nll", "endpoint": "early_nll", "value": -0.08669827528932655},
+      {"panel": "all_blocks_including_sequence_initialization", "comparison": "seen_mode_imm_minus_factorized_nll", "endpoint": "late_nll", "value": 0.08191536801844329},
+      {"panel": "transition_blocks_only", "comparison": "seen_mode_imm_minus_factorized_nll", "endpoint": "early_nll", "value": -0.08752313656232821},
+      {"panel": "transition_blocks_only", "comparison": "seen_mode_imm_minus_factorized_nll", "endpoint": "late_nll", "value": 0.08315263870785343}
+    ],
+    "headroom": {
+      "fixed_to_oracle_factorial_imm_headroom_retained": 0.7908267968223631,
+      "seen_imm_to_oracle_factorial_imm_gap_closed": 0.3844754417800689,
+      "fixed_to_oracle_dynamic_headroom_retained": 0.7136877505503222,
+      "seen_imm_to_oracle_dynamic_gap_closed": 0.29169858046859093
+    }
+  },
+  "claim_boundary": {
+    "registered_average_unseen_composition_utility": "support",
+    "uniform_cellwise_composition_utility": "oppose",
+    "clean_three_factor_parameter_decomposition": "oppose",
+    "faster_post_switch_release_than_seen_mode_imm": "oppose",
+    "real_behavior_or_neural_utility": "inconclusive"
+  }
+}

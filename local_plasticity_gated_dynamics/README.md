@@ -67,9 +67,13 @@ The current evidence chain is:
    joint readiness gate (0/5 seeds). Oracle headroom and cumulative switch harm
    hold, but causal reachability is not robust; external data remain untouched
    and the main utility claim is inconclusive.
-13. Exp39: a frozen synthetic factorial task supports functional composition
-    of separate uncertainty states over fixed and seen-mode comparators, while
-    parameter recovery and faster switching are opposed.
+13. Exp39: a frozen synthetic factorial task supports an **average** held-out
+    predictive gain across four unseen composition cells over fixed and
+    seen-mode comparators. The controller is therefore described as using
+    factor-indexed adaptive coordinates, not as identifying separate physical
+    \(h/Q/R\) states: cell `110` is negative against both comparators, the
+    \(Q/R\) coordinates cross-load strongly, and early-in-block NLL is worse
+    than seen-mode IMM.
 14. Exp40: on the outcome-exposed 30-animal IBL development cohort, structured
     semi-Markov state improves block-context NLL but the three-state controller
     does not improve held-out low-contrast choice NLL. Meaningful utility and
@@ -82,32 +86,56 @@ See the [formal principle ledger](docs/actuator_matching_principle.md) and
 [current critical audit](docs/current_evidence_critical_audit.md) for effect
 sizes, boundaries, and scale priorities.
 
-The [ICLR-style review and paper reframe](docs/iclr_paper_reframe_20260726.md)
-records the decisive Exp35 stop decision. The current paper is a bounded
-negative mechanism audit, not an ICLR-ready routing method. Its recommended
-title is *When Consistency Is Not Reliability: A Causal Audit of Streaming
-Personalized Recognition*. Exp37 and Exp38 are prospective follow-up stop
-results, not positive method extensions: the former identifies an unreachable
-frozen BOCPD threshold grid, while the latter fails robust causal reachability
-before external access.
+The [Exp35--Exp38 historical audit](results/history/adaptive_memory_exp35_exp38_20260726.md)
+records the decisive Exp35 stop decision and remains the historical contract
+for the bounded negative mechanism audit *When Consistency Is Not Reliability:
+A Causal Audit of Streaming Personalized Recognition*. Exp37 and Exp38 are
+prospective follow-up stop results, not positive method extensions. The active
+synthetic successor is Exp39, whose eligible claim is narrower: average
+prediction on the four registered held-out composition cells. Its additive
+[engineering and claim lock](docs/exp39_engineering_and_claim_lock_20260727.md)
+records exact replay checks and post-hoc claim boundaries without changing the
+frozen algorithm, protocol, or result artifacts. The
+[Exp41 matched-identifiability protocol](docs/exp41_matched_identifiability_development_protocol_20260727.md)
+is development-only and must test matched \(Q/R\) alternatives before any new
+confirmation claim. [Exp42](docs/exp42_actuator_factorization_audit_plan_20260727.md)
+remains locked behind an Exp41 go decision.
 
 The [Exp40 historical development audit](results/history/exp40_ibl_factorized_state_development_20260726.md)
 records the synthetic-to-real transfer boundary: better hidden-block decoding
 did not yield held-out behavioral utility, so no new IBL cohort or neural data
 were opened.
 
-The [Exp00--Exp35 diagnostic lineage](docs/experiment_lineage_diagnostic_audit_20260726.md)
-separates theory errors from identification, method, and data failures. The
-[reviewer-response revision plan](docs/iclr_reviewer_response_and_revision_plan_20260726.md)
-records the revised title, abstract, contribution boundary, and stop rules.
+The [historical evidence registry](results/history/README.md) separates theory
+errors from identification, method, and data failures. The
+[current critical audit](docs/current_evidence_critical_audit.md) records the
+active contribution boundary and stop rules.
 
 ## System architecture
 
-The [source-grounded architecture figure](docs/figures/actuator_matching_system_architecture.md)
-shows the complete active dataflow, evidence boundary, and conditional scale
-frontier. SVG, PDF, PNG, editable PowerPoint, generator source, and a
-hash-bound figure contract are included; historical-only branches are kept in
-the evidence registry rather than mixed into the active computation graph.
+The active computational hypothesis is deliberately smaller than the full
+historical programme:
+
+```mermaid
+flowchart LR
+    Y["Causal observations"] --> S["Local innovation statistics"]
+    S --> C["Fast change posterior"]
+    S --> U["Slow factor-indexed coordinates"]
+    C --> R["Release / reset"]
+    U --> W["Write / precision control"]
+    U --> D["Internal-dynamics control"]
+    R --> M["Shared memory or fixed high-rank carrier"]
+    W --> M
+    D --> M
+    M --> P["Prediction / behavior"]
+    P --> S
+```
+
+Exp41 tests whether the slow Q/R coordinates are identifiable under matched
+one-step marginals. Exp42 may test actuator matching only after that gate;
+real behavior, neural shared dynamics, and a participating E/I carrier remain
+conditional later stages. Historical-only branches stay in the evidence
+registry rather than the active computation graph.
 
 ## What is not currently claimed
 
@@ -134,6 +162,17 @@ the evidence registry rather than mixed into the active computation graph.
 - Exp40's improved block-context NLL does not establish a useful release or
   precision actuator. Its outcome-exposed behavioral gate failed, and no
   disjoint IBL or neural result is claimed.
+- Exp39 does not establish uniform unseen-composition dominance: cell `110`
+  loses on mean NLL, and the registered result is an average over the four
+  held-out cells `011`, `101`, `110`, and `111`.
+- Exp39 does not identify three clean uncertainty variables. Its reported
+  \(h/Q/R\) quantities are factor-indexed adaptive coordinates; the post-hoc
+  loading audit shows substantial \(Q/R\) cross-loading.
+- Exp39's frozen `early_nll` is an early-in-block metric and includes each
+  sequence's initial block. A transition-only recomputation is post-hoc and
+  also finds worse early NLL than seen-mode IMM.
+- Exp39 is wholly synthetic and supplies no behavioral, neural, E/I, or
+  biological mechanism validation.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

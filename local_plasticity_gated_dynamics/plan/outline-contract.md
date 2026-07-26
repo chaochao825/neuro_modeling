@@ -1,22 +1,51 @@
 # Outline Contract
 
-## Active pre-evidence paper spine
+## Active successor paper spine
 
-The successor paper asks whether uncertainty factors can be composed rather
-than memorized as joint modes. It fits a three-dimensional causal
-\((h,Q,R)\) state only on baseline and isolated hazard, drift, and noise
-elevations, then tests pairwise and triple combinations absent from fitting.
-The hash-frozen 30-seed factorial passed its stop gate against the best fixed
-and seen-mode IMM. Positive wording is restricted to aggregate compositional
-predictive utility and functional clamp selectivity.
+The successor paper asks whether adaptive coordinates fitted on isolated
+uncertainty regimes can be composed rather than memorizing every joint mode.
+It fits three factor-indexed causal coordinates \((z_h,z_Q,z_R)\) on baseline
+and isolated hazard, process-noise, and observation-noise elevations, then
+tests four pairwise/triple combinations absent from fitting. The hash-frozen
+30-seed factorial passed its registered **average-across-cells** stop gate
+against the best fixed and seen-mode IMM. Positive wording is restricted to
+that aggregate predictive utility and functional clamp selectivity.
 
-Required active sections are: normative identifiability; local online-EM
-factorized filter; isolated-factor train split; unseen-composition test;
-matched fixed and four-mode IMM controls; privileged eight-mode/dynamic
-oracles; selective clamps; held-out IBL behavior; and only then neural
-decoding. A new IBL behavior cohort is eligible but unverified; the neural
-section remains locked. Parameter recovery, cell heterogeneity, early-switch
-cost, and privileged-oracle gaps are mandatory negative-result subsections.
+Required active sections are: causal information boundary; local online-EM
+factor-indexed filter; isolated-factor fit split; four-cell unseen-composition
+test; matched fixed and four-mode IMM controls; privileged eight-mode/dynamic
+oracles; selective clamps; and the additive semantic/claim audit. The negative
+subsections are mandatory: cell `110`, Q/R cross-loading, weak h recovery,
+privileged-oracle gaps, and worse early-in-block performance. The frozen
+`early_nll` includes sequence-initial blocks and must never be labelled a pure
+post-switch endpoint; the transition-only panel is post-hoc.
+
+Identifiability, real behavior, neural decoding, and E/I interpretation are
+not active positive sections. Exp40's exposed-cohort behavioral utility gate
+failed. Exp41 is a development-only matched-Q/R test; Exp42, a new IBL cohort,
+and all neural claims remain conditional on its go decision.
+
+## Active Exp39 contribution wording allowed today
+
+1. A fully paired 30-seed synthetic experiment in which selection uses only
+   baseline and isolated generator regimes and evaluation uses four held-out
+   joint regimes.
+2. An average NLL improvement of 0.290580 nats over selected fixed and 0.048008
+   nats over seen-mode IMM across those four registered cells, positive in
+   30/30 seeds.
+3. A bounded causal local filter using factor-indexed adaptive coordinates and
+   no test-time gradients.
+4. A complete disclosure that cell `110` is negative, h/Q recovery is weak,
+   Q/R cross-loading is strong, and the early-in-block endpoint loses to
+   seen-mode IMM.
+
+## Active Exp39 wording prohibited without new evidence
+
+- clean or calibrated recovery of three uncertainty parameters;
+- uniform generalization to every unseen composition;
+- faster change-point release or superior early post-switch adaptation;
+- behavioral, neural, E/I, or biological validation;
+- a general Actuator Matching result or state-of-the-art claim.
 
 The Exp35--Exp38 consistency/change-aware/soft-retention line is historical and
 belongs in `results/history/adaptive_memory_exp35_exp38_20260726.md` or an
@@ -111,7 +140,7 @@ audit was necessary but no longer supports a viable routing method.
 The existing broad E/I programme architecture belongs only in the supplement
 or a separate paper.
 
-## Readiness decision
+## Historical Exp35 readiness decision
 
 - **ICLR method paper:** stop; the core utility claim is opposed.
 - **TMLR mechanism-audit route:** viable after manuscript drafting, literature

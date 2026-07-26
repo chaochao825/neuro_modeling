@@ -1,0 +1,9 @@
+comparison,cell,mean_nll_gain,positive_seeds,n_seeds
+seen_mode_imm_minus_factorized_nll,011,0.042613449067249114,27,30
+seen_mode_imm_minus_factorized_nll,101,0.020958453050105654,22,30
+seen_mode_imm_minus_factorized_nll,110,-0.004333153288187528,12,30
+seen_mode_imm_minus_factorized_nll,111,0.13279356838092157,30,30
+selected_fixed_minus_factorized_nll,011,0.4463121635172605,30,30
+selected_fixed_minus_factorized_nll,101,0.30530903761406775,30,30
+selected_fixed_minus_factorized_nll,110,-0.012256769366356782,4,30
+selected_fixed_minus_factorized_nll,111,0.4229575003842756,30,30

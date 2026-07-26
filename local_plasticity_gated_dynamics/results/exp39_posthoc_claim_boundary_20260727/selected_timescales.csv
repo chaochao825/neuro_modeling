@@ -1,0 +1,5 @@
+factor,adaptation_rate,approximate_steps,selected_seeds,n_seeds
+h,0.002,500.0,26,30
+h,0.01,100.0,4,30
+q,0.5,2.0,30,30
+r,0.2,5.0,30,30

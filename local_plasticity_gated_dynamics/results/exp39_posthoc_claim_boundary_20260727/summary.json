@@ -1,0 +1,55 @@
+{
+  "analysis_status": "post_hoc_frozen_result_diagnostic_only",
+  "claim_classification": [
+    {
+      "claim": "registered_average_unseen_composition_utility",
+      "conclusion": "support",
+      "eligibility": "confirmatory_exp39_frozen_gate",
+      "reason": "The original five-test preregistered joint gate passed."
+    },
+    {
+      "claim": "uniform_cellwise_composition_utility",
+      "conclusion": "oppose",
+      "eligibility": "post_hoc_descriptive",
+      "reason": "At least one unseen cell has non-positive mean gain versus the seen-mode IMM."
+    },
+    {
+      "claim": "clean_three_factor_parameter_decomposition",
+      "conclusion": "oppose",
+      "eligibility": "post_hoc_descriptive",
+      "reason": "Diagonal loading wins for 1/3 estimated coordinates; h and Q are not cleanly separated."
+    },
+    {
+      "claim": "faster_post_switch_release_than_seen_mode_imm",
+      "conclusion": "oppose",
+      "eligibility": "registered_secondary_descriptive",
+      "reason": "Seen-IMM minus factorized early-window NLL gain is -0.087523."
+    },
+    {
+      "claim": "late_regime_adaptation_advantage",
+      "conclusion": "support",
+      "eligibility": "post_hoc_descriptive",
+      "reason": "Seen-IMM minus factorized late-window NLL gain is +0.083153."
+    },
+    {
+      "claim": "real_behavior_or_neural_utility",
+      "conclusion": "inconclusive",
+      "eligibility": "not_tested_by_exp39",
+      "reason": "Exp39 contains synthetic observations only."
+    }
+  ],
+  "claim_upgrade_allowed": false,
+  "headroom": {
+    "fixed_to_oracle_dynamic_headroom_retained": 0.7136877505503222,
+    "fixed_to_oracle_factorial_imm_headroom_retained": 0.7908267968223631,
+    "seen_imm_to_oracle_dynamic_gap_closed": 0.29169858046859093,
+    "seen_imm_to_oracle_factorial_imm_gap_closed": 0.3844754417800689
+  },
+  "interpretation": "Exp39 supports registered aggregate synthetic utility. It does not support uniform cell-wise dominance, clean h/Q/R recovery, fast release, or real-data utility.",
+  "n_seeds": 30,
+  "source_block_metrics_sha256": "3231b4ac8ecf1a50029133ed7f2267089f0a1ce5dbc9d5e0b259349a2661d8b0",
+  "source_registered_summary_sha256": "649b7533ef9dca9f83e933b1aefe1665b5012ec8f4a2d69859eda40b2d453561",
+  "source_result_dir": "exp39_factorized_uncertainty_prospective_v1",
+  "source_selection_audit_sha256": "eb7313bcd76a5369a5cba9491bca25856abedf5208a133bc2e0b87b119580ffb",
+  "statistics_unit": "seed"
+}
