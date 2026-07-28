@@ -1032,6 +1032,10 @@ def summarize(
         and imm_nll_gain.mean() > 0.0
         and total_mse_gain.mean() > 0.0
         and imm_mse_gain.mean() > 0.0
+        and int(np.sum(total_nll_gain > 0.0)) >= required
+        and int(np.sum(imm_nll_gain > 0.0)) >= required
+        and int(np.sum(total_mse_gain > 0.0)) >= required
+        and int(np.sum(imm_mse_gain > 0.0)) >= required
         and no_negative_cell
         and any_early_gain
     )
