@@ -78,6 +78,7 @@ SOURCE_FILES = (
     "src/tasks/factorized_uncertainty.py",
     "src/tasks/fast_slow_uncertainty.py",
     "experiments/exp43_fast_slow_causal_decomposition.py",
+    "scripts/validate_exp43_development_result.py",
 )
 
 
