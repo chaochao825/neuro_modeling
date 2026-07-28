@@ -66,6 +66,10 @@ def test_exp43_config_is_development_only_and_reserves_formal_seeds() -> None:
     invalid["seeds"] = [43100]
     with pytest.raises(ValueError, match="overlap"):
         validate_config(invalid)
+    invalid = deepcopy(config)
+    invalid["reserved_formal_seeds"] = [43100]
+    with pytest.raises(ValueError, match="exactly 43100--43129"):
+        validate_config(invalid)
 
 
 def test_exp43_seed_executes_complete_paired_panel_without_test_selection() -> None:

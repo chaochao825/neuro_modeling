@@ -176,10 +176,12 @@ def validate_config(config: Mapping[str, Any]) -> None:
         raise ValueError("development seeds must be unique non-negative integers")
     if not reserved or len(set(reserved)) != len(reserved):
         raise ValueError("reserved formal seeds must be unique")
+    if reserved != tuple(range(43100, 43130)):
+        raise ValueError("reserved formal seeds must be exactly 43100--43129")
     if set(seeds) & set(reserved):
         raise ValueError("development seeds must not overlap reserved formal seeds")
-    if any(seed < 43100 or seed > 43129 for seed in reserved):
-        raise ValueError("reserved formal seeds must remain in 43100--43129")
+    if any(43100 <= seed <= 43129 for seed in seeds):
+        raise ValueError("reserved formal seeds must not be used as development seeds")
 
     levels = config["levels"]
     UncertaintyLevels(
@@ -1144,14 +1146,28 @@ def _report(summary: Mapping[str, Any]) -> str:
 
 def _method_budget() -> pd.DataFrame:
     rows = [
-        (LEARNED, 5, 1, False, "local h/Q/R updates; learned release"),
-        (ORACLE_EVENT, 5, 1, True, "true event drives post-observation release"),
-        (ORACLE_QR, 5, 1, True, "dynamic generating Q/R drives gain"),
-        (ORACLE_BOTH, 5, 1, True, "both privileged paths"),
-        (TOTAL_VARIANCE, 4, 1, False, "one total-variance coordinate plus h"),
-        (SEEN_IMM, 12, 4, True, "four generator-supported fit modes"),
-        (FIXED, 2, 1, False, "fixed h/Q/R parameters"),
-        (DYNAMIC_ORACLE, 2, 1, True, "dynamic generating h/Q/R"),
+        (LEARNED, 5, 1, 3, False, "local h/Q/R updates; learned release"),
+        (
+            ORACLE_EVENT,
+            5,
+            1,
+            3,
+            True,
+            "true event drives post-observation release",
+        ),
+        (ORACLE_QR, 5, 1, 3, True, "dynamic generating Q/R drives gain"),
+        (ORACLE_BOTH, 5, 1, 3, True, "both privileged paths"),
+        (
+            TOTAL_VARIANCE,
+            10,
+            1,
+            2,
+            False,
+            "mean/variance/h/Q/R plus five local sufficient-statistic states",
+        ),
+        (SEEN_IMM, 12, 4, 0, True, "four generator-supported fit modes"),
+        (FIXED, 2, 1, 0, False, "mean/variance states; fixed h/Q/R"),
+        (DYNAMIC_ORACLE, 2, 1, 0, True, "dynamic generating h/Q/R"),
     ]
     return pd.DataFrame(
         rows,
@@ -1159,10 +1175,16 @@ def _method_budget() -> pd.DataFrame:
             "method",
             "persistent_scalar_state_count",
             "mode_count",
+            "adaptive_scalar_updates_per_sample",
             "uses_generator_truth",
             "budget_note",
         ),
-    ).assign(used_autograd=False, used_bptt=False, online_gradient_updates=0)
+    ).assign(
+        used_autograd=False,
+        used_bptt=False,
+        online_gradient_updates=0,
+        functional_budget_matched=False,
+    )
 
 
 def _artifact_manifest(output: Path, *, status: str, environment: Mapping[str, Any]) -> dict[str, Any]:
