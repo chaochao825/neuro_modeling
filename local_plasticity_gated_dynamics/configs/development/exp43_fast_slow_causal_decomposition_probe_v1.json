@@ -1,0 +1,50 @@
+{
+  "profile": "development_fast_slow_causal_decomposition_probe",
+  "protocol_version": "exp43_fast_slow_causal_decomposition_probe_v1",
+  "claim_upgrade_allowed": false,
+  "seeds": [43000, 43001, 43002, 43003, 43004, 43005, 43006, 43007],
+  "reserved_formal_seeds": [43100, 43101, 43102, 43103, 43104, 43105, 43106, 43107, 43108, 43109, 43110, 43111, 43112, 43113, 43114, 43115, 43116, 43117, 43118, 43119, 43120, 43121, 43122, 43123, 43124, 43125, 43126, 43127, 43128, 43129],
+  "used_autograd": false,
+  "used_bptt": false,
+  "levels": {
+    "hazard": [0.0025, 0.06],
+    "process_variance": [0.0025, 0.04],
+    "observation_variance": [0.01, 0.16]
+  },
+  "stream": {
+    "block_lengths": [64, 96, 128],
+    "blocks_per_sequence": 12,
+    "n_sequences": 4,
+    "jump_variance": 4.0
+  },
+  "filter": {
+    "initial_hazard": 0.01,
+    "initial_process_variance": 0.02,
+    "initial_observation_variance": 0.04,
+    "jump_variance": 4.0,
+    "bounds": {
+      "hazard": [0.0001, 0.25],
+      "process_variance": [0.0001, 0.5],
+      "observation_variance": [0.0001, 1.0]
+    }
+  },
+  "selection": {
+    "hazard_rate_grid": [0.002, 0.02, 0.1],
+    "process_rate_grid": [0.02, 0.1, 0.5],
+    "observation_rate_grid": [0.02, 0.1, 0.5],
+    "fixed_process_grid": [0.0025, 0.02, 0.04],
+    "fixed_observation_grid": [0.01, 0.04, 0.16],
+    "total_variance_decay_grid": [0.95, 0.99, 1.0],
+    "total_variance_prior_mass_grid": [1.0, 4.0, 16.0],
+    "total_variance_q_fraction_grid": [0.1, 0.5, 0.9],
+    "imm_switch_grid": [0.001, 0.01, 0.05]
+  },
+  "analysis": {
+    "transition_windows": [1, 4, 8, 16],
+    "late_window": 16,
+    "event_path_mcid_nll": 0.02,
+    "qr_path_mcid_nll": 0.02,
+    "actuator_headroom_mcid_nll": 0.03,
+    "required_positive_seeds": 7
+  }
+}

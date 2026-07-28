@@ -10,6 +10,11 @@ and current online-EM. Exp42 is therefore **not authorized and was not run**.
 This document is retained as a conditional historical design, not an active
 experiment protocol.
 
+Successor note (2026-07-28): Exp43 does not unlock or execute this plan. It is
+a narrower development-only exchange audit on new tapes that holds the audited
+Exp39 actuator fixed and independently replaces event and Q/R inference with
+truth. Exp42 remains unexecuted regardless of the Exp43 outcome.
+
 ## Question
 
 Exp39 shows average synthetic prediction benefit but leaves inference and
