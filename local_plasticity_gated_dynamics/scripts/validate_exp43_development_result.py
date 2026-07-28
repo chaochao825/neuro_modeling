@@ -71,6 +71,17 @@ def _sorted(frame: pd.DataFrame, columns: tuple[str, ...]) -> pd.DataFrame:
     return frame.sort_values(list(columns)).reset_index(drop=True)
 
 
+def _read_frame(path: Path) -> pd.DataFrame:
+    """Read registered condition identifiers without dropping leading zeros."""
+
+    dtype: dict[str, str] = {}
+    if path.name in {"block_metrics.csv", "event_window_metrics.csv"}:
+        dtype["cell"] = "string"
+    elif path.name == "regime_window_metrics.csv":
+        dtype.update(cell="string", previous_cell="string")
+    return pd.read_csv(path, dtype=dtype or None)
+
+
 def validate_result(output_dir: Path) -> dict[str, Any]:
     output = output_dir.resolve()
     if not output.is_dir():
@@ -138,12 +149,12 @@ def validate_result(output_dir: Path) -> dict[str, Any]:
     if source_hashes != expected_source_hashes:
         raise ValueError("source hashes differ from the executed implementation")
 
-    seed_metrics = pd.read_csv(output / "seed_metrics.csv")
-    block_metrics = pd.read_csv(output / "block_metrics.csv")
-    event_metrics = pd.read_csv(output / "event_window_metrics.csv")
-    regime_metrics = pd.read_csv(output / "regime_window_metrics.csv")
-    selection_audit = pd.read_csv(output / "selection_audit.csv")
-    comparisons = pd.read_csv(output / "comparisons.csv")
+    seed_metrics = _read_frame(output / "seed_metrics.csv")
+    block_metrics = _read_frame(output / "block_metrics.csv")
+    event_metrics = _read_frame(output / "event_window_metrics.csv")
+    regime_metrics = _read_frame(output / "regime_window_metrics.csv")
+    selection_audit = _read_frame(output / "selection_audit.csv")
+    comparisons = _read_frame(output / "comparisons.csv")
     expected_panel = {
         (int(seed), method) for seed in config["seeds"] for method in METHODS
     }
@@ -192,7 +203,7 @@ def validate_result(output_dir: Path) -> dict[str, Any]:
         if metadata.get("claim_upgrade_allowed") is not False:
             raise ValueError(f"seed {seed} metadata permits a claim upgrade")
         for name in per_seed_frames:
-            per_seed_frames[name].append(pd.read_csv(seed_dir / name))
+            per_seed_frames[name].append(_read_frame(seed_dir / name))
 
     aggregate_frames = {
         "seed_metrics.csv": (seed_metrics, ("seed", "method")),
