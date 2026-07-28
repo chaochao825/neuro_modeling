@@ -1,0 +1,9 @@
+method,persistent_scalar_state_count,mode_count,adaptive_scalar_updates_per_sample,uses_generator_truth,budget_note,used_autograd,used_bptt,online_gradient_updates,functional_budget_matched
+learned_event_learned_qr,5,1,3,False,local h/Q/R updates; learned release,False,False,0,False
+oracle_event_learned_qr,5,1,3,True,true event drives post-observation release,False,False,0,False
+learned_event_oracle_qr,5,1,3,True,dynamic generating Q/R drives gain,False,False,0,False
+oracle_event_oracle_qr,5,1,3,True,both privileged paths,False,False,0,False
+h_plus_total_variance,10,1,2,False,mean/variance/h/Q/R plus five local sufficient-statistic states,False,False,0,False
+generator_supported_seen_mode_imm,12,4,0,True,four generator-supported fit modes,False,False,0,False
+selected_fixed_jump,2,1,0,False,mean/variance states; fixed h/Q/R,False,False,0,False
+dynamic_parameter_oracle,2,1,0,True,dynamic generating h/Q/R,False,False,0,False

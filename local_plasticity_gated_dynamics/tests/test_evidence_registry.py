@@ -56,6 +56,7 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp40",
         "exp41",
         "exp42",
+        "exp43",
     ):
         assert dispositions[experiment_id] == "historical_only"
     for experiment_id in (
@@ -69,7 +70,6 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp31",
         "exp32",
         "exp39",
-        "exp43",
     ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
     assert registry["exp37"]["disposition"] == "historical_only"
@@ -80,6 +80,10 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
     assert registry["exp41"]["conclusion"] == "mixed"
     assert registry["exp41"]["canonical_evidence"] == (
         "results/history/exp41_matched_qr_development_20260727.md"
+    )
+    assert registry["exp43"]["conclusion"] == "mixed"
+    assert registry["exp43"]["canonical_evidence"] == (
+        "results/history/exp43_fast_slow_causal_decomposition_development_20260728.md"
     )
 
 

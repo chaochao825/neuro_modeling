@@ -58,6 +58,8 @@ results/*.pdf
 !results/exp20_ibl_md_belief_dynamics_formal.pdf
 !results/exp40_ibl_state_utility.png
 !results/exp40_ibl_state_utility.pdf
+!results/exp43_fast_slow_causal_decomposition_development.png
+!results/exp43_fast_slow_causal_decomposition_development.pdf
 
 # Deletions are staged here per workspace safety policy.
 trash/

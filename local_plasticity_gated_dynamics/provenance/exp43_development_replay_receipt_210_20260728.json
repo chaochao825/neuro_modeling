@@ -1,0 +1,15 @@
+{
+  "aggregate_replay": "pass",
+  "artifact_hashes": "pass",
+  "claim_upgrade_allowed": false,
+  "experiment": "exp43_fast_slow_causal_decomposition",
+  "formal_seeds_accessed": false,
+  "implementation_sha256": "68fc6cf4bd67444c5a2c3dc19d98e08191b051b71615fe8c7944cc48460132d1",
+  "n_methods": 8,
+  "n_seeds": 8,
+  "result_dir": "/home/spco/sow_linear/codex_worktrees/neuro_exp41_20260727/local_plasticity_gated_dynamics/results/exp43_fast_slow_causal_decomposition_development_v1",
+  "source_hashes": "pass",
+  "status": "pass",
+  "summary_replay": "pass",
+  "validator": "validate_exp43_development_result_v1"
+}

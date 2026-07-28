@@ -1,0 +1,9 @@
+{
+  "claim_upgrade_allowed": false,
+  "development_only": true,
+  "n_complete_seeds": 8,
+  "n_failed_seeds": 0,
+  "n_planned_seeds": 8,
+  "status": "complete",
+  "verdict": "inconclusive_development_only"
+}

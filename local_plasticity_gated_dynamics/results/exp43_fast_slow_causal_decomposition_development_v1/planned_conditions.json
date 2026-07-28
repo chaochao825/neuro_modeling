@@ -1,0 +1,68 @@
+{
+  "claim_upgrade_allowed": false,
+  "development_seeds": [
+    43000,
+    43001,
+    43002,
+    43003,
+    43004,
+    43005,
+    43006,
+    43007
+  ],
+  "fit_cells": [
+    "000",
+    "100",
+    "010",
+    "001"
+  ],
+  "methods": [
+    "learned_event_learned_qr",
+    "oracle_event_learned_qr",
+    "learned_event_oracle_qr",
+    "oracle_event_oracle_qr",
+    "h_plus_total_variance",
+    "generator_supported_seen_mode_imm",
+    "selected_fixed_jump",
+    "dynamic_parameter_oracle"
+  ],
+  "oracle_event_timing": "post_observation_action_only",
+  "reserved_formal_seeds": [
+    43100,
+    43101,
+    43102,
+    43103,
+    43104,
+    43105,
+    43106,
+    43107,
+    43108,
+    43109,
+    43110,
+    43111,
+    43112,
+    43113,
+    43114,
+    43115,
+    43116,
+    43117,
+    43118,
+    43119,
+    43120,
+    43121,
+    43122,
+    43123,
+    43124,
+    43125,
+    43126,
+    43127,
+    43128,
+    43129
+  ],
+  "test_cells": [
+    "110",
+    "101",
+    "011",
+    "111"
+  ]
+}

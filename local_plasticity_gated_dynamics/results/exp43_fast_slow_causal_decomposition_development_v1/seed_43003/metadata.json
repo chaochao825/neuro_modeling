@@ -1,0 +1,43 @@
+{
+  "claim_upgrade_allowed": false,
+  "fit_cells": [
+    "000",
+    "100",
+    "010",
+    "001"
+  ],
+  "fit_tape_digest": "b00ee74ff3fe2bcfab81247e32cb8cc2a20e063410b184db4091951e4a236378",
+  "n_fit_samples": 4608,
+  "n_test_jumps": 186,
+  "n_test_samples": 4608,
+  "oracle_event_timing": "post_observation_action_only",
+  "seed": 43003,
+  "selected_adaptation": {
+    "hazard": 0.002,
+    "observation_variance": 0.1,
+    "process_variance": 0.5
+  },
+  "selected_fixed": {
+    "hazard": 0.01,
+    "jump_variance": 4.0,
+    "observation_variance": 0.04,
+    "process_variance": 0.02
+  },
+  "selected_imm_switch": 0.01,
+  "selected_total_variance": {
+    "q_fraction": 0.1,
+    "update": {
+      "hazard_rate": 0.002,
+      "minimum_continuation_weight": 1e-06,
+      "prior_mass": 1.0,
+      "statistic_decay": 0.95
+    }
+  },
+  "test_cells": [
+    "110",
+    "101",
+    "011",
+    "111"
+  ],
+  "test_tape_digest": "0351c7e0de7320008847e5380d32307df9a522349fed7b5d1d3671f2428de2c0"
+}

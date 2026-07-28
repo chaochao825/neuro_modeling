@@ -17,6 +17,22 @@ The highest-value question is not whether another gate can be added. It is:
 This is narrower than the abandoned Exp42 entry-gated plan. It is a causal
 diagnostic on new tapes, not a confirmation or a claim upgrade.
 
+## Exp43 outcome update
+
+The prospective 2x2 audit has now completed on 8/8 development seeds with no
+failure and no access to reserved formal seeds. Oracle-both improves learned
+NLL by +0.090067 in 8/8 seeds. Oracle event improves the next-eight post-jump
+NLL by +0.031488, and oracle Q/R improves overall NLL by +0.076979, both in
+8/8. The existing actuator can therefore use correct signals.
+
+The deployable gate nevertheless fails. Total variance minus learned is only
++0.013021 NLL with 6/8 positive seeds and 5/8 positive latent-MSE seeds; cell
+`110` remains negative. In that cell the learned controller underestimates Q
+and overestimates R, while oracle Q/R restores +0.125209 NLL in 8/8 seeds.
+The development conclusion is consequently a localization result: both
+inference paths have headroom, Q/R is the dominant aggregate bottleneck, and
+event inference matters after jumps. It is not a controller confirmation.
+
 ## What the existing experiments establish
 
 | Evidence | What is established | What is not established |
@@ -28,6 +44,7 @@ diagnostic on new tapes, not a confirmation or a claim upgrade.
 | Exp39 | A local three-coordinate filter selected on isolated factors improves average NLL and latent MSE on unseen joint synthetic cells | Uniform cell-wise benefit, clean h/Q/R recovery, or fast post-switch release |
 | Exp40 | Semi-Markov structure improves hidden-block decoding on exposed IBL behavior | Incremental held-out choice utility or a neural mechanism |
 | Exp41 | Lag covariance contains enough information to order matched Q/R regimes | Timely predictive utility: the estimator loses early and overall to online EM and total variance |
+| Exp43 | The fixed actuator converts correct event and Q/R signals into held-out headroom | The all-learned controller does not uniformly beat total variance/IMM; cell `110` still fails |
 
 The repeated negative boundary is therefore specific: useful stable evidence
 accumulation exists, but the learned controller has not released or redirected
@@ -96,20 +113,23 @@ verbal diagnosis implied. Its audited jump step computes:
 4. a mixture of the two states.
 
 Exp41 changes the slow Q/R estimator but deliberately reuses this actuator.
-Thus another implementation of “fast event posterior + slow Q/R + separate
-write/release” would be semantically redundant. The missing experiment is an
-exchange audit in which event inference and Q/R inference are independently
-replaced by truth while the actuator is held fixed.
+Thus another implementation of "fast event posterior + slow Q/R + separate
+write/release" would be semantically redundant. Exp43 supplied the missing
+exchange audit: the actuator has headroom, while both learned inference paths
+remain limiting.
 
 ## Priority ladder
 
-1. **Run the Exp43 development-only 2x2 exchange audit on new tapes.** It
-   separates deployable/oracle event release from deployable/oracle Q/R gain.
-2. **Advance only the identified bottleneck.** If oracle release helps, improve
-   event inference; if oracle Q/R helps, improve slow inference; if neither
-   helps, retire this actuator/task pairing.
-3. **Use the Piray--Daw public human task as the first external utility test.**
-   Predict held-out participant updates, not merely true block labels.
+1. **Archive Exp43 without a formal run.** Its development gate localizes
+   opportunity but the deployable conjunction fails; reserved seeds remain
+   untouched.
+2. **Use the Piray--Daw public human task as the first external utility test.**
+   Predict held-out participant updates, not merely true block labels. Compare
+   a reduced total-uncertainty controller, robust BOCPD, and a hierarchical
+   particle/HGF-style model under participant-held evaluation.
+3. **Change inference, not the actuator.** Pre-register cell-`110` recovery,
+   post-change utility, calibration, and update-cost endpoints. Keep the
+   current write/release algebra fixed so improvement remains identifiable.
 4. **Return to a disjoint IBL cohort only after behavioral utility.** Cross-fit
    subjective state by animal/session before neural encoding; regress movement
    and pose; use animal/session bootstrap.
@@ -129,3 +149,7 @@ replaced by truth while the actuator is held fixed.
   total variance and seen-mode IMM, the contribution remains a failure
   localization result, not a new controller.
 - No synthetic result licenses a neural or E/I mechanism claim.
+
+Exp43 reaches exactly the fourth condition. The next experiment must therefore
+change the data/inference bridge and use untouched participants; it must not
+be presented as a post-hoc rescue on seeds `43000--43007`.

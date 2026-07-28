@@ -429,3 +429,59 @@ locked. Confirmatory real-data evidence is **inconclusive/not run**. The report,
 animal effects, failure rows, figure, and run hashes are preserved under
 `results/exp40_ibl_state_utility_*`; the full lineage record is
 `results/history/exp40_ibl_factorized_state_development_20260726.md`.
+
+## Exp41 prospective development update: matched-Q/R identification
+
+Exp41 removed the lag-zero shortcut by matching \(Q+2R\) within two regime
+pairs. The lagged-covariance estimator ordered both Q and R correctly in both
+pairs in 8/8 development seeds. The recovered separations were 43.9--61.8% of
+the generating Q differences and 44.6--54.3% of the R differences. This is a
+bounded **support** result for statistical identifiability.
+
+It did not yield predictive utility. Current online EM had 0.021208 lower NLL
+than autocovariance in 8/8 seeds; total variance had 0.010722 lower NLL on
+average and won every 1/4/8/16-step transition window. Latent MSE did not
+improve, and Q clipped at a bound in 8.65% of samples. Predictive and fast-
+transition claims are therefore **oppose**. No reserved seed was accessed and
+formal confirmation is **inconclusive/not run**. The replay-bound decision is
+`results/history/exp41_matched_qr_development_20260727.md`.
+
+## Exp43 prospective development update: fast/slow causal exchange
+
+Exp43 held the Exp39 state-update actuator fixed and independently replaced
+learned event and Q/R signals with privileged truth. Fit and test tapes were
+disjoint; all methods were paired on 8/8 completed seeds. Event truth was
+supplied only after scoring its observation, so the event endpoint starts at
+the next prediction. Source/artifact hashes, aggregate replay, and summary
+replay passed; formal seeds `43100--43129` were not accessed.
+
+| Registered gate | Effect | Positive seeds | Result |
+|---|---:|---:|---|
+| oracle-both NLL headroom | +0.090067 | 8/8 | **support**, development localization |
+| oracle-event next-eight NLL headroom | +0.031488 | 8/8 | **support**, development localization |
+| oracle-Q/R overall NLL headroom | +0.076979 | 8/8 | **support**, development localization |
+| deployable learned-controller conjunction | total variance minus learned +0.013021 | 6/8 | **oppose** |
+
+The existing actuator can therefore convert correct signals into held-out
+utility; failure is not explained by an intrinsically powerless write/release
+mapping. Q/R inference is the larger aggregate bottleneck, while event
+inference leaves specific post-jump headroom.
+
+The deployable method is not validated. Its latent-MSE gain over total
+variance is positive in only 5/8 seeds, and cell `110` remains negative against
+both total variance (-0.002957 NLL) and seen IMM (-0.014193). In that cell,
+learned Q/R are approximately 0.0196/0.0512 versus generating 0.04/0.01;
+oracle Q/R improves NLL by +0.125209 in 8/8 seeds. Thus Exp43 is a historical
+mixed localization result, not an Exp39 upgrade or formal-controller success.
+The decision is archived at
+`results/history/exp43_fast_slow_causal_decomposition_development_20260728.md`.
+
+## Revised scaling decision
+
+Do not add carrier size, a new actuator, formal Exp43 seeds, neural activity,
+or E/I claims. The next external bridge should use the public human task that
+separately manipulates volatility and observation stochasticity, with held-out
+participant update prediction rather than condition decoding. The current
+actuator stays fixed; robust change-point and hierarchical Bayesian models are
+required comparators. A disjoint IBL cohort is conditional on behavioral
+utility, and participating E/I plasticity remains a final-stage mechanism test.

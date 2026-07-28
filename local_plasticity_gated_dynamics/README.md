@@ -27,7 +27,7 @@ The repository has two exhaustive and mutually exclusive result views:
   positive, negative, failed, and inconclusive rows.
 
 The [experiment registry](provenance/experiment_registry.csv) classifies every
-entry point from Exp00 through Exp40. The [branch audit](docs/branch_consolidation.md)
+entry point from Exp00 through Exp43. The [branch audit](docs/branch_consolidation.md)
 shows that all other remote branches were already ancestors of the audited
 base, so no implementation commit was missing. Hash-bound snapshots preserve
 their prior README/report/summary surfaces.
@@ -84,7 +84,11 @@ The current evidence chain is:
     online-EM and the reduced total-variance controller on overall NLL and at
     every early transition window. It is a historical mixed/no-go result; no
     formal seed was accessed and Exp42 remains locked.
-16. Exp25: the real compositional neural endpoint remains active but correctly
+16. Exp43: the prospectively frozen 2x2 exchange audit finds usable oracle
+    headroom in both event and Q/R paths, but the deployable conjunction fails:
+    total variance remains competitive and cell `110` is negative. This is a
+    historical development localization, not a formal controller result.
+17. Exp25: the real compositional neural endpoint remains active but correctly
     fails closed because an eligible canonical neural bundle is unavailable.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
@@ -107,6 +111,11 @@ was executed only on its disclosed development seeds. The
 records successful Q/R separation but failed predictive and early-transition
 utility. Its stop rule blocks formal advancement and keeps
 [Exp42](docs/exp42_actuator_factorization_audit_plan_20260727.md) unexecuted.
+The narrower [Exp43 protocol](docs/exp43_fast_slow_causal_decomposition_protocol_20260728.md)
+then holds the actuator fixed and exchanges its two inferred signals for
+truth. Its [historical decision](results/history/exp43_fast_slow_causal_decomposition_development_20260728.md)
+records oracle headroom in both paths, failed deployable advancement, and the
+continued lock on formal seeds, Exp42, neural data, and E/I claims.
 
 The [Exp40 historical development audit](results/history/exp40_ibl_factorized_state_development_20260726.md)
 records the synthetic-to-real transfer boundary: better hidden-block decoding
@@ -139,12 +148,14 @@ flowchart LR
 ```
 
 Exp41 shows that the slow Q/R coordinates can carry matched-marginal
-information, but also that identifiability alone is insufficient: the tested
-single-timescale estimator adapts too slowly to improve held-out prediction.
-The fast-event/slow-uncertainty architecture therefore remains a hypothesis,
-not a validated method. Exp42, real behavior, neural shared dynamics, and a
-participating E/I carrier remain locked. Historical-only branches stay in the
-evidence registry rather than the active computation graph.
+information, but also that identifiability alone is insufficient. Exp43 then
+shows that the existing fast-event/slow-Q/R actuator has oracle headroom while
+the all-learned controller still fails its deployable conjunction. The
+architecture therefore remains a hypothesis with a localized inference and
+calibration bottleneck, not a validated method. Exp42, formal Exp43 seeds,
+real behavior, neural shared dynamics, and a participating E/I carrier remain
+locked. Historical-only branches stay in the evidence registry rather than
+the active computation graph.
 
 ## What is not currently claimed
 
@@ -186,6 +197,10 @@ evidence registry rather than the active computation graph.
   covariance statistics separate matched Q/R regimes, but aggregate NLL is
   worse than current online-EM and total variance, early transition costs are
   larger, functional budgets are unmatched, and the result is development-only.
+- Exp43 oracle arms do not establish deployable performance. They show only
+  that the fixed actuator can use correct signals; learned-versus-total-
+  variance consistency, latent MSE, and cell-wise non-negativity all fail the
+  registered conjunction, so no formal seed is authorized.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

@@ -32,6 +32,7 @@ prediction across its four registered held-out composition cells.
 | Exp39 factor-indexed uncertainty | Average four-cell compositional utility **support**; clean parameter decomposition, uniform cell-wise dominance, and fast release **oppose** | Cell `110` loses on mean NLL; h recovery is weak; Q/R cross-load strongly; `early_nll` includes sequence-initial blocks; synthetic data provide no real behavior or neural evidence |
 | Exp40 IBL factorized-state development | Context decoding **support**; meaningful choice utility **oppose**; confirmation **inconclusive/not run** | Outcome-exposed cohort; 27/30 endpoint-eligible animals; release is inconclusive and precision clamp improves NLL |
 | Exp41 matched-Q/R development | Statistical Q/R separation **support**; predictive and early-transition utility **oppose**; formal confirmation **not run** | Eight development seeds only; autocovariance loses to online-EM and total variance, improves only late, clips Q in 8.65% of steps, and has unmatched functional budgets |
+| Exp43 fast/slow causal exchange | Existing-actuator oracle headroom **support**; deployable advance **oppose**; formal confirmation **not run** | Eight development seeds only; both event and Q/R inference paths leave headroom, total variance remains competitive, and cell `110` still loses |
 | Exp25 real compositional panel | **Inconclusive** | Canonical neural inputs are unavailable and the loader correctly fails closed |
 
 Exp31's full-block reward-only advantage over the train-selected fixed actuator
@@ -131,6 +132,20 @@ by 0.016334. Latent MSE does not improve, and Q reaches a clipping bound in
 8.65% of steps. This is a mixed identifiability success and utility failure,
 not a successful factorized controller.
 
+Exp43 holds that same actuator fixed and independently exchanges learned event
+and Q/R signals for truth. Oracle-both improves NLL by +0.090067 and latent MSE
+by +0.020102 in 8/8 development seeds. Oracle event improves the registered
+next-eight post-jump NLL by +0.031488; oracle Q/R improves overall NLL by
++0.076979. This rules out the narrow diagnosis that the existing actuator
+cannot use correct signals. It does not validate the learned controller:
+against total variance, NLL is positive in only 6/8 seeds and latent MSE in
+5/8, while cell `110` remains negative against both total variance and seen
+IMM. Learned cell-`110` Q/R are approximately 0.0196/0.0512 versus generator
+0.04/0.01. The failure is therefore dominated by slow-state attribution and
+calibration, with a smaller event-timing deficit, rather than a missing new
+write/release actuator. This is a mixed development localization and its
+formal seeds remain untouched.
+
 Priority is therefore:
 
 1. preserve Exp39's frozen implementation, settings, tapes, and artifacts;
@@ -139,16 +154,20 @@ Priority is therefore:
 2. archive Exp41 as the registered development no-go: preserve its successful
    matched-Q/R separation and failed predictive/transition utility together;
    do not access reserved seeds `41100--41129` or retune seeds `41000--41007`;
-3. contract the deployable utility claim to total uncertainty/current online
-   adaptation. Lagged Q/R covariance remains a slow diagnostic state, not a
-   validated actuator;
-4. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
+3. archive Exp43 as a development localization: do not access formal seeds or
+   retune its exposed tapes; keep the actuator fixed and improve only the
+   identified inference/calibration paths;
+4. use the public volatility-versus-stochasticity human task as the next
+   external bridge, with participant-held predictive/update utility and
+   reduced total-uncertainty, robust BOCPD, and hierarchical Bayesian
+   comparators; decoding a condition label is not a sufficient endpoint;
+5. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
    extensions locked. Any future fast-event/slow-uncertainty study requires a
    materially new prospective contract and untouched data;
-5. retain Exp35--Exp38 as historical failure-boundary evidence: do not retune
+6. retain Exp35--Exp38 as historical failure-boundary evidence: do not retune
    categorical BOCPD on CORe50, reopen Stream-51 external data, or present
    prefix consistency as a positive active method;
-6. retain simple forgetting/current-frame evidence as the real-task reference
+7. retain simple forgetting/current-frame evidence as the real-task reference
    rather than treating explicit change detection as automatically superior.
 
 Increasing carrier neuron count while the carrier does no computation has no

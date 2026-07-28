@@ -124,3 +124,17 @@ per-seed metadata/status, fit selections, raw block/event metrics, paired seed
 metrics, failures, summary, report, and a manifest. Validation must replay the
 method panel and reject missing arms, digest mismatches, future leakage, or a
 formal-claim flag.
+
+## Outcome addendum (added after execution)
+
+The prospective text above was not changed after outcomes. All 8/8 development
+seeds completed under frozen commit
+`24464da2bdd3785dd442832d18e4858b10084842`; the independent validator passed
+source/artifact hashes, aggregate replay, and summary replay. The actuator,
+event-path, and Q/R-path oracle-headroom gates passed, but the deployable
+advance gate failed. Reserved seeds `43100--43129` were not accessed.
+
+The bounded decision and registered/post-hoc separation are recorded in
+[`results/history/exp43_fast_slow_causal_decomposition_development_20260728.md`](../results/history/exp43_fast_slow_causal_decomposition_development_20260728.md).
+No outcome in this development audit authorizes Exp42, a formal run, or a
+neural/E/I claim.
