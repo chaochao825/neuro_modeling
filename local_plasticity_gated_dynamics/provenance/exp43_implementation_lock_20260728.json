@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "experiment": "exp43_fast_slow_causal_decomposition",
+  "status": "implementation_frozen_before_outcome",
+  "development_only": true,
+  "claim_upgrade_allowed": false,
+  "protocol_commit": "bb3d9cf",
+  "implementation_commit": "b67590944bb57f3ac70e7a1a0cb6132bf346a275",
+  "config_sha256": "46dd4599a86320d5b2f56a41ea37e4f3eb0d9fed4922c575e830914843fd4bde",
+  "protocol_sha256": "4738f7a8b830ae6d462f0b51dd526ccc5ce94b48c2819779a2ef053f8080ff41",
+  "development_seeds": [43000, 43001, 43002, 43003, 43004, 43005, 43006, 43007],
+  "reserved_formal_seeds": [43100, 43101, 43102, 43103, 43104, 43105, 43106, 43107, 43108, 43109, 43110, 43111, 43112, 43113, 43114, 43115, 43116, 43117, 43118, 43119, 43120, 43121, 43122, 43123, 43124, 43125, 43126, 43127, 43128, 43129],
+  "source_sha256": {
+    "experiments/exp43_fast_slow_causal_decomposition.py": "e507b04c4d4fbbb1deebf31cf180cd793d3dd8bc0c714265bff2f0cbc45fb594",
+    "scripts/validate_exp43_development_result.py": "6495870a354e6d4471ce21f740692e751c6898f04c4032cca6e7159e22f6fa6c",
+    "src/models/autocovariance_uncertainty_filter.py": "b0197929c55f3d0f2d0e20fd622ba53f7f737aee0cf6607007b5798c386664d6",
+    "src/models/factorized_uncertainty_filter.py": "69579dd4bb967b12645039b600ae511bfdae6304f8b165b281464c553f35e47a",
+    "src/models/fast_slow_uncertainty_audit.py": "6232e07df0d1de5fc7fed847650105ea21d0802b644d756f3d06a69ac47561be",
+    "src/tasks/factorized_uncertainty.py": "a2b5ee2eb3a7e5829c13acec55b08cb62bfc5d933895b7445350ffe065b3f6a2",
+    "src/tasks/fast_slow_uncertainty.py": "618a494e64a266e01dc7f96d6f34ca721c2819aa3c2ebc34693089980be2763e"
+  },
+  "implementation_sha256": "68fc6cf4bd67444c5a2c3dc19d98e08191b051b71615fe8c7944cc48460132d1",
+  "pre_outcome_checks": {
+    "python": "3.11.15",
+    "server_profile": "210",
+    "targeted_tests": "27 passed in 10.63s",
+    "ruff": "pass",
+    "locked_exp39_semantic_test": "pass",
+    "earlier_full_regression_on_cf90277": "1381 passed in 340.88s"
+  },
+  "outcome_exposed_at_lock": false,
+  "formal_seeds_accessed_at_lock": false,
+  "notes": [
+    "The oracle event is injected only into the post-observation release action.",
+    "Q/R truth and event truth remain explicitly privileged diagnostic inputs.",
+    "Exp42 remains historical and locked regardless of Exp43 outcomes."
+  ]
+}
