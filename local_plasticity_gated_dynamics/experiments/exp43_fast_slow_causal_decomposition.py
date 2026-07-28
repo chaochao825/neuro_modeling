@@ -892,7 +892,7 @@ def summarize(
                 }
             )
 
-    comparison_frame = pd.DataFrame(comparisons)
+    comparison_frame = pd.DataFrame(comparisons).drop(columns="values_by_seed")
     required = int(config["analysis"]["required_positive_seeds"])
     event_window = max(
         value
