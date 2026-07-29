@@ -5,6 +5,14 @@
   "development_outcomes_accessed_before_lock": false,
   "lock_date": "2026-07-30",
   "popgym_accessed": false,
+  "preoutcome_entrypoint_remediation": {
+    "failed_commit": "7e785adda71f15f38d0f2db073af13a2d4a97dc8",
+    "failed_tag": "exp44-dev-v1-preoutcome-20260730",
+    "failure_stage": "module_import_before_data_loading",
+    "outcomes_accessed": false,
+    "record": "results/history/exp44_piray_daw_entrypoint_failure_20260730.md",
+    "scope": "project-root import bootstrap and direct-entrypoint regression test only"
+  },
   "protocol_version": "exp44_piray_daw_qr_behavior_v1",
   "schema_only_access_before_lock": {
     "allowed": true,
@@ -20,20 +28,22 @@
   },
   "sha256": {
     "configs/development/exp44_piray_daw_qr_behavior_v1.json": "1f2728238ff336d75560c5e5f1741f43af0661645128290ecf4b34332c967034",
-    "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md": "7a04c1d5e1678ba3b927cd4c552e030dbe97241b321afd4c0635a96350e97109",
-    "experiments/exp44_piray_daw_qr_behavior.py": "ff259323aa9c6334349eace428b5c01e7267f70ae25fc88b16e39d28c95f1418",
+    "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md": "8b363dc331a23257bdc2c58bfd09a7aae62ecf1a5810f58a7645bace13f01487",
+    "experiments/exp44_piray_daw_qr_behavior.py": "7b095097c7e6c3b76673e866e86569ef9f7b8a08a78a9e2b05b500f048ecc315",
     "provenance/piray_daw_zenodo_v1.json": "eaf89783107c4f18560ec80fbd0669cd2a384cf7d788773026808e463ebadee3",
     "scripts/fetch_piray_daw.py": "31f02d6011b4015fcf04a81d9b70d5e1dd52920eaed5f550f27770e52132cf9f",
     "src/data/piray_daw.py": "17e78559c7040915246da3be3869de35637972b7c4b80913f999d3f504aa132e",
+    "results/history/exp44_piray_daw_entrypoint_failure_20260730.md": "edabd0d727343e0f199539fad25f69ffbcb8a92da93e703cde725b3f6f6fc7b2",
     "src/models/piray_daw_qr_controller.py": "18084e9ac8c0c8dff3efc1335b2df4510943c796e2b4a027e9f31d6efc2ccd20",
-    "tests/test_exp44_piray_daw_qr_behavior.py": "04f047147adadcc0114390e6832db25d49a44295ed84f9b64c63d40ce67b2094",
+    "tests/test_exp44_implementation_lock.py": "28143daf5a11f5a740e1c6358db5e55c40a0a15c1a9b3e17bfc3786b1ba7db8b",
+    "tests/test_exp44_piray_daw_qr_behavior.py": "6a3bb34a6d9d0694ba1b7404532fd8bbd102f4bfaa26bab46ef8bd04a47aeead",
     "tests/test_piray_daw_loader.py": "e99e5b5497aa31cd813e770a103b10236acc18df7f62224371fed14fb2367eef",
     "tests/test_piray_daw_qr_controller.py": "60167256eacb8ecf43b374806065c159ccf346bd392bb70ec6b3d68729473f34"
   },
   "stage": "prospective_development_preoutcome",
   "targeted_test_receipt": {
     "environment": "210 Python 3.11",
-    "result": "30 passed",
+    "result": "pending entrypoint-remediation rerun",
     "scope": "Exp44 loader, causal controllers, runner, leakage locks, and evidence registry"
   }
 }

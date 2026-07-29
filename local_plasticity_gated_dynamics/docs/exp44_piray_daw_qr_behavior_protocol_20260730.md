@@ -163,6 +163,24 @@ recurrent baseline and an online recurrent method such as RTU, with matched
 parameter and interaction budgets. Neural, tracking/BCI/IBL, and participating
 E/I carrier stages remain downstream of that result.
 
+## Executable and launch audit
+
+The Experiment 1 development command is:
+
+```bash
+python experiments/exp44_piray_daw_qr_behavior.py \
+  --config configs/development/exp44_piray_daw_qr_behavior_v1.json \
+  --output results/exp44_piray_daw_qr_behavior_development_v1
+```
+
+The first launch from the original pre-outcome tag failed during Python module
+resolution, before data loading or metric computation. That attempt is retained
+in `results/history/exp44_piray_daw_entrypoint_failure_20260730.md`. The only
+permitted remediation is an entrypoint project-root bootstrap plus a subprocess
+test of this exact direct-file invocation. The implementation receipt and a new
+pre-outcome tag must be updated before the replacement run. No output directory
+may be overwritten.
+
 ## Permitted conclusions
 
 - `support`: causal factorized Q/R state adds held-out participant behavior

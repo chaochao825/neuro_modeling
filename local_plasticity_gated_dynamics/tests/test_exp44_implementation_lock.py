@@ -24,6 +24,10 @@ def test_exp44_preoutcome_lock_matches_protocol_config_and_sources() -> None:
     assert not receipt["schema_only_access_before_lock"][
         "project_model_comparisons_computed"
     ]
+    remediation = receipt["preoutcome_entrypoint_remediation"]
+    assert remediation["failure_stage"] == "module_import_before_data_loading"
+    assert not remediation["outcomes_accessed"]
+    assert (ROOT / remediation["record"]).is_file()
     for relative, expected in receipt["sha256"].items():
         path = ROOT / relative
         assert path.is_file(), relative

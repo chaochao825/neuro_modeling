@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 import numpy as np
 import pandas as pd
@@ -32,6 +34,24 @@ from src.models.piray_daw_qr_controller import run_fixed_gain
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "development" / "exp44_piray_daw_qr_behavior_v1.json"
+
+
+def test_script_entrypoint_resolves_project_imports() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "experiments" / "exp44_piray_daw_qr_behavior.py"),
+            "--help",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--config" in completed.stdout
+    assert "--output" in completed.stdout
 
 
 def _config() -> dict:
