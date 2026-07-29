@@ -100,4 +100,7 @@ Canonical raw evidence is in
 `results/exp44_piray_daw_qr_behavior_development_v1/`. The independent
 post-outcome validator replays artifact hashes, participant-level contrasts,
 bootstrap intervals, Holm adjustment, every gate clause, and both downstream
-locks without importing the experiment decision function.
+locks without importing the experiment decision function. Its explicitly
+post-outcome `posthoc_validation.json` receipt has SHA-256
+`c19ddb1e89a60be3aa8c9c2c9716b4b79040dc08b8242ca760caefb8e4c93896`;
+it is intentionally not retrofitted into the frozen run manifest.

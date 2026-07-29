@@ -1,0 +1,24 @@
+{
+  "artifact_hashes_replayed": 14,
+  "cell_metric_rows": 5352,
+  "clauses": {
+    "cellwise_noninferiority_vs_total": true,
+    "directional_qr_effects": false,
+    "mse_gain_vs_fixed": false,
+    "mse_gain_vs_total_uncertainty": false,
+    "nll_gain_vs_fixed": false,
+    "nll_gain_vs_total_uncertainty": false,
+    "particle_gain_retention": true
+  },
+  "comparison_rows_replayed": 10,
+  "conclusion": "oppose",
+  "development_gate_passed": false,
+  "experiment2_locked": true,
+  "frozen_commit": "42af52bb2d6769f41fe9d6f9a4825a0d60ecd8a0",
+  "manifest_sha256": "b30e193c9cfc0beb54e040a99781e5eb9dd723dce514af66b73ea9a5bc12a440",
+  "n_participants": 223,
+  "participant_metric_rows": 1338,
+  "popgym_locked": true,
+  "status": "pass",
+  "validation_scope": "postoutcome_independent_artifact_and_decision_replay"
+}
