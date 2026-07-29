@@ -1,0 +1,3 @@
+2026-07-30 03:34:15,623 INFO loaded 223 participants from /home/spco/sow_linear/codex_worktrees/neuro_exp41_20260727/local_plasticity_gated_dynamics/data/raw/piray_daw_v1/experiment1/data.mat
+2026-07-30 03:34:22,089 INFO built candidate counts {'fixed_gain': 99, 'total_uncertainty': 132, 'factorized_local_em': 81, 'autocovariance_qr': 81, 'hierarchical_particle': 48, 'oracle_qr': 1}
+2026-07-30 03:34:23,716 INFO development gate passed=False
