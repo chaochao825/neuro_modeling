@@ -230,8 +230,9 @@ def _replay_decision(
             mse["mean_gain"] > float(analysis["minimum_mse_gain"])
             and mse["ci_low"] > 0.0
         )
-        clauses[f"nll_gain_vs_{baseline}"] = nll_pass
-        clauses[f"mse_gain_vs_{baseline}"] = mse_pass
+        clause_suffix = "fixed" if baseline == FIXED else baseline
+        clauses[f"nll_gain_vs_{clause_suffix}"] = nll_pass
+        clauses[f"mse_gain_vs_{clause_suffix}"] = mse_pass
         primary[baseline] = {
             "nll_mean_gain": float(nll["mean_gain"]),
             "nll_ci_low": float(nll["ci_low"]),
