@@ -157,10 +157,12 @@ Priority is therefore:
 3. archive Exp43 as a development localization: do not access formal seeds or
    retune its exposed tapes; keep the actuator fixed and improve only the
    identified inference/calibration paths;
-4. use the public volatility-versus-stochasticity human task as the next
-   external bridge, with participant-held predictive/update utility and
-   reduced total-uncertainty, robust BOCPD, and hierarchical Bayesian
-   comparators; decoding a condition label is not a sufficient endpoint;
+4. execute the prospective Exp44 public volatility-versus-stochasticity bridge
+   on Experiment 1, with participant-held update utility and fixed,
+   reduced-total-uncertainty, and hierarchical-particle comparators. Its block
+   boundary is explicitly cued, so BOCPD is not a matched primary comparator;
+   change-point models are deferred to a genuinely hidden-boundary task.
+   Decoding a condition label is not a sufficient endpoint;
 5. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
    extensions locked. Any future fast-event/slow-uncertainty study requires a
    materially new prospective contract and untouched data;

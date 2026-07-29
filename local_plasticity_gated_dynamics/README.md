@@ -27,7 +27,7 @@ The repository has two exhaustive and mutually exclusive result views:
   positive, negative, failed, and inconclusive rows.
 
 The [experiment registry](provenance/experiment_registry.csv) classifies every
-entry point from Exp00 through Exp43. The [branch audit](docs/branch_consolidation.md)
+entry point from Exp00 through Exp44. The [branch audit](docs/branch_consolidation.md)
 shows that all other remote branches were already ancestors of the audited
 base, so no implementation commit was missing. Hash-bound snapshots preserve
 their prior README/report/summary surfaces.
@@ -90,6 +90,10 @@ The current evidence chain is:
     historical development localization, not a formal controller result.
 17. Exp25: the real compositional neural endpoint remains active but correctly
     fails closed because an eligible canonical neural bundle is unavailable.
+18. Exp44: a prospective Piray--Daw bridge is now open on Experiment 1 only.
+    It tests causal participant-held bucket-update utility for separate Q/R
+    coordinates against fixed, total-uncertainty, autocovariance, and
+    hierarchical-particle comparators. Experiment 2 and POPGym remain locked.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
 [current critical audit](docs/current_evidence_critical_audit.md) for effect
@@ -122,6 +126,12 @@ records the synthetic-to-real transfer boundary: better hidden-block decoding
 did not yield held-out behavioral utility, so no new IBL cohort or neural data
 were opened.
 
+The [Exp44 prospective protocol](docs/exp44_piray_daw_qr_behavior_protocol_20260730.md)
+is the next external bridge. Its audit records that the two published cohorts
+contain independent participants but the same bag/bird stimulus tape; a future
+Experiment-2 result can test same-tape population generalization only. Unseen
+episode and control generalization are reserved for a gated POPGym successor.
+
 The [historical evidence registry](results/history/README.md) separates theory
 errors from identification, method, and data failures. The
 [current critical audit](docs/current_evidence_critical_audit.md) records the
@@ -152,10 +162,11 @@ information, but also that identifiability alone is insufficient. Exp43 then
 shows that the existing fast-event/slow-Q/R actuator has oracle headroom while
 the all-learned controller still fails its deployable conjunction. The
 architecture therefore remains a hypothesis with a localized inference and
-calibration bottleneck, not a validated method. Exp42, formal Exp43 seeds,
-real behavior, neural shared dynamics, and a participating E/I carrier remain
-locked. Historical-only branches stay in the evidence registry rather than
-the active computation graph.
+calibration bottleneck, not a validated method. Exp44 now opens a bounded
+Experiment-1 real-behavior development test without reopening Exp42 or formal
+Exp43. Experiment-2 confirmation, POPGym, neural shared dynamics, and a
+participating E/I carrier remain locked. Historical-only branches stay in the
+evidence registry rather than the active computation graph.
 
 ## What is not currently claimed
 
@@ -201,6 +212,9 @@ the active computation graph.
   that the fixed actuator can use correct signals; learned-versus-total-
   variance consistency, latent MSE, and cell-wise non-negativity all fail the
   registered conjunction, so no formal seed is authorized.
+- Exp44's public task has explicit block boundaries and identical stimulus
+  tapes across its two cohorts. It cannot establish hidden change detection or
+  unseen-stream generalization, even if participant-held behavior improves.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

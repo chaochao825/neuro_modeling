@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
     rows = load_registry(PROJECT_ROOT)
     assert [row["experiment_id"] for row in rows] == [
-        f"exp{index:02d}" for index in range(44)
+        f"exp{index:02d}" for index in range(45)
     ]
     current = {
         row["experiment_id"]
@@ -29,7 +29,7 @@ def test_registry_is_complete_disjoint_and_evidence_bound() -> None:
         row["experiment_id"] for row in rows if row["disposition"] == "historical_only"
     }
     assert current.isdisjoint(history)
-    assert current | history == {f"exp{index:02d}" for index in range(44)}
+    assert current | history == {f"exp{index:02d}" for index in range(45)}
 
 
 def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
@@ -70,6 +70,7 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp31",
         "exp32",
         "exp39",
+        "exp44",
     ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
     assert registry["exp37"]["disposition"] == "historical_only"
@@ -84,6 +85,11 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
     assert registry["exp43"]["conclusion"] == "mixed"
     assert registry["exp43"]["canonical_evidence"] == (
         "results/history/exp43_fast_slow_causal_decomposition_development_20260728.md"
+    )
+    assert registry["exp44"]["disposition"] == "current_open"
+    assert registry["exp44"]["conclusion"] == "inconclusive"
+    assert registry["exp44"]["canonical_evidence"] == (
+        "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md"
     )
 
 

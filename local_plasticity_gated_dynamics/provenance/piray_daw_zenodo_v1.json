@@ -1,0 +1,40 @@
+{
+  "citation": "Piray P, Daw ND. Computational processes of simultaneous learning of stochasticity and volatility in humans. Nature Communications 15, 9073 (2024).",
+  "concept_doi": "10.5281/zenodo.13840904",
+  "files": {
+    "README.md": {
+      "md5": "6f046ce56e31b9e67f8dd2539750388d",
+      "size_bytes": 1196
+    },
+    "code.zip": {
+      "md5": "12f30e337f40c4f6052cf06ac6303362",
+      "size_bytes": 93659
+    },
+    "data.zip": {
+      "md5": "59cdae0b66f5868ae9268729fa863d0e",
+      "size_bytes": 19058585
+    }
+  },
+  "license": "CC-BY-4.0",
+  "record_doi": "10.5281/zenodo.13840905",
+  "record_id": 13840905,
+  "source_url": "https://zenodo.org/api/records/13840905",
+  "stimulus_tape_audit": {
+    "bag_sha256": "aa3ae721fdaec6d95b4cede234a8877bdd45a6f6787bea9b0366915601332f32",
+    "bird_sha256": "112892ed34678bf7289a4fcd87d2a3c4f1677e0122fe56ed0e343211ac58cf34",
+    "experiment1_equals_experiment2": true,
+    "scope": "hash and equality audit only; no project model outcome was computed"
+  },
+  "schema_audit": {
+    "experiment1_missing_age": 1,
+    "experiment2_missing_age": 6,
+    "randomization_order_encoding": "zero_based_permutation_0_to_3",
+    "core_task_arrays_finite": true,
+    "demographics_used_by_exp44": false
+  },
+  "extracted_data_sha256": {
+    "experiment1/data.mat": "dbb6446bc412f5fcf883dcb4b0a950e74b3109814001f7c0ccbe968d0a197271",
+    "experiment2/data.mat": "b6d74c615b7ec8f4ff5e9c4ccb058ce89e47568be6f22dfbbfc0f3ec3c65a0f5"
+  },
+  "version": "v1.0"
+}

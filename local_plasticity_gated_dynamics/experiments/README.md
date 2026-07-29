@@ -10,6 +10,9 @@ list of current methods. The authoritative machine-readable status is
 - Core Actuator Matching evidence: Exp24, Exp26, Exp29, Exp31, Exp32, and
   Exp39.
 - Open fail-closed endpoint: Exp25 for real neural population dynamics.
+- Open prospective endpoint: Exp44 for participant-level Piray--Daw Q/R
+  behavioral utility. Only Experiment 1 development is authorized; Experiment
+  2 and POPGym remain locked by its registered conjunction.
 
 Exp32 has a mixed conclusion: its bounded main controller endpoint supports,
 but the registered joint timescale phase claim is inconclusive.

@@ -125,8 +125,10 @@ remain limiting.
    untouched.
 2. **Use the Piray--Daw public human task as the first external utility test.**
    Predict held-out participant updates, not merely true block labels. Compare
-   a reduced total-uncertainty controller, robust BOCPD, and a hierarchical
-   particle/HGF-style model under participant-held evaluation.
+   a reduced total-uncertainty controller and a hierarchical particle/HGF-style
+   model under participant-held evaluation. The block boundary is explicitly
+   cued, so BOCPD is deferred to a genuinely hidden-change task. Exp44 also
+   records that both published cohorts reuse the same stimulus tape.
 3. **Change inference, not the actuator.** Pre-register cell-`110` recovery,
    post-change utility, calibration, and update-cost endpoints. Keep the
    current write/release algebra fixed so improvement remains identifiable.
