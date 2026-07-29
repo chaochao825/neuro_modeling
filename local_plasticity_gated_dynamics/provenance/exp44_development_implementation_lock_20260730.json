@@ -43,7 +43,7 @@
   "stage": "prospective_development_preoutcome",
   "targeted_test_receipt": {
     "environment": "210 Python 3.11",
-    "result": "pending entrypoint-remediation rerun",
+    "result": "37 passed in 4.29s",
     "scope": "Exp44 loader, causal controllers, runner, leakage locks, and evidence registry"
   }
 }
