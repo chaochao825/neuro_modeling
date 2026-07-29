@@ -885,9 +885,13 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
     validate_config(config)
     if output.exists():
         raise FileExistsError(f"refusing to overwrite existing output: {output}")
+    # Capture provenance before creating the untracked result directory.  This
+    # distinguishes a genuinely dirty starting tree from artifacts produced by
+    # the current run.
+    environment = _environment()
     output.mkdir(parents=True)
     _atomic_text(output / "config.json", config_path.read_text(encoding="utf-8"))
-    _atomic_json(output / "environment.json", _environment())
+    _atomic_json(output / "environment.json", environment)
     log_path = output / "run.log"
     logger = logging.getLogger(EXPERIMENT)
     logger.handlers.clear()
@@ -897,6 +901,8 @@ def run(config_path: Path, output: Path) -> dict[str, Any]:
     logger.addHandler(handler)
     status = "failed"
     try:
+        if environment.get("git", {}).get("dirty") is not False:
+            raise RuntimeError("Exp44 must start from a clean git worktree")
         data_root = PROJECT_ROOT / str(config["data"]["root"])
         dataset = load_piray_daw(
             data_root,

@@ -21,19 +21,19 @@
   "sha256": {
     "configs/development/exp44_piray_daw_qr_behavior_v1.json": "94dad28068e9e50c61b9ab2dbc558b55629806db1ee328137edcfa3b8492a2bd",
     "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md": "b5dc8bd971467c706e761905fb83b87d34489b15cf03a530b0f2c974208a2d4a",
-    "experiments/exp44_piray_daw_qr_behavior.py": "87a4075c9605961f610a6825520fd6dc3c8ecc8d793ee071fd96af5259790852",
+    "experiments/exp44_piray_daw_qr_behavior.py": "ecb66af640a20479ce904535bad7982218a2496111da9f19fafed5145e74b9f0",
     "provenance/piray_daw_zenodo_v1.json": "eaf89783107c4f18560ec80fbd0669cd2a384cf7d788773026808e463ebadee3",
     "scripts/fetch_piray_daw.py": "31f02d6011b4015fcf04a81d9b70d5e1dd52920eaed5f550f27770e52132cf9f",
     "src/data/piray_daw.py": "17e78559c7040915246da3be3869de35637972b7c4b80913f999d3f504aa132e",
     "src/models/piray_daw_qr_controller.py": "18084e9ac8c0c8dff3efc1335b2df4510943c796e2b4a027e9f31d6efc2ccd20",
-    "tests/test_exp44_piray_daw_qr_behavior.py": "6a6190ccaa4b34ff883184126e17e7b968d9e2e38728c076683c8b068dde6ced",
+    "tests/test_exp44_piray_daw_qr_behavior.py": "5052635b064cff061cea2d9017026d6d1083114da771b87380e00f8b71404550",
     "tests/test_piray_daw_loader.py": "e99e5b5497aa31cd813e770a103b10236acc18df7f62224371fed14fb2367eef",
     "tests/test_piray_daw_qr_controller.py": "60167256eacb8ecf43b374806065c159ccf346bd392bb70ec6b3d68729473f34"
   },
   "stage": "prospective_development_preoutcome",
   "targeted_test_receipt": {
     "environment": "210 Python 3.11",
-    "result": "29 passed",
+    "result": "30 passed",
     "scope": "Exp44 loader, causal controllers, runner, leakage locks, and evidence registry"
   }
 }

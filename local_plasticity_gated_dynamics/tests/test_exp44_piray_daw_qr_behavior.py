@@ -230,6 +230,7 @@ def test_execute_writes_complete_failure_preserving_artifacts(
         ]
     monkeypatch.setattr(exp44, "load_piray_daw", lambda *args, **kwargs: dataset)
     monkeypatch.setattr(exp44, "_build_candidates", lambda *args, **kwargs: candidates)
+    monkeypatch.setattr(exp44, "_environment", lambda: {"git": {"dirty": False}})
     config_path = tmp_path / "config.json"
     config_path.write_text(CONFIG.read_text(encoding="utf-8"), encoding="utf-8")
     output = tmp_path / "result"
@@ -258,3 +259,18 @@ def test_execute_writes_complete_failure_preserving_artifacts(
     assert manifest["status"] == "complete"
     with pytest.raises(FileExistsError):
         run(config_path, output)
+
+
+def test_execute_rejects_dirty_start_and_preserves_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(exp44, "_environment", lambda: {"git": {"dirty": True}})
+    config_path = tmp_path / "config.json"
+    config_path.write_text(CONFIG.read_text(encoding="utf-8"), encoding="utf-8")
+    output = tmp_path / "dirty_result"
+    with pytest.raises(RuntimeError, match="clean git worktree"):
+        run(config_path, output)
+    failure = json.loads((output / "failure.json").read_text(encoding="utf-8"))
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    assert failure["type"] == "RuntimeError"
+    assert manifest["status"] == "failed"
