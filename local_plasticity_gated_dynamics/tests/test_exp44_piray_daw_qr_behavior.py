@@ -143,15 +143,18 @@ def test_deployable_candidates_ignore_bird_true_labels_and_bucket_outcomes() -> 
 
 
 def _passing_decision_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    comparisons = pd.DataFrame(
-        [
-            {"baseline": FIXED, "mean_gain": 0.010, "ci_low": 0.006},
-            {"baseline": TOTAL, "mean_gain": 0.008, "ci_low": 0.003},
-            {"baseline": AUTOCOV, "mean_gain": 0.002, "ci_low": -0.001},
-            {"baseline": PARTICLE, "mean_gain": 0.001, "ci_low": -0.001},
-            {"baseline": ORACLE, "mean_gain": 0.001, "ci_low": -0.001},
-        ]
-    )
+    comparison_rows = []
+    for metric in ("conditional_update_nll", "conditional_update_mse"):
+        comparison_rows.extend(
+            [
+                {"baseline": FIXED, "metric": metric, "mean_gain": 0.010, "ci_low": 0.006},
+                {"baseline": TOTAL, "metric": metric, "mean_gain": 0.008, "ci_low": 0.003},
+                {"baseline": AUTOCOV, "metric": metric, "mean_gain": 0.002, "ci_low": -0.001},
+                {"baseline": PARTICLE, "metric": metric, "mean_gain": 0.001, "ci_low": -0.001},
+                {"baseline": ORACLE, "metric": metric, "mean_gain": 0.001, "ci_low": -0.001},
+            ]
+        )
+    comparisons = pd.DataFrame(comparison_rows)
     rows = []
     for participant in range(5):
         for block in range(4):
@@ -188,7 +191,11 @@ def test_development_gate_is_a_strict_conjunction() -> None:
     assert decision["development_gate_passed"]
     assert decision["confirmation_unlocked"]
     assert not decision["popgym_unlocked"]
-    comparisons.loc[comparisons["baseline"] == TOTAL, "mean_gain"] = 0.0
+    comparisons.loc[
+        (comparisons["baseline"] == TOTAL)
+        & (comparisons["metric"] == "conditional_update_nll"),
+        "mean_gain",
+    ] = 0.0
     decision = development_decision(comparisons, cells, diagnostics, _config())
     assert not decision["development_gate_passed"]
     assert not decision["confirmation_unlocked"]
@@ -203,6 +210,7 @@ def test_method_comparison_uses_one_row_per_participant() -> None:
                     "participant_id": participant,
                     "method": method,
                     "conditional_update_nll": 1.0 + 0.01 * method_index,
+                    "conditional_update_mse": 2.0 + 0.02 * method_index,
                 }
             )
     config = _config()

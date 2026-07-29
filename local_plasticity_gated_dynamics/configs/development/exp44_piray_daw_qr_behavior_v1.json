@@ -56,6 +56,7 @@
     "bootstrap_resamples": 5000,
     "bootstrap_seed": 44010,
     "minimum_nll_gain": 0.005,
+    "minimum_mse_gain": 0.0,
     "cell_noninferiority_margin": -0.005,
     "particle_gain_retention": 0.9,
     "required_directional_effects": true

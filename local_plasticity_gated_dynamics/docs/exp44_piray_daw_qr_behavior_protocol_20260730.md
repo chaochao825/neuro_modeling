@@ -133,10 +133,13 @@ The Experiment 1 gate is a conjunction. `factorized_local_em` must:
    `total_uncertainty` by at least 0.005 nats/trial on average;
 2. have a participant-bootstrap lower confidence bound above zero for both
    comparisons;
-3. show both registered Q/R gain directions;
-4. have no one factorial cell below `total_uncertainty` by more than
+3. improve conditional-update MSE over both comparators with a
+   participant-bootstrap lower confidence bound above zero, preventing a
+   response-variance calibration effect from passing alone;
+4. show both registered Q/R gain directions;
+5. have no one factorial cell below `total_uncertainty` by more than
    0.005 nats/trial;
-5. retain at least 90% of the improvement supplied by the hierarchical
+6. retain at least 90% of the improvement supplied by the hierarchical
    particle comparator over fixed gain, when that comparator improves.
 
 If any clause fails, Exp44 is archived as development evidence and Experiment

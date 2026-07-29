@@ -193,6 +193,9 @@ def validate_config(config: Mapping[str, Any]) -> None:
         raise ValueError("analysis windows must be positive")
     if int(analysis["bootstrap_resamples"]) < 100:
         raise ValueError("bootstrap_resamples must be >= 100")
+    for name in ("minimum_nll_gain", "minimum_mse_gain"):
+        if not np.isfinite(float(analysis[name])) or float(analysis[name]) < 0.0:
+            raise ValueError(f"{name} must be finite and non-negative")
 
 
 def _candidate_id(method: str, parameters: Mapping[str, Any]) -> str:
@@ -524,38 +527,44 @@ def compare_methods(
     participant_metrics: pd.DataFrame,
     config: Mapping[str, Any],
 ) -> pd.DataFrame:
-    pivot = participant_metrics.pivot(
-        index="participant_id", columns="method", values="conditional_update_nll"
-    )
-    if tuple(sorted(pivot.columns)) != tuple(sorted(METHODS)):
-        raise RuntimeError("participant metrics are incomplete")
     rows: list[dict[str, Any]] = []
     resamples = int(config["analysis"]["bootstrap_resamples"])
     seed = int(config["analysis"]["bootstrap_seed"])
-    for index, baseline in enumerate((FIXED, TOTAL, AUTOCOV, PARTICLE, ORACLE)):
-        difference = (pivot[baseline] - pivot[FACTORIZED]).to_numpy()
-        ci_low, ci_high = _bootstrap_interval(
-            difference, resamples=resamples, seed=seed + index
+    baselines = (FIXED, TOTAL, AUTOCOV, PARTICLE, ORACLE)
+    for metric_index, metric in enumerate(
+        ("conditional_update_nll", "conditional_update_mse")
+    ):
+        pivot = participant_metrics.pivot(
+            index="participant_id", columns="method", values=metric
         )
-        if np.ptp(difference) <= np.finfo(np.float64).eps:
-            p_value = 1.0 if difference[0] == 0.0 else 0.0
-        else:
-            p_value = float(ttest_1samp(difference, 0.0).pvalue)
-        rows.append(
-            {
-                "candidate": FACTORIZED,
-                "baseline": baseline,
-                "metric": "conditional_update_nll",
-                "contrast": "baseline_minus_candidate",
-                "n_participants": len(difference),
-                "mean_gain": float(difference.mean()),
-                "median_gain": float(np.median(difference)),
-                "ci_low": ci_low,
-                "ci_high": ci_high,
-                "positive_participants": int(np.sum(difference > 0.0)),
-                "p_raw": p_value,
-            }
-        )
+        if tuple(sorted(pivot.columns)) != tuple(sorted(METHODS)):
+            raise RuntimeError("participant metrics are incomplete")
+        for baseline_index, baseline in enumerate(baselines):
+            difference = (pivot[baseline] - pivot[FACTORIZED]).to_numpy()
+            ci_low, ci_high = _bootstrap_interval(
+                difference,
+                resamples=resamples,
+                seed=seed + metric_index * len(baselines) + baseline_index,
+            )
+            if np.ptp(difference) <= np.finfo(np.float64).eps:
+                p_value = 1.0 if difference[0] == 0.0 else 0.0
+            else:
+                p_value = float(ttest_1samp(difference, 0.0).pvalue)
+            rows.append(
+                {
+                    "candidate": FACTORIZED,
+                    "baseline": baseline,
+                    "metric": metric,
+                    "contrast": "baseline_minus_candidate",
+                    "n_participants": len(difference),
+                    "mean_gain": float(difference.mean()),
+                    "median_gain": float(np.median(difference)),
+                    "ci_low": ci_low,
+                    "ci_high": ci_high,
+                    "positive_participants": int(np.sum(difference > 0.0)),
+                    "p_raw": p_value,
+                }
+            )
     adjusted = multipletests(
         [row["p_raw"] for row in rows], alpha=0.05, method="holm"
     )[1]
@@ -614,14 +623,30 @@ def development_decision(
 ) -> dict[str, Any]:
     analysis = config["analysis"]
     minimum_gain = float(analysis["minimum_nll_gain"])
+    minimum_mse_gain = float(analysis["minimum_mse_gain"])
+    nll_comparisons = comparisons.loc[
+        comparisons["metric"] == "conditional_update_nll"
+    ]
+    mse_comparisons = comparisons.loc[
+        comparisons["metric"] == "conditional_update_mse"
+    ]
     primary: dict[str, dict[str, Any]] = {}
     for baseline in (FIXED, TOTAL):
-        row = comparisons.loc[comparisons["baseline"] == baseline].iloc[0]
+        row = nll_comparisons.loc[nll_comparisons["baseline"] == baseline].iloc[0]
+        mse_row = mse_comparisons.loc[
+            mse_comparisons["baseline"] == baseline
+        ].iloc[0]
         primary[baseline] = {
-            "mean_gain": float(row["mean_gain"]),
-            "ci_low": float(row["ci_low"]),
-            "passes": bool(
+            "nll_mean_gain": float(row["mean_gain"]),
+            "nll_ci_low": float(row["ci_low"]),
+            "nll_passes": bool(
                 row["mean_gain"] >= minimum_gain and row["ci_low"] > 0.0
+            ),
+            "mse_mean_gain": float(mse_row["mean_gain"]),
+            "mse_ci_low": float(mse_row["ci_low"]),
+            "mse_passes": bool(
+                mse_row["mean_gain"] > minimum_mse_gain
+                and mse_row["ci_low"] > 0.0
             ),
         }
 
@@ -655,7 +680,7 @@ def development_decision(
     cell_margin = float(analysis["cell_noninferiority_margin"])
     cell_pass = bool(np.all(cell_gain.to_numpy() >= cell_margin))
 
-    comparison_map = comparisons.set_index("baseline")["mean_gain"].to_dict()
+    comparison_map = nll_comparisons.set_index("baseline")["mean_gain"].to_dict()
     factor_over_fixed = float(comparison_map[FIXED])
     # comparison_map[PARTICLE] is particle NLL minus factorized NLL.
     particle_over_fixed = factor_over_fixed - float(comparison_map[PARTICLE])
@@ -669,8 +694,10 @@ def development_decision(
         retention_applicable = False
 
     clauses = {
-        "gain_vs_fixed": primary[FIXED]["passes"],
-        "gain_vs_total_uncertainty": primary[TOTAL]["passes"],
+        "nll_gain_vs_fixed": primary[FIXED]["nll_passes"],
+        "nll_gain_vs_total_uncertainty": primary[TOTAL]["nll_passes"],
+        "mse_gain_vs_fixed": primary[FIXED]["mse_passes"],
+        "mse_gain_vs_total_uncertainty": primary[TOTAL]["mse_passes"],
         "directional_qr_effects": directional_pass,
         "cellwise_noninferiority_vs_total": cell_pass,
         "particle_gain_retention": retention_pass,
@@ -719,6 +746,7 @@ def _plot(
 ) -> None:
     figure, axes = plt.subplots(1, 2, figsize=(11, 4.2))
     panel = comparisons.loc[comparisons["baseline"].isin((FIXED, TOTAL, PARTICLE))]
+    panel = panel.loc[panel["metric"] == "conditional_update_nll"]
     x = np.arange(len(panel))
     mean = panel["mean_gain"].to_numpy()
     low = mean - panel["ci_low"].to_numpy()
@@ -763,7 +791,27 @@ def _report(
         "|---|---:|---:|---:|",
     ]
     for baseline in (FIXED, TOTAL, PARTICLE, AUTOCOV, ORACLE):
-        row = comparisons.loc[comparisons["baseline"] == baseline].iloc[0]
+        row = comparisons.loc[
+            (comparisons["baseline"] == baseline)
+            & (comparisons["metric"] == "conditional_update_nll")
+        ].iloc[0]
+        lines.append(
+            f"| {baseline} | {row['mean_gain']:+.6f} | "
+            f"[{row['ci_low']:+.6f}, {row['ci_high']:+.6f}] | "
+            f"{row['p_holm']:.6g} |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Baseline | MSE gain (baseline - factorized) | 95% bootstrap CI | Holm p |",
+            "|---|---:|---:|---:|",
+        ]
+    )
+    for baseline in (FIXED, TOTAL, PARTICLE, AUTOCOV, ORACLE):
+        row = comparisons.loc[
+            (comparisons["baseline"] == baseline)
+            & (comparisons["metric"] == "conditional_update_mse")
+        ].iloc[0]
         lines.append(
             f"| {baseline} | {row['mean_gain']:+.6f} | "
             f"[{row['ci_low']:+.6f}, {row['ci_high']:+.6f}] | "

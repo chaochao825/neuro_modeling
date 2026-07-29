@@ -19,14 +19,14 @@
     "project_model_comparisons_computed": false
   },
   "sha256": {
-    "configs/development/exp44_piray_daw_qr_behavior_v1.json": "94dad28068e9e50c61b9ab2dbc558b55629806db1ee328137edcfa3b8492a2bd",
-    "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md": "b5dc8bd971467c706e761905fb83b87d34489b15cf03a530b0f2c974208a2d4a",
-    "experiments/exp44_piray_daw_qr_behavior.py": "ecb66af640a20479ce904535bad7982218a2496111da9f19fafed5145e74b9f0",
+    "configs/development/exp44_piray_daw_qr_behavior_v1.json": "1f2728238ff336d75560c5e5f1741f43af0661645128290ecf4b34332c967034",
+    "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md": "7a04c1d5e1678ba3b927cd4c552e030dbe97241b321afd4c0635a96350e97109",
+    "experiments/exp44_piray_daw_qr_behavior.py": "ff259323aa9c6334349eace428b5c01e7267f70ae25fc88b16e39d28c95f1418",
     "provenance/piray_daw_zenodo_v1.json": "eaf89783107c4f18560ec80fbd0669cd2a384cf7d788773026808e463ebadee3",
     "scripts/fetch_piray_daw.py": "31f02d6011b4015fcf04a81d9b70d5e1dd52920eaed5f550f27770e52132cf9f",
     "src/data/piray_daw.py": "17e78559c7040915246da3be3869de35637972b7c4b80913f999d3f504aa132e",
     "src/models/piray_daw_qr_controller.py": "18084e9ac8c0c8dff3efc1335b2df4510943c796e2b4a027e9f31d6efc2ccd20",
-    "tests/test_exp44_piray_daw_qr_behavior.py": "5052635b064cff061cea2d9017026d6d1083114da771b87380e00f8b71404550",
+    "tests/test_exp44_piray_daw_qr_behavior.py": "04f047147adadcc0114390e6832db25d49a44295ed84f9b64c63d40ce67b2094",
     "tests/test_piray_daw_loader.py": "e99e5b5497aa31cd813e770a103b10236acc18df7f62224371fed14fb2367eef",
     "tests/test_piray_daw_qr_controller.py": "60167256eacb8ecf43b374806065c159ccf346bd392bb70ec6b3d68729473f34"
   },
