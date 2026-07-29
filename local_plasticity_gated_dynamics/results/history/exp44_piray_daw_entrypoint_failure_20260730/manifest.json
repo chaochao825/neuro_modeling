@@ -1,0 +1,13 @@
+{
+  "artifacts": {
+    "exit_status.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "launch.log": "e27baa0e395543fa28d008fff4dd50779b95368748aa3f2458c167ac2e4b103d"
+  },
+  "command": "python experiments/exp44_piray_daw_qr_behavior.py --config configs/development/exp44_piray_daw_qr_behavior_v1.json --output results/exp44_piray_daw_qr_behavior_development_v1",
+  "config_sha256": "1f2728238ff336d75560c5e5f1741f43af0661645128290ecf4b34332c967034",
+  "failure_stage": "module_import_before_data_loading",
+  "frozen_commit": "7e785adda71f15f38d0f2db073af13a2d4a97dc8",
+  "frozen_tag": "exp44-dev-v1-preoutcome-20260730",
+  "outcomes_accessed": false,
+  "status": "failed"
+}

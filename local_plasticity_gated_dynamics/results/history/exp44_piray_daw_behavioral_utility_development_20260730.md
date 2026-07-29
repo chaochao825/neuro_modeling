@@ -15,7 +15,10 @@ The frozen execution used commit
 The clean regression contained 1,416 passing tests. The original pre-outcome
 tag and its import-stage failure are separately retained in
 `exp44_piray_daw_entrypoint_failure_20260730.md`; no data or metric was read in
-that failed launch.
+that failed launch. Its raw `launch.log` and `exit_status.txt` are preserved in
+`results/history/exp44_piray_daw_entrypoint_failure_20260730/` with SHA-256
+`e27baa0e395543fa28d008fff4dd50779b95368748aa3f2458c167ac2e4b103d` and
+`4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865`.
 
 ## Primary held-out results
 

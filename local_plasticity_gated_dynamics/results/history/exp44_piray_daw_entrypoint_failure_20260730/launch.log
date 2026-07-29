@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/spco/sow_linear/codex_worktrees/neuro_exp41_20260727/local_plasticity_gated_dynamics/experiments/exp44_piray_daw_qr_behavior.py", line 30, in <module>
+    from src.data.piray_daw import (
+ModuleNotFoundError: No module named 'src'
