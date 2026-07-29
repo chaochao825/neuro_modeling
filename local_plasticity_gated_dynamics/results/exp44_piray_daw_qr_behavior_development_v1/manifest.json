@@ -1,0 +1,33 @@
+{
+  "artifacts": {
+    "candidate_scores.csv": "757ff431642843640e3e9e1f0dd583f7dc210e829d3634db7f3bc3544fa86557",
+    "cell_metrics.csv": "6e43e3d899384fe92d9b647ff90f29d009ca59f24c6283c1aeec2ac2c65f5492",
+    "comparisons.csv": "ab923aabbf4ce5d3109bbcaf5714b14155a4196b6043a4f8c6d0e4eeb27448de",
+    "config.json": "1f2728238ff336d75560c5e5f1741f43af0661645128290ecf4b34332c967034",
+    "environment.json": "64d8e42c997a799d622d8bacc197ec9aaa7ba4b41e58f7e8dd927a349e5907ef",
+    "exp44_piray_daw_qr_behavior.pdf": "0a1f716786a95c3a598e4443827aef66d4a020ba00523ddd8cd757c92afdeb8e",
+    "exp44_piray_daw_qr_behavior.png": "0263b1b2e5b5df2168c707846ed30d16d76c7ab511faff56efa3ef227792dda2",
+    "participant_folds.csv": "0d3bf8cf5d15ed244373d2187a971be2b6289089cfd461ed1e2f5e13898a3579",
+    "participant_metrics.csv": "443e48a47b2df35311568e9137d7ee2dede47b457388c251674f2e348d3d9c13",
+    "report.md": "939d325cbbc2a172d7a59af292e91d7d8807d1786bb9659ae8f71aadfc4d6959",
+    "run.log": "1bb48b279cff81a62ca85d7f87d2b6504f3943d784b1e2fef7a815c4fd38fb78",
+    "selected_candidates.json": "255f89195142c63f1ee9b843560519426ad318ed924e1d24b8db0da3cafdae6a",
+    "summary.json": "1a14e7e5b1031db17f6adaf9306a0f8012775eb5ffefc412728bc7ba490f754d",
+    "trace_diagnostics.csv": "cb9df601a323b78b48b9b4aaef05a39f0ff74c21da46937becb56db19d9117fc"
+  },
+  "experiment": "exp44_piray_daw_qr_behavior",
+  "protocol_sha256": "8b363dc331a23257bdc2c58bfd09a7aae62ecf1a5810f58a7645bace13f01487",
+  "protocol_version": "exp44_piray_daw_qr_behavior_v1",
+  "source_sha256": {
+    "experiments/exp44_piray_daw_qr_behavior.py": "7b095097c7e6c3b76673e866e86569ef9f7b8a08a78a9e2b05b500f048ecc315",
+    "provenance/exp44_development_implementation_lock_20260730.json": "55d53dabd40cea8c9d2cab21d66ddd965e8d0c072645827d5bdb9a5527e82b8b",
+    "provenance/piray_daw_zenodo_v1.json": "eaf89783107c4f18560ec80fbd0669cd2a384cf7d788773026808e463ebadee3",
+    "scripts/fetch_piray_daw.py": "31f02d6011b4015fcf04a81d9b70d5e1dd52920eaed5f550f27770e52132cf9f",
+    "src/data/piray_daw.py": "17e78559c7040915246da3be3869de35637972b7c4b80913f999d3f504aa132e",
+    "src/models/piray_daw_qr_controller.py": "18084e9ac8c0c8dff3efc1335b2df4510943c796e2b4a027e9f31d6efc2ccd20",
+    "tests/test_exp44_piray_daw_qr_behavior.py": "6a3bb34a6d9d0694ba1b7404532fd8bbd102f4bfaa26bab46ef8bd04a47aeead",
+    "tests/test_piray_daw_loader.py": "e99e5b5497aa31cd813e770a103b10236acc18df7f62224371fed14fb2367eef",
+    "tests/test_piray_daw_qr_controller.py": "60167256eacb8ecf43b374806065c159ccf346bd392bb70ec6b3d68729473f34"
+  },
+  "status": "complete"
+}

@@ -57,6 +57,7 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp41",
         "exp42",
         "exp43",
+        "exp44",
     ):
         assert dispositions[experiment_id] == "historical_only"
     for experiment_id in (
@@ -70,7 +71,6 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
         "exp31",
         "exp32",
         "exp39",
-        "exp44",
     ):
         assert dispositions[experiment_id] in CURRENT_DISPOSITIONS
     assert registry["exp37"]["disposition"] == "historical_only"
@@ -86,10 +86,10 @@ def test_rejected_abandoned_and_superseded_work_is_historical_only() -> None:
     assert registry["exp43"]["canonical_evidence"] == (
         "results/history/exp43_fast_slow_causal_decomposition_development_20260728.md"
     )
-    assert registry["exp44"]["disposition"] == "current_open"
-    assert registry["exp44"]["conclusion"] == "inconclusive"
+    assert registry["exp44"]["disposition"] == "historical_only"
+    assert registry["exp44"]["conclusion"] == "oppose"
     assert registry["exp44"]["canonical_evidence"] == (
-        "docs/exp44_piray_daw_qr_behavior_protocol_20260730.md"
+        "results/exp44_piray_daw_qr_behavior_development_v1/report.md"
     )
 
 
@@ -172,6 +172,23 @@ def test_generated_views_match_committed_indexes(tmp_path: Path) -> None:
         row
         for row in exp37_claims
         if row["claim_id"] == "exp37_joint_change_aware_prefix"
+    )["conclusion"] == "oppose"
+    exp44_claims = [
+        row
+        for row in historical_claims
+        if row["experiment"] == "exp44_piray_daw_qr_behavior"
+    ]
+    assert {row["claim_id"] for row in exp44_claims} >= {
+        "exp44_nll_vs_fixed",
+        "exp44_nll_vs_total_uncertainty",
+        "exp44_joint_development_gate",
+        "exp44_experiment2_confirmation",
+        "exp44_conditional_popgym_scale",
+    }
+    assert next(
+        row
+        for row in exp44_claims
+        if row["claim_id"] == "exp44_joint_development_gate"
     )["conclusion"] == "oppose"
 
     with (tmp_path / "current" / "foundation_claims.csv").open(

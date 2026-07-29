@@ -90,10 +90,11 @@ The current evidence chain is:
     historical development localization, not a formal controller result.
 17. Exp25: the real compositional neural endpoint remains active but correctly
     fails closed because an eligible canonical neural bundle is unavailable.
-18. Exp44: a prospective Piray--Daw bridge is now open on Experiment 1 only.
-    It tests causal participant-held bucket-update utility for separate Q/R
-    coordinates against fixed, total-uncertainty, autocovariance, and
-    hierarchical-particle comparators. Experiment 2 and POPGym remain locked.
+18. Exp44: the prospective 223-participant Piray--Daw development bridge is
+    now a historical negative result. The factorized controller improved NLL
+    over fixed by only +0.00104 with a crossing interval, failed the fixed and
+    total MSE clauses, and produced the wrong Q-to-gain direction. Experiment
+    2 and POPGym remain unexecuted.
 
 See the [formal principle ledger](docs/actuator_matching_principle.md) and
 [current critical audit](docs/current_evidence_critical_audit.md) for effect
@@ -127,10 +128,12 @@ did not yield held-out behavioral utility, so no new IBL cohort or neural data
 were opened.
 
 The [Exp44 prospective protocol](docs/exp44_piray_daw_qr_behavior_protocol_20260730.md)
-is the next external bridge. Its audit records that the two published cohorts
-contain independent participants but the same bag/bird stimulus tape; a future
-Experiment-2 result can test same-tape population generalization only. Unseen
-episode and control generalization are reserved for a gated POPGym successor.
+and [development audit](results/history/exp44_piray_daw_behavioral_utility_development_20260730.md)
+now close the first external bridge for the current controller. Human behavior
+contains the expected opposing Q/R learning-rate effects, but the selected
+controller collapses to nearly constant gain and does not add reliable
+participant-held utility. The stop rule therefore keeps the same-tape
+Experiment-2 cohort and the conditional POPGym successor unexecuted.
 
 The [historical evidence registry](results/history/README.md) separates theory
 errors from identification, method, and data failures. The
@@ -162,9 +165,9 @@ information, but also that identifiability alone is insufficient. Exp43 then
 shows that the existing fast-event/slow-Q/R actuator has oracle headroom while
 the all-learned controller still fails its deployable conjunction. The
 architecture therefore remains a hypothesis with a localized inference and
-calibration bottleneck, not a validated method. Exp44 now opens a bounded
-Experiment-1 real-behavior development test without reopening Exp42 or formal
-Exp43. Experiment-2 confirmation, POPGym, neural shared dynamics, and a
+calibration bottleneck, not a validated method. Exp44 then finds the expected
+Q/R modulation in people but no registered utility for the current causal
+controller. Experiment-2 confirmation, POPGym, neural shared dynamics, and a
 participating E/I carrier remain locked. Historical-only branches stay in the
 evidence registry rather than the active computation graph.
 
@@ -214,7 +217,9 @@ evidence registry rather than the active computation graph.
   registered conjunction, so no formal seed is authorized.
 - Exp44's public task has explicit block boundaries and identical stimulus
   tapes across its two cohorts. It cannot establish hidden change detection or
-  unseen-stream generalization, even if participant-held behavior improves.
+  unseen-stream generalization. Its Experiment-1 gate also failed, so no
+  participant-held controller advantage is claimed and Experiment 2 was not
+  accessed.
 - No shared gated model has yet beaten common dynamics on the required
   multi-animal/session neural dataset.
 - The project does not claim general SOTA, a biological MD/ACC identity, or a

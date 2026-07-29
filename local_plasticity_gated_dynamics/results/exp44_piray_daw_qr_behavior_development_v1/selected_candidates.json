@@ -1,0 +1,62 @@
+{
+  "autocovariance_qr": {
+    "candidate_id": "autocovariance_qr:3764e1712f24",
+    "parameters": {
+      "initial_observation_variance": 8.0,
+      "initial_process_variance": 32.0,
+      "prior_mass": 32.0,
+      "statistic_decay": 0.99
+    },
+    "response_sigma": 5.650874930585382
+  },
+  "factorized_local_em": {
+    "candidate_id": "factorized_local_em:2fe494fe42f9",
+    "parameters": {
+      "initial_observation_variance": 8.0,
+      "initial_process_variance": 8.0,
+      "observation_rate": 0.02,
+      "process_rate": 0.02
+    },
+    "response_sigma": 5.513679242248762
+  },
+  "fixed_gain": {
+    "candidate_id": "fixed_gain:f5a1f9326639",
+    "parameters": {
+      "gain": 0.66,
+      "initial_mean": 60.0
+    },
+    "response_sigma": 5.50042940588986
+  },
+  "hierarchical_particle": {
+    "candidate_id": "hierarchical_particle:437b6f9cf06c",
+    "parameters": {
+      "change_probability_q": 0.05,
+      "change_probability_r": 0.01,
+      "log_step_scale": 0.1,
+      "particle_count": 1024,
+      "particle_seeds": [
+        44001,
+        44002,
+        44003
+      ]
+    },
+    "response_sigma": 5.555557367347461
+  },
+  "oracle_qr": {
+    "candidate_id": "oracle_qr:b964134d4145",
+    "parameters": {
+      "privileged": true,
+      "source": "released_true_block_qr"
+    },
+    "response_sigma": 6.064788493185141
+  },
+  "total_uncertainty": {
+    "candidate_id": "total_uncertainty:2ade3e47abb7",
+    "parameters": {
+      "adaptation_rate": 0.02,
+      "initial_total_variance": 8.0,
+      "q_fraction": 0.6
+    },
+    "response_sigma": 5.508261748803649
+  }
+}

@@ -146,6 +146,19 @@ calibration, with a smaller event-timing deficit, rather than a missing new
 write/release actuator. This is a mixed development localization and its
 formal seeds remain untouched.
 
+Exp44 then performs the bounded external test on all 223 Experiment-1
+participants. The registered conjunction fails. Factorized NLL gain is only
++0.001044 over fixed gain (95% participant bootstrap -0.006093 to +0.010351)
+and +0.006105 over total uncertainty (-0.002445 to +0.017697); both MSE
+intervals also cross zero. The executed high-minus-low Q gain effect is
+-0.000702, while the selected `Q0=R0=8`, `beta_Q=beta_R=0.02` candidate keeps
+the two coordinates identical and its gain nearly constant across cells.
+Outcome-exposed model-agnostic regression nevertheless recovers the human Q
+effect (+0.042389) and R effect (+0.055021), so the data contain the expected
+behavioral structure. The current inference/calibration path, not the task,
+fails to turn it into held-out participant utility. Experiment 2 and POPGym
+remain unexecuted.
+
 Priority is therefore:
 
 1. preserve Exp39's frozen implementation, settings, tapes, and artifacts;
@@ -157,15 +170,14 @@ Priority is therefore:
 3. archive Exp43 as a development localization: do not access formal seeds or
    retune its exposed tapes; keep the actuator fixed and improve only the
    identified inference/calibration paths;
-4. execute the prospective Exp44 public volatility-versus-stochasticity bridge
-   on Experiment 1, with participant-held update utility and fixed,
-   reduced-total-uncertainty, and hierarchical-particle comparators. Its block
-   boundary is explicitly cued, so BOCPD is not a matched primary comparator;
-   change-point models are deferred to a genuinely hidden-boundary task.
-   Decoding a condition label is not a sufficient endpoint;
-5. keep Exp42, a disjoint IBL confirmation cohort, neural activity, and E/I
+4. archive Exp44 as the real-behavior no-go for the current controller. Keep
+   its positive human Q/R modulation and failed predictive gate together; do
+   not access the same-tape Experiment-2 cohort under this contract;
+5. keep Exp42, POPGym, a disjoint IBL confirmation cohort, neural activity, and E/I
    extensions locked. Any future fast-event/slow-uncertainty study requires a
-   materially new prospective contract and untouched data;
+   materially new prospective contract and untouched data. A causal
+   participant-specific calibration layer is a possible new question, not an
+   eligible post-hoc rescue of Exp44;
 6. retain Exp35--Exp38 as historical failure-boundary evidence: do not retune
    categorical BOCPD on CORe50, reopen Stream-51 external data, or present
    prefix consistency as a positive active method;

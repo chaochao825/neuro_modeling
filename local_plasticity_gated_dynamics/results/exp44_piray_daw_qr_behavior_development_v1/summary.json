@@ -1,0 +1,49 @@
+{
+  "cell_gain_total_minus_factorized": {
+    "0": 0.0029065492842101845,
+    "1": 0.0011416353211694877,
+    "2": 0.009704528129983256,
+    "3": 0.01066756469224366
+  },
+  "claim_upgrade_allowed": false,
+  "clauses": {
+    "cellwise_noninferiority_vs_total": true,
+    "directional_qr_effects": false,
+    "mse_gain_vs_fixed": false,
+    "mse_gain_vs_total_uncertainty": false,
+    "nll_gain_vs_fixed": false,
+    "nll_gain_vs_total_uncertainty": false,
+    "particle_gain_retention": true
+  },
+  "conclusion": "oppose",
+  "confirmation_unlocked": false,
+  "development_gate_passed": false,
+  "experiment": "exp44_piray_daw_qr_behavior",
+  "independent_statistical_unit": "participant",
+  "particle_gain_retention": null,
+  "particle_gain_retention_applicable": false,
+  "popgym_unlocked": false,
+  "primary_comparisons": {
+    "fixed_gain": {
+      "mse_ci_low": -0.38545154531554415,
+      "mse_mean_gain": 0.019918465880941292,
+      "mse_passes": false,
+      "nll_ci_low": -0.006092605746785846,
+      "nll_mean_gain": 0.001043678468821023,
+      "nll_passes": false
+    },
+    "total_uncertainty": {
+      "mse_ci_low": -0.15343816058656018,
+      "mse_mean_gain": 0.32422440722806134,
+      "mse_passes": false,
+      "nll_ci_low": -0.0024450060850319567,
+      "nll_mean_gain": 0.006105069356901647,
+      "nll_passes": false
+    }
+  },
+  "protocol_version": "exp44_piray_daw_qr_behavior_v1",
+  "q_gain_effect": -0.0007020869645577577,
+  "r_gain_effect": 0.0011303158392652612,
+  "same_stimulus_tape_across_experiments": true,
+  "stage": "development"
+}

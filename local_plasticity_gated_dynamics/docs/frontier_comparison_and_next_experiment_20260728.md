@@ -33,6 +33,18 @@ The development conclusion is consequently a localization result: both
 inference paths have headroom, Q/R is the dominant aggregate bottleneck, and
 event inference matters after jumps. It is not a controller confirmation.
 
+## Exp44 outcome update
+
+The external behavior gate now fails on 223/223 participants. Factorized NLL
+gain is +0.001044 over fixed and +0.006105 over total uncertainty, but both
+participant-bootstrap intervals cross zero; both registered MSE clauses also
+fail. The selected symmetric local-EM candidate has nearly constant gain and
+its Q effect has the wrong sign (-0.000702). In an outcome-exposed descriptive
+replay, human blockwise gains retain the expected Q (+0.042389) and R
+(+0.055021) effects. Thus the external task contains the target computation,
+but the current causal controller does not recover it with held-out utility.
+Experiment 2 and POPGym remain locked.
+
 ## What the existing experiments establish
 
 | Evidence | What is established | What is not established |
@@ -123,16 +135,18 @@ remain limiting.
 1. **Archive Exp43 without a formal run.** Its development gate localizes
    opportunity but the deployable conjunction fails; reserved seeds remain
    untouched.
-2. **Use the Piray--Daw public human task as the first external utility test.**
-   Predict held-out participant updates, not merely true block labels. Compare
-   a reduced total-uncertainty controller and a hierarchical particle/HGF-style
-   model under participant-held evaluation. The block boundary is explicitly
-   cued, so BOCPD is deferred to a genuinely hidden-change task. Exp44 also
-   records that both published cohorts reuse the same stimulus tape.
-3. **Change inference, not the actuator.** Pre-register cell-`110` recovery,
+2. **Archive the completed Piray--Daw test.** Its participant-held gate fails
+   despite a valid empirical Q/R behavior signal. Do not run the same-tape
+   Experiment-2 cohort or characterize the result as partial support.
+3. **Change inference, not the actuator.** Any successor must be a new
+   prospective contract on untouched outcomes. A causal participant-specific
+   calibration layer may be tested against fixed-person, total-uncertainty,
+   and hierarchical behavioral baselines, but it cannot rescue Exp44.
+   Pre-register cell-`110` recovery,
    post-change utility, calibration, and update-cost endpoints. Keep the
    current write/release algebra fixed so improvement remains identifiable.
-4. **Return to a disjoint IBL cohort only after behavioral utility.** Cross-fit
+4. **Keep POPGym and real neural scaling conditional on behavioral utility.**
+   Cross-fit
    subjective state by animal/session before neural encoding; regress movement
    and pose; use animal/session bootstrap.
 5. **Add participating E/I plasticity last.** Match functional update budgets
